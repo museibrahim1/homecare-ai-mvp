@@ -7,7 +7,9 @@ alwaysApply: true
 # Agent Skills — Use the Right One
 
 Full catalog (with descriptions + where each has been used): `docs/AGENT_SKILLS.md`.
-Global skills live in `~/.agents/skills/`. Load the matching skill before doing the work.
+Load the matching skill before doing the work.
+
+Cloud Agents only see skills in this repo (`.cursor/skills/` and `.agents/skills/`). The copies shipped for phone/cloud are `copywriting`, `social`, `seo-audit`, `video`, plus the Higgsfield and Kling skills. Everything else still lives in `~/.agents/skills/` on this Mac.
 
 ## Reach for these by task
 

@@ -4,11 +4,11 @@ This is a human-readable index of the skills installed for the AI agent working 
 "Skills" are specialized playbooks the agent loads on demand to do a job the right way
 (e.g. run an SEO audit, write a Word doc, debug systematically).
 
-- **Global skills** live in `~/.agents/skills/` and apply to every project.
+- **Global skills** live in `~/.agents/skills/` and apply to every project on this Mac. Cloud Agents do not see this folder.
 - **Cursor built-in skills** ship with Cursor and cover Cursor-specific workflows.
-- **Project skills** live in `.cursor/skills/` inside this repo.
+- **Project skills** live in `.cursor/skills/` and `.agents/skills/` in this repo. These are what Cloud Agents (phone, web, Slack) load after a push.
 
-Last updated: 2026-06-23.
+Last updated: 2026-08-13.
 
 ---
 
@@ -104,9 +104,19 @@ These cover Cursor-specific workflows (available in this IDE session):
 - `split-to-prs` — split work into small reviewable PRs
 - `statusline` / `update-cursor-settings` — CLI status line + editor settings
 
-## Project Skill (this repo)
+## Project skills (this repo)
 
-- `kling-remotion-nano-banana` — plan + execute AI marketing videos (Kling 3.0 via fal.ai, Remotion, Nano Banana assets)
+Copied into `.cursor/skills/` so Cloud Agents can use them on the phone:
+
+- `copywriting` — write or rewrite marketing copy
+- `social` — LinkedIn, TikTok, Reels, calendars, captions
+- `seo-audit` — technical and on-page SEO diagnosis
+- `video` — AI video production (pairs with `kling-remotion-nano-banana`)
+- `kling-remotion-nano-banana` — PALM video pipeline (Kling, Remotion, Nano Banana)
+
+Higgsfield skills live in `.agents/skills/` (`higgsfield-generate`, `higgsfield-soul-id`, `higgsfield-product-photoshoot`, `higgsfield-marketplace-cards`).
+
+Everything else in the marketing library still lives only in `~/.agents/skills/` until it is copied here and pushed.
 
 ---
 
@@ -117,6 +127,8 @@ Skills come from the [skills.sh](https://www.skills.sh) registry (and GitHub rep
 ```bash
 npx skills add <owner>/<repo> -g --copy -y -s <skill-name> -s <another-skill>
 ```
+
+To make a global skill available to Cloud Agents, copy it into `.cursor/skills/<name>/` (include `SKILL.md` and `references/`), commit, and push. Cloud VMs clone GitHub; they never see `~/.agents/skills/`.
 
 Marketing skills used here are from `coreyhaines31/marketingskills`. Engineering/web/docs skills are from
 `anthropics`, `vercel-labs`, `supabase`, `obra`, and `mattpocock`.
