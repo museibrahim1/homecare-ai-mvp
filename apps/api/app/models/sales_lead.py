@@ -82,6 +82,10 @@ class SalesLead(Base, TimestampMixin):
     campaign_tag = Column(String(100), nullable=True, index=True)
     source = Column(String(100), default="cms_provider_data")
 
+    # Unsubscribe / suppression (CAN-SPAM: honor opt-outs, stop all marketing)
+    unsubscribed = Column(Boolean, default=False, nullable=False, server_default="false", index=True)
+    unsubscribed_at = Column(DateTime(timezone=True), nullable=True)
+
     # Conversion tracking
     is_contacted = Column(Boolean, default=False)
     is_converted = Column(Boolean, default=False)

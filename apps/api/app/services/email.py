@@ -108,6 +108,7 @@ class EmailService:
         reply_to: Optional[str] = None,
         attachments: Optional[List[dict]] = None,
         sender: Optional[str] = None,
+        headers: Optional[dict] = None,
     ) -> dict:
         """
         Send an email via Resend.
@@ -117,6 +118,9 @@ class EmailService:
             subject: Email subject
             html: HTML body
             sender: Override from address (defaults to self.from_email)
+            headers: Extra SMTP headers (e.g. List-Unsubscribe / one-click).
+                Marketing sends pass the RFC 8058 unsubscribe headers here so
+                Gmail/Apple Mail show a native "Unsubscribe" button.
         """
         recipients = [to] if isinstance(to, str) else to
         from_addr = sender or self.from_email
@@ -139,6 +143,8 @@ class EmailService:
                 params["reply_to"] = reply_to
             if attachments:
                 params["attachments"] = attachments
+            if headers:
+                params["headers"] = headers
 
             response = resend.Emails.send(params)
 

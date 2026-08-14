@@ -22,7 +22,7 @@ from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
     OPENED_REENGAGE_ORDER, REENGAGE_CAMPAIGN_TAG, REENGAGE_MIN_DAYS_BETWEEN,
     REENGAGE_DAILY_CAP, MARKETING_RESEND_TAG,
-    _render_template, _auto_start_sequence,
+    _auto_start_sequence, render_email,
 )
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
@@ -50,6 +50,7 @@ async def send_campaign(
     query = db.query(SalesLead).filter(
         SalesLead.contact_email.isnot(None),
         SalesLead.contact_email != "",
+        SalesLead.unsubscribed.isnot(True),
     )
 
     if req.state:
@@ -81,14 +82,16 @@ async def send_campaign(
             "state_full": STATE_NAMES.get(lead.state, lead.state),
         }
 
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
+        subject, body, headers = render_email(
+            tmpl["body"], tmpl["subject"], data, lead.contact_email
+        )
 
         result = email_service.send_email(
             to=lead.contact_email,
             subject=subject,
             sender=email_service.from_sales,
             html=body,
+            headers=headers,
         )
 
         if result.get("success"):
@@ -160,6 +163,7 @@ async def preview_campaign_recipients(
     query = db.query(SalesLead).filter(
         SalesLead.contact_email.isnot(None),
         SalesLead.contact_email != "",
+        SalesLead.unsubscribed.isnot(True),
     )
 
     if state:
@@ -218,6 +222,7 @@ async def launch_email_sequence(
     query = db.query(SalesLead).filter(
         SalesLead.contact_email.isnot(None),
         SalesLead.contact_email != "",
+        SalesLead.unsubscribed.isnot(True),
     )
 
     if req.state:
@@ -249,14 +254,16 @@ async def launch_email_sequence(
             "state_full": STATE_NAMES.get(lead.state, lead.state),
         }
 
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
+        subject, body, headers = render_email(
+            tmpl["body"], tmpl["subject"], data, lead.contact_email
+        )
 
         result = email_service.send_email(
             to=lead.contact_email,
             subject=subject,
             sender=email_service.from_sales,
             html=body,
+            headers=headers,
         )
 
         if result.get("success"):
@@ -319,6 +326,7 @@ def _process_due_sequence_emails(db: Session) -> dict:
         SalesLead.next_email_scheduled_at.isnot(None),
         SalesLead.next_email_scheduled_at <= now,
         SalesLead.sequence_completed == False,
+        SalesLead.unsubscribed.isnot(True),
         SalesLead.status.notin_(["not_interested", "converted", "responded"]),
     ).all()
 
@@ -361,14 +369,16 @@ def _process_due_sequence_emails(db: Session) -> dict:
             "state_full": STATE_NAMES.get(lead.state, lead.state),
         }
 
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
+        subject, body, headers = render_email(
+            tmpl["body"], tmpl["subject"], data, lead.contact_email
+        )
 
         result = email_service.send_email(
             to=lead.contact_email,
             subject=subject,
             sender=email_service.from_sales,
             html=body,
+            headers=headers,
         )
 
         if result.get("success"):
@@ -453,6 +463,7 @@ def _process_opened_reengagement(db: Session) -> dict:
     candidates = db.query(SalesLead).filter(
         SalesLead.contact_email.isnot(None),
         SalesLead.contact_email != "",
+        SalesLead.unsubscribed.isnot(True),
         SalesLead.status.notin_(["not_interested", "converted", "responded"]),
         or_(
             SalesLead.email_open_count >= 1,
@@ -489,14 +500,16 @@ def _process_opened_reengagement(db: Session) -> dict:
             "state": lead.state,
             "state_full": STATE_NAMES.get(lead.state, lead.state),
         }
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
+        subject, body, headers = render_email(
+            tmpl["body"], tmpl["subject"], data, lead.contact_email
+        )
 
         result = email_service.send_email(
             to=lead.contact_email,
             subject=subject,
             sender=email_service.from_sales,
             html=body,
+            headers=headers,
         )
 
         if not result.get("success"):
@@ -566,6 +579,7 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
     candidates = db.query(SalesLead).filter(
         SalesLead.contact_email.isnot(None),
         SalesLead.contact_email != "",
+        SalesLead.unsubscribed.isnot(True),
         SalesLead.email_send_count > 0,
         SalesLead.last_email_sent_at < start_today,
         SalesLead.status.notin_(["not_interested", "converted", "responded"]),
@@ -604,8 +618,9 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
             "state": lead.state,
             "state_full": STATE_NAMES.get(lead.state, lead.state),
         }
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
+        subject, body, headers = render_email(
+            tmpl["body"], tmpl["subject"], data, lead.contact_email
+        )
 
         if dry_run:
             per_template[template_id] = per_template.get(template_id, 0) + 1
@@ -624,6 +639,7 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
             subject=subject,
             sender=email_service.from_sales,
             html=body,
+            headers=headers,
         )
 
         if not result.get("success"):

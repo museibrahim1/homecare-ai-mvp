@@ -28,8 +28,12 @@ from .campaigns import router as _campaigns_router
 from .detail import router as _detail_router
 from .email_actions import router as _email_actions_router
 from .internal import router as _internal_router
+from .unsubscribe import router as _unsubscribe_router
 
 router = APIRouter()
+# Public, token-gated unsubscribe first so its unauthenticated routes are not
+# shadowed by the auth-protected lead routes.
+router.include_router(_unsubscribe_router)
 router.include_router(_crud_router)
 router.include_router(_campaigns_router)
 router.include_router(_detail_router)

@@ -20,7 +20,7 @@ from app.services.email import email_service
 
 from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
-    _render_template, _auto_start_sequence,
+    _auto_start_sequence, render_email,
 )
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
@@ -502,7 +502,7 @@ async def internal_add_lead_and_email(
             db.add(lead)
             db.flush()
 
-        if item.send_email and lead.contact_email:
+        if item.send_email and lead.contact_email and not lead.unsubscribed:
             data = {
                 "provider_name": lead.provider_name,
                 "city": lead.city or "your area",
@@ -510,14 +510,16 @@ async def internal_add_lead_and_email(
                 "state_full": STATE_NAMES.get(lead.state, lead.state),
             }
             tmpl = EMAIL_TEMPLATES[SEQUENCE_ORDER[0]]
-            subject = _render_template(tmpl["subject"], data)
-            body = _render_template(tmpl["body"], data)
+            subject, body, headers = render_email(
+                tmpl["body"], tmpl["subject"], data, lead.contact_email
+            )
 
             result = email_service.send_email(
                 to=lead.contact_email,
                 subject=subject,
                 sender=email_service.from_sales,
                 html=body,
+                headers=headers,
             )
 
             if result.get("success"):

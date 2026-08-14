@@ -6,7 +6,10 @@ is re-exported from app.routers.sales_leads (see __init__.py) because the
 outreach package imports it directly.
 """
 
+import hashlib
+import hmac
 import logging
+import os
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
@@ -17,6 +20,107 @@ from app.models.analytics import EmailCampaignEvent
 from app.services.email import email_service
 
 logger = logging.getLogger(__name__)
+
+
+# ─── Unsubscribe (one-click, token-signed) ───
+#
+# Every marketing email carries a personalized, signed unsubscribe link so a
+# recipient can opt out in one click instead of emailing us. The same token is
+# used for the RFC 8058 List-Unsubscribe / List-Unsubscribe-Post headers so
+# Gmail and Apple Mail render a native "Unsubscribe" button.
+#
+# The signing secret is shared between the API and the outreach scripts. We
+# resolve it in a fixed order so both sides agree without any extra config:
+# UNSUBSCRIBE_SECRET, then CRON_SECRET (already shared with the scripts), then
+# JWT_SECRET, then a dev-only fallback.
+
+_PUBLIC_SITE = "https://palmcareai.com"
+_PUBLIC_API_URL = (
+    os.getenv("PUBLIC_API_URL")
+    or os.getenv("API_BASE_URL")
+    or "https://api-production-a0a2.up.railway.app"
+).rstrip("/")
+# Monitored mailbox for the mailto: fallback in the List-Unsubscribe header
+# (matches the reply-to on outreach mail, so opt-outs land where a human reads).
+_UNSUB_MAILTO = os.getenv("UNSUBSCRIBE_MAILTO", "sales@palmtai.com")
+
+
+def _unsubscribe_secret() -> str:
+    from app.core.config import settings
+
+    return (
+        os.getenv("UNSUBSCRIBE_SECRET")
+        or os.getenv("CRON_SECRET")
+        or (settings.jwt_secret or "")
+        or "palmcare-unsubscribe-dev-secret"
+    )
+
+
+def _normalize_email(email: str | None) -> str:
+    return (email or "").strip().lower()
+
+
+def unsubscribe_token(email: str | None) -> str:
+    """Signed, URL-safe token that proves an unsubscribe link is ours.
+
+    HMAC-SHA256 over the lowercased email, truncated to 32 hex chars. Stable
+    across restarts (unlike a random per-process value), so links stay valid.
+    """
+    norm = _normalize_email(email)
+    return hmac.new(
+        _unsubscribe_secret().encode("utf-8"), norm.encode("utf-8"), hashlib.sha256
+    ).hexdigest()[:32]
+
+
+def verify_unsubscribe_token(email: str | None, token: str | None) -> bool:
+    """Constant-time check that `token` matches the email's expected token."""
+    if not email or not token:
+        return False
+    return hmac.compare_digest(unsubscribe_token(email), token.strip())
+
+
+def unsubscribe_url(email: str | None) -> str:
+    """Branded footer link → palmcareai.com/unsubscribe (auto-completes via API)."""
+    params = {
+        "email": _normalize_email(email),
+        "token": unsubscribe_token(email),
+        "utm_source": "email",
+        "utm_medium": "email",
+        "utm_campaign": "agency_outreach",
+        "utm_content": "unsubscribe",
+    }
+    return f"{_PUBLIC_SITE}/unsubscribe?{urlencode(params)}"
+
+
+def unsubscribe_api_url(email: str | None) -> str:
+    """Direct API endpoint for the List-Unsubscribe header (one-click, no JS)."""
+    params = {"email": _normalize_email(email), "token": unsubscribe_token(email)}
+    return f"{_PUBLIC_API_URL}/platform/sales/leads/unsubscribe?{urlencode(params)}"
+
+
+def unsubscribe_headers(email: str | None) -> dict:
+    """RFC 8058 one-click unsubscribe headers for a marketing send."""
+    return {
+        "List-Unsubscribe": (
+            f"<mailto:{_UNSUB_MAILTO}?subject=unsubscribe>, <{unsubscribe_api_url(email)}>"
+        ),
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    }
+
+
+def render_email(template_body: str, subject: str, data: dict, email: str | None):
+    """Render a marketing template for one recipient.
+
+    Fills the shared merge tags plus the per-recipient {unsubscribe_url} used in
+    the footer, and returns (subject, html, headers) ready for email_service.
+    """
+    merged = dict(data)
+    merged["unsubscribe_url"] = unsubscribe_url(email)
+    return (
+        _render_template(subject, merged),
+        _render_template(template_body, merged),
+        unsubscribe_headers(email),
+    )
 
 
 def _utm(path: str = "", *, content: str | None = None, campaign: str = "agency_outreach") -> str:
@@ -140,7 +244,9 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'<a href="{_PRIVACY}" style="color: #94a3b8; text-decoration: underline; '
         'font-size: 11px;">Privacy</a>'
         '&nbsp;&middot;&nbsp;'
-        f'<a href="{_UNSUB}" style="color: #94a3b8; text-decoration: underline; '
+        # Per-recipient one-click unsubscribe. Rendered by render_email() which
+        # fills {unsubscribe_url} with a signed link for the actual recipient.
+        '<a href="{unsubscribe_url}" style="color: #94a3b8; text-decoration: underline; '
         'font-size: 11px;">Unsubscribe</a>'
         '</p></div>'
         '</div>'
@@ -451,6 +557,8 @@ def _auto_start_sequence(lead: SalesLead, campaign_name: str, db: Session):
     if lead.sequence_step and lead.sequence_step > 0:
         return
     if lead.sequence_completed:
+        return
+    if getattr(lead, "unsubscribed", False):
         return
 
     now = datetime.now(timezone.utc)
