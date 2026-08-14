@@ -37,10 +37,6 @@
 	<string></string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>POSTHOG_API_KEY</key>
-	<string></string>
-	<key>POSTHOG_HOST</key>
-	<string>https://us.i.posthog.com</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -60,8 +56,10 @@
 	<string>PALM uses Face ID to quickly and securely unlock the app and protect access to sensitive client information.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PALM uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>PALM uses on-device speech recognition for hands-free voice commands with the Palm assistant.</string>
+	<key>POSTHOG_API_KEY</key>
+	<string></string>
+	<key>POSTHOG_HOST</key>
+	<string>https://us.i.posthog.com</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

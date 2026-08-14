@@ -6,7 +6,6 @@ struct MainTabView: View {
     @State private var navigationResetIds: [Int: UUID] = [
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
-    @State private var palmAgentOpen = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -22,26 +21,8 @@ struct MainTabView: View {
                     navigationResetIds[tab] = UUID()
                 }
             )
-
-            // The record screen stays minimal — just the orb. The assistant
-            // is available on every other tab.
-            if selectedTab != 2 {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        PalmAgentButton(isOpen: $palmAgentOpen)
-                            .padding(.trailing, 20)
-                            .padding(.bottom, 90)
-                    }
-                }
-            }
         }
         .edgesIgnoringSafeArea(.bottom)
-        .sheet(isPresented: $palmAgentOpen) {
-            PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: false)
-                .environmentObject(api)
-        }
         .onChange(of: selectedTab) { newTab in
             PostHogService.shared.capture("tab_selected", properties: [
                 "tab_index": newTab,
