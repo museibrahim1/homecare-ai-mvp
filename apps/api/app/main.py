@@ -338,6 +338,32 @@ async def seed_database():
         logger.warning(f"business_users migration check: {e}")
         db.rollback()
 
+    # Auto-add unsubscribe/suppression columns to sales_leads so the one-click
+    # unsubscribe link works even if the 035 migration hasn't been applied yet.
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "sales_leads" in inspector.get_table_names():
+            sl_cols = {c["name"] for c in inspector.get_columns("sales_leads")}
+            if "unsubscribed" not in sl_cols:
+                db.execute(sa_text(
+                    "ALTER TABLE sales_leads ADD COLUMN unsubscribed BOOLEAN NOT NULL DEFAULT false"
+                ))
+                logger.info("Added column sales_leads.unsubscribed")
+            if "unsubscribed_at" not in sl_cols:
+                db.execute(sa_text(
+                    "ALTER TABLE sales_leads ADD COLUMN unsubscribed_at TIMESTAMP WITH TIME ZONE"
+                ))
+                logger.info("Added column sales_leads.unsubscribed_at")
+            db.execute(sa_text(
+                "CREATE INDEX IF NOT EXISTS ix_sales_leads_unsubscribed "
+                "ON sales_leads (unsubscribed)"
+            ))
+            db.commit()
+    except Exception as e:
+        logger.warning(f"sales_leads unsubscribe migration check: {e}")
+        db.rollback()
+
     # Auto-create site_events table for public analytics
     try:
         from sqlalchemy import text as sa_text, inspect as sa_inspect

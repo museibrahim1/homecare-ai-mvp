@@ -19,7 +19,7 @@ from app.services.email import email_service
 
 from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
-    _render_template, _auto_start_sequence,
+    _auto_start_sequence, unsubscribe_headers,
 )
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
@@ -48,11 +48,18 @@ async def send_lead_email(
     if not to_email:
         raise HTTPException(status_code=400, detail="No email address for this lead. Add contact_email first.")
 
+    if getattr(lead, "unsubscribed", False):
+        raise HTTPException(
+            status_code=409,
+            detail="This lead has unsubscribed from marketing email. Sending is blocked.",
+        )
+
     result = email_service.send_email(
         to=to_email,
         subject=email_req.subject,
         sender=email_service.from_sales,
         html=email_req.html_body,
+        headers=unsubscribe_headers(to_email),
     )
 
     now = datetime.now(timezone.utc)
@@ -250,7 +257,9 @@ async def resend_webhook(
         lead.status = "not_interested"
         lead.sequence_completed = True
         lead.next_email_scheduled_at = None
-        activity.append({"action": "Spam complaint received", "at": now.isoformat()})
+        lead.unsubscribed = True
+        lead.unsubscribed_at = now
+        activity.append({"action": "Spam complaint received (unsubscribed)", "at": now.isoformat()})
 
     lead.activity_log = activity
     db.commit()

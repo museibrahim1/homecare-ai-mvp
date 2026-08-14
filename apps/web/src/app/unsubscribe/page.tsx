@@ -1,20 +1,66 @@
 'use client';
 
-import { FormEvent, useState, Suspense } from 'react';
+import { FormEvent, useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Loader2, Mail } from 'lucide-react';
 
 const FORMSPREE_CONTACT_ID = process.env.NEXT_PUBLIC_FORMSPREE_CONTACT_ID || '';
 
+// Same-origin proxy to the backend (see next.config rewrites: /api/* -> API).
+const UNSUBSCRIBE_ENDPOINT = '/api/platform/sales/leads/unsubscribe';
+
 function UnsubscribeForm() {
   const searchParams = useSearchParams();
   const prefill = searchParams.get('email') || '';
+  const token = searchParams.get('token') || '';
 
   const [email, setEmail] = useState(prefill);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+
+  // Directly opt the recipient out via the backend using the signed token from
+  // the email link. This is the real unsubscribe — no manual email needed.
+  const unsubscribeViaApi = useCallback(
+    async (addr: string, tok: string): Promise<boolean> => {
+      const params = new URLSearchParams({ email: addr, token: tok });
+      const response = await fetch(`${UNSUBSCRIBE_ENDPOINT}?${params.toString()}`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'unsubscribe_failed');
+      }
+      return true;
+    },
+    []
+  );
+
+  // When arriving from an email link (email + signed token present), complete
+  // the unsubscribe automatically. Link scanners don't run JS, so this only
+  // fires for real recipients.
+  useEffect(() => {
+    if (!prefill || !token || done) return;
+    let cancelled = false;
+    setLoading(true);
+    unsubscribeViaApi(prefill, token)
+      .then(() => {
+        if (!cancelled) setDone(true);
+      })
+      .catch(() => {
+        // Fall back to the manual form (e.g. token expired).
+        if (!cancelled) setError('');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill, token]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -22,6 +68,17 @@ function UnsubscribeForm() {
     setError('');
 
     try {
+      // Preferred path: signed token → real one-click unsubscribe on the backend.
+      if (token) {
+        try {
+          await unsubscribeViaApi(email, token);
+          setDone(true);
+          return;
+        } catch {
+          // Token invalid/expired — fall through to the contact-form path.
+        }
+      }
+
       if (!FORMSPREE_CONTACT_ID) {
         // Fallback when Formspree isn't configured: open a prefilled mailto.
         window.location.href = `mailto:sales@palmtai.com?subject=${encodeURIComponent(
@@ -57,6 +114,18 @@ function UnsubscribeForm() {
     }
   }
 
+  if (loading && !done && prefill && token) {
+    return (
+      <div className="text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50">
+          <Loader2 className="h-7 w-7 animate-spin text-teal-600" />
+        </div>
+        <h1 className="mb-2 text-2xl font-semibold text-slate-900">Unsubscribing…</h1>
+        <p className="text-slate-600">One moment while we remove you from marketing emails.</p>
+      </div>
+    );
+  }
+
   if (done) {
     return (
       <div className="text-center">
@@ -65,9 +134,9 @@ function UnsubscribeForm() {
         </div>
         <h1 className="mb-2 text-2xl font-semibold text-slate-900">You&apos;re unsubscribed</h1>
         <p className="mb-8 text-slate-600">
-          We&apos;ll remove <span className="font-medium text-slate-800">{email}</span> from
-          marketing emails within one business day. Transactional account mail (password
-          resets, receipts) is unaffected.
+          <span className="font-medium text-slate-800">{email}</span> won&apos;t receive any more
+          marketing emails from PalmCare AI. Transactional account mail (password resets,
+          receipts) is unaffected.
         </p>
         <Link href="/" className="text-sm font-medium text-teal-700 hover:text-teal-800">
           Back to palmcareai.com

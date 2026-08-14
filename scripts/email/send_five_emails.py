@@ -7,17 +7,24 @@ Uses local .env for Resend API key since Railway's may be expired.
 import os
 import sys
 import json
+import hmac
+import hashlib
+from urllib.parse import urlencode
 from pathlib import Path
 from datetime import datetime
 
-# Load .env
-env_path = Path(__file__).resolve().parent.parent / ".env"
-if env_path.exists():
-    for line in env_path.read_text().splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+# Load .env — check both the repo root and scripts/ so the signing secret and
+# API keys resolve wherever this is run from.
+for _candidate in (
+    Path(__file__).resolve().parents[2] / ".env",  # repo root
+    Path(__file__).resolve().parent.parent / ".env",  # scripts/
+):
+    if _candidate.exists():
+        for line in _candidate.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, _, v = line.partition("=")
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
 try:
     import resend
@@ -43,8 +50,52 @@ SITE = site("/", source="email", medium="email", campaign="agency_outreach", con
 SITE_HOME = site("/", source="email", medium="email", campaign="agency_outreach", content="hero")
 BOOK_DEMO = site("/book-demo", source="email", medium="email", campaign="agency_outreach", content="cta")
 PRIVACY = site("/privacy", source="email", medium="email", campaign="agency_outreach", content="footer")
-UNSUB = site("/unsubscribe", source="email", medium="email", campaign="agency_outreach", content="footer")
 GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
+
+API_BASE_URL = (
+    os.getenv("PUBLIC_API_URL")
+    or os.getenv("API_BASE_URL")
+    or "https://api-production-a0a2.up.railway.app"
+).rstrip("/")
+UNSUB_MAILTO = os.getenv("UNSUBSCRIBE_MAILTO", "sales@palmtai.com")
+
+
+def _unsub_secret():
+    """Signing secret shared with the API (see sales_leads/common.py)."""
+    return (
+        os.getenv("UNSUBSCRIBE_SECRET")
+        or os.getenv("CRON_SECRET")
+        or os.getenv("JWT_SECRET")
+        or "palmcare-unsubscribe-dev-secret"
+    )
+
+
+def unsub_token(email):
+    norm = (email or "").strip().lower()
+    return hmac.new(
+        _unsub_secret().encode(), norm.encode(), hashlib.sha256
+    ).hexdigest()[:32]
+
+
+def unsubscribe_url(email):
+    """Personalized, signed one-click unsubscribe link for the footer."""
+    q = urlencode({
+        "email": (email or "").strip().lower(),
+        "token": unsub_token(email),
+        "utm_source": "email", "utm_medium": "email",
+        "utm_campaign": "agency_outreach", "utm_content": "unsubscribe",
+    })
+    return f"https://palmcareai.com/unsubscribe?{q}"
+
+
+def unsubscribe_headers(email):
+    """RFC 8058 one-click List-Unsubscribe headers for the Resend send."""
+    q = urlencode({"email": (email or "").strip().lower(), "token": unsub_token(email)})
+    api_url = f"{API_BASE_URL}/platform/sales/leads/unsubscribe?{q}"
+    return {
+        "List-Unsubscribe": f"<mailto:{UNSUB_MAILTO}?subject=unsubscribe>, <{api_url}>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    }
 
 TEAL = "#0d9488"
 TEAL_DARK = "#0f766e"
@@ -54,9 +105,10 @@ SLATE_200 = "#e2e8f0"
 SLATE_100 = "#f1f5f9"
 
 
-def build_warm_open(provider_name, city, state, state_full):
+def build_warm_open(provider_name, city, state, state_full, to_email):
     """Build the warm_open email (same as API template)."""
     subject = f"{provider_name} — quick question"
+    unsub = unsubscribe_url(to_email)
 
     body = f"""\
 <div style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -108,7 +160,7 @@ def build_warm_open(provider_name, city, state, state_full):
 <p style="margin: 0;">
 <a href="{PRIVACY}" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>
 &nbsp;&middot;&nbsp;
-<a href="{UNSUB}" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a>
+<a href="{unsub}" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a>
 </p></div>
 </div>"""
     return subject, body
@@ -175,7 +227,9 @@ def send_emails():
         if i > 0:
             time.sleep(1.5)
 
-        subject, html = build_warm_open(c["provider_name"], c["city"], c["state"], c["state_full"])
+        subject, html = build_warm_open(
+            c["provider_name"], c["city"], c["state"], c["state_full"], c["email"]
+        )
 
         try:
             resp = resend.Emails.send({
@@ -184,6 +238,7 @@ def send_emails():
                 "subject": subject,
                 "html": html,
                 "reply_to": "sales@palmtai.com",
+                "headers": unsubscribe_headers(c["email"]),
             })
 
             email_id = None
