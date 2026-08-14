@@ -63,14 +63,15 @@ final class AssessmentSession: ObservableObject {
 
     func startRecording(client: Client?) throws {
         liveTranscription.segments = []
+        liveTranscription.stopTranscribing()
         try recorder.startRecording()
         activeClient = client
         PostHogService.shared.capture("assessment_recording_started", properties: [
             "has_client": client != nil,
         ])
-        if let url = recorder.recordingURL {
-            liveTranscription.startTranscribing(recordingURL: url)
-        }
+        // Live in-recording transcription is paused until the local
+        // chunk pipeline is reliable. The visit is still transcribed
+        // after stop via the normal upload pipeline.
         setAssessmentInProgress(true)
     }
 

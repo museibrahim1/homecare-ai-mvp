@@ -154,7 +154,7 @@ struct PaywallView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 8) {
-                            Text(product.displayName)
+                            Text("PalmCare AI")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.palmText)
                             if isOwned {
@@ -217,7 +217,7 @@ struct PaywallView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(product.displayName), \(product.displayPrice) per month")
+        .accessibilityLabel("PalmCare AI, \(product.displayPrice) per month")
     }
 
     private var purchaseButton: some View {
