@@ -19,9 +19,11 @@ from typing import List, Optional
 
 import requests
 
+from app.core.config import settings
 from app.core.deps import get_current_user
 from app.core.rate_limit import limiter
 from app.models.user import User
+from app.services.live_audio import pcm_peak as _pcm_peak
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -60,8 +62,9 @@ async def live_transcribe(
     Send audio data (any format) and get back the transcript immediately.
     Optimized for short clips (5-60 seconds) during live recording.
     """
-    deepgram_key = os.environ.get("DEEPGRAM_API_KEY", "")
-    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    # Prefer process env (tests / docker) then Settings (.env for local uvicorn).
+    deepgram_key = os.environ.get("DEEPGRAM_API_KEY", settings.deepgram_api_key) or ""
+    openai_key = os.environ.get("OPENAI_API_KEY", settings.openai_api_key) or ""
 
     try:
         content = await file.read()
@@ -96,8 +99,8 @@ async def live_transcribe(
         )
 
     # Try Deepgram first (preferred); fall back to OpenAI Whisper on
-    # ANY failure so a transient Deepgram outage doesn't break the
-    # live transcript banner in the iOS app.
+    # ANY failure, including Deepgram HTTP errors, so a transient outage
+    # does not blank the live transcript banner in the iOS app.
     if deepgram_key:
         try:
             result = _transcribe_deepgram(content, content_type, deepgram_key, language, diarize)
@@ -106,8 +109,6 @@ async def live_transcribe(
                 getattr(current_user, "email", "?"), len(result.words), len(result.transcript),
             )
             return result
-        except HTTPException:
-            raise
         except Exception as e:
             logger.warning(
                 "live_transcribe: Deepgram failed, falling back to Whisper: %s\n%s",
@@ -115,6 +116,8 @@ async def live_transcribe(
                 traceback.format_exc(limit=3),
             )
             if not openai_key:
+                if isinstance(e, HTTPException):
+                    raise
                 raise HTTPException(
                     status_code=502,
                     detail=f"Live transcription failed: {type(e).__name__}",
@@ -134,37 +137,6 @@ async def live_transcribe(
             status_code=502,
             detail=f"Live transcription failed: {type(e).__name__}",
         )
-
-
-def _pcm_peak(content: bytes) -> Optional[int]:
-    """Max abs int16 sample of a WAV chunk (None if not parseable as WAV)."""
-    import struct
-
-    if len(content) < 44 or content[:4] != b"RIFF":
-        return None
-    # Walk RIFF sub-chunks to find `data`
-    i = 12
-    pcm = None
-    while i + 8 <= len(content):
-        four_cc = content[i:i + 4]
-        size = struct.unpack_from("<I", content, i + 4)[0]
-        if four_cc == b"data":
-            pcm = content[i + 8: i + 8 + size]
-            break
-        i += 8 + size + (size % 2)
-    if pcm is None or len(pcm) < 2:
-        return None
-    # Sample up to ~50k samples evenly to keep this cheap
-    n = len(pcm) // 2
-    step = max(1, n // 50_000)
-    peak = 0
-    for j in range(0, n, step):
-        val = struct.unpack_from("<h", pcm, j * 2)[0]
-        if abs(val) > peak:
-            peak = abs(val)
-            if peak >= 32767:
-                break
-    return peak
 
 
 def _transcribe_deepgram(

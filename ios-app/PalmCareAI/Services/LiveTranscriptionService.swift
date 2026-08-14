@@ -69,6 +69,13 @@ class LiveTranscriptionService: ObservableObject {
         lastError = nil
         recordingStart = Date()
 
+        // First chunk as soon as we have ~1s of audio, then every 3s.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            guard let self, self.isTranscribing else { return }
+            await self.sendChunk(recordingURL: recordingURL)
+        }
+
         chunkTimer = Timer.scheduledTimer(withTimeInterval: chunkInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
@@ -158,6 +165,7 @@ class LiveTranscriptionService: ObservableObject {
             // Don't advance lastByteOffset on failure; we'll retry the
             // same audio range on the next tick.
             lastError = error.localizedDescription
+            NSLog("LiveTranscription chunk failed: \(error.localizedDescription)")
         }
     }
 

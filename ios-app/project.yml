@@ -55,6 +55,7 @@ targets:
         NSFaceIDUsageDescription: "PALM uses Face ID to quickly and securely unlock the app and protect access to sensitive client information."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
+          NSAllowsLocalNetworking: true
           NSExceptionDomains:
             railway.app:
               NSIncludesSubdomains: true

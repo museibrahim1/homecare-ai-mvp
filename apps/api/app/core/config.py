@@ -55,6 +55,11 @@ class Settings(BaseSettings):
     debug: bool = False
     log_level: str = "INFO"
 
+    # Live transcription. Read from .env even when the process did not export
+    # the keys into os.environ (local uvicorn / docker without an explicit pass).
+    deepgram_api_key: str = ""
+    openai_api_key: str = ""
+
     # TestFlight/beta: every account gets full access with no assessment or
     # team-size limits. Pricing/limits will be set from real usage data after
     # the beta. Flip BETA_FREE_ACCESS=false when billing goes live.

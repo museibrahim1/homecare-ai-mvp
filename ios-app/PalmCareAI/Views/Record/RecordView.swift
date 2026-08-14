@@ -8,7 +8,12 @@ struct RecordView: View {
     /// Lives outside this view, so leaving the screen never stops a recording
     /// or kills contract processing.
     @EnvironmentObject var session: AssessmentSession
+    @State private var liveSegments: [TranscriptSegment] = []
+    @State private var liveFullTranscript = ""
+    @State private var liveNoSpeech = false
+    @State private var liveError: String?
     #if DEBUG
+    @StateObject private var demoTranscription = DemoTranscriptionService()
     @State private var isDemoMode = false
     #endif
 
@@ -208,7 +213,9 @@ struct RecordView: View {
                 guard !didRunAutomationDemo else { return }
                 didRunAutomationDemo = true
                 isDemoMode = true
+                demoTranscription.startTranscribing()
                 try? await Task.sleep(nanoseconds: 4_000_000_000)
+                demoTranscription.stopTranscribing()
                 isDemoMode = false
             }
             .task {
@@ -221,6 +228,7 @@ struct RecordView: View {
                 }
                 try? await Task.sleep(nanoseconds: 1_500_000_000)
                 isDemoMode = true
+                demoTranscription.startTranscribing()
             }
             #endif
             .onAppear {
@@ -228,6 +236,27 @@ struct RecordView: View {
                 // tab, restore the client chosen at start.
                 if selectedClient == nil, let active = session.activeClient {
                     selectedClient = active
+                }
+                let lt = session.liveTranscription
+                if lt.isTranscribing {
+                    liveSegments = lt.segments
+                    liveFullTranscript = lt.fullTranscript
+                    liveNoSpeech = lt.noSpeechDetected
+                    liveError = lt.lastError
+                }
+            }
+            .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
+                let lt = session.liveTranscription
+                guard lt.isTranscribing else { return }
+                if lt.segments.count != liveSegments.count || lt.fullTranscript != liveFullTranscript {
+                    liveSegments = lt.segments
+                    liveFullTranscript = lt.fullTranscript
+                }
+                if lt.noSpeechDetected != liveNoSpeech {
+                    withAnimation { liveNoSpeech = lt.noSpeechDetected }
+                }
+                if lt.lastError != liveError {
+                    liveError = lt.lastError
                 }
             }
             .onReceive(session.$completedVisitId) { visitId in
@@ -377,38 +406,109 @@ struct RecordView: View {
         .padding(.bottom, 4)
     }
 
+    private var transcriptSegments: [TranscriptSegment] {
+        #if DEBUG
+        if isDemoMode { return demoTranscription.segments }
+        #endif
+        return liveSegments
+    }
+
     // MARK: - Orb stage (idle + recording)
 
-    /// Centered pulsing orb only. Live transcription UI is off until the
-    /// on-device chunk pipeline is reliable. The visit is still transcribed
-    /// after the recording stops.
     private var idleLayout: some View {
         orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording")
     }
 
     private var recordingLayout: some View {
-        orbStage(
-            isActive: true,
-            audioLevel: {
-                #if DEBUG
-                if isDemoMode { return 0.4 }
-                #endif
-                return recorder.audioLevel
-            }(),
-            caption: "Recording. Tap the orb to stop."
-        )
+        VStack(spacing: 0) {
+            orbStage(
+                isActive: true,
+                audioLevel: {
+                    #if DEBUG
+                    if isDemoMode { return 0.4 }
+                    #endif
+                    return recorder.audioLevel
+                }(),
+                caption: "Recording. Tap the orb to stop.",
+                compact: true
+            )
+
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(Color.green.opacity(0.8))
+                    .frame(width: 6, height: 6)
+                Text("LIVE TRANSCRIPT")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.4))
+                    .tracking(1.5)
+            }
+            .padding(.bottom, 8)
+
+            if transcriptSegments.isEmpty, liveNoSpeech {
+                Text("No speech detected yet. Speak near the microphone.")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.35))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 8)
+            } else if transcriptSegments.isEmpty, let err = liveError, !err.isEmpty {
+                Text(err)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmOrange.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 8)
+            } else if transcriptSegments.isEmpty {
+                Text("Listening…")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.35))
+                    .padding(.bottom, 8)
+            }
+
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(transcriptSegments) { segment in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Circle()
+                                        .fill(speakerColor(for: segment.speaker))
+                                        .frame(width: 8, height: 8)
+                                    Text(segment.speakerLabel)
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(speakerColor(for: segment.speaker))
+                                }
+                                WrappingHStack(words: segment.text.split(separator: " ").map(String.init))
+                            }
+                            .id(segment.id)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 100)
+                }
+                .onChange(of: transcriptSegments.count) { _ in
+                    if let last = transcriptSegments.last {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            proxy.scrollTo(last.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    private func orbStage(isActive: Bool, audioLevel: Float, caption: String) -> some View {
+    private func orbStage(isActive: Bool, audioLevel: Float, caption: String, compact: Bool = false) -> some View {
         VStack(spacing: 0) {
-            Spacer()
+            if !compact { Spacer() }
 
             VoiceOrb(isActive: isActive, audioLevel: audioLevel)
-                .frame(width: 240, height: 240)
+                .frame(width: compact ? 160 : 240, height: compact ? 160 : 240)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     #if DEBUG
                     if isDemoMode {
+                        demoTranscription.stopTranscribing()
                         isDemoMode = false
                         return
                     }
@@ -421,10 +521,11 @@ struct RecordView: View {
             Text(caption)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white.opacity(0.5))
-                .padding(.top, 20)
+                .padding(.top, compact ? 8 : 20)
 
-            Spacer()
+            if !compact { Spacer() }
         }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Actions
@@ -477,6 +578,10 @@ struct RecordView: View {
 
             // Usage limits are enforced server-side on submit, not here.
             await MainActor.run {
+                liveSegments = []
+                liveFullTranscript = ""
+                liveNoSpeech = false
+                liveError = nil
                 do {
                     try session.startRecording(client: selectedClient)
                 } catch {

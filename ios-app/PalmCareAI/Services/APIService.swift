@@ -68,6 +68,20 @@ final class PostHogService {
 class APIService: ObservableObject {
     static let shared = APIService()
     let baseURL: String = {
+        #if DEBUG
+        if let env = ProcessInfo.processInfo.environment["PALM_API_BASE_URL"], !env.isEmpty {
+            return env
+        }
+        #if targetEnvironment(simulator)
+        // Debug Simulator talks to docker-compose on this Mac. Set
+        // PALM_USE_PRODUCTION_API=1 to hit Railway instead. Physical
+        // devices keep production unless PALM_API_BASE_URL is set, because
+        // 127.0.0.1 on a phone is the phone itself.
+        if ProcessInfo.processInfo.environment["PALM_USE_PRODUCTION_API"] != "1" {
+            return "http://127.0.0.1:8000"
+        }
+        #endif
+        #endif
         if let url = Bundle.main.infoDictionary?["API_BASE_URL"] as? String, !url.isEmpty {
             return url
         }

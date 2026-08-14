@@ -63,12 +63,11 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         try FileManager.default.createDirectory(
             at: recordingsDir,
             withIntermediateDirectories: true,
-            attributes: [.protectionKey: FileProtectionType.complete]
+        attributes: [.protectionKey: FileProtectionType.completeUnlessOpen]
         )
 
         let timestamp = Int(Date().timeIntervalSince1970)
         let url = recordingsDir.appendingPathComponent("recording_\(timestamp).wav")
-        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: recordingsDir.path)
 
         // WAV (Linear PCM) is used instead of AAC/M4A so the file can be
         // read mid-recording for live transcription. M4A writes its moov
@@ -89,7 +88,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         guard audioRecorder?.record() == true else {
             throw RecordingError.failedToStart
         }
-        try? FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: url.path)
+        try? FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUnlessOpen], ofItemAtPath: url.path)
 
         recordingURL = url
         isRecording = true
@@ -131,6 +130,12 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         }
 
         let url = recordingURL
+        if let url {
+            try? FileManager.default.setAttributes(
+                [.protectionKey: FileProtectionType.complete],
+                ofItemAtPath: url.path
+            )
+        }
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         endBackgroundTaskIfNeeded()
         return url
