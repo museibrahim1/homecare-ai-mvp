@@ -1,0 +1,68 @@
+name: Weekday engagement preview email
+
+# Mon–Fri morning email with LinkedIn + Threads talking points for Muse to approve.
+# NEVER posts. Marketing auto-posts stay in social-posts.yml.
+
+on:
+  schedule:
+    - cron: "0 12 * * 1-5"   # 8:00 AM ET (12:00 UTC) Mon–Fri
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Force a date (YYYY-MM-DD). Leave empty for today."
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry run (build email, do not send)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: engagement-preview
+  cancel-in-progress: false
+
+jobs:
+  email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install requests python-dotenv
+
+      - name: Send engagement preview
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        working-directory: scripts/social
+        run: |
+          DATE_ARG=""
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            DATE_ARG="--date ${{ github.event.inputs.date }}"
+          fi
+          DRY=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY="--dry-run"
+          fi
+          python3 send_engagement_preview.py $DATE_ARG $DRY
+
+      - name: Commit offered log
+        if: ${{ github.event.inputs.dry_run != true }}
+        run: |
+          git config user.name "palmcareai-bot"
+          git config user.email "bot@palmtai.com"
+          git add -f scripts/social/.engagement_offered.json
+          if git diff --cached --quiet; then
+            echo "No offered-log changes"
+          else
+            git commit -m "social: record engagement options offered [skip ci]"
+            git push
+          fi
