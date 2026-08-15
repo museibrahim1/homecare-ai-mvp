@@ -7,9 +7,8 @@ import { getStoredToken } from '@/lib/auth';
 import {
   HelpCircle, Send, Loader2, CheckCircle, MessageSquare,
   AlertCircle, Book, FileQuestion, Bug, Lightbulb, Mail,
-  BookOpen, Play, Sparkles, ArrowRight
+  Sparkles, ArrowRight
 } from 'lucide-react';
-import { useWalkthrough } from '@/lib/walkthrough';
 import TopBar from '@/components/TopBar';
 
 // Formspree form ID for support tickets
@@ -49,7 +48,6 @@ const FAQ_ITEMS = [
 
 export default function HelpPage() {
   const router = useRouter();
-  const { open: openTour } = useWalkthrough();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'faq' | 'ticket'>('faq');
@@ -150,32 +148,6 @@ export default function HelpPage() {
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-slate-900">Help & Support</h1>
             <p className="text-slate-500 mt-1">Find answers or get in touch with our team</p>
-          </div>
-
-          {/* Guided Tour Banner */}
-          <div className="mb-8 relative overflow-hidden rounded-2xl border border-primary-200 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-accent-cyan/10">
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500 rounded-full blur-[80px]" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-cyan rounded-full blur-[80px]" />
-            </div>
-            <div className="relative p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="w-14 h-14 shrink-0 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-                <BookOpen className="w-7 h-7 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-slate-900 mb-1">Interactive App Tour</h2>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  New to PalmCare AI? Take a guided walkthrough of all the key features — from recording assessments to generating contracts. Built for care professionals. Takes about 2 minutes.
-                </p>
-              </div>
-              <button
-                onClick={openTour}
-                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-slate-900 font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
-              >
-                <Play className="w-4 h-4" />
-                Start Tour
-              </button>
-            </div>
           </div>
 
           {/* Quick Contact */}

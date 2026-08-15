@@ -3,8 +3,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme';
 import { NotificationProvider } from '@/lib/notifications';
-import { WalkthroughProvider } from '@/lib/walkthrough';
-import WalkthroughGuide from '@/components/WalkthroughGuide';
 import ReminderPoller from '@/components/ReminderPoller';
 import SiteAnalytics from '@/components/SiteAnalytics';
 
@@ -203,12 +201,9 @@ export default function RootLayout({
       <body className={`${inter.className} bg-slate-50 text-slate-800 min-h-screen`}>
         <ThemeProvider>
           <NotificationProvider>
-            <WalkthroughProvider>
-              {children}
-              <WalkthroughGuide />
-              <ReminderPoller />
-              <SiteAnalytics />
-            </WalkthroughProvider>
+            {children}
+            <ReminderPoller />
+            <SiteAnalytics />
           </NotificationProvider>
         </ThemeProvider>
       </body>

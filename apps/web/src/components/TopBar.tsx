@@ -5,13 +5,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   Bell, Settings, ChevronDown, LogOut, User, X,
   CalendarDays, CheckSquare, MessageSquare, Mail, AlertTriangle,
-  Clock, ChevronRight, BellOff, Check, BookOpen, Search,
+  Clock, ChevronRight, BellOff, Check, Search,
   Home, Users, FileText, BarChart3, Zap, CreditCard,
   Shield, Headphones, Layout, PlusCircle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useNotifications, type AppNotification, type NotificationCategory } from '@/lib/notifications';
-import { useWalkthrough } from '@/lib/walkthrough';
 
 const CATEGORY_META: Record<NotificationCategory, { label: string; icon: typeof Bell; color: string; bg: string }> = {
   schedule:  { label: 'Schedule',  icon: CalendarDays,  color: 'text-blue-600',   bg: 'bg-blue-50' },
@@ -277,7 +276,6 @@ export default function TopBar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
-  const { open: openTour } = useWalkthrough();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -536,13 +534,6 @@ export default function TopBar() {
                 >
                   <User className="w-4 h-4 text-slate-400" />
                   Profile & Settings
-                </button>
-                <button
-                  onClick={() => { setShowUserMenu(false); openTour(); }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 text-slate-400" />
-                  App Tour
                 </button>
                 <div className="border-t border-slate-100 my-1" />
                 <button
