@@ -31,20 +31,22 @@ def generate_visit_note(self, visit_id: str):
     try:
         from models import Visit, TranscriptSegment, BillableItem, Note
         from libs.llm import get_llm_service
+        from libs.pipeline_state import patch_pipeline_step
         
         # Get visit
         visit = db.query(Visit).filter(Visit.id == UUID(visit_id)).first()
         if not visit:
             raise ValueError(f"Visit not found: {visit_id}")
+
+        conversation_kind = (visit.pipeline_state or {}).get("conversation_kind")
         
-        # Update pipeline state
-        visit.pipeline_state = {
-            **visit.pipeline_state,
-            "note": {
-                "status": "processing",
-                "started_at": datetime.now(timezone.utc).isoformat(),
-            }
-        }
+        patch_pipeline_step(
+            db,
+            visit_id,
+            "note",
+            status="processing",
+            started_at=datetime.now(timezone.utc).isoformat(),
+        )
         db.commit()
         
         # Get transcript segments
@@ -73,29 +75,42 @@ def generate_visit_note(self, visit_id: str):
             "scheduled_duration": f"{(visit.scheduled_end - visit.scheduled_start).seconds // 60} minutes" if visit.scheduled_start and visit.scheduled_end else "Unknown",
         }
         
-        # Prepare billable items
-        billable_dicts = [
-            {
-                "category": b.category,
-                "description": b.description,
-                "minutes": b.minutes,
-            }
-            for b in billables
-        ]
+        # Prepare billable items (include frequency from evidence when present)
+        billable_dicts = []
+        for b in billables:
+            frequency = None
+            if isinstance(b.evidence, list):
+                for ev in b.evidence:
+                    if isinstance(ev, dict) and ev.get("frequency"):
+                        frequency = ev.get("frequency")
+                        break
+            billable_dicts.append(
+                {
+                    "category": b.category,
+                    "description": b.description,
+                    "minutes": b.minutes,
+                    "frequency": frequency,
+                }
+            )
         
         # Use LLM to generate professional note
-        logger.info(f"Calling Claude LLM for note generation...")
+        logger.info(
+            f"Calling Claude LLM for note generation kind={conversation_kind}..."
+        )
         llm_service = get_llm_service()
         note_data = llm_service.generate_visit_note(
             transcript_text=transcript_text,
             visit_info=visit_info,
             billable_items=billable_dicts,
+            conversation_kind=conversation_kind,
         )
         logger.info(f"Claude LLM note generation complete")
         
         # Build structured data from LLM response
         structured_data = {
             "visit_info": visit_info,
+            "documentation_type": note_data.get("documentation_type") or conversation_kind,
+            "conversation_kind": conversation_kind,
             "subjective": note_data.get("subjective", ""),
             "objective": note_data.get("objective", ""),
             "assessment": note_data.get("assessment", ""),
@@ -127,15 +142,13 @@ def generate_visit_note(self, visit_id: str):
             )
             db.add(note)
         
-        # Update pipeline state
-        visit.pipeline_state = {
-            **visit.pipeline_state,
-            "note": {
-                "status": "completed",
-                "started_at": visit.pipeline_state.get("note", {}).get("started_at"),
-                "finished_at": datetime.now(timezone.utc).isoformat(),
-            }
-        }
+        patch_pipeline_step(
+            db,
+            visit_id,
+            "note",
+            status="completed",
+            finished_at=datetime.now(timezone.utc).isoformat(),
+        )
         
         db.commit()
         logger.info(f"Note generation completed for visit {visit_id}")
@@ -144,21 +157,25 @@ def generate_visit_note(self, visit_id: str):
             "status": "success",
             "visit_id": visit_id,
             "note_id": str(note.id),
+            "conversation_kind": conversation_kind,
         }
         
     except Exception as e:
         logger.error(f"Note generation failed for visit {visit_id}: {str(e)}")
         
-        if visit:
-            visit.pipeline_state = {
-                **visit.pipeline_state,
-                "note": {
-                    "status": "failed",
-                    "error": str(e),
-                    "finished_at": datetime.now(timezone.utc).isoformat(),
-                }
-            }
+        try:
+            from libs.pipeline_state import patch_pipeline_step
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "note",
+                status="failed",
+                error=str(e),
+                finished_at=datetime.now(timezone.utc).isoformat(),
+            )
             db.commit()
+        except Exception:
+            pass
         
         raise
     finally:

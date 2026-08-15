@@ -204,7 +204,16 @@ def format_declined_services_list(declined: Optional[List[Dict]]) -> str:
             continue
         name = (item.get("name") or "Service").strip()
         evidence = (item.get("evidence") or "").strip()
-        line = f"• {name} (declined / not included in this Agreement)"
+        name_l = name.lower()
+        # Clarify maid/deep-clean decline vs included light housekeeping.
+        if any(k in name_l for k in ("maid", "deep clean", "deep-clean")):
+            line = (
+                f"• {name} (declined / not included in this Agreement). "
+                "This does not remove Light Housekeeping listed in Section 1, "
+                "which covers light tidying related to the client's care areas only."
+            )
+        else:
+            line = f"• {name} (declined / not included in this Agreement)"
         if evidence:
             if len(evidence) > 160:
                 evidence = evidence[:157].rstrip() + "..."

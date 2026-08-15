@@ -52,18 +52,19 @@ def generate_service_contract(self, visit_id: str):
         )
         
         # Get visit
+        from libs.pipeline_state import patch_pipeline_step
+
         visit = db.query(Visit).filter(Visit.id == UUID(visit_id)).first()
         if not visit:
             raise ValueError(f"Visit not found: {visit_id}")
         
-        # Update pipeline state
-        visit.pipeline_state = {
-            **visit.pipeline_state,
-            "contract": {
-                "status": "processing",
-                "started_at": datetime.now(timezone.utc).isoformat(),
-            }
-        }
+        patch_pipeline_step(
+            db,
+            visit_id,
+            "contract",
+            status="processing",
+            started_at=datetime.now(timezone.utc).isoformat(),
+        )
         db.commit()
         
         # Get client
@@ -892,16 +893,15 @@ def generate_service_contract(self, visit_id: str):
         ).update({"status": "superseded"})
         
         # Update pipeline state
-        visit.pipeline_state = {
-            **visit.pipeline_state,
-            "contract": {
-                "status": "completed",
-                "started_at": visit.pipeline_state.get("contract", {}).get("started_at"),
-                "finished_at": datetime.now(timezone.utc).isoformat(),
-                "care_need_level": care_need_level,
-                "services_count": len(contract_services),
-            }
-        }
+        patch_pipeline_step(
+            db,
+            visit_id,
+            "contract",
+            status="completed",
+            finished_at=datetime.now(timezone.utc).isoformat(),
+            care_need_level=care_need_level,
+            services_count=len(contract_services),
+        )
         
         db.commit()
         logger.info(f"Contract generation completed for visit {visit_id}")
@@ -923,15 +923,19 @@ def generate_service_contract(self, visit_id: str):
         logger.error(traceback.format_exc())
         
         if visit:
-            visit.pipeline_state = {
-                **visit.pipeline_state,
-                "contract": {
-                    "status": "failed",
-                    "error": str(e),
-                    "finished_at": datetime.now(timezone.utc).isoformat(),
-                }
-            }
-            db.commit()
+            try:
+                from libs.pipeline_state import patch_pipeline_step
+                patch_pipeline_step(
+                    db,
+                    visit_id,
+                    "contract",
+                    status="failed",
+                    error=str(e),
+                    finished_at=datetime.now(timezone.utc).isoformat(),
+                )
+                db.commit()
+            except Exception:
+                pass
         
         raise
     finally:

@@ -1509,31 +1509,31 @@ Check if uses or needs:
 
 ## CARE NEED LEVEL DETERMINATION
 
+Ground the level only in home-care needs stated in the transcript.
+Do not invent a dollar rate here. Rates come from quoted transcript amounts or agency config after extraction.
+Do not default to HIGH. Prefer LOW or MODERATE unless the transcript clearly supports HIGH.
+
 ### HIGH CARE LEVEL - Use when ANY of these present:
-- 2+ chronic conditions mentioned
-- Depression, anxiety, or mental health concerns
+- 2+ chronic conditions mentioned that affect daily home care
 - Caregiver stress/burnout mentioned
-- ADL score >= 6 (needs help with 3+ ADLs)
-- IADL score >= 5 (needs help with 5+ IADLs)
+- Needs help with 3+ ADLs (bathing, dressing, toileting, eating, transferring)
+- Needs help with many IADLs (cooking, cleaning, shopping, medications)
 - Recent hospitalization or ER visits
 - Falls in past 6 months
 - Dementia or significant cognitive impairment
-- Lives alone with health problems
-- Safety concerns at home
+- Lives alone with clear safety risk
+- Cannot be left alone / needs supervision
 
 ### MODERATE CARE LEVEL - Use when:
-- 1-2 chronic conditions, well-managed
-- ADL score 2-5
-- IADL score 3-4
+- Limited chronic conditions, manageable at home
+- Needs help with some ADLs or several IADLs
 - Good family support available
-- No significant safety concerns
+- No urgent safety crisis
 
-### LOW CARE LEVEL - Use only when:
-- No chronic conditions or well-controlled
-- ADL score 0-1
-- IADL score 0-2
-- Strong support system
-- Independent with most activities
+### LOW CARE LEVEL - Use when:
+- Companion / check-in / light help only
+- Independent with most ADLs
+- No major safety concerns stated
 
 ## STRICT SCOPE - HOME CARE SERVICES ONLY
 
@@ -1603,39 +1603,11 @@ Only use these service categories:
 
 ## CARE NEED LEVEL DETERMINATION - CRITICAL
 
-**DEFAULT TO HIGH** unless clearly minimal needs. Most clients seeking home care have HIGH needs.
+Use the CARE NEED LEVEL DETERMINATION rules above.
+Never invent hourly rates in this section. Do not default to HIGH.
+Do not treat clinic diagnoses alone (for example IBS in a doctor visit) as proof of HIGH home-care need.
 
-**HIGH CARE LEVEL ($35/hour)** - Use this for MOST cases:
-- ANY chronic illness mentioned (IBS, diabetes, heart disease, COPD, etc.)
-- Depression, anxiety, or mental health concerns
-- Caregiver stress or burnout mentioned
-- Multiple health conditions
-- Needs help with ANY ADLs (bathing, dressing, toileting)
-- Lives with special needs family member
-- Financial stress affecting care
-- Social isolation
-- Unable to work due to health
-- Frequent bathroom needs
-- Chronic pain
-- Sleep issues
-- Recent hospitalization
-- Age 65+ with any health concern
-- Falls or fall risk
-- Memory issues or confusion
-- Lives alone with health problems
-
-**MODERATE CARE LEVEL ($30/hour)** - Use only if:
-- Only needs IADL help (cooking, cleaning, shopping)
-- No chronic illness
-- No mental health concerns
-- Has adequate family support
-- Independent with personal care
-
-**LOW CARE LEVEL ($25/hour)** - Use rarely:
-- Only needs companionship/check-ins
-- Fully independent with all ADLs and IADLs
-- No health conditions
-- Just needs social interaction
+## STRICT EXTRACTION RULES
 
 **IMPORTANT: If the transcript does not support a high-need picture, do not default to HIGH.**
 
@@ -2018,15 +1990,33 @@ Generate comprehensive contract terms for this care agreement.
                 "special_provisions": []
             }
     
-    def generate_visit_note(self, transcript_text: str, visit_info: Dict, billable_items: List) -> Dict[str, Any]:
+    def generate_visit_note(
+        self,
+        transcript_text: str,
+        visit_info: Dict,
+        billable_items: List,
+        conversation_kind: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Generate professional SOAP-style visit documentation for HOME CARE visits.
         """
-        system_prompt = """You are a HOME CARE documentation specialist.
+        kind = (conversation_kind or "").strip() or None
+        kind_line = (
+            f"AUTHORITATIVE documentation_type from pipeline classifier: {kind}. "
+            "Do not reclassify. Write the note to match this type exactly."
+            if kind
+            else (
+                "First classify the transcript, then write the note to match "
+                "(home_care_visit | home_care_intake | training_with_embedded_intake | out_of_scope)."
+            )
+        )
+        system_prompt = f"""You are a HOME CARE documentation specialist.
 
 ## WHAT THIS RECORDING IS
 
-First classify the transcript, then write the note to match:
+{kind_line}
+
+Meaning of each type:
 - home_care_visit: caregiver was in the home delivering care. Document tasks that actually happened.
 - home_care_intake: assessment or meet-and-greet about future care. Document needs discussed. Do not claim tasks were performed today.
 - training_with_embedded_intake: coaching or role-play that contains an intake. Document the care recipient in the role-play (often a parent). Ignore the coach selling to an audience.
@@ -2037,30 +2027,32 @@ First classify the transcript, then write the note to match:
 - Never document bathing, toileting, meals, or housekeeping as performed unless the transcript describes them happening in the home.
 - If the client declined a service, record the decline.
 - Ignore clinic counseling, prescriptions, and hospital plans except as context.
+- Set documentation_type to exactly: {kind or "home_care_visit | home_care_intake | training_with_embedded_intake | out_of_scope"}
 
 ## OUTPUT FORMAT
 
 Return ONLY valid JSON:
-{
+{{
     "documentation_type": "home_care_visit | home_care_intake | training_with_embedded_intake | out_of_scope",
     "subjective": "What the client or family reported",
     "objective": "What was actually observed. Empty if this was not a home visit.",
     "assessment": "Clinical or intake impression grounded in the transcript",
     "plan": "Next steps that were discussed",
     "tasks_summary": [
-        {
+        {{
             "task": "Valid home care category, or empty list if none were delivered",
             "details": "What was specifically done or requested",
             "duration_minutes": 0,
+            "frequency": "If stated for planned services",
             "client_response": "How the client participated"
-        }
+        }}
     ],
-    "vital_signs": {
+    "vital_signs": {{
         "blood_pressure": "If taken",
         "temperature": "If taken",
         "pulse": "If taken",
         "blood_sugar": "If taken"
-    },
+    }},
     "client_mood": "Emotional state if described",
     "cognitive_status": "Mental status if described",
     "mobility_observations": "Only if discussed",
@@ -2070,10 +2062,11 @@ Return ONLY valid JSON:
     "family_communication": "Family present and what they said",
     "next_visit_plan": "What was agreed, if anything",
     "narrative": "Professional summary that matches documentation_type"
-}"""
+}}"""
         
         billable_summary = "\n".join([
-            f"- {b.get('category', 'Service')}: {b.get('description', 'N/A')} ({b.get('minutes', 0)} minutes)"
+            f"- {b.get('category', 'Service')}: {b.get('description', 'N/A')} "
+            f"(minutes={b.get('minutes', 0)}, frequency={b.get('frequency') or 'n/a'})"
             for b in billable_items
         ]) if billable_items else "No billable items documented"
         
@@ -2083,6 +2076,7 @@ Client: {visit_info.get('client_name', 'Unknown')}
 Date: {visit_info.get('date', 'Unknown')}
 Caregiver: {visit_info.get('caregiver_name', 'Unknown')}
 Scheduled Duration: {visit_info.get('scheduled_duration', 'Unknown')}
+Pipeline conversation_kind: {kind or 'unknown'}
 
 ## SERVICES DOCUMENTED
 {billable_summary}
@@ -2090,7 +2084,7 @@ Scheduled Duration: {visit_info.get('scheduled_duration', 'Unknown')}
 ## VISIT TRANSCRIPT
 {transcript_text}
 
-Generate the note that matches what this recording actually is. Do not write a home-visit SOAP note if this was an intake, a training role-play, or a clinic interview.
+Generate the note that matches documentation_type. Do not write a home-visit SOAP note if this was an intake, a training role-play, or a clinic interview.
 """
         
         response = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=3072)
@@ -2100,10 +2094,13 @@ Generate the note that matches what this recording actually is. Do not write a h
                 response = response.split("```json")[1].split("```")[0]
             elif "```" in response:
                 response = response.split("```")[1].split("```")[0]
-            return json.loads(response.strip())
+            parsed = json.loads(response.strip())
+            if kind:
+                parsed["documentation_type"] = kind
+            return parsed
         except json.JSONDecodeError:
             return {
-                "documentation_type": "unknown",
+                "documentation_type": kind or "unknown",
                 "subjective": "",
                 "objective": "",
                 "assessment": "Note generation failed to parse model output. Review the transcript manually.",

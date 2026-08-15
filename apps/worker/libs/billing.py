@@ -182,19 +182,24 @@ def filter_grounded_claude_services(
 
 
 def format_billable_description(category_name: str, tasks: List[Dict[str, Any]]) -> str:
-    """Human-readable description with verbatim evidence, not a task-count summary."""
+    """Human-readable description with verbatim evidence and stated frequency."""
     if not tasks:
         return category_name
     parts = []
     for task in tasks[:4]:
         name = str(task.get("task") or category_name).strip()
         quote = str(task.get("evidence") or "").strip()
+        frequency = str(task.get("frequency") or "").strip()
         if len(quote) > 140:
             quote = quote[:137].rstrip() + "..."
+        bit = name
+        if frequency and frequency.lower() not in ("as needed", "n/a", ""):
+            bit += f" [{frequency}]"
+        elif frequency:
+            bit += f" [{frequency}]"
         if quote:
-            parts.append(f'{name}: "{quote}"')
-        else:
-            parts.append(name)
+            bit += f': "{quote}"'
+        parts.append(bit)
     return "; ".join(parts)
 
 
@@ -352,18 +357,27 @@ def generate_billables_from_transcript(
     min_block_minutes: int = 5,
     use_llm: bool = True,  # Default to using Claude
     llm_client: Optional[Any] = None,
+    conversation_kind: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Generate billable items from transcript segments using Claude AI.
     
     Extracts and categorizes ALL care services mentioned in the transcript.
     Groups tasks by category and prices by category.
+
+    For intakes / training-with-embedded-intake, items are recommended services
+    (frequency + evidence). minutes stay 0 unless this is a real home_care_visit
+    with timed work (we do not invent visit minutes).
     
     Returns list of dicts for JSON serialization.
     """
     logger.info(f"Generating billables from {len(segments)} segments using Claude")
     
     transcript_text = "\n".join(str(s.get("text") or "") for s in segments)
+    kind = (conversation_kind or "").strip()
+    # Only real visits should look like timed delivered care. Intakes and
+    # training role-plays are recommended services (frequency + evidence).
+    is_recommendation = kind != "home_care_visit"
 
     # Use Claude to extract all services. None = Claude unavailable; [] = no home-care needs.
     claude_services = analyze_transcript_with_claude(segments) if use_llm else None
@@ -467,6 +481,8 @@ def generate_billables_from_transcript(
             for t in tasks
         ]
         task_list = [t["task"] for t in tasks]
+        frequencies = [str(t.get("frequency") or "").strip() for t in tasks if t.get("frequency")]
+        primary_frequency = next((f for f in frequencies if f), None)
         
         item = {
             "code": category_name.upper().replace(" ", "_"),
@@ -474,6 +490,7 @@ def generate_billables_from_transcript(
             "description": format_billable_description(category_name, tasks),
             "start_ms": visit_start_ms,
             "end_ms": visit_end_ms,
+            # Do not invent visit minutes for intakes / recommendations.
             "minutes": 0,
             "evidence": evidence_list,
             "service_type": category_name,
@@ -483,8 +500,14 @@ def generate_billables_from_transcript(
             "color": "blue",
             "task_count": len(tasks),
             "tasks": task_list,
-            "is_flagged": False,
-            "flag_reason": None,
+            "frequency": primary_frequency,
+            "is_recommendation": is_recommendation,
+            "is_flagged": bool(is_recommendation),
+            "flag_reason": (
+                "Recommended from assessment (not timed visit work)"
+                if is_recommendation
+                else None
+            ),
         }
         result.append(item)
     
