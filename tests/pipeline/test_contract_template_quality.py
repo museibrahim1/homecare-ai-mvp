@@ -132,3 +132,11 @@ class TestMergeDeclined:
         names = [m["name"] for m in merged]
         assert names.count("Bathing") == 1
         assert "Toileting" in names
+
+    def test_merge_collapses_bathing_aliases(self):
+        merged = merge_declined_services(
+            [{"name": "Bathing / Personal Care", "evidence": "I don't want anybody bathing me"}],
+            [{"name": "Bathing assistance", "evidence": "you can bathe yourself"}],
+        )
+        assert len(merged) == 1
+        assert "bath" in merged[0]["name"].lower()

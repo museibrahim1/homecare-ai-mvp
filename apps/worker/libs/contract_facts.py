@@ -249,9 +249,18 @@ def extract_declined_services(transcript_text: str) -> List[Dict[str, Any]]:
 def merge_declined_services(
     *groups: Optional[List[Dict[str, Any]]],
 ) -> List[Dict[str, Any]]:
-    """Merge declined service lists, keeping the first evidence per name."""
+    """Merge declined service lists, keeping the first evidence per name family."""
     merged: List[Dict[str, Any]] = []
     seen = set()
+
+    def _family(name: str) -> str:
+        n = name.lower()
+        if any(k in n for k in ("bath", "shower", "hygiene", "personal care")):
+            return "bathing"
+        if any(k in n for k in ("maid", "deep clean", "housekeep")):
+            return "maid_deep_clean"
+        return n
+
     for group in groups:
         if not group:
             continue
@@ -266,7 +275,7 @@ def merge_declined_services(
                 continue
             if not name:
                 continue
-            key = name.lower()
+            key = _family(name)
             if key in seen:
                 continue
             seen.add(key)
