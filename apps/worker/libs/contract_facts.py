@@ -159,3 +159,39 @@ def sanitize_identified_services(services: Optional[List[Dict[str, Any]]]) -> Li
             continue
         cleaned.append(svc)
     return cleaned
+
+
+# Matches apps/api Client column lengths. Long LLM prose must be clipped.
+CLIENT_FIELD_LIMITS = {
+    "primary_diagnosis": 255,
+    "mobility_status": 100,
+    "cognitive_status": 100,
+    "living_situation": 100,
+    "care_level": 50,
+    "preferred_days": 255,
+    "preferred_times": 255,
+}
+
+
+def clip_client_field(value: Any, field: str) -> Optional[str]:
+    """Clip assessment text to the Client column limit.
+
+    Prefers the short label before an em dash or hyphen when present, so
+    "Independent — can do everything herself" becomes "Independent".
+    """
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    limit = CLIENT_FIELD_LIMITS.get(field)
+    if not limit:
+        return text
+    if len(text) <= limit:
+        return text
+    for sep in (" — ", " – ", " - ", "—", "–"):
+        if sep in text:
+            head = text.split(sep, 1)[0].strip()
+            if 0 < len(head) <= limit:
+                return head
+    return text[: limit - 1].rstrip() + "…"

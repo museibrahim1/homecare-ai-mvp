@@ -45,8 +45,10 @@ CATEGORIES = {
 # Format: (pattern, category_code, description)
 TASK_PATTERNS = [
     # Medication
-    (r"\b(take|taking|medication|medicine|pill|pills|meds)\b", "MED_REMINDER", "Medication reminder"),
-    (r"\b(blood pressure|bp|heart rate|pulse|temperature|vitals)\b", "VITALS", "Vital signs check"),
+    (r"\b(medication|medicine|pill|pills|meds)\b.{0,30}\b(reminder|remind|help|assist|organize|organizer)\b", "MED_REMINDER", "Medication reminder"),
+    (r"\b(remind|help|assist|organize)\b.{0,30}\b(medication|medicine|pill|pills|meds)\b", "MED_REMINDER", "Medication reminder"),
+    (r"\b(take|taking)\b.{0,20}\b(medication|medicine|pill|meds)\b", "MED_REMINDER", "Medication reminder"),
+    (r"\b(check|checking|take|taking|monitor|monitoring)\b.{0,30}\b(blood pressure|bp|pulse|heart rate|vitals|vital signs)\b", "VITALS", "Vital signs check"),
     
     # Meals
     (r"\b(breakfast|lunch|dinner|meal|eating|food|snack)\b", "MEAL_PREP", "Meal preparation"),
@@ -54,18 +56,19 @@ TASK_PATTERNS = [
     (r"\b(help|assist|helping|assisting)\b.*\b(eat|eating)\b", "MEAL_ASSIST", "Meal assistance"),
     
     # Hygiene
-    (r"\b(bath|bathing|shower|showering|wash|washing)\b", "ADL_HYGIENE", "Bathing assistance"),
-    (r"\b(brush|brushing|teeth|dental|oral)\b", "ADL_HYGIENE", "Oral hygiene"),
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bath|bathing|shower|showering)\b", "ADL_HYGIENE", "Bathing assistance"),
+    (r"\b(your|her|his|their)\s+(bath|shower)\b", "ADL_HYGIENE", "Bathing assistance"),
+    (r"\b(brush|brushing)\b.{0,20}\b(teeth|dental)\b", "ADL_HYGIENE", "Oral hygiene"),
     (r"\b(toileting|commode|bedpan)\b", "ADL_HYGIENE", "Toileting assistance"),
     (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bathroom|toilet|toileting)\b", "ADL_HYGIENE", "Toileting assistance"),
     
     # Dressing
-    (r"\b(dress|dressing|clothes|clothing|dressed|outfit)\b", "ADL_DRESSING", "Dressing assistance"),
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(dress|dressing|dressed|undress|clothes|clothing)\b", "ADL_DRESSING", "Dressing assistance"),
     (r"\b(change|changing)\b.*\b(clothes|shirt|pants)\b", "ADL_DRESSING", "Clothing change"),
     
     # Mobility
     (r"\b(walk|walking|walker|cane|wheelchair)\b", "ADL_MOBILITY", "Mobility assistance"),
-    (r"\b(transfer|transferring|wheelchair)\b", "MOBILITY_ASSIST", "Transfer assistance"),
+    (r"\b(transfer|transferring)\b", "MOBILITY_ASSIST", "Transfer assistance"),
     (r"\b(help|assist|assistance)\b.{0,40}\b(stand|standing|sit|sitting)\b", "MOBILITY_ASSIST", "Transfer assistance"),
     (r"\b(exercise|exercises|stretch|stretching|physical therapy|pt)\b", "EXERCISE", "Exercise assistance"),
     

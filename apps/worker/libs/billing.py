@@ -32,23 +32,27 @@ class BillableBlock:
 
 # Enhanced task patterns with better categorization
 TASK_PATTERNS = [
-    # Personal Care / ADL
-    (r"\b(bath|bathing|shower|showering|wash|washing|clean up|cleaned up)\b", "ADL_HYGIENE", "Bathing/showering assistance", "Personal Care"),
-    (r"\b(brush|brushing|teeth|dental|oral care|mouth care)\b", "ADL_HYGIENE", "Oral hygiene assistance", "Personal Care"),
+    # Personal Care / ADL — require assist language; do not match declined self-care talk
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bath|bathing|shower|showering)\b", "ADL_HYGIENE", "Bathing/showering assistance", "Personal Care"),
+    (r"\b(bath|bathing|shower|showering)\b.{0,40}\b(help|assist|assistance|helping|assisting)\b", "ADL_HYGIENE", "Bathing/showering assistance", "Personal Care"),
+    (r"\b(your|her|his|their)\s+(bath|shower)\b", "ADL_HYGIENE", "Bathing/showering assistance", "Personal Care"),
+    (r"\b(brush|brushing)\b.{0,20}\b(teeth|dental)\b", "ADL_HYGIENE", "Oral hygiene assistance", "Personal Care"),
+    (r"\b(oral care|mouth care)\b", "ADL_HYGIENE", "Oral hygiene assistance", "Personal Care"),
     (r"\b(toileting|commode|bedpan)\b", "ADL_HYGIENE", "Toileting assistance", "Personal Care"),
     (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bathroom|toilet|toileting)\b", "ADL_HYGIENE", "Toileting assistance", "Personal Care"),
-    (r"\b(dress|dressing|clothes|clothing|dressed|undress|outfit|changing)\b", "ADL_DRESSING", "Dressing assistance", "Personal Care"),
-    (r"\b(grooming|shave|shaving|hair|comb|brush)\b", "ADL_GROOMING", "Grooming assistance", "Personal Care"),
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(dress|dressing|dressed|undress|clothes|clothing)\b", "ADL_DRESSING", "Dressing assistance", "Personal Care"),
+    (r"\b(grooming|shave|shaving)\b", "ADL_GROOMING", "Grooming assistance", "Personal Care"),
+    (r"\b(comb|brush)\b.{0,20}\b(hair)\b", "ADL_GROOMING", "Grooming assistance", "Personal Care"),
     
-    # Medication
-    (r"\b(medication|medicine|pill|pills|meds|prescription|dosage)\b", "MED_REMINDER", "Medication reminder/assistance", "Medication Management"),
-    (r"\b(take|taking|took)\b.*\b(medication|medicine|pill|meds)\b", "MED_REMINDER", "Medication administration", "Medication Management"),
-    (r"\b(metformin|lisinopril|aspirin|insulin|blood pressure med)\b", "MED_REMINDER", "Specific medication assistance", "Medication Management"),
+    # Medication — reminders/assistance, not intake questions about meds
+    (r"\b(medication|medicine|pill|pills|meds)\b.{0,30}\b(reminder|remind|help|assist|organize|organizer)\b", "MED_REMINDER", "Medication reminder/assistance", "Medication Management"),
+    (r"\b(remind|help|assist|organize)\b.{0,30}\b(medication|medicine|pill|pills|meds)\b", "MED_REMINDER", "Medication reminder/assistance", "Medication Management"),
+    (r"\b(take|taking|took)\b.{0,20}\b(medication|medicine|pill|meds)\b", "MED_REMINDER", "Medication administration", "Medication Management"),
+    (r"\b(metformin|lisinopril|aspirin|insulin)\b", "MED_REMINDER", "Specific medication assistance", "Medication Management"),
     
-    # Vital Signs
-    (r"\b(blood pressure|bp|pulse|heart rate|vitals|vital signs)\b", "VITALS", "Vital signs monitoring", "Health Monitoring"),
-    (r"\b(temperature|thermometer|fever|oxygen|o2 sat|saturation)\b", "VITALS", "Vital signs check", "Health Monitoring"),
-    (r"\b(weight|weigh|scale|blood sugar|glucose|diabetic check)\b", "VITALS", "Health monitoring", "Health Monitoring"),
+    # Vital Signs — actions taken, not diagnoses alone
+    (r"\b(check|checking|take|taking|monitor|monitoring)\b.{0,30}\b(blood pressure|bp|pulse|heart rate|vitals|vital signs|temperature|blood sugar|glucose)\b", "VITALS", "Vital signs monitoring", "Health Monitoring"),
+    (r"\b(blood pressure|bp|pulse|heart rate|vitals|vital signs)\b.{0,20}\b(check|checking|taken|reading)\b", "VITALS", "Vital signs check", "Health Monitoring"),
     
     # Meals
     (r"\b(breakfast|lunch|dinner|meal|supper)\b", "MEAL_PREP", "Meal preparation", "Nutrition"),
@@ -67,7 +71,8 @@ TASK_PATTERNS = [
     # Housekeeping
     (r"\b(clean|cleaning|tidy|tidying|straighten)\b", "HOUSEHOLD_LIGHT", "Light housekeeping", "Homemaking"),
     (r"\b(vacuum|vacuuming|sweep|sweeping|mop|mopping|dust|dusting)\b", "HOUSEHOLD_LIGHT", "Floor care", "Homemaking"),
-    (r"\b(laundry|wash|washing|fold|folding|iron|ironing)\b.*\b(clothes|clothing|linens|sheets)?\b", "HOUSEHOLD_LAUNDRY", "Laundry services", "Homemaking"),
+    (r"\b(laundry|fold|folding|iron|ironing)\b", "HOUSEHOLD_LAUNDRY", "Laundry services", "Homemaking"),
+    (r"\b(wash|washing)\b.{0,20}\b(clothes|clothing|linens|sheets|laundry)\b", "HOUSEHOLD_LAUNDRY", "Laundry services", "Homemaking"),
     (r"\b(dishes|dish|kitchen|counter|wipe|wiping)\b", "HOUSEHOLD_LIGHT", "Kitchen cleaning", "Homemaking"),
     (r"\b(trash|garbage|recycling|take out)\b", "HOUSEHOLD_LIGHT", "Trash removal", "Homemaking"),
     (r"\b(bed|beds|bedding|make the bed|change sheets)\b", "HOUSEHOLD_LIGHT", "Bed making/linen change", "Homemaking"),
@@ -77,9 +82,9 @@ TASK_PATTERNS = [
     (r"\b(talk|talking|chat|chatting|conversation|visit|visiting|listen)\b", "COMPANIONSHIP", "Social interaction", "Companionship"),
     (r"\b(cards|games|read|reading|tv|television|watch)\b", "COMPANIONSHIP", "Recreational activities", "Companionship"),
     
-    # Supervision/Safety
-    (r"\b(supervise|supervision|monitor|monitoring|watch|watching|observe)\b", "SUPERVISION", "Safety supervision", "Supervision"),
-    (r"\b(safe|safety|secure|security|check on)\b", "SUPERVISION", "Safety monitoring", "Supervision"),
+    # Supervision/Safety — avoid "safe driver" / "bonded" / "check on"
+    (r"\b(supervise|supervision|monitor|monitoring)\b", "SUPERVISION", "Safety supervision", "Supervision"),
+    (r"\b(safety\s+monitoring|fall\s+prevention|cannot\s+be\s+left\s+alone)\b", "SUPERVISION", "Safety monitoring", "Supervision"),
 ]
 
 # Service category rates (can be customized per agency)
@@ -385,10 +390,11 @@ def generate_billables_from_transcript(
         }
         result.append(item)
     
-    # Add any rules-based detections not found by Claude
-    for category, detections in segment_services.items():
-        service_type = detections[0]["service_type"] if detections else category
-        if service_type not in category_tasks:
+    # Add rules-based detections only when Claude found nothing.
+    # Keyword matches on long intakes/training audio are too noisy to merge.
+    if not category_tasks:
+        for category, detections in segment_services.items():
+            service_type = detections[0]["service_type"] if detections else category
             cat_info = CATEGORY_INFO.get(category, {"label": category, "default_rate": 25.00})
             all_evidence = [d["evidence"] for d in detections]
             

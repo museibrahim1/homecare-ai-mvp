@@ -45,6 +45,7 @@ def generate_service_contract(self, visit_id: str):
             extract_stated_weekly_hours,
             prefer_private_pay_rate,
             sanitize_identified_services,
+            clip_client_field,
             _coerce_positive_float,
         )
         
@@ -492,7 +493,7 @@ def generate_service_contract(self, visit_id: str):
         
         # Primary diagnosis
         if client_profile.get("primary_diagnosis") and client_profile["primary_diagnosis"] not in ["N/A", "Not specified", "See medical records"]:
-            client.primary_diagnosis = client_profile["primary_diagnosis"]
+            client.primary_diagnosis = clip_client_field(client_profile["primary_diagnosis"], "primary_diagnosis")
             updates_made.append("primary_diagnosis")
         
         # Secondary conditions
@@ -533,21 +534,21 @@ def generate_service_contract(self, visit_id: str):
         
         # Mobility status
         if client_profile.get("mobility_status") and client_profile["mobility_status"] not in ["N/A", "Not specified"]:
-            client.mobility_status = client_profile["mobility_status"]
+            client.mobility_status = clip_client_field(client_profile["mobility_status"], "mobility_status")
             updates_made.append("mobility_status")
         
         # Cognitive status
         if client_profile.get("cognitive_status") and client_profile["cognitive_status"] not in ["N/A", "Not specified"]:
-            client.cognitive_status = client_profile["cognitive_status"]
+            client.cognitive_status = clip_client_field(client_profile["cognitive_status"], "cognitive_status")
             updates_made.append("cognitive_status")
         
         # Living situation
         if client_profile.get("living_situation") and client_profile["living_situation"] not in ["N/A", "Not specified"]:
-            client.living_situation = client_profile["living_situation"]
+            client.living_situation = clip_client_field(client_profile["living_situation"], "living_situation")
             updates_made.append("living_situation")
         
         # Care level (always update)
-        client.care_level = care_need_level
+        client.care_level = clip_client_field(care_need_level, "care_level") or care_need_level
         updates_made.append("care_level")
         
         # Special requirements - comprehensive
@@ -582,14 +583,14 @@ def generate_service_contract(self, visit_id: str):
             if isinstance(days, list):
                 day_strs = [d if isinstance(d, str) else d.get("day", str(d)) for d in days]
                 if day_strs:
-                    client.preferred_days = ", ".join(day_strs)
+                    client.preferred_days = clip_client_field(", ".join(day_strs), "preferred_days")
                     updates_made.append("preferred_days")
             elif days:
-                client.preferred_days = str(days)
+                client.preferred_days = clip_client_field(days, "preferred_days")
                 updates_made.append("preferred_days")
         
         if schedule.get("preferred_times") and schedule["preferred_times"] not in ["N/A", "Flexible"]:
-            client.preferred_times = schedule["preferred_times"]
+            client.preferred_times = clip_client_field(schedule["preferred_times"], "preferred_times")
             updates_made.append("preferred_times")
         
         # Build comprehensive medical notes from assessment

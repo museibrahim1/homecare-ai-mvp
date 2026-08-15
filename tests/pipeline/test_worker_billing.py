@@ -86,6 +86,18 @@ class TestTaskDetection:
         categories = [t[0] for t in tasks]
         assert "ADL_HYGIENE" in categories
 
+    def test_declined_bathing_is_not_personal_care(self):
+        tasks = detect_tasks_in_text(
+            "You can bathe yourself. She's like, I don't want anybody bathing me. I can wash myself."
+        )
+        categories = [t[0] for t in tasks]
+        assert "ADL_HYGIENE" not in categories
+
+    def test_hair_salon_is_not_grooming_care(self):
+        tasks = detect_tasks_in_text("Take her to the hair salon, nail salon.")
+        categories = [t[0] for t in tasks]
+        assert "ADL_GROOMING" not in categories
+
     def test_housekeeping_detection(self):
         """Test detecting light housekeeping."""
         tasks = detect_tasks_in_text("I'll do some cleaning in the kitchen.")

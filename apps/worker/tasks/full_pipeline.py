@@ -125,13 +125,11 @@ def run_full_pipeline(self, visit_id: str):
     run_step(visit_id, "note", "generate_note", generate_visit_note)
     
     # Then generate contract (uses billing data)
-    run_step(visit_id, "contract", "generate_contract", generate_service_contract)
+    contract_ok = run_step(visit_id, "contract", "generate_contract", generate_service_contract)
     
     # =========================================================================
     # COMPLETE
     # =========================================================================
-    update_pipeline_state(visit_id, "full_pipeline", "completed")
-    
     # Check if any critical steps failed before marking as pending_review
     has_failures = False
     with get_db_session() as db:
@@ -143,6 +141,20 @@ def run_full_pipeline(self, visit_id: str):
                     has_failures = True
                     break
             visit.status = "pipeline_failed" if has_failures else "pending_review"
+            visit.pipeline_state = {
+                **(visit.pipeline_state or {}),
+                "full_pipeline": {
+                    "status": "failed" if has_failures else "completed",
+                    "failed_step": next(
+                        (
+                            k for k in ("transcription", "billing", "note", "contract")
+                            if isinstance((visit.pipeline_state or {}).get(k), dict)
+                            and (visit.pipeline_state or {}).get(k, {}).get("status") == "failed"
+                        ),
+                        None,
+                    ) if has_failures else None,
+                },
+            }
             db.commit()
     
     if has_failures:

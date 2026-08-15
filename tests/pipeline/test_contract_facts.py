@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "worker"))
 
 from libs.contract_facts import (
+    clip_client_field,
     extract_stated_hourly_rate,
     extract_stated_weekly_hours,
     prefer_private_pay_rate,
@@ -94,3 +95,19 @@ class TestSanitizeServices:
     def test_does_not_invent_fallback_services(self):
         assert sanitize_identified_services([]) == []
         assert sanitize_identified_services(None) == []
+
+
+class TestClipClientField:
+    def test_clips_mobility_status_to_100(self):
+        long = (
+            "Independent — client stated she can do everything herself; "
+            "no mobility aids mentioned and she walked around freely"
+        )
+        clipped = clip_client_field(long, "mobility_status")
+        assert clipped == "Independent"
+        assert len(clipped) <= 100
+
+    def test_hard_truncates_when_no_separator(self):
+        long = "x" * 150
+        clipped = clip_client_field(long, "living_situation")
+        assert len(clipped) <= 100
