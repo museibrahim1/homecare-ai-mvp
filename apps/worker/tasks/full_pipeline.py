@@ -185,7 +185,9 @@ def run_full_pipeline(self, visit_id: str):
     # =========================================================================
     # TRANSCRIPTION (Deepgram diarizes speakers inline)
     # =========================================================================
-    run_step(visit_id, "transcription", "transcribe", transcribe_visit)
+    timings_ms: dict = {}
+    _key, _ok, _err, ms = run_step(visit_id, "transcription", "transcribe", transcribe_visit)
+    timings_ms["transcription"] = ms
 
     # =========================================================================
     # CLASSIFY — decide whether to run the expensive home-care LLM stack
@@ -199,6 +201,7 @@ def run_full_pipeline(self, visit_id: str):
         logger.warning(f"Classify failed, defaulting to intake: {e}")
         kind = "home_care_intake"
     classify_ms = int((time.monotonic() - t_classify) * 1000)
+    timings_ms["classify"] = classify_ms
     _set_conversation_kind(visit_id, kind, classify_ms)
     logger.info(f"Classified visit {visit_id} as {kind} in {classify_ms}ms")
 
@@ -215,7 +218,8 @@ def run_full_pipeline(self, visit_id: str):
         contract_fut = None
 
         for fut in as_completed([bill_fut, note_fut]):
-            step_key, ok, err, _duration_ms = fut.result()
+            step_key, ok, err, duration_ms = fut.result()
+            timings_ms[step_key] = duration_ms
             if not ok:
                 logger.error(f"Parallel step {step_key} failed: {err}")
             if fut is bill_fut and ok and contract_fut is None:
@@ -231,19 +235,28 @@ def run_full_pipeline(self, visit_id: str):
                 )
 
         if contract_fut is not None:
-            step_key, ok, err, _duration_ms = contract_fut.result()
+            step_key, ok, err, duration_ms = contract_fut.result()
+            timings_ms[step_key] = duration_ms
             if not ok:
                 logger.error(f"Parallel step {step_key} failed: {err}")
         else:
             # Billing failed; still attempt contract for a reviewable artifact.
-            run_step(visit_id, "contract", "generate_contract", generate_service_contract)
+            step_key, ok, err, duration_ms = run_step(
+                visit_id, "contract", "generate_contract", generate_service_contract
+            )
+            timings_ms[step_key] = duration_ms
 
     # =========================================================================
     # COMPLETE
     # =========================================================================
     has_failures = False
     with get_db_session() as db:
-        visit = db.query(Visit).filter(Visit.id == visit_id).first()
+        visit = (
+            db.query(Visit)
+            .filter(Visit.id == visit_id)
+            .with_for_update()
+            .first()
+        )
         if visit and visit.pipeline_state:
             for step_key in ["transcription", "billing", "note", "contract"]:
                 step_state = visit.pipeline_state.get(step_key, {})
@@ -251,10 +264,6 @@ def run_full_pipeline(self, visit_id: str):
                     has_failures = True
                     break
             visit.status = "pipeline_failed" if has_failures else "pending_review"
-            timings = {
-                k: (visit.pipeline_state.get(k) or {}).get("duration_ms")
-                for k in ("transcription", "classify", "billing", "note", "contract")
-            }
             visit.pipeline_state = {
                 **(visit.pipeline_state or {}),
                 "full_pipeline": {
@@ -268,7 +277,7 @@ def run_full_pipeline(self, visit_id: str):
                         None,
                     ) if has_failures else None,
                     "conversation_kind": kind,
-                    "timings_ms": timings,
+                    "timings_ms": timings_ms,
                 },
             }
             db.commit()
