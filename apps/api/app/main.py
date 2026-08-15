@@ -364,6 +364,34 @@ async def seed_database():
         logger.warning(f"sales_leads unsubscribe migration check: {e}")
         db.rollback()
 
+    # Email preference categories for granular unsubscribe.
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "email_preferences" not in inspector.get_table_names():
+            db.execute(sa_text("""
+                CREATE TABLE email_preferences (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    email VARCHAR(320) NOT NULL,
+                    outreach BOOLEAN NOT NULL DEFAULT true,
+                    product_updates BOOLEAN NOT NULL DEFAULT true,
+                    announcements BOOLEAN NOT NULL DEFAULT true,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.execute(sa_text(
+                "CREATE UNIQUE INDEX ix_email_preferences_email ON email_preferences (email)"
+            ))
+            db.execute(sa_text(
+                "CREATE INDEX ix_email_preferences_email_lower ON email_preferences (lower(email))"
+            ))
+            db.commit()
+            logger.info("Created email_preferences table")
+    except Exception as e:
+        logger.warning(f"email_preferences table check: {e}")
+        db.rollback()
+
     # Auto-create site_events table for public analytics
     try:
         from sqlalchemy import text as sa_text, inspect as sa_inspect

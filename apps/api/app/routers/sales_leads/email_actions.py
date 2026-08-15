@@ -21,6 +21,7 @@ from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
     _auto_start_sequence, unsubscribe_headers,
 )
+from .unsubscribe import allows_marketing
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
     LeadStats, ImportRequest, CampaignSendRequest, SequenceLaunchRequest,
@@ -48,10 +49,10 @@ async def send_lead_email(
     if not to_email:
         raise HTTPException(status_code=400, detail="No email address for this lead. Add contact_email first.")
 
-    if getattr(lead, "unsubscribed", False):
+    if getattr(lead, "unsubscribed", False) or not allows_marketing(db, to_email, "outreach"):
         raise HTTPException(
             status_code=409,
-            detail="This lead has unsubscribed from marketing email. Sending is blocked.",
+            detail="This address has opted out of sales outreach. Sending is blocked.",
         )
 
     result = email_service.send_email(

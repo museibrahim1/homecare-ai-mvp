@@ -60,6 +60,152 @@ except ImportError:
 
 BRAND = "PalmCare AI"
 
+# Pipeline Glass palette (matches Paper Email Glass + product tokens).
+# Email clients ignore backdrop-filter, so we simulate glass with a soft
+# slate field, frosted white card, hairline border, and teal accent.
+_GLASS = {
+    "bg": "#F8FAFC",
+    "card": "#FFFFFF",
+    "border": "#E2E8F0",
+    "text": "#0F172A",
+    "muted": "#64748B",
+    "faint": "#94A3B8",
+    "teal": "#0D9488",
+    "teal_dark": "#115E59",
+    "teal_soft": "#F0FDFA",
+    "teal_edge": "#99F6E4",
+}
+
+_PUBLIC_SITE = "https://palmcareai.com"
+_PUBLIC_API_URL = (
+    os.getenv("PUBLIC_API_URL")
+    or os.getenv("API_BASE_URL")
+    or "https://api-production-a0a2.up.railway.app"
+).rstrip("/")
+_UNSUB_MAILTO = os.getenv("UNSUBSCRIBE_MAILTO", "sales@palmtai.com")
+
+
+def _unsubscribe_secret() -> str:
+    return (
+        os.getenv("UNSUBSCRIBE_SECRET")
+        or os.getenv("CRON_SECRET")
+        or os.getenv("JWT_SECRET")
+        or "palmcare-unsubscribe-dev-secret"
+    )
+
+
+def unsubscribe_token(email: str | None) -> str:
+    """HMAC token shared with /unsubscribe and sales_leads one-click."""
+    import hashlib
+    import hmac
+
+    norm = (email or "").strip().lower()
+    return hmac.new(
+        _unsubscribe_secret().encode("utf-8"),
+        norm.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()[:32]
+
+
+def unsubscribe_url(email: str | None) -> str:
+    from urllib.parse import urlencode
+
+    params = {
+        "email": (email or "").strip().lower(),
+        "token": unsubscribe_token(email),
+        "utm_source": "email",
+        "utm_medium": "email",
+        "utm_campaign": "product",
+        "utm_content": "unsubscribe",
+    }
+    return f"{_PUBLIC_SITE}/unsubscribe?{urlencode(params)}"
+
+
+def unsubscribe_headers(email: str | None) -> dict:
+    """RFC 8058 headers so Gmail/Apple Mail show a native Unsubscribe control."""
+    from urllib.parse import urlencode
+
+    params = {
+        "email": (email or "").strip().lower(),
+        "token": unsubscribe_token(email),
+    }
+    api = f"{_PUBLIC_API_URL}/platform/sales/leads/unsubscribe?{urlencode(params)}"
+    return {
+        "List-Unsubscribe": f"<mailto:{_UNSUB_MAILTO}?subject=unsubscribe>, <{api}>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    }
+
+
+def _glass_email(
+    *,
+    title: str,
+    body_html: str,
+    cta_label: str,
+    cta_url: str,
+    note_title: str,
+    note_body: str,
+    unsubscribe_href: str,
+    fallback_label: str = "Button not working? Paste this link:",
+    logo_url: Optional[str] = None,
+    app_url: str = "https://palmcareai.com",
+) -> str:
+    """Simple glass-card shell. App logo mark + unsubscribe on every send."""
+    g = _GLASS
+    mark = logo_url or f"{app_url.rstrip('/')}/app-logo.png"
+    logo = (
+        f'<img src="{mark}" width="40" height="40" alt="PalmCare AI" '
+        f'style="display:block;width:40px;height:40px;border-radius:10px;border:0;outline:none;" />'
+    )
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title></head>
+<body style="margin:0;padding:0;background:{g['bg']};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{g['bg']};">
+  <tr><td align="center" style="padding:32px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+      <tr><td style="background:{g['card']};border:1px solid {g['border']};border-radius:20px;padding:28px 24px;box-shadow:0 18px 40px rgba(15,23,42,0.06);">
+
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+          <tr>
+            <td style="vertical-align:middle;padding-right:12px;width:40px;">{logo}</td>
+            <td style="vertical-align:middle;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:{g['text']};letter-spacing:-0.02em;">PalmCare AI</td>
+          </tr>
+        </table>
+        <div style="width:36px;height:3px;border-radius:99px;background:{g['teal']};margin:0 0 24px;"></div>
+
+        <h1 style="margin:0 0 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;line-height:32px;font-weight:700;color:{g['text']};letter-spacing:-0.03em;">{title}</h1>
+        <div style="margin:0 0 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:{g['muted']};">{body_html}</div>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+          <tr><td align="center">
+            <a href="{cta_url}" style="display:inline-block;background:{g['teal']};color:#FFFFFF;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;">{cta_label}</a>
+          </td></tr>
+        </table>
+
+        <div style="background:{g['teal_soft']};border:1px solid {g['teal_edge']};border-radius:12px;padding:14px 16px;margin:0 0 20px;">
+          <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:{g['teal_dark']};">{note_title}</p>
+          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:{g['muted']};">{note_body}</p>
+        </div>
+
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:{g['muted']};">{fallback_label}</p>
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:{g['teal']};word-break:break-all;"><a href="{cta_url}" style="color:{g['teal']};text-decoration:none;">{cta_url}</a></p>
+
+      </td></tr>
+      <tr><td align="center" style="padding:20px 8px 0;">
+        <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;font-weight:500;color:{g['muted']};">PalmCare AI</p>
+        <p style="margin:0 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;color:{g['faint']};">palmcareai.com · support@palmcareai.com</p>
+        <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;color:{g['faint']};">
+          <a href="{unsubscribe_href}" style="color:{g['muted']};text-decoration:underline;">Email preferences</a>
+          from PalmCare emails
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
+
 
 class EmailService:
     """Service for sending transactional emails via Resend."""
@@ -167,332 +313,98 @@ class EmailService:
             return {"success": False, "id": None, "error": error_str}
     
     # ==================== Password Reset ====================
+
+    def _send_glass(
+        self,
+        *,
+        to: str,
+        subject: str,
+        title: str,
+        body_html: str,
+        cta_label: str,
+        cta_url: str,
+        note_title: str,
+        note_body: str,
+        sender: Optional[str] = None,
+        reply_to: Optional[str] = None,
+        attachments: Optional[List[dict]] = None,
+        fallback_label: str = "Button not working? Paste this link:",
+    ) -> dict:
+        html = _glass_email(
+            title=title,
+            body_html=body_html,
+            cta_label=cta_label,
+            cta_url=cta_url,
+            note_title=note_title,
+            note_body=note_body,
+            unsubscribe_href=unsubscribe_url(to),
+            fallback_label=fallback_label,
+            logo_url=f"{self.app_url.rstrip('/')}/app-logo.png",
+            app_url=self.app_url,
+        )
+        return self.send_email(
+            to,
+            subject,
+            html,
+            sender=sender,
+            reply_to=reply_to,
+            attachments=attachments,
+            headers=unsubscribe_headers(to),
+        )
     
     def send_password_reset(self, user_email: str, user_name: str, reset_url: str):
         """Send password reset email with link."""
-        subject = f"Reset Your Password - {BRAND}"
-        html = f"""
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">
-                    PalmCare AI
-                </h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">
-                    Password Reset Request
-                </p>
-            </div>
-            
-            <!-- Main content -->
-            <div style="padding: 40px 30px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f512.png" alt="Lock" style="width: 50px; height: 50px;">
-                    <h2 style="color: #1f2937; margin: 15px 0 10px 0; font-size: 24px;">Reset Your Password</h2>
-                </div>
-                
-                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-                    Hi {user_name},
-                </p>
-                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-                    We received a request to reset your password. Click the button below to create a new password.
-                    This link will expire in <strong>1 hour</strong>.
-                </p>
-                
-                <!-- CTA Button -->
-                <div style="text-align: center; margin: 35px 0;">
-                    <a href="{reset_url}" 
-                       style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
-                        Reset Password
-                    </a>
-                </div>
-                
-                <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin: 25px 0; border-left: 4px solid #f59e0b;">
-                    <p style="color: #92400e; margin: 0; font-size: 14px;">
-                        <strong>Didn't request this?</strong> If you didn't request a password reset, 
-                        you can safely ignore this email. Your password will not be changed.
-                    </p>
-                </div>
-                
-                <p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">
-                    If the button doesn't work, copy and paste this link into your browser:<br>
-                    <span style="color: #6366f1; word-break: break-all;">{reset_url}</span>
-                </p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
-                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                    AI-Powered CRM for Home Healthcare Agencies
-                </p>
-                <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
-                    &copy; 2026 PalmCare AI. All rights reserved.
-                </p>
-            </div>
-        </div>
-        """
-        return self.send_email(user_email, subject, html, sender=self.from_support)
+        return self._send_glass(
+            to=user_email,
+            subject=f"Reset your password · {BRAND}",
+            title="Reset your password",
+            body_html=(
+                f"Hi {user_name}, we got a request to reset your PalmCare password. "
+                "Use the button below. This link expires in <strong>1 hour</strong>."
+            ),
+            cta_label="Reset password",
+            cta_url=reset_url,
+            note_title="Didn't request this?",
+            note_body="Ignore this email. Your password stays the same.",
+            sender=self.from_support,
+        )
 
     # ==================== Email Verification ====================
 
     def send_email_verification(self, user_email: str, user_name: str, verify_url: str):
         """Send an email-address verification link."""
-        subject = f"Verify your email - {BRAND}"
-        html = f"""
-        <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-            <div style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">Confirm your email address</p>
-            </div>
-            <div style="padding: 40px 30px;">
-                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">Hi {user_name},</p>
-                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-                    Please confirm this is your email address to secure your PalmCare AI account.
-                    This link expires in <strong>24 hours</strong>.
-                </p>
-                <div style="text-align: center; margin: 35px 0;">
-                    <a href="{verify_url}"
-                       style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block;">
-                        Verify Email
-                    </a>
-                </div>
-                <p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">
-                    If the button doesn't work, copy and paste this link into your browser:<br>
-                    <span style="color: #0d9488; word-break: break-all;">{verify_url}</span>
-                </p>
-                <p style="color: #9ca3af; font-size: 13px;">If you didn't create this account, you can ignore this email.</p>
-            </div>
-            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #0d9488; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
-                <p style="color: #d1d5db; font-size: 11px; margin: 10px 0 0 0;">&copy; 2026 PalmCare AI. All rights reserved.</p>
-            </div>
-        </div>
-        """
-        return self.send_email(user_email, subject, html, sender=self.from_support)
+        return self._send_glass(
+            to=user_email,
+            subject=f"Confirm your email · {BRAND}",
+            title="Confirm your email",
+            body_html=(
+                f"Hi {user_name}, confirm this email to secure your PalmCare account. "
+                "This link expires in <strong>24 hours</strong>."
+            ),
+            cta_label="Verify email",
+            cta_url=verify_url,
+            note_title="Didn't create an account?",
+            note_body="Ignore this email. Nothing will change.",
+            sender=self.from_support,
+        )
 
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):
-        """Send branded welcome email with product screenshots and demo booking CTA."""
-        subject = f"Welcome to {BRAND} — Your 14-Day Free Trial Is Live"
-        app = self.app_url
-        screenshots = f"{app}/screenshots"
-        html = f"""
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 640px; margin: 0 auto; background: #ffffff;">
-
-            <!-- ══ HEADER ══ -->
-            <div style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); padding: 48px 32px 40px; text-align: center;">
-                <img src="{app}/app-logo.png" alt="PalmCare AI" width="52" height="52" style="margin-bottom: 12px; border-radius: 12px;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.3px;">
-                    PalmCare AI
-                </h1>
-                <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">
-                    WHERE CARE MEETS INTELLIGENCE
-                </p>
-            </div>
-
-            <!-- ══ WELCOME ══ -->
-            <div style="padding: 40px 32px 0;">
-                <h2 style="color: #0f172a; margin: 0 0 8px; font-size: 22px; font-weight: 700;">
-                    Welcome aboard, {business_name}!
-                </h2>
-                <p style="color: #475569; margin: 0 0 24px; font-size: 15px; line-height: 1.6;">
-                    Your 14-day free trial is active. You have full access to every feature — AI voice assessments,
-                    instant contract generation, the CRM dashboard, and our iOS mobile app.
-                    Here's a quick look at what you can do right now.
-                </p>
-            </div>
-
-            <!-- ══ STEP 1: RECORD ══ -->
-            <div style="padding: 0 32px;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
-                    <tr>
-                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
-                            <div style="background: #0d9488; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">1</div>
-                        </td>
-                        <td style="vertical-align: top; padding-left: 12px;">
-                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Record a Client Assessment</p>
-                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
-                                Open the PalmCare AI mobile app, tap <strong>Record</strong>, and speak naturally with your client.
-                                Our AI transcribes the conversation in real-time using Deepgram Nova-3 and automatically
-                                identifies speakers, care needs, and billable services.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <img src="{screenshots}/email/recording_screen.png" alt="PalmCare AI — Voice Recording"
-                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
-                </div>
-            </div>
-
-            <!-- ══ STEP 2: CRM ══ -->
-            <div style="padding: 0 32px;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
-                    <tr>
-                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
-                            <div style="background: #0891b2; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">2</div>
-                        </td>
-                        <td style="vertical-align: top; padding-left: 12px;">
-                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Manage Everything in the CRM</p>
-                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
-                                Your web dashboard gives you a complete view of clients, assessments, visits, 
-                                contracts, and billing — all in one place. Track your team, monitor revenue,
-                                and never lose a client to paperwork again.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <img src="{screenshots}/email/crm_dashboard.png" alt="PalmCare AI — CRM Dashboard"
-                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
-                </div>
-            </div>
-
-            <!-- ══ STEP 3: CONTRACT ══ -->
-            <div style="padding: 0 32px;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
-                    <tr>
-                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
-                            <div style="background: #0d9488; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">3</div>
-                        </td>
-                        <td style="vertical-align: top; padding-left: 12px;">
-                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Generate Contracts Instantly</p>
-                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
-                                After the assessment, a state-compliant service agreement is generated automatically.
-                                Review, customize, send for signature — all within seconds. Our AI knows the
-                                regulations for all 50 states.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <img src="{screenshots}/email/crm_contract.png" alt="PalmCare AI — Contract Generation"
-                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
-                </div>
-            </div>
-
-            <!-- ══ PRIMARY CTA ══ -->
-            <div style="padding: 0 32px 12px; text-align: center;">
-                <a href="{app}/login"
-                   style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0891b2); color: #ffffff; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
-                    Log In &amp; Start Your First Assessment
-                </a>
-            </div>
-
-            <!-- ══ DEMO BOOKING ══ -->
-            <div style="margin: 32px; background: linear-gradient(135deg, #f0fdfa, #ecfeff); border: 1px solid #99f6e4; border-radius: 16px; padding: 28px; text-align: center;">
-                <p style="color: #0f172a; margin: 0 0 6px; font-size: 17px; font-weight: 700;">
-                    Want a Personal Walkthrough?
-                </p>
-                <p style="color: #475569; margin: 0 0 20px; font-size: 14px; line-height: 1.5;">
-                    Book a free 30-minute demo with our team. We'll show you the full platform live
-                    and answer any questions about your agency's specific needs.
-                </p>
-                <a href="{app}/book-demo"
-                   style="display: inline-block; background: #0f172a; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600;">
-                    Schedule a Free Demo
-                </a>
-            </div>
-
-            <!-- ══ DOWNLOAD THE APP ══ -->
-            <div style="margin: 0 32px 32px; background: #0f172a; border-radius: 16px; padding: 28px; text-align: center;">
-                <p style="color: #ffffff; margin: 0 0 6px; font-size: 17px; font-weight: 700;">
-                    PALM Is on the App Store
-                </p>
-                <p style="color: #94a3b8; margin: 0 0 20px; font-size: 14px; line-height: 1.5;">
-                    The app is where the work happens. It sits in on the assessment, writes the
-                    care plan, finds the billable items, and builds the contract. Download it
-                    now and record your first visit today.
-                </p>
-                <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
-                   style="display: inline-block; background: #0d9488; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700;">
-                    Download PALM for iPhone
-                </a>
-                <div style="margin-top: 20px;">
-                    <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988" style="text-decoration: none;">
-                        <img src="{app}/launch/palm-appstore-qr.png" alt="Scan to download PALM"
-                             width="96" height="96" style="border-radius: 10px; background: #ffffff; padding: 6px;">
-                    </a>
-                    <p style="color: #64748b; margin: 8px 0 0; font-size: 12px;">
-                        Or point your iPhone camera at the code
-                    </p>
-                </div>
-                <p style="margin: 16px 0 0; font-size: 13px;">
-                    <a href="{app}/launch/palm-app-launch.mp4" style="color: #2dd4bf; text-decoration: none; font-weight: 600;">
-                        Watch the 7 second launch video
-                    </a>
-                </p>
-            </div>
-
-            <!-- ══ BROCHURE ══ -->
-            <div style="margin: 0 32px 32px; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; text-align: center;">
-                <p style="color: #0f172a; margin: 0 0 4px; font-size: 15px; font-weight: 700;">
-                    PalmCare AI Brochure
-                </p>
-                <p style="color: #64748b; margin: 0 0 16px; font-size: 13px; line-height: 1.5;">
-                    We've attached our brochure to this email — perfect for sharing with your team.
-                </p>
-                <a href="{app}/brochure/PalmCare-AI-Brochure.pdf"
-                   style="display: inline-block; border: 1px solid #0d9488; color: #0d9488; padding: 11px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600;">
-                    Download Brochure (PDF)
-                </a>
-            </div>
-
-            <!-- ══ QUICK LINKS ══ -->
-            <div style="padding: 0 32px 32px;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%;">
-                    <tr>
-                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
-                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">50</p>
-                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">States Covered</p>
-                        </td>
-                        <td style="width: 12px;"></td>
-                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
-                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">60s</p>
-                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Avg Contract Time</p>
-                        </td>
-                        <td style="width: 12px;"></td>
-                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
-                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">HIPAA</p>
-                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Compliant</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- ══ HELP ══ -->
-            <div style="padding: 0 32px 32px; text-align: center;">
-                <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
-                    Questions? Reach us at
-                    <a href="mailto:support@palmcareai.com" style="color: #0d9488; text-decoration: none; font-weight: 600;">support@palmcareai.com</a>
-                    — we typically respond within a few hours.
-                </p>
-            </div>
-
-            <!-- ══ FOOTER ══ -->
-            <div style="background: #0f172a; padding: 32px; text-align: center;">
-                <img src="{app}/app-logo.png" alt="PalmCare AI" width="28" height="28" style="margin-bottom: 8px; opacity: 0.8; border-radius: 6px;">
-                <p style="color: #94a3b8; margin: 0 0 4px; font-size: 13px; font-weight: 600;">PalmCare AI</p>
-                <p style="color: #64748b; margin: 0 0 16px; font-size: 11px;">Where care meets intelligence</p>
-                <div style="margin-bottom: 16px;">
-                    <a href="{app}" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Website</a>
-                    <span style="color: #334155;">|</span>
-                    <a href="{app}/features" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Features</a>
-                    <span style="color: #334155;">|</span>
-                    <a href="{app}/pricing" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Pricing</a>
-                    <span style="color: #334155;">|</span>
-                    <a href="{app}/privacy" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Privacy</a>
-                </div>
-                <p style="color: #475569; font-size: 11px; margin: 0;">
-                    &copy; 2026 Palm Technologies, INC. All rights reserved.
-                </p>
-            </div>
-        </div>
-        """
+        """Send a simple glass welcome email for new trial signups."""
         brochure = _brochure_attachment()
-        return self.send_email(
-            business_email, subject, html,
+        return self._send_glass(
+            to=business_email,
+            subject=f"Welcome to {BRAND}. Your trial is live",
+            title="Welcome aboard",
+            body_html=(
+                f"Hi {business_name}. Your 14-day trial is live. "
+                "Record a visit, review the docs, and send the agreement when you're ready."
+            ),
+            cta_label="Open PalmCare",
+            cta_url=f"{self.app_url}/login",
+            note_title="What's included",
+            note_body="Voice assessments, notes, billables, and contracts from one recording.",
             sender=self.from_onboarding,
             reply_to="support@palmcareai.com",
             attachments=[brochure] if brochure else None,
@@ -510,49 +422,41 @@ class EmailService:
 
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
         """Send approval notification with login link."""
-        subject = f"Your Account is Approved! - {BRAND}"
-        html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #10b981;">Account Approved!</h1>
-            <p>Hello {business_name},</p>
-            <p>Great news! Your PalmCare AI account has been approved and is now active.</p>
-            <p>You can now log in and start using our platform to:</p>
-            <ul>
-                <li>Upload care assessment recordings</li>
-                <li>Generate service contracts</li>
-                <li>Manage your clients and caregivers</li>
-            </ul>
-            <p style="margin: 30px 0 12px;">
-                <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988" style="background-color: #0d9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 700;">
-                    Download PALM for iPhone
-                </a>
-            </p>
-            <p style="margin: 0 0 30px;">
-                <a href="{login_url}" style="color: #0d9488;">Or log in on the web</a>
-            </p>
-            <p>If you have any questions, please contact our support team.</p>
-            <br>
-            <p>Best regards,<br>The PalmCare AI Team</p>
-        </div>
-        """
-        return self.send_email(business_email, subject, html, sender=self.from_welcome)
-    
+        return self._send_glass(
+            to=business_email,
+            subject=f"Your account is approved · {BRAND}",
+            title="You're approved",
+            body_html=(
+                f"Hi {business_name}. Your PalmCare account is active. "
+                "Download the iPhone app or log in on the web to start your first visit."
+            ),
+            cta_label="Download PALM for iPhone",
+            cta_url="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988",
+            note_title="Prefer the web?",
+            note_body=(
+                f'<a href="{login_url}" style="color:#0D9488;text-decoration:none;">'
+                "Log in at palmcareai.com</a>"
+            ),
+            sender=self.from_welcome,
+        )
+
     def send_business_rejected(self, business_email: str, business_name: str, reason: Optional[str] = None):
         """Send rejection notification."""
-        subject = f"Registration Update - {BRAND}"
-        reason_text = f"<p><strong>Reason:</strong> {reason}</p>" if reason else ""
-        html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #ef4444;">Registration Update</h1>
-            <p>Hello {business_name},</p>
-            <p>Unfortunately, we were unable to approve your registration at this time.</p>
-            {reason_text}
-            <p>If you believe this is an error or would like to provide additional information, please contact our support team.</p>
-            <br>
-            <p>Best regards,<br>The PalmCare AI Team</p>
-        </div>
-        """
-        return self.send_email(business_email, subject, html, sender=self.from_welcome)
+        reason_text = f" Reason: {reason}." if reason else ""
+        return self._send_glass(
+            to=business_email,
+            subject=f"Registration update · {BRAND}",
+            title="Registration update",
+            body_html=(
+                f"Hi {business_name}. We were unable to approve your registration at this time."
+                f"{reason_text} Reply to this email if you want to share more information."
+            ),
+            cta_label="Contact support",
+            cta_url="mailto:support@palmcareai.com",
+            note_title="Need help?",
+            note_body="Our team reads every reply. We usually respond within one business day.",
+            sender=self.from_welcome,
+        )
     
     def send_business_pending_documents(self, business_email: str, business_name: str, missing_docs: List[str]):
         """Request additional documents from business."""

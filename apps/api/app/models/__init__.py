@@ -15,6 +15,7 @@ from app.models.incident import Incident, IncidentUpdate
 from app.models.contract_template import ContractTemplate
 from app.models.sales_lead import SalesLead
 from app.models.investor import Investor
+from app.models.email_preference import EmailPreference
 from app.models.smart_note import SmartNote
 from app.models.task import Task
 from app.models.reminder import Reminder
@@ -42,6 +43,7 @@ __all__ = [
     "ContractTemplate",
     "SalesLead",
     "Investor",
+    "EmailPreference",
     "SmartNote",
     "Task",
     "Reminder",
