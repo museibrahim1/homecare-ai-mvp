@@ -35,7 +35,9 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
     """Cheap local guess. Returns None when unsure so the LLM can decide."""
     if not text:
         return None
-    sample = (text[:4000] + "\n" + text[-3000:]).lower()
+    # Count over the full transcript. Head/tail-only samples miss intake facts
+    # buried in the middle of long coaching intros (rate, schedule, companionship).
+    sample = text.lower()
 
     clinic_hits = sum(
         1

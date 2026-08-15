@@ -107,7 +107,9 @@ CATEGORY_INFO = {
 
 def detect_tasks_in_text(text: str) -> List[Tuple[str, str, str, str]]:
     """Detect tasks mentioned in text using keyword patterns."""
-    text_lower = text.lower()
+    if not text:
+        return []
+    text_lower = str(text).lower()
     detected = []
     seen_categories = set()
     
@@ -375,6 +377,11 @@ def generate_billables_from_transcript(
     
     transcript_text = "\n".join(str(s.get("text") or "") for s in segments)
     kind = (conversation_kind or "").strip()
+    # Clinic / non-home-care recordings must stay empty even if Claude is down
+    # and keyword rules would otherwise fire on medical language.
+    if kind == "out_of_scope":
+        logger.info("Skipping billables for out_of_scope recording")
+        return []
     # Only real visits should look like timed delivered care. Intakes and
     # training role-plays are recommended services (frequency + evidence).
     is_recommendation = kind != "home_care_visit"
@@ -540,8 +547,14 @@ def generate_billables_from_transcript(
                 "color": "gray",
                 "task_count": len(all_evidence),
                 "tasks": [detections[0]["description"]] if detections else [],
-                "is_flagged": True,
-                "flag_reason": "Detected by rules only - verify needed",
+                "is_recommendation": is_recommendation,
+                # Recommendations must not use is_flagged (Denied in clients).
+                "is_flagged": False if is_recommendation else True,
+                "flag_reason": (
+                    "Recommended from assessment (not timed visit work)"
+                    if is_recommendation
+                    else "Detected by rules only - verify needed"
+                ),
             }
             result.append(item)
     

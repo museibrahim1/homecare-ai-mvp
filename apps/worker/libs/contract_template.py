@@ -224,8 +224,54 @@ def format_declined_services_list(declined: Optional[List[Dict]]) -> str:
     )
 
 
+def _as_str_list(value: Any) -> List[str]:
+    """Normalize LLM list-or-string fields so join never character-splits."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        return [text] if text else []
+    if isinstance(value, (list, tuple, set)):
+        out: List[str] = []
+        for item in value:
+            if item is None:
+                continue
+            if isinstance(item, str):
+                text = item.strip()
+                if text:
+                    out.append(text)
+            elif isinstance(item, dict):
+                text = str(
+                    item.get("name")
+                    or item.get("condition")
+                    or item.get("concern")
+                    or item.get("requirement")
+                    or ""
+                ).strip()
+                if text:
+                    out.append(text)
+            else:
+                text = str(item).strip()
+                if text:
+                    out.append(text)
+        return out
+    text = str(value).strip()
+    return [text] if text else []
+
+
+def _safe_float(value: Any, default: float) -> float:
+    try:
+        if value is None or value == "":
+            return float(default)
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
 def format_list(items: List, prefix: str = "• ") -> str:
     """Format a list of items."""
+    if isinstance(items, str):
+        items = [items] if items.strip() else []
     if not items:
         return "None specified"
     
@@ -308,8 +354,9 @@ def generate_contract_from_template(
             profile_lines.append(f"Cognitive Status: {client_profile_data['cognitive_status']}")
         if client_profile_data.get('living_situation'):
             profile_lines.append(f"Living Situation: {client_profile_data['living_situation']}")
-        if client_profile_data.get('risk_factors'):
-            profile_lines.append(f"Risk Factors: {', '.join(client_profile_data['risk_factors'])}")
+        risk_factors = _as_str_list(client_profile_data.get('risk_factors'))
+        if risk_factors:
+            profile_lines.append(f"Risk Factors: {', '.join(risk_factors)}")
     
     client_profile = "\n".join(profile_lines) if profile_lines else "See care assessment documentation"
     
@@ -361,9 +408,9 @@ def generate_contract_from_template(
     if not declined and assessment_data:
         declined = assessment_data.get("declined_services") or []
     
-    # Calculate costs
-    hourly_rate = float(contract_data.get('hourly_rate', 25))
-    weekly_hours = float(contract_data.get('weekly_hours', 12))
+    # Calculate costs (tolerate None / blank LLM fields)
+    hourly_rate = _safe_float(contract_data.get('hourly_rate', 25), 25.0)
+    weekly_hours = _safe_float(contract_data.get('weekly_hours', 12), 12.0)
     weekly_cost = hourly_rate * weekly_hours
     monthly_cost = weekly_cost * 4.33
     
@@ -409,7 +456,10 @@ def generate_contract_from_template(
         # Assessment summary
         'care_need_level': schedule.get('care_need_level', 'MODERATE'),
         'primary_diagnosis': client_profile_data.get('primary_diagnosis', 'See medical records'),
-        'secondary_conditions': ', '.join(client_profile_data.get('secondary_conditions', [])) or 'None noted',
+        'secondary_conditions': (
+            ', '.join(_as_str_list(client_profile_data.get('secondary_conditions')))
+            or 'None noted'
+        ),
         'client_profile': client_profile,
         
         # Schedule
