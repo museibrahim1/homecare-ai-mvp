@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
@@ -42,20 +43,44 @@ async def complete_onboarding(
             "needs_onboarding": False,
         }
 
+    # Team members already belong to an agency via company_name / invite.
+    if (current_user.company_name or "").strip() or getattr(current_user, "invited_by", None):
+        raise HTTPException(
+            status_code=400,
+            detail="Your account already belongs to an agency. Sign out and sign back in.",
+        )
+
     agency = (body.agency_name or "").strip()
     if not agency:
-        agency = (current_user.company_name or current_user.full_name or "").strip()
+        agency = (current_user.full_name or "").strip()
     if not agency and current_user.email:
         agency = current_user.email.split("@", 1)[0]
     if not agency:
         agency = "My Agency"
     agency = agency[:255]
 
+    # Same one-name-one-tenant rule as email registration (team scoping).
+    name_taken = (
+        db.query(User)
+        .filter(
+            func.lower(User.company_name) == agency.lower(),
+            User.id != current_user.id,
+        )
+        .first()
+    )
+    if name_taken:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "An agency with this name is already registered. "
+                "If you work there, ask the account owner to invite you from Settings → Team."
+            ),
+        )
+
     email = (current_user.email or "").lower().strip()
     if not email:
         raise HTTPException(status_code=400, detail="Account email is required to finish setup.")
 
-    # Email uniqueness on business_users — should match users.email
     conflict = (
         db.query(BusinessUser)
         .filter(BusinessUser.email == email, BusinessUser.id != current_user.id)
@@ -98,9 +123,9 @@ async def complete_onboarding(
     db.add(owner)
     db.flush()
 
+    # Mirror email registration: company_name + role=user for team/visit scoping
     current_user.company_name = agency
-    if current_user.role == "caregiver":
-        current_user.role = "user"
+    current_user.role = "user"
 
     try:
         from app.models.agency_settings import AgencySettings

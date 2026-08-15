@@ -36,30 +36,51 @@ export default function SocialAuthButtons({ onError }: Props) {
   const router = useRouter();
   const { setToken, setUser } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [mfaToken, setMfaToken] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   const appleClientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '';
+
+  const routeAfterAuth = useCallback(
+    (response: {
+      access_token: string;
+      needs_onboarding: boolean;
+      user?: { id?: string; email?: string };
+    }) => {
+      setToken(response.access_token);
+      if (response.user) setUser(response.user as never);
+      if (response.needs_onboarding) {
+        router.push('/onboarding');
+        return;
+      }
+      const userId = response.user?.id || response.user?.email || 'user';
+      const hasSeenWelcome = localStorage.getItem(`has-seen-welcome-${userId}`);
+      if (!hasSeenWelcome) {
+        localStorage.setItem(`has-seen-welcome-${userId}`, 'true');
+        router.push('/welcome');
+      } else {
+        router.push('/dashboard');
+      }
+    },
+    [router, setToken, setUser],
+  );
 
   const finish = useCallback(
     async (provider: 'google' | 'apple', idToken: string, fullName?: string) => {
       setBusy(true);
       try {
         const response = await api.socialLogin(provider, idToken, fullName);
-        setToken(response.access_token);
-        if (response.user) setUser(response.user);
-        await new Promise((r) => setTimeout(r, 50));
-        if (response.needs_onboarding) {
-          router.push('/onboarding');
+        if (response.requires_mfa && response.mfa_token) {
+          setMfaToken(response.mfa_token);
           return;
         }
-        const userId = response.user?.id || response.user?.email || 'user';
-        const hasSeenWelcome = localStorage.getItem(`has-seen-welcome-${userId}`);
-        if (!hasSeenWelcome) {
-          localStorage.setItem(`has-seen-welcome-${userId}`, 'true');
-          router.push('/welcome');
-        } else {
-          router.push('/dashboard');
+        if (!response.access_token) {
+          onError?.('Sign-in failed. Try again.');
+          return;
         }
+        await new Promise((r) => setTimeout(r, 50));
+        routeAfterAuth(response);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Sign-in failed. Try again.';
         onError?.(message);
@@ -67,8 +88,24 @@ export default function SocialAuthButtons({ onError }: Props) {
         setBusy(false);
       }
     },
-    [onError, router, setToken, setUser],
+    [onError, routeAfterAuth],
   );
+
+  const submitMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const response = await api.mfaVerify(mfaToken, mfaCode.trim());
+      setMfaToken('');
+      setMfaCode('');
+      routeAfterAuth(response);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid MFA code';
+      onError?.(message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!googleClientId || !googleBtnRef.current) return;
@@ -147,6 +184,40 @@ export default function SocialAuthButtons({ onError }: Props) {
 
   return (
     <div className="space-y-3">
+      {mfaToken ? (
+        <form onSubmit={submitMfa} className="space-y-3 border border-slate-200 rounded-lg p-4">
+          <p className="text-sm text-slate-600">
+            Enter the 6-digit code from your authenticator app.
+          </p>
+          <input
+            value={mfaCode}
+            onChange={(e) => setMfaCode(e.target.value)}
+            inputMode="numeric"
+            maxLength={8}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg tracking-widest text-center font-mono"
+            placeholder="000000"
+            autoFocus
+          />
+          <button
+            type="submit"
+            disabled={busy || mfaCode.trim().length < 6}
+            className="w-full py-3 bg-primary-500 text-white font-medium rounded-lg disabled:opacity-50"
+          >
+            {busy ? 'Verifying…' : 'Verify'}
+          </button>
+          <button
+            type="button"
+            className="w-full text-sm text-slate-500"
+            onClick={() => {
+              setMfaToken('');
+              setMfaCode('');
+            }}
+          >
+            Cancel
+          </button>
+        </form>
+      ) : (
+        <>
       <button
         type="button"
         onClick={() => void handleApple()}
@@ -176,6 +247,8 @@ export default function SocialAuthButtons({ onError }: Props) {
         or use email
         <div className="flex-1 h-px bg-slate-200" />
       </div>
+        </>
+      )}
     </div>
   );
 }

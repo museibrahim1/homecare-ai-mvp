@@ -19,13 +19,14 @@ from app.core.security import (
     check_password_history, record_password_in_history,
     validate_password,
     _get_redis,
+    decode_access_token,
 )
 from app.models.user import User
 from app.models.user_identity import UserIdentity
 from app.models.business import BusinessUser
 from app.schemas.auth import (
     LoginRequest, Token, MFALoginRequest, RefreshRequest,
-    SocialLoginRequest, SocialLoginResponse,
+    SocialLoginRequest, SocialLoginResponse, MFACompleteRequest,
 )
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
@@ -56,7 +57,15 @@ def _issue_refresh_token(user: User) -> str:
 
 
 def _user_needs_onboarding(db: Session, user: User) -> bool:
-    """True when no BusinessUser shares this User's id (social User-first path)."""
+    """True only for accounts that still need to create their own agency.
+
+    Team invites create a User with company_name set and no BusinessUser row.
+    Those members must NOT be flagged for owner onboarding.
+    """
+    if (user.company_name or "").strip():
+        return False
+    if getattr(user, "invited_by", None):
+        return False
     return (
         db.query(BusinessUser.id)
         .filter(BusinessUser.id == user.id)
@@ -417,6 +426,29 @@ async def social_login(
         provider_user_id=sub,
         email=email or user.email,
     )
+    db.flush()
+
+    # MFA applies to linked social sign-in the same as password login.
+    if getattr(user, "mfa_enabled", False) and user.mfa_secret:
+        log_action(
+            db=db, user_id=user.id, action="social_login_mfa_required",
+            entity_type="user", entity_id=user.id,
+            description=f"{provider} sign-in successful, MFA required",
+            changes={"provider": provider},
+            ip_address=client_ip,
+        )
+        db.commit()
+        mfa_token = create_access_token(
+            data={"sub": str(user.id), "mfa_pending": True},
+        )
+        return SocialLoginResponse(
+            access_token="",
+            token_type="bearer",
+            requires_mfa=True,
+            mfa_token=mfa_token,
+            needs_onboarding=False,
+            user=_user_response(db, user),
+        )
 
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = _issue_refresh_token(user)
@@ -669,6 +701,84 @@ async def mfa_login(
 
     set_session_cookie(response, access_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post("/mfa/verify", response_model=SocialLoginResponse)
+async def mfa_verify_pending(
+    body: MFACompleteRequest,
+    req: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    """Complete MFA after /auth/login or /auth/social returned requires_mfa.
+
+    Accepts the short-lived mfa_pending JWT plus TOTP. Works for password and
+    social-only accounts (no password re-check).
+    """
+    import uuid as _uuid
+
+    client_ip = get_client_ip(req)
+    _check_rate_limit(f"mfa_verify:{client_ip}")
+
+    payload = decode_access_token(body.mfa_token)
+    if not payload or not payload.get("mfa_pending"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="MFA session expired. Sign in again.",
+        )
+
+    try:
+        user_uuid = _uuid.UUID(str(payload.get("sub")))
+    except (ValueError, TypeError, AttributeError):
+        raise HTTPException(status_code=401, detail="MFA session expired. Sign in again.")
+
+    user = db.query(User).filter(User.id == user_uuid).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="MFA session expired. Sign in again.")
+
+    if not user.mfa_enabled or not user.mfa_secret:
+        raise HTTPException(status_code=400, detail="MFA is not enabled for this account")
+
+    email = (user.email or "").lower()
+    is_locked, seconds_remaining = check_account_lockout(email)
+    if is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Account temporarily locked. Try again in {seconds_remaining} seconds.",
+        )
+
+    totp = pyotp.TOTP(user.mfa_secret)
+    if not totp.verify(body.mfa_code.strip(), valid_window=1):
+        record_failed_login(email)
+        log_action(
+            db=db, user_id=user.id, action="mfa_verify_failed",
+            entity_type="security", entity_id=user.id,
+            description="Invalid MFA code after social/password challenge",
+            ip_address=client_ip,
+        )
+        raise HTTPException(status_code=401, detail="Invalid MFA code")
+
+    clear_login_attempts(email)
+    access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = _issue_refresh_token(user)
+    db.commit()
+    db.refresh(user)
+
+    log_action(
+        db=db, user_id=user.id, action="user_login",
+        entity_type="user", entity_id=user.id,
+        description="Successful login with MFA (verify)",
+        ip_address=client_ip,
+    )
+
+    set_session_cookie(response, access_token)
+    user_payload = _user_response(db, user)
+    return SocialLoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        needs_onboarding=bool(user_payload.needs_onboarding),
+        user=user_payload,
+    )
 
 
 @router.post("/reset-password")

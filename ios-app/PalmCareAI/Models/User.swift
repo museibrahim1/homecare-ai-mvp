@@ -43,6 +43,8 @@ struct SocialLoginResponse: Codable {
     let refresh_token: String?
     let needs_onboarding: Bool
     let user: User
+    let requires_mfa: Bool?
+    let mfa_token: String?
 }
 
 struct BusinessLoginResponse: Codable {

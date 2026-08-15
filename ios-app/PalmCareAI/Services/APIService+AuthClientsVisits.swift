@@ -52,6 +52,30 @@ extension APIService {
         let response: SocialLoginResponse = try await request(
             "POST", path: "/auth/social", body: body, noAuth: true
         )
+        // MFA challenge: do not store a session yet
+        if response.requires_mfa == true {
+            return response
+        }
+        await MainActor.run {
+            if let refresh = response.refresh_token, !refresh.isEmpty {
+                self.refreshToken = refresh
+            }
+            self.token = response.access_token
+            self.needsOnboarding = response.needs_onboarding
+            self.cachedUser = CacheEntry(value: response.user, timestamp: Date())
+        }
+        return response
+    }
+
+    /// Finish MFA after social (or password) login that returned requires_mfa + mfa_token.
+    @discardableResult
+    func mfaVerify(mfaToken: String, code: String) async throws -> SocialLoginResponse {
+        let response: SocialLoginResponse = try await request(
+            "POST",
+            path: "/auth/mfa/verify",
+            body: ["mfa_token": mfaToken, "mfa_code": code],
+            noAuth: true
+        )
         await MainActor.run {
             if let refresh = response.refresh_token, !refresh.isEmpty {
                 self.refreshToken = refresh

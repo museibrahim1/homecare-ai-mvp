@@ -62,3 +62,9 @@ class SocialLoginResponse(Token):
 class CompleteOnboardingRequest(BaseModel):
     agency_name: Optional[str] = None
     consent: bool = False
+
+
+class MFACompleteRequest(BaseModel):
+    """Finish MFA after password or social login that returned requires_mfa."""
+    mfa_token: str
+    mfa_code: str

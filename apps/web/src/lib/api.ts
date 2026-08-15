@@ -157,6 +157,8 @@ class ApiClient {
       token_type: string;
       refresh_token?: string;
       needs_onboarding: boolean;
+      requires_mfa?: boolean;
+      mfa_token?: string;
       user: {
         id: string;
         email: string;
@@ -172,6 +174,26 @@ class ApiClient {
         id_token: idToken,
         ...(fullName ? { full_name: fullName } : {}),
       }),
+    });
+  }
+
+  async mfaVerify(mfaToken: string, mfaCode: string) {
+    return this.request<{
+      access_token: string;
+      token_type: string;
+      refresh_token?: string;
+      needs_onboarding: boolean;
+      user: {
+        id: string;
+        email: string;
+        full_name: string;
+        role: string;
+        is_active: boolean;
+        needs_onboarding?: boolean;
+      };
+    }>('/auth/mfa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ mfa_token: mfaToken, mfa_code: mfaCode }),
     });
   }
 

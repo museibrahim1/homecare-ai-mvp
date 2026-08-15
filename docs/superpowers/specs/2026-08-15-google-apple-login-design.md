@@ -125,7 +125,13 @@ Social creates `User` first. Therefore **`complete-onboarding` MUST create the o
 
 ### Deriving `needs_onboarding`
 
-`true` when there is no `BusinessUser` row whose **`id` equals the authenticated `User.id`**. Do not invent a separate flag unless needed for caching.
+`true` only when the user still needs to create their own agency:
+
+- no `BusinessUser` with `id == User.id`, **and**
+- `User.company_name` is empty, **and**
+- `User.invited_by` is empty
+
+Team invites create a `User` with `company_name` set and no matching `BusinessUser`. Those members must get `needs_onboarding=false` and must not be offered owner `complete-onboarding`.
 
 ## API
 
@@ -161,7 +167,8 @@ Behavior:
    - On new user or auto-link: `INSERT` `(user_id, provider, provider_user_id, email)`
    - On existing identity match: optionally refresh `email` if provider returned one
    - This insert is **mandatory**. Later Apple grants often omit email; repeat login depends on stored `provider_user_id`
-5. Return tokens + `needs_onboarding` + user payload compatible with `/auth/me`
+5. If the resolved user has MFA enabled → return `requires_mfa=true` + `mfa_token` (no session yet). Client completes via `POST /auth/mfa/verify`.
+6. Else return tokens + `needs_onboarding` + user payload compatible with `/auth/me`
 
 Errors (stable, user-safe):
 
@@ -174,11 +181,14 @@ Errors (stable, user-safe):
 Auth required. Body: `{ "agency_name": "...", "consent": true }`.
 
 - Reject if consent false
+- Reject if user already has `company_name` or `invited_by` (team member; already in an agency)
+- Reject if agency name already taken (`User.company_name` case-insensitive), same rule as email registration
 - If `BusinessUser` already exists with `id == current_user.id` → return that business (idempotent)
 - Else create:
   1. `Business` (agency name from body, or fallback from `user.full_name` / email local-part)
-  2. **`BusinessUser(id=current_user.id`, `business_id=…`, `email=user.email`, `full_name=user.full_name`, `password_hash=NULL`, `role="owner"`, `is_owner=True`, `email_verified=True`)** — same UUID as User
-  3. `AgencySettings` + 14-day trial subscription (mirror `POST /auth/business/register` side effects, without setting a password)
+  2. **`BusinessUser(id=current_user.id`, …, `password_hash=NULL`, …)** — same UUID as User
+  3. Set **`User.company_name = agency`** and **`User.role = "user"`** (required for team scoping and visit isolation)
+  4. `AgencySettings` + 14-day trial subscription
 - Do **not** create a second `User` row (social already created it)
 
 ### `POST /auth/delete-account` (update)
