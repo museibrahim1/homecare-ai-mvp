@@ -502,36 +502,28 @@ struct HomeView: View {
     }
 
     private var errorView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 36))
-                .foregroundColor(.palmOrange)
-            Text("Something went wrong")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.palmText)
-            Text(loadError ?? "")
-                .font(.system(size: 13))
-                .foregroundColor(.palmSecondary)
+                .font(.system(size: 40, weight: .regular))
+                .foregroundStyle(.secondary)
+                .symbolRenderingMode(.hierarchical)
+            Text("Couldn't Load Home")
+                .font(.title3.weight(.semibold))
+            Text(loadError ?? "Check your connection and try again.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            Button {
+            Button("Try Again") {
                 loadError = nil
                 Task { await loadData() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 12, weight: .bold))
-                    Text("Try Again")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(Color.palmPrimary)
-                .cornerRadius(10)
             }
+            .buttonStyle(.borderedProminent)
+            .tint(.palmPrimary)
+            .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 40)
     }
 }
 

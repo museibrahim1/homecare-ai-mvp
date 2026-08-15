@@ -197,96 +197,62 @@ struct LandingView: View {
                     .frame(maxWidth: .infinity)
                 }
 
-                // Bottom content
+                // Bottom content — Auth Glass copy
                 VStack(spacing: 0) {
                     Spacer()
 
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 9) {
-                            PalmOrbLogo(size: 38)
+                        Text("HOME CARE")
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1.2)
+                            .foregroundColor(Color.palmPrimaryLight)
+                            .padding(.bottom, 10)
 
-                            Text("PALM")
-                                .font(.system(size: 17, weight: .heavy))
-                                .foregroundColor(.white)
-                                .tracking(0.5)
+                        (Text("Palm ").foregroundColor(.white)
+                            + Text("It.").foregroundColor(Color.palmPrimary))
+                            .font(.system(size: 44, weight: .black))
+                            .tracking(-1.4)
+                            .padding(.bottom, 12)
 
-                            Spacer()
-
-                            Text("FOR HOME CARE TEAMS")
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(0.8)
-                                .foregroundColor(Color.palmPrimaryLight)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 3)
-                                .background(Color.palmPrimary.opacity(0.25))
-                                .overlay(
-                                    Capsule().stroke(Color.palmPrimaryLight.opacity(0.35), lineWidth: 1)
-                                )
-                                .clipShape(Capsule())
-                        }
-                        .padding(.bottom, 18)
-
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("PALM")
-                                .font(.system(size: 42, weight: .black))
-                                .foregroundColor(.white)
-                                .tracking(-1.5)
-
-                            Text("IT.")
-                                .font(.system(size: 42, weight: .black))
-                                .italic()
-                                .foregroundColor(Color.palmPrimaryLight)
-                                .tracking(-1.5)
-                        }
-                        .padding(.bottom, 10)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Record. Transcribe. Contract.")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.85))
-
-                            Text("Every care assessment — handled in seconds.\nYour clients get proposals. You get your time back.")
-                                .font(.system(size: 12))
-                                .foregroundColor(.white.opacity(0.55))
-                                .lineSpacing(4)
-                        }
-                        .padding(.bottom, 20)
+                        Text("Record the visit. PALM writes the care plan, billables, notes, and the contract.")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.78))
+                            .lineSpacing(4)
+                            .padding(.bottom, 28)
 
                         Button {
                             navigateToRegister = true
                         } label: {
-                            Text("GET STARTED")
-                                .font(.system(size: 14, weight: .heavy))
-                                .tracking(0.2)
+                            Text("Get started")
+                                .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .cornerRadius(12)
-                                .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
+                                .padding(.vertical, 16)
+                                .background(Color.palmPrimary)
+                                .clipShape(Capsule())
+                                .shadow(color: Color.palmPrimary.opacity(0.4), radius: 12, y: 6)
                         }
                         .accessibilityLabel("Get started, create an account")
-                        .padding(.bottom, 9)
+                        .padding(.bottom, 12)
 
                         Button {
                             navigateToLogin = true
                         } label: {
-                            Text("Already have an account? Sign in →")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.white.opacity(0.7))
+                            Text("Sign in")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(Color.white.opacity(0.07))
+                                .padding(.vertical, 16)
+                                .background(Color.white.opacity(0.08))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.white.opacity(0.15), lineWidth: 1.5)
+                                    Capsule().stroke(Color.white.opacity(0.22), lineWidth: 1)
                                 )
-                                .cornerRadius(12)
+                                .clipShape(Capsule())
                         }
                         .accessibilityLabel("Sign in to existing account")
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 30)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 40)
                 }
             }
             .navigationDestination(isPresented: $navigateToLogin) {

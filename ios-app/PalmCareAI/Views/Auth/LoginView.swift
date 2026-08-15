@@ -23,30 +23,28 @@ struct LoginView: View {
         ScrollView {
             VStack(spacing: 0) {
                 header
-                    .padding(.top, 32)
-                    .padding(.bottom, 40)
+                    .padding(.top, 28)
+                    .padding(.bottom, 20)
 
-                form
+                formCard
                     .padding(.horizontal, 24)
 
-                SocialSignInButtons()
+                orDivider
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 18)
+
+                SocialSignInButtons(showEmailDivider: false)
                     .environmentObject(api)
                     .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
-
-                signInButton
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
 
                 registerPrompt
-                    .padding(.top, 24)
-                    .padding(.bottom, 32)
+                    .padding(.top, 22)
+                    .padding(.bottom, 36)
             }
             .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Color(UIColor.systemBackground))
+        .background(PalmGlassBackground())
         .navigationBarTitleDisplayMode(.inline)
         .palmBackButton()
         .navigationDestination(isPresented: $showRegister) {
@@ -67,47 +65,78 @@ struct LoginView: View {
     // MARK: - Subviews
 
     private var header: some View {
-        VStack(spacing: 20) {
-            PalmOrbLogo(size: 84, animated: true)
+        VStack(spacing: 14) {
+            PalmOrbLogo(size: 72, animated: true)
 
             VStack(spacing: 6) {
                 Text("Welcome back")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 28, weight: .heavy))
+                    .foregroundColor(.palmText)
+                    .tracking(-0.4)
 
-                Text("Sign in to continue to PALM")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Text("Sign in to your agency")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.palmSecondary)
             }
         }
     }
 
-    private var form: some View {
-        VStack(spacing: 14) {
-            iosField(
-                icon: "envelope",
-                placeholder: "Email",
-                text: $email,
-                isSecure: false,
-                contentType: .username,
-                keyboard: .emailAddress,
-                submitLabel: .next,
-                focus: .email
-            )
-
-            iosPasswordField
-
-            HStack {
-                Spacer()
-                Button { showForgotPassword = true } label: {
-                    Text("Forgot password?")
-                        .font(.subheadline)
-                        .foregroundColor(.palmPrimary)
-                }
-                .accessibilityIdentifier("forgotPasswordButton")
+    private var formCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("EMAIL")
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundColor(.palmSecondary)
+                iosField(
+                    icon: "envelope",
+                    placeholder: "you@agency.com",
+                    text: $email,
+                    isSecure: false,
+                    contentType: .username,
+                    keyboard: .emailAddress,
+                    submitLabel: .next,
+                    focus: .email
+                )
             }
-            .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("PASSWORD")
+                        .font(.system(size: 11, weight: .bold))
+                        .tracking(0.8)
+                        .foregroundColor(.palmSecondary)
+                    Spacer()
+                    Button { showForgotPassword = true } label: {
+                        Text("Forgot?")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+                    }
+                    .accessibilityIdentifier("forgotPasswordButton")
+                }
+                iosPasswordField
+            }
+
+            signInButton
+                .padding(.top, 4)
         }
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+        .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.62)
+    }
+
+    private var orDivider: some View {
+        HStack(spacing: 12) {
+            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
+            Text("or")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.palmSecondary)
+            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
+        }
+    }
+
+    private var form: some View {
+        formCard
     }
 
     private var iosPasswordField: some View {
@@ -141,11 +170,11 @@ struct LoginView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 14)
-        .background(Color(UIColor.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.white.opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.5) : Color.clear, lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
         )
     }
 
@@ -176,19 +205,19 @@ struct LoginView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 14)
-        .background(Color(UIColor.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.white.opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.5) : Color.clear, lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
         )
     }
 
     private var signInButton: some View {
         Button(action: performLogin) {
             ZStack {
-                Text("Sign In")
-                    .font(.headline)
+                Text("Sign in")
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                     .opacity(isLoading ? 0 : 1)
 
@@ -199,9 +228,10 @@ struct LoginView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 52)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                Capsule(style: .continuous)
                     .fill(canSubmit ? Color.palmPrimary : Color.palmPrimary.opacity(0.4))
             )
+            .shadow(color: canSubmit ? PalmGlass.tealShadow : .clear, radius: 12, y: 6)
         }
         .disabled(!canSubmit)
         .accessibilityIdentifier("signInButton")
@@ -228,13 +258,13 @@ struct LoginView: View {
 
     private var registerPrompt: some View {
         HStack(spacing: 4) {
-            Text("New to PALM?")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            Text("New agency?")
+                .font(.system(size: 14))
+                .foregroundColor(.palmSecondary)
 
             Button { showRegister = true } label: {
-                Text("Create an account")
-                    .font(.subheadline.weight(.semibold))
+                Text("Create account")
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.palmPrimary)
             }
             .accessibilityIdentifier("createAccountButton")

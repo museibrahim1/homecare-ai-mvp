@@ -250,39 +250,29 @@ struct ClientsView: View {
     }
 
     private var errorView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Spacer()
             Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 38))
-                .foregroundColor(.palmOrange)
-            Text("Something went wrong")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.palmText)
-            Text(loadError ?? "")
-                .font(.system(size: 13))
-                .foregroundColor(.palmSecondary)
+                .font(.system(size: 40, weight: .regular))
+                .foregroundStyle(.secondary)
+                .symbolRenderingMode(.hierarchical)
+            Text("Couldn't Load Clients")
+                .font(.title3.weight(.semibold))
+            Text(loadError ?? "Check your connection and try again.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button {
+            Button("Try Again") {
                 loadError = nil
                 Task { await loadClients() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 13, weight: .bold))
-                    Text("Try Again")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 22)
-                .padding(.vertical, 11)
-                .background(Color.palmPrimary)
-                .cornerRadius(12)
             }
+            .buttonStyle(.borderedProminent)
+            .tint(.palmPrimary)
             .padding(.top, 4)
             Spacer()
             Spacer()
         }
-        .padding(.horizontal, 40)
+        .padding(.horizontal, 28)
     }
 
     private func loadClients() async {

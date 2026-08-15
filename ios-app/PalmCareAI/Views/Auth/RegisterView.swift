@@ -72,7 +72,7 @@ struct RegisterView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Color(UIColor.systemBackground))
+        .background(PalmGlassBackground())
         .navigationTitle("Create Account")
         .navigationBarTitleDisplayMode(.inline)
         .palmBackButton()

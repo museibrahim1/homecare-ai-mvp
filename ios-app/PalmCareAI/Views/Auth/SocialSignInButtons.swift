@@ -4,6 +4,8 @@ import AuthenticationServices
 /// Apple + Google buttons for Login and Register.
 struct SocialSignInButtons: View {
     @EnvironmentObject var api: APIService
+    /// When false, hide the trailing "or use email" rule (login already has email above).
+    var showEmailDivider: Bool = true
 
     @StateObject private var apple = AppleSignInCoordinator()
     @State private var isLoading = false
@@ -23,9 +25,9 @@ struct SocialSignInButtons: View {
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.black)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(height: 52)
+                .background(Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255))
+                .clipShape(Capsule(style: .continuous))
             }
             .disabled(isLoading)
             .accessibilityLabel("Continue with Apple")
@@ -37,27 +39,29 @@ struct SocialSignInButtons: View {
                     Text("Continue with Google")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .foregroundColor(.primary)
+                .foregroundColor(.palmText)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color(UIColor.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(height: 52)
+                .background(Color.white.opacity(0.72))
+                .clipShape(Capsule(style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+                    Capsule(style: .continuous)
+                        .stroke(Color.palmGlassBorder, lineWidth: 1)
                 )
             }
             .disabled(isLoading)
             .accessibilityLabel("Continue with Google")
 
-            HStack {
-                Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
-                Text("or use email")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
+            if showEmailDivider {
+                HStack {
+                    Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
+                    Text("or use email")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
+                }
+                .padding(.top, 4)
             }
-            .padding(.top, 4)
         }
         .palmErrorAlert("Sign In Failed", message: $errorMessage, isPresented: $showError)
         .sheet(isPresented: $showMFA) {

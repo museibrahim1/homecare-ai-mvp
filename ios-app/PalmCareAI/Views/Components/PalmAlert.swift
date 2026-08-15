@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Confirmation dialogs that need a custom icon/layout. Prefer native
+/// `.alert` / `.confirmationDialog` for ordinary errors (Apple HIG).
 struct PalmAlert: View {
     let title: String
     let message: String
@@ -138,19 +140,19 @@ extension View {
         }
     }
 
+    /// Native iOS system alert (Apple HIG). Use for errors and simple notices.
     func palmErrorAlert(
         _ title: String = "Error",
         message: Binding<String?>,
         isPresented: Binding<Bool>
     ) -> some View {
-        palmAlert(
-            title,
-            message: message.wrappedValue ?? "An unexpected error occurred.",
-            icon: "xmark.circle.fill",
-            iconColor: .red,
-            isPresented: isPresented,
-            primaryButton: .init(title: "OK", style: .primary, action: {})
-        )
+        alert(title, isPresented: isPresented) {
+            Button("OK", role: .cancel) {
+                message.wrappedValue = nil
+            }
+        } message: {
+            Text(message.wrappedValue ?? "Something went wrong. Please try again.")
+        }
     }
 
     func palmConfirmAlert(
@@ -163,14 +165,13 @@ extension View {
         confirmStyle: PalmAlert.PalmAlertButton.ButtonStyle = .destructive,
         onConfirm: @escaping () -> Void
     ) -> some View {
-        palmAlert(
-            title,
-            message: message,
-            icon: icon,
-            iconColor: iconColor,
-            isPresented: isPresented,
-            primaryButton: .init(title: confirmTitle, style: confirmStyle, action: onConfirm),
-            secondaryButton: .init(title: "Cancel", style: .cancel, action: {})
-        )
+        confirmationDialog(title, isPresented: isPresented, titleVisibility: .visible) {
+            Button(confirmTitle, role: confirmStyle == .destructive ? .destructive : nil) {
+                onConfirm()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(message)
+        }
     }
 }
