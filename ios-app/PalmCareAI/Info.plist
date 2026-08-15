@@ -28,13 +28,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.palmcareai.app</string>
+				<string>com.googleusercontent.apps.668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>GOOGLE_CLIENT_ID</key>
-	<string></string>
+	<string>668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>

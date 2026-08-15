@@ -83,13 +83,14 @@ targets:
         POSTHOG_HOST: "https://us.i.posthog.com"
         # Google OAuth client ID for Calendar/Gmail/Drive integrations.
         # Leave blank in source — set via build configuration / xcconfig.
-        GOOGLE_CLIENT_ID: ""
+        GOOGLE_CLIENT_ID: "668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com"
         # Register the OAuth callback URL scheme so Google can redirect
         # back into the app after the user grants Calendar access.
         CFBundleURLTypes:
           - CFBundleURLName: com.palmcareai.app
             CFBundleURLSchemes:
               - com.palmcareai.app
+              - com.googleusercontent.apps.668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j
 
 schemes:
   PalmCareAI:
