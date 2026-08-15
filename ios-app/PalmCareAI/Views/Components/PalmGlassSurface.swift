@@ -80,4 +80,61 @@ extension View {
     ) -> some View {
         modifier(PalmGlassCardModifier(radius: radius, fillOpacity: fillOpacity, padding: padding))
     }
+
+    /// Full-screen mint wash behind any App / Pipeline / Auth glass screen.
+    func palmGlassScreen() -> some View {
+        background { PalmGlassBackground() }
+    }
+
+    /// Soft white field on glass forms (Login / Sign up / Add Client).
+    func palmGlassField(focused: Bool = false) -> some View {
+        self
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(0.85))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        focused ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8),
+                        lineWidth: 1
+                    )
+            )
+    }
+}
+
+/// Uppercase eyebrow label used across Paper glass forms.
+struct PalmGlassLabel: View {
+    let text: String
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .tracking(0.8)
+            .foregroundColor(.palmSecondary)
+    }
+}
+
+/// Status pill for Pipeline Glass checklists (Ready / Writing / Next / Failed).
+/// Used on the Overview processing checklist and the Record processing overlay.
+struct PalmPipelinePill: View {
+    let text: String
+    let color: Color
+    var showsSpinner: Bool = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if showsSpinner {
+                ProgressView()
+                    .scaleEffect(0.55)
+                    .tint(color)
+            }
+            Text(text.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .tracking(0.5)
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 4)
+        .background(Capsule(style: .continuous).fill(color.opacity(0.14)))
+    }
 }

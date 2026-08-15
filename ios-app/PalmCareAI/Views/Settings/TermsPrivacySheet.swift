@@ -92,7 +92,7 @@ struct TermsPrivacySheet: View {
                 .padding(.top, 16)
                 .padding(.bottom, 40)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Terms & Privacy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

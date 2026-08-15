@@ -32,7 +32,7 @@ struct GoogleCalendarSetupSheet: View {
                     connectPrompt
                 }
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle(isConnected ? "Google Calendar" : "Google Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

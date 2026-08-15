@@ -81,7 +81,7 @@ struct AddEventSheet: View {
                 }
                 .padding(.top, 16)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("New Event")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

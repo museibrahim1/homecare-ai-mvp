@@ -49,10 +49,7 @@ struct EventRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 14)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityHint("Long press for options")
     }

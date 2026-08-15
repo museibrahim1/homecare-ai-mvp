@@ -59,10 +59,7 @@ extension VisitDetailView {
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard()
     }
 
     func agreementSendCard(_ send: AgreementSend) -> some View {
@@ -147,64 +144,67 @@ extension VisitDetailView {
     }
 
     func pipelineCard(_ v: Visit) -> some View {
-        let steps: [(String, String, String)] = [
-            ("transcription", "Transcribe", "waveform"),
+        // The four deliverable documents shown in the Processing checklist —
+        // one row each, so the count matches the visible items ("X of 4").
+        let docSteps: [(String, String, String)] = [
+            ("transcription", "Transcript", "text.quote"),
+            ("billing", "Billables", "dollarsign.circle.fill"),
+            ("note", "Notes", "note.text"),
+            ("contract", "Contract", "doc.text.fill"),
+        ]
+        // Speakers/diarization isn't a deliverable document, but keep it in the
+        // retry list so a failed speaker pass can still be re-queued.
+        let retrySteps: [(String, String, String)] = [
+            ("transcription", "Transcript", "text.quote"),
             ("diarization", "Speakers", "person.2.fill"),
-            ("billing", "Billables", "dollarsign.circle"),
+            ("billing", "Billables", "dollarsign.circle.fill"),
             ("note", "Notes", "note.text"),
             ("contract", "Contract", "doc.text.fill"),
         ]
         let ready = documentReadyCount
-        let retryable = steps.filter { pipelineStepState(v, step: $0.0).canRetry }
+        let retryable = retrySteps.filter { pipelineStepState(v, step: $0.0).canRetry }
 
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Processing Pipeline")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.palmText)
+                PalmGlassLabel(text: "Documents")
                 Spacer()
                 Text("\(ready) of 4 ready")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(ready == 4 ? .palmGreen : .palmSecondary)
             }
 
-            HStack(spacing: 0) {
-                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+            VStack(spacing: 0) {
+                ForEach(Array(docSteps.enumerated()), id: \.offset) { index, step in
                     let state = pipelineStepState(v, step: step.0)
-                    VStack(spacing: 6) {
+                    HStack(spacing: 12) {
                         ZStack {
                             Circle()
-                                .fill(state.color.opacity(0.15))
-                                .frame(width: 36, height: 36)
+                                .fill(state.color.opacity(0.14))
+                                .frame(width: 34, height: 34)
                             if state.isProcessing {
                                 ProgressView()
                                     .scaleEffect(0.6)
-                            } else if state.isFailed {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(state.color)
-                            } else if state.isStuck {
-                                Image(systemName: "exclamationmark")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(state.color)
+                                    .tint(state.color)
                             } else {
-                                Image(systemName: state.isComplete ? "checkmark" : step.2)
-                                    .font(.system(size: 13, weight: .semibold))
+                                Image(systemName: state.isComplete
+                                      ? "checkmark"
+                                      : (state.isFailed ? "xmark" : (state.isStuck ? "exclamationmark" : step.2)))
+                                    .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(state.color)
                             }
                         }
                         Text(step.1)
-                            .font(.system(size: 9, weight: .medium))
-                            .foregroundColor(state.color)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.palmText)
+                        Spacer()
+                        pipelineStatusPill(state)
                     }
-                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 11)
 
-                    if index < steps.count - 1 {
-                        Rectangle()
-                            .fill(state.isComplete ? Color.palmGreen.opacity(0.3) : Color.palmBorder)
-                            .frame(height: 2)
-                            .frame(maxWidth: 20)
-                            .padding(.bottom, 18)
+                    if index < docSteps.count - 1 {
+                        Divider()
+                            .overlay(Color.palmGlassBorder)
+                            .padding(.leading, 46)
                     }
                 }
             }
@@ -262,10 +262,24 @@ extension VisitDetailView {
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard()
+    }
+
+    /// Maps a pipeline step's state to a Pipeline Glass status pill
+    /// (Ready / Writing / Failed / Stuck / Next).
+    @ViewBuilder
+    func pipelineStatusPill(_ state: PipelineStepState) -> some View {
+        if state.isComplete {
+            PalmPipelinePill(text: "Ready", color: .palmGreen)
+        } else if state.isProcessing {
+            PalmPipelinePill(text: "Writing", color: .palmBlue, showsSpinner: true)
+        } else if state.isFailed {
+            PalmPipelinePill(text: "Failed", color: .red)
+        } else if state.isStuck {
+            PalmPipelinePill(text: "Stuck", color: .palmOrange)
+        } else {
+            PalmPipelinePill(text: "Next", color: .palmSecondary)
+        }
     }
 
     var quickStatsGrid: some View {
@@ -294,11 +308,20 @@ extension VisitDetailView {
             statCard(
                 icon: "doc.text.fill",
                 label: "Contract",
-                value: contract?.title ?? "—",
+                value: contractStatValue,
                 color: .palmPurple,
                 tapAction: { activeTab = 4 }
             )
         }
+    }
+
+    /// Contract titles like "Home Care Service Agreement" ellipsize badly in
+    /// the small stat card. Fall back to a short, safe label when the real
+    /// title is too long for two lines to read cleanly.
+    var contractStatValue: String {
+        guard let title = contract?.title?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !title.isEmpty else { return "—" }
+        return title.count > 28 ? "Service agreement" : title
     }
 
     func statCard(icon: String, label: String, value: String, color: Color, tapAction: @escaping () -> Void) -> some View {
@@ -318,15 +341,13 @@ extension VisitDetailView {
                     Text(value)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.palmText)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(12)
-            .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+            .palmGlassCard(radius: 18)
         }
         .buttonStyle(.plain)
     }

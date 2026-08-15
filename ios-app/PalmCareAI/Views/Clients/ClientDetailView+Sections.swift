@@ -91,10 +91,7 @@ extension ClientDetailView {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 22)
         .padding(.horizontal, 16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 6, y: 3)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 24)
     }
 
     func actionButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {

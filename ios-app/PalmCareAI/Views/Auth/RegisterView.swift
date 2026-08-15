@@ -52,31 +52,27 @@ struct RegisterView: View {
                 VStack(spacing: 0) {
                     header
                         .padding(.top, 8)
-                        .padding(.bottom, 28)
+                        .padding(.bottom, 20)
 
-                    VStack(spacing: 14) {
-                        SocialSignInButtons()
-                            .environmentObject(api)
-                            .padding(.bottom, 4)
+                    formCard
+                        .padding(.horizontal, 24)
 
-                        nameField
-                        emailField
-                        passwordField
-                        agencyField
+                    orDivider
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 18)
 
-                        createButton
-                            .padding(.top, 8)
+                    SocialSignInButtons(showEmailDivider: false)
+                        .environmentObject(api)
+                        .padding(.horizontal, 24)
 
-                        bottomLink
-                            .padding(.top, 8)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                    bottomLink
+                        .padding(.top, 22)
+                        .padding(.bottom, 40)
                 }
+                .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .navigationTitle("Create Account")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .palmTransparentNavBar()
@@ -106,16 +102,44 @@ struct RegisterView: View {
     private var header: some View {
         VStack(spacing: 14) {
             PalmOrbLogo(size: 72, animated: true)
-            VStack(spacing: 4) {
-                Text("Get started in 30 seconds")
-                    .font(.system(size: 22, weight: .bold))
-                Text("Built for licensed home care agencies.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+            VStack(spacing: 6) {
+                Text("Create your agency")
+                    .font(.system(size: 28, weight: .heavy))
+                    .foregroundColor(.palmText)
+                    .tracking(-0.4)
+                Text("Name, email, password. You are in.")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.palmSecondary)
             }
             .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 24)
+    }
+
+    private var formCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                PalmGlassLabel(text: "Your name")
+                nameField
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                PalmGlassLabel(text: "Work email")
+                emailField
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                PalmGlassLabel(text: "Password")
+                passwordField
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                PalmGlassLabel(text: "Agency name")
+                agencyField
+            }
+            createButton
+                .padding(.top, 4)
+        }
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+        .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.62)
     }
 
     private var nameField: some View {
@@ -174,11 +198,11 @@ struct RegisterView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 14)
-            .background(Color(UIColor.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Color.white.opacity(0.85))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
             )
 
             if !password.isEmpty && !passwordIsStrong {
@@ -204,8 +228,8 @@ struct RegisterView: View {
     private var createButton: some View {
         Button(action: { focusedField = nil; showConsent = true }) {
             ZStack {
-                Text("Create Account")
-                    .font(.headline)
+                Text("Create account")
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                     .opacity(isLoading ? 0 : 1)
                 if isLoading {
@@ -215,9 +239,10 @@ struct RegisterView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 52)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                Capsule(style: .continuous)
                     .fill(formIsValid ? Color.palmPrimary : Color.palmPrimary.opacity(0.4))
             )
+            .shadow(color: formIsValid ? PalmGlass.tealShadow : .clear, radius: 12, y: 6)
         }
         .disabled(!formIsValid || isLoading)
         .accessibilityIdentifier("createAccountButton")
@@ -225,9 +250,11 @@ struct RegisterView: View {
 
     private var orDivider: some View {
         HStack(spacing: 12) {
-            Rectangle().fill(Color.secondary.opacity(0.2)).frame(height: 1)
-            Text("OR").font(.caption).foregroundColor(.secondary)
-            Rectangle().fill(Color.secondary.opacity(0.2)).frame(height: 1)
+            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
+            Text("or")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.palmSecondary)
+            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
         }
     }
 
@@ -309,11 +336,11 @@ struct RegisterView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 14)
-        .background(Color(UIColor.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.white.opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.5) : Color.clear, lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
         )
     }
 
@@ -512,7 +539,7 @@ struct RegistrationConsentView: View {
                 .padding(.top, 24)
                 .padding(.bottom, 40)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Almost done")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

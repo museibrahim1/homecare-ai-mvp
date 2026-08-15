@@ -92,39 +92,43 @@ struct RecordView: View {
                 if isProcessing {
                     VStack {
                         Spacer()
-                        VStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 14) {
                             HStack(spacing: 10) {
-                                ProgressView().tint(.white).scaleEffect(0.8)
+                                ProgressView().tint(.palmPrimary).scaleEffect(0.8)
                                 Text(uploadProgress ?? "Processing assessment...")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.palmText)
+                                Spacer()
                             }
 
                             if !pipelineSteps.isEmpty {
-                                VStack(spacing: 6) {
-                                    ForEach(pipelineSteps, id: \.0) { step, status in
-                                        HStack(spacing: 8) {
+                                VStack(spacing: 0) {
+                                    ForEach(Array(pipelineSteps.enumerated()), id: \.offset) { index, entry in
+                                        let (step, status) = entry
+                                        HStack(spacing: 10) {
                                             pipelineIcon(for: status)
-                                                .frame(width: 14, height: 14)
+                                                .frame(width: 16, height: 16)
                                             Text(step)
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(.white.opacity(0.85))
+                                                .font(.system(size: 13, weight: .medium))
+                                                .foregroundColor(.palmText)
                                             Spacer()
-                                            Text(status.capitalized)
-                                                .font(.system(size: 10, weight: .semibold))
-                                                .foregroundColor(pipelineColor(for: status))
+                                            let s = pipelineStatusDescriptor(for: status)
+                                            PalmPipelinePill(text: s.0, color: s.1, showsSpinner: s.2)
+                                        }
+                                        .padding(.vertical, 9)
+
+                                        if index < pipelineSteps.count - 1 {
+                                            Divider()
+                                                .overlay(Color.palmGlassBorder)
+                                                .padding(.leading, 26)
                                         }
                                     }
                                 }
-                                .padding(.top, 4)
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 14)
-                        .background(Color(red: 20/255, green: 20/255, blue: 24/255).opacity(0.95))
-                        .cornerRadius(16)
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmPrimary.opacity(0.3), lineWidth: 1))
-                        .shadow(color: Color.black.opacity(0.4), radius: 10, y: 4)
+                        .padding(.vertical, 18)
+                        .palmGlassCard(radius: 22)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 100)
                     }
@@ -792,7 +796,7 @@ struct RecordView: View {
         default:
             Image(systemName: "circle")
                 .font(.system(size: 12))
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(.palmSecondary.opacity(0.4))
         }
     }
 
@@ -802,7 +806,19 @@ struct RecordView: View {
         case "running", "processing": return .palmPrimary
         case "failed": return .red
         case "queued", "pending": return .palmOrange
-        default: return .white.opacity(0.4)
+        default: return .palmSecondary
+        }
+    }
+
+    /// Status pill descriptor (label, color, spinner) for the Processing
+    /// checklist — mirrors the Overview Pipeline Glass statuses.
+    private func pipelineStatusDescriptor(for status: String) -> (String, Color, Bool) {
+        switch status.lowercased() {
+        case "completed": return ("Ready", .palmGreen, false)
+        case "running", "processing": return ("Writing", .palmPrimary, true)
+        case "failed": return ("Failed", .red, false)
+        case "queued", "pending": return ("Next", .palmOrange, false)
+        default: return ("Waiting", .palmSecondary, false)
         }
     }
 
@@ -918,7 +934,7 @@ struct AIDataConsentSheet: View {
                 .padding(.top, 24)
                 .padding(.bottom, 40)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Data & Privacy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

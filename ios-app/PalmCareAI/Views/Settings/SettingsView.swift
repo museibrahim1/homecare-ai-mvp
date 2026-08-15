@@ -71,7 +71,8 @@ struct SettingsView: View {
             .sheet(isPresented: $showPaywall, onDismiss: {
                 Task { usage = try? await api.fetchUsage() }
             }) {
-                PaywallView().environmentObject(api)
+                // Opened deliberately from Settings → they may close it.
+                PaywallView(isRequired: false).environmentObject(api)
             }
             .task { await loadData() }
             .refundRequestSheet(for: refundTransactionID ?? 0, isPresented: $showRefundSheet)

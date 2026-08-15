@@ -103,7 +103,7 @@ struct ContractStylesView: View {
                 }
                 .padding(.bottom, 40)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Contract Styles")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

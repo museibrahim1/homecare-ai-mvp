@@ -8,17 +8,21 @@ extension VisitDetailView {
     var contractTab: some View {
         VStack(spacing: 0) {
             if let c = contract {
-                contractHeader(c)
-                    .padding(.bottom, 14)
+                VStack(spacing: 0) {
+                    contractHeader(c)
+                        .padding(.bottom, 14)
 
-                currentStyleBadge
-                    .padding(.bottom, 10)
+                    currentStyleBadge
+                        .padding(.bottom, 10)
 
-                contractRateCards(c)
-                    .padding(.bottom, 14)
-                contractServicesSection(c)
-                contractScheduleSection(c)
-                contractDocumentSection(c)
+                    contractRateCards(c)
+                        .padding(.bottom, 14)
+                    contractServicesSection(c)
+                    contractScheduleSection(c)
+                    contractDocumentSection(c)
+                }
+                .padding(18)
+                .palmGlassCard()
             } else if tabFetchFailed.contains(4) {
                 tabErrorState(tab: 4)
             } else {
@@ -66,6 +70,9 @@ extension VisitDetailView {
                         Text(c.title ?? "Service Agreement")
                             .font(titleFont)
                             .foregroundColor(isElegant || isProfessional ? accent : .palmText)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     if let status = c.status, !isEditingContract {
                         PalmStatusChip(text: status.capitalized, tone: status == "active" ? .success : .warning)
@@ -150,7 +157,7 @@ extension VisitDetailView {
                             .keyboardType(.decimalPad)
                             .font(.system(size: 13, weight: .semibold))
                             .padding(8)
-                            .background(Color.palmBackground)
+                            .background(Color.white.opacity(0.75))
                             .cornerRadius(8)
                         Text("Weekly hours")
                             .font(.system(size: 12, weight: .medium))
@@ -159,7 +166,7 @@ extension VisitDetailView {
                             .keyboardType(.decimalPad)
                             .font(.system(size: 13, weight: .semibold))
                             .padding(8)
-                            .background(Color.palmBackground)
+                            .background(Color.white.opacity(0.75))
                             .cornerRadius(8)
                     }
                     Text("Terms")
@@ -169,9 +176,9 @@ extension VisitDetailView {
                         .font(.system(size: 13))
                         .lineLimit(4...12)
                         .padding(10)
-                        .background(Color.palmBackground)
+                        .background(Color.white.opacity(0.75))
                         .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
                 }
                 .padding(.top, 10)
             }
@@ -652,10 +659,7 @@ extension VisitDetailView {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 18)
     }
 
     func beginContractEdit(_ c: VisitContract) {

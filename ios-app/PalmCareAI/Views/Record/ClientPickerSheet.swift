@@ -48,7 +48,7 @@ struct ClientPickerSheet: View {
                 }
             }
         }
-        .background(Color.palmBackground.ignoresSafeArea())
+        .background(PalmGlassBackground())
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
         .sheet(isPresented: $showAddClient) {
@@ -128,9 +128,9 @@ struct ClientPickerSheet: View {
         }
         .padding(.horizontal, 13)
         .padding(.vertical, 10)
-        .background(Color.palmFieldBg)
+        .background(Color.white.opacity(0.75))
         .cornerRadius(11)
-        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.palmBorder, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.palmGlassBorder, lineWidth: 1))
         .padding(.horizontal, 18)
         .padding(.bottom, 12)
     }
@@ -201,10 +201,9 @@ struct ClientPickerSheet: View {
             }
             .padding(.horizontal, 13)
             .padding(.vertical, 10)
-            .background(isSelected ? Color.palmPrimary.opacity(0.07) : Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(14)
-            .overlay(RoundedRectangle(cornerRadius: 14)
-                .stroke(isSelected ? Color.palmPrimary.opacity(0.4) : Color.palmBorder.opacity(0.7), lineWidth: 1))
+            .palmGlassCard(radius: 16)
+            .overlay(RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? Color.palmPrimary.opacity(0.45) : Color.clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(client.full_name)\(isSelected ? ", selected" : "")")

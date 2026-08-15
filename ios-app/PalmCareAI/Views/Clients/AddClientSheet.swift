@@ -101,7 +101,7 @@ struct AddClientSheet: View {
 
                 submitBar
             }
-            .background(Color.palmBackground.ignoresSafeArea())
+            .background(PalmGlassBackground())
             .toolbar(.hidden, for: .navigationBar)
             .onAppear { populateFromClient() }
         }
@@ -127,10 +127,6 @@ struct AddClientSheet: View {
         .padding(.horizontal, 18)
         .padding(.top, 14)
         .padding(.bottom, 12)
-        .background(Color(UIColor.systemBackground))
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
-        }
     }
 
     // MARK: - Avatar Preview
@@ -166,9 +162,7 @@ struct AddClientSheet: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder.opacity(0.7), lineWidth: 1))
+        .palmGlassCard(radius: 20)
     }
 
     // MARK: - Sticky Submit Bar

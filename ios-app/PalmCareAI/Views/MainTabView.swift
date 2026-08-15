@@ -2,13 +2,33 @@ import SwiftUI
 
 struct MainTabView: View {
     @EnvironmentObject var api: APIService
+    @StateObject private var store = StoreKitService.shared
     @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("OPEN_RECORD_TAB") ? 2 : 0
     @State private var navigationResetIds: [Int: UUID] = [
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
     @AppStorage("hasSeenSampleVisit") private var hasSeenSampleVisit = false
     @State private var showSamplePacket = false
-    @State private var showPostWowPaywall = false
+
+    /// The only ways past the hard paywall gate are a real Apple trial/purchase
+    /// or, for automated test runs, an explicit launch argument. There is no
+    /// visible "skip" button anywhere in the UI.
+    private var paywallBypass: Bool {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        return args.contains("SKIP_PAYWALL") || args.contains("AUTOMATION_STRESS_FLOW")
+        #else
+        return false
+        #endif
+    }
+
+    /// Present the required paywall once the user has seen (or skipped) the
+    /// sample packet and still holds no active subscription entitlement.
+    private var shouldGateOnPaywall: Bool {
+        guard !paywallBypass else { return false }
+        guard hasSeenSampleVisit else { return false }
+        return !store.hasActiveEntitlement
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -34,6 +54,11 @@ struct MainTabView: View {
             ])
         }
         .onAppear {
+            // Re-verify subscription state on every launch so renewals,
+            // refunds, and revocations made outside the app are enforced and
+            // the hard gate reflects the true entitlement.
+            Task { await store.syncEntitlements() }
+
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
                 hasSeenSampleVisit = true
@@ -50,17 +75,21 @@ struct MainTabView: View {
         .fullScreenCover(isPresented: $showSamplePacket, onDismiss: {
             hasSeenSampleVisit = true
             PostHogService.shared.capture("sample_packet_dismissed")
-            // Soft plan ask after the wow, not before.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                showPostWowPaywall = true
-            }
+            // After the wow, `shouldGateOnPaywall` flips true (unless already
+            // subscribed) and the required paywall below takes over.
         }) {
             SamplePacketView {
                 showSamplePacket = false
             }
         }
-        .sheet(isPresented: $showPostWowPaywall) {
-            PaywallView()
+        // Hard subscription gate: this cover cannot be dismissed by the user.
+        // It appears whenever `shouldGateOnPaywall` is true and disappears only
+        // once an entitlement becomes active (which flips the value to false).
+        .fullScreenCover(isPresented: Binding(
+            get: { shouldGateOnPaywall },
+            set: { _ in }
+        )) {
+            PaywallView(isRequired: true)
                 .environmentObject(api)
         }
     }

@@ -108,7 +108,7 @@ struct ContractsView: View {
                 }
             }
         }
-        .background(Color.palmBackground)
+        .palmGlassScreen()
         .task { await loadDocuments() }
         .quickLookPreview($previewURL)
     }
@@ -126,11 +126,15 @@ struct ContractsView: View {
                             .foregroundColor(isSelected ? .white : .palmText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(isSelected ? Color.palmPrimary : Color.palmFieldBg)
+                            .background(
+                                isSelected
+                                    ? AnyShapeStyle(Color.palmPrimary)
+                                    : AnyShapeStyle(.ultraThinMaterial)
+                            )
                             .cornerRadius(20)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .stroke(isSelected ? Color.clear : Color.palmBorder, lineWidth: 1)
+                                    .stroke(isSelected ? Color.clear : Color.palmGlassBorder, lineWidth: 1)
                             )
                     }
                     .accessibilityLabel("Filter by \(filter)")
@@ -139,7 +143,6 @@ struct ContractsView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Search
@@ -164,9 +167,8 @@ struct ContractsView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(Color.palmFieldBg)
-        .cornerRadius(10)
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.palmGlassBorder, lineWidth: 1))
         .padding(.horizontal, 18)
         .padding(.vertical, 8)
     }
@@ -407,10 +409,7 @@ private struct ClientSection: View {
                 .padding(.bottom, 8)
             }
         }
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 18)
     }
 
     private func docSection(title: String, icon: String, color: Color, docs: [DocumentItem]) -> some View {

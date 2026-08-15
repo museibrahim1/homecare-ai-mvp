@@ -66,12 +66,10 @@ extension VisitDetailView {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+        .palmGlassCard(radius: 18)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.15), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(color.opacity(0.25), lineWidth: 1)
         )
     }
 

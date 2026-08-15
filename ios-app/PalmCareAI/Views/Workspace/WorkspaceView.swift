@@ -48,41 +48,39 @@ struct WorkspaceSectionPicker: View {
     @Binding var selectedSection: Int
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Array(sections.enumerated()), id: \.offset) { index, title in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { selectedSection = index }
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: sectionIcons[index])
-                                .font(.system(size: 11, weight: .semibold))
-                                .accessibilityHidden(true)
+        HStack(spacing: 4) {
+            ForEach(Array(sections.enumerated()), id: \.offset) { index, title in
+                let isSelected = selectedSection == index
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { selectedSection = index }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: sectionIcons[index])
+                            .font(.system(size: 11, weight: .semibold))
+                            .accessibilityHidden(true)
 
-                            Text(title)
-                                .font(.system(size: 12, weight: .semibold))
-                                .lineLimit(1)
-                                .fixedSize()
-                        }
-                        .foregroundColor(selectedSection == index ? .white : .palmSecondary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            selectedSection == index
-                                ? AnyShapeStyle(LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600], startPoint: .leading, endPoint: .trailing))
-                                : AnyShapeStyle(Color(UIColor.secondarySystemGroupedBackground))
-                        )
-                        .cornerRadius(10)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(selectedSection == index ? Color.clear : Color.palmBorder, lineWidth: 1)
-                        )
+                        Text(title)
+                            .font(.system(size: 12, weight: .semibold))
+                            .lineLimit(1)
                     }
-                    .accessibilityLabel("\(title), \(selectedSection == index ? "selected" : "")")
+                    .foregroundColor(isSelected ? .white : .palmSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 9)
+                    .background(
+                        isSelected
+                            ? AnyShapeStyle(LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600], startPoint: .leading, endPoint: .trailing))
+                            : AnyShapeStyle(Color.clear)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .shadow(color: isSelected ? PalmGlass.tealShadow : .clear, radius: 8, y: 3)
                 }
+                .accessibilityLabel("\(title), \(isSelected ? "selected" : "")")
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 8)
         }
+        .padding(4)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.palmGlassBorder, lineWidth: 1))
+        .padding(.horizontal, 18)
+        .padding(.bottom, 8)
     }
 }

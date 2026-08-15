@@ -134,10 +134,7 @@ struct DetailSection<Content: View>: View {
             VStack(spacing: 0) {
                 content
             }
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(14)
-            .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
+            .palmGlassCard(radius: 18)
         }
     }
 }

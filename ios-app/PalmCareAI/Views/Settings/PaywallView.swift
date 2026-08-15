@@ -9,6 +9,10 @@ struct PaywallView: View {
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
+    /// When true the paywall is a hard gate: no "Done", no swipe-to-dismiss.
+    /// It only closes after a purchase or restore that grants an entitlement.
+    var isRequired: Bool = false
+
     @State private var selectedProductID: String = "com.palmcareai.app.starter.monthly"
     @State private var showSuccess = false
     @State private var restoreMessage: String?
@@ -59,12 +63,18 @@ struct PaywallView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 40)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Plan")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(isRequired)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+                // When the paywall is a hard gate there is no escape hatch —
+                // the only way out is starting the Apple trial or restoring an
+                // existing subscription.
+                if !isRequired {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { dismiss() }
+                    }
                 }
             }
             .task {
@@ -74,7 +84,7 @@ struct PaywallView: View {
                 }
             }
             .alert("You're all set", isPresented: $showSuccess) {
-                Button("OK") { dismiss() }
+                Button("OK") { dismissIfAllowed() }
             } message: {
                 Text("Your subscription is active. Every feature is unlocked.")
             }
@@ -82,7 +92,7 @@ struct PaywallView: View {
                 get: { restoreMessage != nil },
                 set: { if !$0 { restoreMessage = nil } }
             )) {
-                Button("OK", role: .cancel) {}
+                Button("OK", role: .cancel) { dismissIfAllowed() }
             } message: {
                 Text(restoreMessage ?? "")
             }
@@ -94,6 +104,16 @@ struct PaywallView: View {
             } message: {
                 Text(store.lastError ?? "")
             }
+        }
+    }
+
+    // MARK: - Dismiss
+
+    /// A non-required paywall can always be closed. A required (hard-gate)
+    /// paywall closes only once the user actually holds an active entitlement.
+    private func dismissIfAllowed() {
+        if !isRequired || store.hasActiveEntitlement {
+            dismiss()
         }
     }
 

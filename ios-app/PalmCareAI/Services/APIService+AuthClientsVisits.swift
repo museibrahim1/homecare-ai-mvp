@@ -87,10 +87,28 @@ extension APIService {
         return response
     }
 
-    func completeOnboarding(agencyName: String, consent: Bool) async throws {
+    func completeOnboarding(
+        agencyName: String,
+        phone: String = "",
+        address: String = "",
+        city: String = "",
+        state: String = "",
+        zipCode: String = "",
+        consent: Bool
+    ) async throws {
         var body: [String: Any] = ["consent": consent]
         let trimmed = agencyName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmed.isEmpty { body["agency_name"] = trimmed }
+        let phoneTrim = phone.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !phoneTrim.isEmpty { body["phone"] = phoneTrim }
+        let addressTrim = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !addressTrim.isEmpty { body["address"] = addressTrim }
+        let cityTrim = city.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !cityTrim.isEmpty { body["city"] = cityTrim }
+        let stateTrim = state.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if !stateTrim.isEmpty { body["state"] = stateTrim }
+        let zipTrim = zipCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !zipTrim.isEmpty { body["zip_code"] = zipTrim }
         let _: [String: AnyCodable] = try await request(
             "POST",
             path: "/auth/business/complete-onboarding",

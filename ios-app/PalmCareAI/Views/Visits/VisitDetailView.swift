@@ -59,7 +59,7 @@ struct VisitDetailView: View {
             tabBar
             tabContent
         }
-        .background(Color.palmBackground)
+        .background(PalmGlassBackground())
         .navigationTitle(clientName ?? "Assessment")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -136,34 +136,84 @@ struct VisitDetailView: View {
 
     // MARK: - Tab Bar
 
+    /// Frosted glass segmented pills floating over the mint wash — the active
+    /// pill is a teal gradient chip, inactive pills are translucent white glass.
     var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { activeTab = index }
-                } label: {
-                    VStack(spacing: 6) {
-                        HStack(spacing: 4) {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                    let isActive = activeTab == index
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { activeTab = index }
+                    } label: {
+                        HStack(spacing: 6) {
                             Image(systemName: tabIcon(index))
-                                .font(.system(size: 10, weight: .semibold))
+                                .font(.system(size: 11, weight: .semibold))
                             Text(tab)
-                                .font(.system(size: 11, weight: .medium))
+                                .font(.system(size: 13, weight: .semibold))
                         }
-                        .foregroundColor(activeTab == index ? .palmPrimary : .palmSecondary)
-
-                        Rectangle()
-                            .fill(activeTab == index ? Color.palmPrimary : Color.clear)
-                            .frame(height: 2)
+                        .foregroundColor(isActive ? .white : .palmSecondary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background {
+                            if isActive {
+                                Capsule(style: .continuous)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.palmPrimary, Color.palmTeal600],
+                                            startPoint: .leading, endPoint: .trailing
+                                        )
+                                    )
+                                    .shadow(color: PalmGlass.tealShadow, radius: 8, y: 3)
+                            } else {
+                                Capsule(style: .continuous)
+                                    .fill(Color.white.opacity(0.55))
+                                    .overlay(
+                                        Capsule(style: .continuous)
+                                            .stroke(Color.palmGlassBorder, lineWidth: 1)
+                                    )
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 10)
+                    .accessibilityLabel("\(tab) tab")
+                    .accessibilityAddTraits(isActive ? .isSelected : [])
                 }
-                .accessibilityLabel("\(tab) tab")
             }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
         }
-        .padding(.horizontal, 4)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .overlay(Divider(), alignment: .bottom)
+    }
+
+    // MARK: - Screen Header (Pipeline Glass eyebrow + title)
+
+    var screenTitle: String {
+        switch activeTab {
+        case 0: return "Overview"
+        case 1: return "Transcript"
+        case 2: return "Billables"
+        case 3: return "Notes"
+        case 4: return "Contract"
+        default: return "Assessment"
+        }
+    }
+
+    /// Client-name eyebrow + large screen title, matching the Paper Pipeline
+    /// Glass header on each document screen.
+    var screenHeader: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            if let name = clientName ?? visit?.client?.full_name, !name.isEmpty {
+                Text(name.uppercased())
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundColor(.palmPrimary)
+                    .lineLimit(1)
+            }
+            Text(screenTitle)
+                .font(.system(size: 26, weight: .heavy))
+                .foregroundColor(.palmText)
+                .tracking(-0.4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     func tabIcon(_ index: Int) -> String {
@@ -187,6 +237,7 @@ struct VisitDetailView: View {
                 } else if let error = errorMessage {
                     errorView(error)
                 } else {
+                    screenHeader
                     if isPipelineProcessing || hasFailedPipelineStep || hasStuckPipelineStep {
                         processingBanner
                     }

@@ -34,14 +34,19 @@ struct CalendarView: View {
     }()
 
     var body: some View {
-        VStack(spacing: 0) {
-            monthHeader
-            weekdayHeader
-            calendarGrid
-            Divider().padding(.horizontal, 18)
+        VStack(spacing: 16) {
+            VStack(spacing: 0) {
+                monthHeader
+                weekdayHeader
+                calendarGrid
+            }
+            .palmGlassCard(radius: 24)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+
             eventsList
         }
-        .background(Color.palmBackground)
+        .palmGlassScreen()
         .task { await refreshEvents() }
         // Refetch when Google Calendar is connected in Settings, so the user
         // doesn't come back to a stale calendar until the tab is reset.
@@ -123,8 +128,8 @@ struct CalendarView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.palmPrimary)
                     .frame(width: 36, height: 36)
-                    .background(Color.palmPrimary.opacity(0.08))
-                    .cornerRadius(10)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.palmGlassBorder, lineWidth: 1))
             }
             .accessibilityLabel("Previous month")
 
@@ -156,14 +161,13 @@ struct CalendarView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.palmPrimary)
                     .frame(width: 36, height: 36)
-                    .background(Color.palmPrimary.opacity(0.08))
-                    .cornerRadius(10)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.palmGlassBorder, lineWidth: 1))
             }
             .accessibilityLabel("Next month")
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Weekday Header
@@ -179,7 +183,6 @@ struct CalendarView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Calendar Grid
@@ -199,7 +202,7 @@ struct CalendarView: View {
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 12)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .padding(.top, 4)
     }
 
     private func dayCell(_ date: Date) -> some View {

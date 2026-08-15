@@ -263,7 +263,7 @@ struct FaceIDLockScreen: View {
 
             Spacer()
         }
-        .background(Color.palmBackground)
+        .background(PalmGlassBackground())
         .onAppear { authenticate() }
     }
 

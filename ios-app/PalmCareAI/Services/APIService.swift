@@ -73,11 +73,10 @@ class APIService: ObservableObject {
             return env
         }
         #if targetEnvironment(simulator)
-        // Debug Simulator talks to docker-compose on this Mac. Set
-        // PALM_USE_PRODUCTION_API=1 to hit Railway instead. Physical
-        // devices keep production unless PALM_API_BASE_URL is set, because
-        // 127.0.0.1 on a phone is the phone itself.
-        if ProcessInfo.processInfo.environment["PALM_USE_PRODUCTION_API"] != "1" {
+        // Prefer Railway in the Simulator. A stale/broken local sandbox on
+        // :8000 is a common reason sign-in "doesn't work" in Debug builds.
+        // Opt into local with PALM_USE_LOCAL_API=1 (or set PALM_API_BASE_URL).
+        if ProcessInfo.processInfo.environment["PALM_USE_LOCAL_API"] == "1" {
             return "http://127.0.0.1:8000"
         }
         #endif

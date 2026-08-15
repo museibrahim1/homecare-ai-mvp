@@ -58,7 +58,7 @@ struct EmailContractSheet: View {
                     submitBar
                 }
             }
-            .background(Color.palmBackground.ignoresSafeArea())
+            .background(PalmGlassBackground())
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
                 if recipientName.isEmpty, let name = clientName { recipientName = name }
@@ -89,9 +89,9 @@ struct EmailContractSheet: View {
         .padding(.horizontal, 18)
         .padding(.top, 14)
         .padding(.bottom, 12)
-        .background(Color(UIColor.systemBackground))
+        .background(.ultraThinMaterial)
         .overlay(alignment: .bottom) {
-            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
+            Rectangle().fill(Color.palmGlassBorder.opacity(0.7)).frame(height: 1)
         }
     }
 
@@ -174,9 +174,7 @@ struct EmailContractSheet: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder.opacity(0.7), lineWidth: 1))
+        .palmGlassCard(radius: 20)
     }
 
     /// Shows the connected sending mailbox, or a prompt to connect one. The
@@ -243,11 +241,10 @@ struct EmailContractSheet: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
+        .palmGlassCard(radius: 20)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(isConnected ? Color.palmGreen.opacity(0.35) : Color.palmBorder.opacity(0.7), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(isConnected ? Color.palmGreen.opacity(0.35) : Color.clear, lineWidth: 1)
         )
     }
 
@@ -268,9 +265,7 @@ struct EmailContractSheet: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder.opacity(0.7), lineWidth: 1))
+        .palmGlassCard(radius: 20)
     }
 
     private func field(_ label: String, text: Binding<String>, placeholder: String,

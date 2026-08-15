@@ -34,6 +34,11 @@ final class StoreKitService: ObservableObject {
     @Published var purchaseInFlight = false
     @Published var lastError: String?
 
+    /// True when the user holds at least one of our verified entitlements.
+    /// Derived from `purchasedProductIDs`, so it updates and republishes
+    /// whenever that set changes.
+    var hasActiveEntitlement: Bool { !purchasedProductIDs.isEmpty }
+
     private var updatesTask: Task<Void, Never>?
 
     private init() {

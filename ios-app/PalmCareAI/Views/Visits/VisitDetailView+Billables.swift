@@ -9,11 +9,9 @@ extension VisitDetailView {
                 }.count
                 let recommendedCount = items.filter { $0.isRecommendation }.count
 
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Billable Items")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.palmText)
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        PalmGlassLabel(text: "Billable Items")
                         Text(
                             recommendedCount > 0
                                 ? "\(items.count) items · \(recommendedCount) recommended from assessment"
@@ -84,8 +82,8 @@ extension VisitDetailView {
                 }
                 Spacer()
                 Text(item.timeLabel)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(isRecommended ? .palmPrimary : .palmSecondary)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmPrimary)
                 if isApproved {
                     Label("Approved", systemImage: "checkmark.circle.fill")
                         .font(.system(size: 11, weight: .semibold))
@@ -105,7 +103,8 @@ extension VisitDetailView {
                 Text(desc)
                     .font(.system(size: 13))
                     .foregroundColor(.palmText)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
+                    .truncationMode(.tail)
             }
 
             if editingBillableId == item.id {
@@ -117,9 +116,9 @@ extension VisitDetailView {
                         .font(.system(size: 13))
                         .lineLimit(2...5)
                         .padding(10)
-                        .background(Color.palmBackground)
+                        .background(Color.white.opacity(0.75))
                         .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
                     HStack {
                         Text("Minutes")
                             .font(.system(size: 12, weight: .medium))
@@ -129,9 +128,9 @@ extension VisitDetailView {
                             .font(.system(size: 13, weight: .semibold))
                             .frame(width: 64)
                             .padding(8)
-                            .background(Color.palmBackground)
+                            .background(Color.white.opacity(0.75))
                             .cornerRadius(8)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
                         Spacer()
                     }
                     HStack(spacing: 10) {
@@ -239,10 +238,8 @@ extension VisitDetailView {
             }
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor.opacity(isApproved || isDenied || isRecommended ? 0.4 : 0.15), lineWidth: isApproved || isDenied || isRecommended ? 1.5 : 1))
+        .palmGlassCard(radius: 18)
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(borderColor.opacity(isApproved || isDenied || isRecommended ? 0.5 : 0), lineWidth: isApproved || isDenied || isRecommended ? 1.5 : 0))
     }
 
     func beginBillableEdit(_ item: BillableItem) {

@@ -146,7 +146,7 @@ struct EditProfileSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

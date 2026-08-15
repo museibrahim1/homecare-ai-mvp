@@ -5,9 +5,7 @@ extension VisitDetailView {
         VStack(spacing: 14) {
             if let n = note {
                 HStack {
-                    Text("Clinical Notes (SOAP)")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.palmText)
+                    PalmGlassLabel(text: "Clinical Notes · SOAP")
                     Spacer()
 
                     if isEditingNote {
@@ -76,13 +74,12 @@ extension VisitDetailView {
                             .font(.system(size: 13))
                             .lineLimit(3...10)
                             .padding(10)
-                            .background(Color.palmBackground)
+                            .background(Color.white.opacity(0.75))
                             .cornerRadius(8)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
                     }
                     .padding(14)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .cornerRadius(12)
+                    .palmGlassCard(radius: 18)
                 } else if let sd = n.structured_data {
                     if let mood = sd.client_mood, !mood.isEmpty {
                         HStack(spacing: 8) {
@@ -137,10 +134,7 @@ extension VisitDetailView {
                             }
                         }
                         .padding(14)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(12)
-                        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                        .palmGlassCard(radius: 18)
                     }
 
                     if let safety = sd.safety_observations, !safety.isEmpty {
@@ -159,9 +153,8 @@ extension VisitDetailView {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(14)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
+                        .palmGlassCard(radius: 18)
+                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.red.opacity(0.25), lineWidth: 1))
                     }
 
                     if let next = sd.next_visit_plan, !next.isEmpty {
@@ -180,9 +173,8 @@ extension VisitDetailView {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(14)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBlue.opacity(0.15), lineWidth: 1))
+                        .palmGlassCard(radius: 18)
+                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.palmBlue.opacity(0.25), lineWidth: 1))
                     }
                 }
 
@@ -202,10 +194,7 @@ extension VisitDetailView {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(14)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                    .palmGlassCard(radius: 18)
                 }
             } else if tabFetchFailed.contains(3) {
                 tabErrorState(tab: 3)
@@ -229,8 +218,9 @@ extension VisitDetailView {
                     .frame(width: 26, height: 26)
                     .background(color)
                     .cornerRadius(7)
-                Text(title)
-                    .font(.system(size: 14, weight: .semibold))
+                Text(title.uppercased())
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(0.8)
                     .foregroundColor(.palmText)
                 Spacer()
             }
@@ -241,12 +231,10 @@ extension VisitDetailView {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+        .palmGlassCard(radius: 18)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(color.opacity(0.3), lineWidth: 1)
         )
     }
 
@@ -259,8 +247,9 @@ extension VisitDetailView {
                     .frame(width: 26, height: 26)
                     .background(color)
                     .cornerRadius(7)
-                Text(title)
-                    .font(.system(size: 14, weight: .semibold))
+                Text(title.uppercased())
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(0.8)
                     .foregroundColor(.palmText)
                 Spacer()
             }
@@ -268,14 +257,12 @@ extension VisitDetailView {
                 .font(.system(size: 13))
                 .lineLimit(3...8)
                 .padding(10)
-                .background(Color.palmBackground)
+                .background(Color.white.opacity(0.75))
                 .cornerRadius(8)
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 18)
     }
 
     func beginNoteEdit(_ n: VisitNote) {

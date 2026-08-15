@@ -28,7 +28,7 @@ struct SamplePacketView: View {
                     .padding(.bottom, 24)
                 }
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle(packet?.client_name ?? "Sample visit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

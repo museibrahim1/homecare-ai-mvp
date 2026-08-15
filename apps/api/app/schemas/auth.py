@@ -69,6 +69,11 @@ class SocialLoginResponse(Token):
 
 class CompleteOnboardingRequest(BaseModel):
     agency_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
     consent: bool = False
 
 

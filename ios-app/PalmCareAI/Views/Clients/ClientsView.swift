@@ -311,6 +311,20 @@ struct ClientCard: View {
         }
     }
 
+    /// Only render the pink care-level pill for known, short values. AI can
+    /// emit long placeholder strings like "Pending — Cannot Determine…" in
+    /// `care_level`; those must not become a wrapping pink badge.
+    private var careLevelLabel: String? {
+        guard let raw = client.care_level?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else { return nil }
+        switch raw.uppercased() {
+        case "LOW": return "Low"
+        case "MODERATE", "MEDIUM": return "Medium"
+        case "HIGH": return "High"
+        default: return nil
+        }
+    }
+
     var body: some View {
         HStack(spacing: 13) {
             ClientAvatar(name: client.full_name, size: 48)
@@ -321,16 +335,20 @@ struct ClientCard: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.palmText)
                         .lineLimit(1)
+                        .layoutPriority(1)
 
-                    if let careLevel = client.care_level, !careLevel.isEmpty {
-                        Text(careLevel.capitalized)
+                    if let careLevel = careLevelLabel {
+                        Text(careLevel)
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.palmPink)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.palmPink.opacity(0.12))
                             .cornerRadius(5)
+                            .fixedSize()
                     }
+
+                    Spacer(minLength: 0)
                 }
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
@@ -353,6 +371,8 @@ struct ClientCard: View {
                                 .font(.system(size: 9))
                             Text(phone.palmFormattedPhone)
                                 .font(.system(size: 11, weight: .medium))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
                         .foregroundColor(.palmSecondary)
                     }
@@ -362,6 +382,8 @@ struct ClientCard: View {
                                 .font(.system(size: 9))
                             Text(city)
                                 .font(.system(size: 11))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
                         .foregroundColor(.palmSecondary)
                     }

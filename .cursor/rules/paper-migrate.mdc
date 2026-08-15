@@ -1,0 +1,19 @@
+---
+description: When user says migrate, port EVERY Paper page into the product (not a subset).
+alwaysApply: true
+---
+
+# Paper → Code: “Migrate” Means All Pages
+
+When the user says **migrate**, **port**, or **transfer** Paper designs into the app (iOS, web, email, or other surfaces):
+
+1. **Every artboard on the named Paper page(s) ships.** Do not stop after Landing/Login/Home. Do not treat “shell chrome” (mint wash, tab bar) as done.
+2. **Default scope for mobile glass work** (unless the user names a smaller set):
+   - **Auth Glass** — Landing, Login, Sign up (and any other artboards on that page)
+   - **App Glass** — Home, Clients, Client Detail, Calendar, Documents, Settings, Add Client (and any other artboards)
+   - **Pipeline Glass** — Queue, Palm It / Record, Recording, Processing, Care Plan, Billables, Notes, Contract, Send (and any other artboards)
+   - Plus **Email Glass** / **Web Glass** when those are in scope for the request
+3. **Source of truth is Paper**, not screenshots alone. Use Paper MCP (`get_jsx`, `get_computed_styles`, structure) and map into existing project conventions (SwiftUI / Next.js / email templates).
+4. **Partial ports are incomplete.** Before saying done, list each Paper artboard and confirm a matching screen in code matches the glass system (mint wash, glass cards, typography hierarchy, floating chrome where designed).
+5. **Do not invent new product flows.** Port layout and visual language; keep existing navigation, API wiring, and business logic unless the user asks otherwise.
+6. File: **PALM Design Studio** (`01KZYXCWZ3R72MMDVGKGMPKEQX`) unless the user points at another Paper file.
