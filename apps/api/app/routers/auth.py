@@ -258,6 +258,7 @@ async def login(request: LoginRequest, req: Request, response: Response, db: Ses
         )
         mfa_token = create_access_token(
             data={"sub": str(user.id), "mfa_pending": True},
+            expires_delta=timedelta(minutes=10),
         )
         return Token(
             access_token="",
@@ -382,6 +383,7 @@ async def social_login(
 
     user: User | None = None
     created = False
+    linked_by_email = False
 
     if identity:
         user = db.query(User).filter(User.id == identity.user_id).first()
@@ -390,8 +392,22 @@ async def social_login(
             db.flush()
             identity = None
 
+    # Email auto-link and new signup require a verified email from the IdP.
+    # Returning users matched by provider subject can sign in without re-checking
+    # email_verified (Apple often omits email after the first authorize).
     if user is None and email:
-        user = db.query(User).filter(User.email == email).first()
+        if not claims.email_verified:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Sign-in email is not verified. Use a verified Google or Apple "
+                    "account, or sign up with email and password."
+                ),
+            )
+        existing = db.query(User).filter(User.email == email).first()
+        if existing:
+            user = existing
+            linked_by_email = True
 
     if user is None:
         if not email:
@@ -401,6 +417,14 @@ async def social_login(
                     "Apple did not provide an email. Use email signup or try again."
                     if provider == "apple"
                     else "Sign-in did not provide an email. Try again or use email signup."
+                ),
+            )
+        if not claims.email_verified:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Sign-in email is not verified. Use a verified Google or Apple "
+                    "account, or sign up with email and password."
                 ),
             )
         full_name = resolve_full_name(body.full_name, claims.name, email)
@@ -417,6 +441,11 @@ async def social_login(
 
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is disabled")
+
+    # First-time email link: kill other sessions so a pre-hijacked password
+    # account cannot keep an attacker logged in after the real owner SSOs in.
+    if linked_by_email:
+        user.force_logout_at = datetime.now(timezone.utc)
 
     # Mandatory: every successful social auth upserts the identity row
     _upsert_identity(
@@ -440,6 +469,7 @@ async def social_login(
         db.commit()
         mfa_token = create_access_token(
             data={"sub": str(user.id), "mfa_pending": True},
+            expires_delta=timedelta(minutes=10),
         )
         return SocialLoginResponse(
             access_token="",
