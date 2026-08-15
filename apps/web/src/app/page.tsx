@@ -579,6 +579,9 @@ export default function LandingPage() {
                 <li><Link href="/pricing" className="hover:text-slate-900 transition inline-block py-0.5">Pricing</Link></li>
                 <li><Link href="/roi-calculator" className="hover:text-slate-900 transition inline-block py-0.5">ROI Calculator</Link></li>
                 <li><Link href="/blog" className="hover:text-slate-900 transition inline-block py-0.5">Blog</Link></li>
+                <li><Link href="/home-care-documentation-software" className="hover:text-slate-900 transition inline-block py-0.5">Documentation software</Link></li>
+                <li><Link href="/compare" className="hover:text-slate-900 transition inline-block py-0.5">Compare options</Link></li>
+                <li><Link href="/alternatives" className="hover:text-slate-900 transition inline-block py-0.5">Alternatives</Link></li>
                 <li><Link href="/faq" className="hover:text-slate-900 transition inline-block py-0.5">FAQ</Link></li>
                 <li><Link href="/login" className="hover:text-slate-900 transition inline-block py-0.5">Sign in</Link></li>
               </ul>

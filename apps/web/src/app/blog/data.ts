@@ -12,6 +12,54 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'paperless-home-care-contracts',
+    title: 'Paperless Home Care Contracts: How Agencies Go Digital',
+    description:
+      'How home care agencies move from paper service agreements to paperless contracts without losing state-specific clauses, signatures, or audit trails.',
+    date: '2026-08-15',
+    readTime: '7 min read',
+    category: 'Operations',
+    content: `
+Paperless home care contracts replace printed service agreements with digital drafts, review, and e-signature. The goal is not a prettier PDF. The goal is a signed agreement that matches the assessment, the care plan, and the state rules, without a stack of paper on the kitchen table.
+
+## What “paperless contracts” means for home care
+
+For non-medical agencies, a paperless contract workflow usually includes:
+
+1. Capturing client needs during the intake assessment.
+2. Drafting a service agreement with the correct state language.
+3. Reviewing rates, hours, and parties on screen.
+4. Collecting a signature digitally.
+5. Storing the signed file with the client record.
+
+If any of those steps still requires retyping from a notepad, the agency is only partly paperless.
+
+## Why agencies stall on paper
+
+- Templates differ by state, so staff keep printing “the safe version.”
+- The assessment lives in one place and the contract in another.
+- Families want to leave with a clear agreement the same day.
+- Admins fear missing a required disclosure.
+
+PalmCare AI drafts a state-specific service contract from the recorded assessment, along with the care plan, visit notes, and billables, so the paperwork set stays consistent before anyone signs.
+
+## A practical path from paper to digital
+
+1. Pick one intake type (for example private duty) and run it fully digital for two weeks.
+2. Require review by a named role before send. Paperless does not mean unsupervised.
+3. Keep the signed PDF in the client file with the care plan.
+4. Train staff on consent to record and on what they must verify (names, rates, start date).
+
+## Related reading
+
+- [Home care service agreement requirements by state](/blog/home-care-service-agreement-requirements-by-state)
+- [How to write a home care service agreement](/blog/how-to-write-home-care-service-agreement)
+- [Compare documentation options](/compare)
+
+To try a voice-to-contract path, [start a free trial](/register) or [book a demo](/book-demo).
+`,
+  },
+  {
     slug: 'home-care-service-agreement-requirements-by-state',
     title: 'Home Care Service Agreement Requirements by State',
     description:
@@ -1001,4 +1049,17 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
 
 export function getAllSlugs(): string[] {
   return BLOG_POSTS.map((p) => p.slug);
+}
+
+/** Related posts for internal linking (same category first, then newest). */
+export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
+  const current = getPostBySlug(slug);
+  if (!current) return BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, limit);
+  const sameCategory = BLOG_POSTS.filter(
+    (p) => p.slug !== slug && p.category === current.category,
+  );
+  const others = BLOG_POSTS.filter(
+    (p) => p.slug !== slug && p.category !== current.category,
+  );
+  return [...sameCategory, ...others].slice(0, limit);
 }

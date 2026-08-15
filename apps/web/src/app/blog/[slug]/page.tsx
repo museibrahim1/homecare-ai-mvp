@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Clock, Calendar } from 'lucide-react';
-import { getPostBySlug, getAllSlugs } from '../data';
+import { getPostBySlug, getAllSlugs, getRelatedPosts } from '../data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -79,6 +79,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) notFound();
+  const related = getRelatedPosts(slug, 3);
 
   const formatted = new Date(post.date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -95,7 +96,12 @@ export default async function BlogPostPage({ params }: Props) {
       dateModified: post.date,
       articleSection: post.category,
       image: 'https://palmcareai.com/og-image.png',
-      author: { '@type': 'Organization', name: 'PalmCare AI', url: 'https://palmcareai.com' },
+      author: {
+        '@type': 'Person',
+        name: 'Muse Ibrahim',
+        jobTitle: 'Founder, PalmCare AI',
+        url: 'https://palmcareai.com/about',
+      },
       publisher: {
         '@type': 'Organization',
         name: 'PalmCare AI',
@@ -173,13 +179,52 @@ export default async function BlogPostPage({ params }: Props) {
               {post.title}
             </h1>
             <p className="text-lg sm:text-xl text-slate-600 mb-6">{post.description}</p>
-            <div className="flex items-center gap-4 text-slate-500 text-sm">
+            <div className="flex flex-wrap items-center gap-4 text-slate-500 text-sm">
               <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {formatted}</span>
               <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {post.readTime}</span>
+              <span>
+                By{' '}
+                <Link href="/about" className="text-primary-700 font-medium underline underline-offset-2">
+                  Muse Ibrahim
+                </Link>
+                , founder of PalmCare AI
+              </span>
             </div>
           </header>
 
           <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+
+          <section className="mt-14 pt-10 border-t border-slate-200">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Keep reading</h2>
+            <ul className="space-y-3">
+              {related.map((item) => (
+                <li key={item.slug}>
+                  <Link
+                    href={`/blog/${item.slug}`}
+                    className="text-primary-700 font-medium underline underline-offset-2"
+                  >
+                    {item.title}
+                  </Link>
+                  <p className="text-sm text-slate-500 mt-1">{item.description}</p>
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm text-slate-500 mt-6">
+              Also see{' '}
+              <Link href="/home-care-documentation-software" className="text-primary-700 underline underline-offset-2">
+                home care documentation software
+              </Link>
+              {', '}
+              <Link href="/compare" className="text-primary-700 underline underline-offset-2">
+                compare options
+              </Link>
+              {', and '}
+              <Link href="/alternatives" className="text-primary-700 underline underline-offset-2">
+                alternatives
+              </Link>
+              .
+            </p>
+          </section>
 
           <div className="mt-16 p-8 rounded-2xl bg-slate-900 text-center">
             <h3 className="text-2xl font-bold text-white mb-3">Ready to see PalmCare AI in action?</h3>
@@ -194,7 +239,10 @@ export default async function BlogPostPage({ params }: Props) {
       <footer className="py-10 sm:py-12 px-4 sm:px-6 border-t border-slate-200 bg-white">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">&copy; 2026 Palm Technologies, Inc. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-slate-500 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-500 text-sm">
+            <Link href="/home-care-documentation-software" className="hover:text-slate-900 transition">Documentation</Link>
+            <Link href="/compare" className="hover:text-slate-900 transition">Compare</Link>
+            <Link href="/blog" className="hover:text-slate-900 transition">Blog</Link>
             <Link href="/privacy" className="hover:text-slate-900 transition">Privacy</Link>
             <Link href="/terms" className="hover:text-slate-900 transition">Terms</Link>
             <Link href="/contact" className="hover:text-slate-900 transition">Contact</Link>

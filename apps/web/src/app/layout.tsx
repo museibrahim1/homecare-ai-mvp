@@ -121,6 +121,19 @@ const jsonLd = {
         'https://www.instagram.com/palmcareai',
         'https://www.facebook.com/palmtechnologies',
       ],
+      founder: {
+        '@type': 'Person',
+        name: 'Muse Ibrahim',
+        jobTitle: 'Founder',
+        url: 'https://palmcareai.com/about',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
     },
     {
       '@type': 'SoftwareApplication',

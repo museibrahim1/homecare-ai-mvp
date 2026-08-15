@@ -118,7 +118,7 @@ export default function ComparePage() {
                 <strong className="text-slate-900">Choose PalmCare AI</strong> when the job is non-medical home care intake: care plan, billables, visit notes, and a state-specific service contract from the same recording.
               </p>
               <p>
-                <strong className="text-slate-900">Choose an AI clinical scribe</strong> when the job is Medicare home health charting or clinical notes. Scribes do not produce client service agreements.
+                <strong className="text-slate-900">Choose an AI clinical scribe</strong> when the job is Medicare home health charting, OASIS documentation, or clinical notes. Scribes do not produce client service agreements. PalmCare AI is built for non-medical home care contracts and care plans, not OASIS.
               </p>
               <p>
                 <strong className="text-slate-900">Choose templates</strong> when volume is low and someone on staff will keep state clauses current by hand.
