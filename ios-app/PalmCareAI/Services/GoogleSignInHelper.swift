@@ -31,13 +31,23 @@ enum GoogleSignInHelper {
     @MainActor
     static func signIn() async throws -> Result {
         #if canImport(GoogleSignIn)
-        guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_CLIENT_ID") as? String,
-              !clientID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        else {
+        // Prefer dedicated iOS OAuth client; fall back to web client if unset.
+        let iosClient = (Bundle.main.object(forInfoDictionaryKey: "GOOGLE_IOS_CLIENT_ID") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let webClient = (Bundle.main.object(forInfoDictionaryKey: "GOOGLE_CLIENT_ID") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let clientID = !iosClient.isEmpty ? iosClient : webClient
+        guard !clientID.isEmpty else {
             throw SignInError.notConfigured
         }
 
-        let config = GIDConfiguration(clientID: clientID)
+        // serverClientID (web) lets the id_token audience match backend web client when present.
+        let config: GIDConfiguration
+        if !iosClient.isEmpty, !webClient.isEmpty, iosClient != webClient {
+            config = GIDConfiguration(clientID: iosClient, serverClientID: webClient)
+        } else {
+            config = GIDConfiguration(clientID: clientID)
+        }
         GIDSignIn.sharedInstance.configuration = config
 
         guard let presenter = UIApplication.shared.connectedScenes

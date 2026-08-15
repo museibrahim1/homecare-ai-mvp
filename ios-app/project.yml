@@ -81,15 +81,16 @@ targets:
         # PostHog (optional override). If empty, app falls back to defaults.
         POSTHOG_API_KEY: ""
         POSTHOG_HOST: "https://us.i.posthog.com"
-        # Google OAuth client ID for Calendar/Gmail/Drive integrations.
-        # Leave blank in source — set via build configuration / xcconfig.
+        # Google OAuth web client ID for Calendar/Gmail/Drive integrations.
         GOOGLE_CLIENT_ID: "668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com"
-        # Register the OAuth callback URL scheme so Google can redirect
-        # back into the app after the user grants Calendar access.
+        # Google Sign-In iOS OAuth client (identity login). Distinct from web client.
+        GOOGLE_IOS_CLIENT_ID: "668945369325-dm2uj3qs8hjhgl7nu9beoihghb8d4mq7.apps.googleusercontent.com"
+        # URL schemes: app deep link + reversed client IDs for Google redirects.
         CFBundleURLTypes:
           - CFBundleURLName: com.palmcareai.app
             CFBundleURLSchemes:
               - com.palmcareai.app
+              - com.googleusercontent.apps.668945369325-dm2uj3qs8hjhgl7nu9beoihghb8d4mq7
               - com.googleusercontent.apps.668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j
 
 schemes:
