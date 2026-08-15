@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Publish to the PALM LinkedIn profile (personal member, w_member_social scope).
+"""Publish to the PALM LinkedIn company page (Palm Technologies).
 
 Uses credentials in the repo .env:
-  LINKEDIN_ACCESS_TOKEN  -> member access token (60-day, from OAuth re-auth)
-  LINKEDIN_PERSON_ID     -> OpenID `sub` of the member (urn:li:person:<id>)
+  LINKEDIN_ACCESS_TOKEN       -> member access token (60-day, from OAuth re-auth)
+  LINKEDIN_PERSON_ID          -> OpenID `sub` of the member (fallback / comments)
+  LINKEDIN_ORGANIZATION_ID    -> numeric company Page id (urn:li:organization:<id>)
+
+Default author is the company Page. Pass --as-person to post on Muse's profile
+instead. First comments use the same author as the post.
 
 Two media modes:
   - image:    an image post (1080x1350 / 1200x1200 PNG or JPG)
@@ -15,7 +19,7 @@ is posted link-free and the signup link is added as the FIRST COMMENT on the pos
 
 Manual usage:
   python3 scripts/social/post_to_linkedin.py --image w1-imsg-contract.png \
-      --text "..." --comment "palmcareai.com/register — free to start"
+      --text "..." --comment "palmcareai.com/register. Free to start"
   python3 scripts/social/post_to_linkedin.py --document palm-linkedin-carousel.pdf \
       --title "2 hours of typing, deleted" --text "..." --comment "..."
   python3 scripts/social/post_to_linkedin.py --image foo.png --text "..." --dry-run
@@ -37,7 +41,9 @@ load_dotenv(PROJECT_ROOT / ".env")
 API = "https://api.linkedin.com/v2"
 TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN")
 PERSON_ID = os.getenv("LINKEDIN_PERSON_ID")
+ORGANIZATION_ID = os.getenv("LINKEDIN_ORGANIZATION_ID")
 LOCAL_MEDIA_DIR = PROJECT_ROOT / "apps/web/public/marketing/social"
+_FORCE_PERSON = False
 
 
 class PostError(RuntimeError):
@@ -74,6 +80,10 @@ def _resolve(name: str) -> Path:
 
 
 def _author() -> str:
+    if not _FORCE_PERSON and ORGANIZATION_ID:
+        return f"urn:li:organization:{ORGANIZATION_ID}"
+    if not PERSON_ID:
+        raise PostError("LINKEDIN_PERSON_ID is required to post as a member")
     return f"urn:li:person:{PERSON_ID}"
 
 
@@ -256,7 +266,9 @@ def post_document(text: str, document: str, title: str, comment: str | None = No
 
 
 def require_env() -> None:
-    missing = [k for k, v in {"LINKEDIN_ACCESS_TOKEN": TOKEN, "LINKEDIN_PERSON_ID": PERSON_ID}.items() if not v]
+    missing = [k for k, v in {"LINKEDIN_ACCESS_TOKEN": TOKEN}.items() if not v]
+    if not ORGANIZATION_ID and not PERSON_ID:
+        missing.append("LINKEDIN_ORGANIZATION_ID or LINKEDIN_PERSON_ID")
     if missing:
         raise SystemExit(f"Missing env vars: {', '.join(missing)} (re-auth LinkedIn)")
 
@@ -278,9 +290,12 @@ def main() -> int:
     ap.add_argument("--document", help="PDF filename/path (document carousel)")
     ap.add_argument("--title", default="", help="Title for a document post")
     ap.add_argument("--comment", help="Text posted as the first comment (put the link here)")
+    ap.add_argument("--as-person", action="store_true", help="Post to Muse's personal profile instead of the company Page")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
+    global _FORCE_PERSON
+    _FORCE_PERSON = bool(args.as_person)
     require_env()
     chosen = [m for m in (args.image, args.video, args.document) if m]
     if len(chosen) > 1:

@@ -116,7 +116,7 @@ const jsonLd = {
         contactType: 'customer support',
       },
       sameAs: [
-        'https://www.linkedin.com/company/palmcare-ai',
+        'https://www.linkedin.com/company/palmtechnologies',
         'https://twitter.com/palmcareai',
         'https://www.instagram.com/palmcareai',
         'https://www.facebook.com/palmtechnologies',
