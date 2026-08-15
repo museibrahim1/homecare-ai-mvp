@@ -47,6 +47,8 @@ struct RecordView: View {
     /// Shown when the picker is dismissed while a finished recording is on
     /// hold, so the audio is never silently discarded.
     @State private var showHeldRecordingPrompt = false
+    @State private var showAudioSavedPrompt = false
+    @State private var audioSavedMessage = "We still have your audio on this iPhone. Retry when you have a signal."
     #if DEBUG
     @State private var didRunAutomationDemo = false
     #endif
@@ -147,7 +149,20 @@ struct RecordView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
+                // Offline / failed upload queue — audio is still on device.
+                if !isProcessing && !session.pendingUploads.isEmpty {
+                    VStack {
+                        pendingUploadBanner
+                            .padding(.horizontal, 20)
+                            .padding(.top, 70)
+                        Spacer()
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
             }
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToVisit) {
                 if let visitId = completedVisitId, !visitId.isEmpty {
                     VisitDetailView(
@@ -206,6 +221,17 @@ struct RecordView: View {
             .task {
                 permissionGranted = await recorder.requestPermission()
                 await loadClients()
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("LIVE_TRANSCRIPT_SMOKE"),
+                   !didRunAutomationDemo {
+                    didRunAutomationDemo = true
+                    aiConsentAccepted = true
+                    if selectedClient == nil {
+                        selectedClient = clients.first
+                    }
+                    startRecording()
+                }
+                #endif
             }
             #if DEBUG
             .task {
@@ -245,20 +271,10 @@ struct RecordView: View {
                     liveError = lt.lastError
                 }
             }
-            .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
-                let lt = session.liveTranscription
-                guard lt.isTranscribing else { return }
-                if lt.segments.count != liveSegments.count || lt.fullTranscript != liveFullTranscript {
-                    liveSegments = lt.segments
-                    liveFullTranscript = lt.fullTranscript
-                }
-                if lt.noSpeechDetected != liveNoSpeech {
-                    withAnimation { liveNoSpeech = lt.noSpeechDetected }
-                }
-                if lt.lastError != liveError {
-                    liveError = lt.lastError
-                }
-            }
+            .onReceive(session.liveTranscription.$fullTranscript) { liveFullTranscript = $0 }
+            .onReceive(session.liveTranscription.$segments) { liveSegments = $0 }
+            .onReceive(session.liveTranscription.$noSpeechDetected) { liveNoSpeech = $0 }
+            .onReceive(session.liveTranscription.$lastError) { liveError = $0 }
             .onReceive(session.$completedVisitId) { visitId in
                 guard let visitId else { return }
                 openCompletedVisit(visitId)
@@ -268,6 +284,14 @@ struct RecordView: View {
                 session.errorMessage = nil
                 errorMessage = message
                 showError = true
+            }
+            .onReceive(session.$audioSavedNotice) { notice in
+                guard let notice else { return }
+                audioSavedMessage = notice
+                showAudioSavedPrompt = true
+            }
+            .onAppear {
+                session.resumePendingUploadsIfNeeded()
             }
             .onChange(of: selectedClient?.id) { clientId in
                 guard clientId != nil, let client = selectedClient else { return }
@@ -314,6 +338,20 @@ struct RecordView: View {
                     session.discardPendingAudio()
                 })
             )
+            .palmAlert(
+                "Audio Saved on This iPhone",
+                message: audioSavedMessage,
+                icon: "internaldrive.fill",
+                iconColor: .palmPrimary,
+                isPresented: $showAudioSavedPrompt,
+                primaryButton: .init(title: "Retry Upload", style: .primary, action: {
+                    session.acknowledgeAudioSavedNotice()
+                    session.resumePendingUploadsIfNeeded()
+                }),
+                secondaryButton: .init(title: "Keep for Later", style: .cancel, action: {
+                    session.acknowledgeAudioSavedNotice()
+                })
+            )
             .onChange(of: recorder.recordingFailureMessage) { message in
                 // System killed the recording (media daemon crash). Recover
                 // the partial file through the normal upload path.
@@ -341,8 +379,65 @@ struct RecordView: View {
 
     // MARK: - Top Bar
 
+    private var pendingUploadBanner: some View {
+        let count = session.pendingUploads.count
+        let name = session.pendingUploads.first?.clientName
+        let subtitle: String = {
+            if let name, count == 1 {
+                return "\(name)'s visit audio is saved locally."
+            }
+            if count == 1 {
+                return "Your visit audio is saved locally."
+            }
+            return "\(count) visit recordings are saved locally."
+        }()
+
+        return HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "internaldrive.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.palmPrimaryLight)
+                .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("We still have your audio")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+                Text(subtitle)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let err = session.pendingUploads.first?.lastError, !err.isEmpty {
+                    Text(err)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmOrange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            Button {
+                session.resumePendingUploadsIfNeeded()
+            } label: {
+                Text("Retry")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.palmPrimary)
+                    .clipShape(Capsule())
+            }
+            .accessibilityLabel("Retry saved upload")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(red: 20/255, green: 28/255, blue: 28/255).opacity(0.95))
+        .cornerRadius(14)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmPrimary.opacity(0.35), lineWidth: 1))
+    }
+
     private var topBar: some View {
-        HStack(spacing: 10) {
+        HStack(alignment: .center, spacing: 12) {
             Button { showClientPicker = true } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "person")
@@ -352,11 +447,13 @@ struct RecordView: View {
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(selectedClient != nil ? .white.opacity(0.9) : .white.opacity(0.45))
                         .lineLimit(1)
+                        .truncationMode(.tail)
                     Image(systemName: "chevron.down")
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundColor(.white.opacity(0.3))
                 }
                 .padding(.horizontal, 14)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 36)
                 .background(Color.white.opacity(0.05))
                 .clipShape(Capsule())
@@ -364,46 +461,42 @@ struct RecordView: View {
             }
             .accessibilityLabel("Select client")
 
-            Spacer()
-
-            if recorder.isRecording {
-                HStack(spacing: 6) {
-                    Circle().fill(Color.red).frame(width: 6, height: 6)
-                    Text(timeString(recorder.duration))
-                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                        .foregroundColor(.white.opacity(0.9))
-                    if backgroundRecording {
-                        Image(systemName: "lock.open")
-                            .font(.system(size: 10))
-                            .foregroundColor(.palmPrimaryLight)
+            Group {
+                if recorder.isRecording {
+                    HStack(spacing: 6) {
+                        Circle().fill(Color.red).frame(width: 6, height: 6)
+                        Text(timeString(recorder.duration))
+                            .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                            .foregroundColor(.white.opacity(0.9))
                     }
-                }
-                .padding(.horizontal, 14)
-                .frame(height: 36)
-                .background(Color.white.opacity(0.05))
-                .clipShape(Capsule())
-                .overlay(Capsule().stroke(Color.red.opacity(0.25), lineWidth: 1))
-            } else {
-                Button { showFilePicker = true } label: {
-                    HStack(spacing: 7) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 12, weight: .medium))
-                        Text("Upload")
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                    .foregroundColor(.white.opacity(0.45))
                     .padding(.horizontal, 14)
                     .frame(height: 36)
                     .background(Color.white.opacity(0.05))
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                    .overlay(Capsule().stroke(Color.red.opacity(0.25), lineWidth: 1))
+                } else {
+                    Button { showFilePicker = true } label: {
+                        HStack(spacing: 7) {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 12, weight: .medium))
+                            Text("Upload")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundColor(.white.opacity(0.45))
+                        .padding(.horizontal, 14)
+                        .frame(height: 36)
+                        .background(Color.white.opacity(0.05))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                    }
+                    .accessibilityLabel("Upload audio file")
                 }
-                .accessibilityLabel("Upload audio file")
             }
+            .fixedSize()
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 4)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
     }
 
     private var transcriptSegments: [TranscriptSegment] {
@@ -413,10 +506,30 @@ struct RecordView: View {
         return liveSegments
     }
 
+    /// Consecutive turns with the same remapped speaker become one paragraph.
+    /// Speaker IDs are already stabilized across chunks in LiveTranscriptMerger.
+    private var transcriptBlocks: [(id: UUID, speaker: Int, text: String)] {
+        var blocks: [(id: UUID, speaker: Int, text: String)] = []
+        for seg in transcriptSegments {
+            let text = seg.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty else { continue }
+            if let last = blocks.last, last.speaker == seg.speaker {
+                blocks[blocks.count - 1].text += " " + text
+            } else {
+                blocks.append((seg.id, seg.speaker, text))
+            }
+        }
+        return blocks
+    }
+
+    private var hasMultipleSpeakers: Bool {
+        Set(transcriptBlocks.map(\.speaker)).count > 1
+    }
+
     // MARK: - Orb stage (idle + recording)
 
     private var idleLayout: some View {
-        orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording")
+        orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording", size: 220)
     }
 
     private var recordingLayout: some View {
@@ -429,81 +542,92 @@ struct RecordView: View {
                     #endif
                     return recorder.audioLevel
                 }(),
-                caption: "Recording. Tap the orb to stop.",
-                compact: true
+                caption: nil,
+                size: 132
             )
+            .padding(.top, 8)
+            .padding(.bottom, 4)
 
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.green.opacity(0.8))
+                    .fill(Color.palmPrimary)
                     .frame(width: 6, height: 6)
                 Text("LIVE TRANSCRIPT")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.4))
-                    .tracking(1.5)
+                    .foregroundColor(.white.opacity(0.38))
+                    .tracking(1.6)
             }
-            .padding(.bottom, 8)
+            .padding(.top, 10)
+            .padding(.bottom, 14)
 
-            if transcriptSegments.isEmpty, liveNoSpeech {
-                Text("No speech detected yet. Speak near the microphone.")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.35))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 8)
-            } else if transcriptSegments.isEmpty, let err = liveError, !err.isEmpty {
+            transcriptStream
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var transcriptStream: some View {
+        Group {
+            if let err = liveError, !err.isEmpty, transcriptBlocks.isEmpty {
                 Text(err)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.palmOrange.opacity(0.85))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.palmOrange)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 8)
-            } else if transcriptSegments.isEmpty {
-                Text("Listening…")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.35))
-                    .padding(.bottom, 8)
-            }
-
-            ScrollViewReader { proxy in
+                    .padding(.horizontal, 28)
+            } else if transcriptBlocks.isEmpty, liveNoSpeech {
+                Text("No speech detected yet. Speak near the microphone.")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.white.opacity(0.38))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
+            } else if transcriptBlocks.isEmpty, !liveFullTranscript.isEmpty {
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(transcriptSegments) { segment in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Circle()
-                                        .fill(speakerColor(for: segment.speaker))
-                                        .frame(width: 8, height: 8)
-                                    Text(segment.speakerLabel)
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(speakerColor(for: segment.speaker))
-                                }
-                                WrappingHStack(words: segment.text.split(separator: " ").map(String.init))
-                            }
-                            .id(segment.id)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    .padding(.bottom, 100)
+                    WrappingHStack(words: liveFullTranscript.split(separator: " ").map(String.init))
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 28)
                 }
-                .onChange(of: transcriptSegments.count) { _ in
-                    if let last = transcriptSegments.last {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            proxy.scrollTo(last.id, anchor: .bottom)
+            } else if transcriptBlocks.isEmpty {
+                Text("Listening…")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.white.opacity(0.35))
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: hasMultipleSpeakers ? 18 : 0) {
+                            ForEach(transcriptBlocks, id: \.id) { block in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    if hasMultipleSpeakers {
+                                        Text(block.speaker == 0 ? "Speaker 1" : "Speaker \(block.speaker + 1)")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundColor(speakerColor(for: block.speaker).opacity(0.85))
+                                    }
+                                    WrappingHStack(words: block.text.split(separator: " ").map(String.init))
+                                }
+                                .id(block.id)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 28)
+                    }
+                    .onChange(of: transcriptBlocks.last?.text) { _ in
+                        if let last = transcriptBlocks.last {
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                proxy.scrollTo(last.id, anchor: .bottom)
+                            }
                         }
                     }
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
-    private func orbStage(isActive: Bool, audioLevel: Float, caption: String, compact: Bool = false) -> some View {
+    private func orbStage(isActive: Bool, audioLevel: Float, caption: String?, size: CGFloat) -> some View {
         VStack(spacing: 0) {
-            if !compact { Spacer() }
+            if caption != nil { Spacer(minLength: 12) }
 
-            VoiceOrb(isActive: isActive, audioLevel: audioLevel)
-                .frame(width: compact ? 160 : 240, height: compact ? 160 : 240)
+            VoiceOrb(isActive: isActive, audioLevel: audioLevel, size: size)
+                .frame(width: size, height: size)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     #if DEBUG
@@ -518,12 +642,13 @@ struct RecordView: View {
                 .accessibilityLabel(isActive ? "Stop recording" : "Start recording")
                 .accessibilityAddTraits(.isButton)
 
-            Text(caption)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.5))
-                .padding(.top, compact ? 8 : 20)
-
-            if !compact { Spacer() }
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.white.opacity(0.5))
+                    .padding(.top, 18)
+                Spacer(minLength: 12)
+            }
         }
         .frame(maxWidth: .infinity)
     }

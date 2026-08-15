@@ -37,6 +37,7 @@ class VisitResponse(BaseModel):
     status: str
     pipeline_state: Dict[str, Any]
     admin_notes: Optional[str] = None
+    agreement_send: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
     
@@ -45,6 +46,11 @@ class VisitResponse(BaseModel):
     caregiver: Optional[UserResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AgreementSendStatusUpdate(BaseModel):
+    """Caregiver-reported status after a wet signature or bounce."""
+    status: str  # signed | bounced | sent
 
 
 class VisitListResponse(BaseModel):

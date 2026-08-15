@@ -48,7 +48,12 @@ extension VisitDetailView {
             } else if tabFetchFailed.contains(2) {
                 tabErrorState(tab: 2)
             } else {
-                emptyState(icon: "dollarsign.circle", title: "No Billables", message: "Billable items will appear here once the assessment has been processed.")
+                documentEmptyState(
+                    step: "billing",
+                    icon: "dollarsign.circle",
+                    title: "No Billables",
+                    waitingMessage: "Billable items will appear here once the assessment has been processed."
+                )
             }
         }
     }
@@ -96,11 +101,71 @@ extension VisitDetailView {
                 }
             }
 
-            if let desc = item.description, !desc.isEmpty {
+            if let desc = item.description, !desc.isEmpty, editingBillableId != item.id {
                 Text(desc)
                     .font(.system(size: 13))
                     .foregroundColor(.palmText)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if editingBillableId == item.id {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Edit before approve")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmSecondary)
+                    TextField("Description", text: $editBillableDescription, axis: .vertical)
+                        .font(.system(size: 13))
+                        .lineLimit(2...5)
+                        .padding(10)
+                        .background(Color.palmBackground)
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                    HStack {
+                        Text("Minutes")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.palmSecondary)
+                        TextField("0", text: $editBillableMinutes)
+                            .keyboardType(.numberPad)
+                            .font(.system(size: 13, weight: .semibold))
+                            .frame(width: 64)
+                            .padding(8)
+                            .background(Color.palmBackground)
+                            .cornerRadius(8)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                        Spacer()
+                    }
+                    HStack(spacing: 10) {
+                        Button {
+                            Task { await saveBillableEdit(item, index: index) }
+                        } label: {
+                            HStack(spacing: 4) {
+                                if isSavingBillableEdit {
+                                    ProgressView().scaleEffect(0.6).tint(.white)
+                                }
+                                Text("Save")
+                                    .font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.palmPrimary.opacity(isSavingBillableEdit ? 0.6 : 1))
+                            .cornerRadius(8)
+                        }
+                        .disabled(isSavingBillableEdit)
+                        Button {
+                            editingBillableId = nil
+                        } label: {
+                            Text("Cancel")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.palmSecondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .background(Color.palmSecondary.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                        .disabled(isSavingBillableEdit)
+                    }
+                }
             }
 
             if isRecommended, let reason = item.flag_reason, !reason.isEmpty {
@@ -112,6 +177,26 @@ extension VisitDetailView {
             if !isApproved && !isDenied {
                 let isPending = pendingBillableIds.contains(item.id)
                 HStack(spacing: 10) {
+                    if editingBillableId != item.id {
+                        Button {
+                            beginBillableEdit(item)
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 11, weight: .bold))
+                                Text("Edit")
+                                    .font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.palmPrimary.opacity(0.08))
+                            .cornerRadius(8)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmPrimary.opacity(0.25), lineWidth: 1))
+                        }
+                        .disabled(isPending || isSavingBillableEdit)
+                    }
+
                     Button {
                         Task { await approveBillable(item, index: index) }
                     } label: {
@@ -131,7 +216,7 @@ extension VisitDetailView {
                         .background(Color.palmGreen.opacity(isPending ? 0.6 : 1))
                         .cornerRadius(8)
                     }
-                    .disabled(isPending)
+                    .disabled(isPending || editingBillableId == item.id)
 
                     Button {
                         Task { await denyBillable(item, index: index) }
@@ -149,7 +234,7 @@ extension VisitDetailView {
                         .cornerRadius(8)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.red.opacity(0.3), lineWidth: 1))
                     }
-                    .disabled(isPending)
+                    .disabled(isPending || editingBillableId == item.id)
                 }
             }
         }
@@ -158,6 +243,46 @@ extension VisitDetailView {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor.opacity(isApproved || isDenied || isRecommended ? 0.4 : 0.15), lineWidth: isApproved || isDenied || isRecommended ? 1.5 : 1))
+    }
+
+    func beginBillableEdit(_ item: BillableItem) {
+        editingBillableId = item.id
+        editBillableDescription = item.description ?? ""
+        let mins = item.adjusted_minutes ?? item.minutes ?? 0
+        editBillableMinutes = "\(Int(mins))"
+    }
+
+    func saveBillableEdit(_ item: BillableItem, index: Int) async {
+        guard !isSavingBillableEdit else { return }
+        await MainActor.run { isSavingBillableEdit = true }
+        defer { Task { @MainActor in isSavingBillableEdit = false } }
+        let minutes = Int(editBillableMinutes.trimmingCharacters(in: .whitespaces))
+        do {
+            let updated = try await api.updateBillableItem(
+                visitId: visitId,
+                itemId: item.id,
+                description: editBillableDescription,
+                adjustedMinutes: minutes,
+                adjustmentReason: minutes == nil ? nil : "Edited before approve"
+            )
+            await MainActor.run {
+                guard var items = billables?.items, items.indices.contains(index) else { return }
+                items[index] = updated
+                billables = VisitBillablesResponse(
+                    items: items,
+                    total_minutes: billables?.total_minutes,
+                    total_adjusted_minutes: billables?.total_adjusted_minutes,
+                    categories: billables?.categories
+                )
+                editingBillableId = nil
+            }
+            PostHogService.shared.capture("billable_edited")
+        } catch {
+            await MainActor.run {
+                actionError = "Could not save billable: \(error.palmFriendlyMessage)"
+                showActionError = true
+            }
+        }
     }
 
     func approveBillable(_ item: BillableItem, index: Int) async {

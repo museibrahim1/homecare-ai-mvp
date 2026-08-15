@@ -122,6 +122,7 @@ struct PalmCareAIApp: App {
                     enteredBackgroundAt = Date()
                 case .active:
                     PostHogService.shared.capture("app_foregrounded")
+                    assessmentSession.resumePendingUploadsIfNeeded()
                     guard let enteredBackgroundAt else { return }
                     let elapsed = Date().timeIntervalSince(enteredBackgroundAt)
                     if elapsed >= sessionReauthTimeout, !assessmentInProgress {

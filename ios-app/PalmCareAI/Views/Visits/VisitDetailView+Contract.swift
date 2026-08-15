@@ -22,7 +22,12 @@ extension VisitDetailView {
             } else if tabFetchFailed.contains(4) {
                 tabErrorState(tab: 4)
             } else {
-                emptyState(icon: "doc.text.fill", title: "No Contract", message: "The contract will appear here once the assessment has been fully processed.")
+                documentEmptyState(
+                    step: "contract",
+                    icon: "doc.text.fill",
+                    title: "No Contract",
+                    waitingMessage: "The contract will appear here once the assessment has been fully processed."
+                )
             }
         }
     }
@@ -53,55 +58,122 @@ extension VisitDetailView {
 
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(c.title ?? "Service Agreement")
-                        .font(titleFont)
-                        .foregroundColor(isElegant || isProfessional ? accent : .palmText)
-                    if let status = c.status {
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(status == "active" ? Color.palmGreen : Color.palmOrange)
-                                .frame(width: 6, height: 6)
-                            Text(status.capitalized)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(status == "active" ? .palmGreen : .palmOrange)
-                        }
+                    if isEditingContract {
+                        TextField("Agreement title", text: $editContractTitle)
+                            .font(titleFont)
+                            .foregroundColor(.palmText)
+                    } else {
+                        Text(c.title ?? "Service Agreement")
+                            .font(titleFont)
+                            .foregroundColor(isElegant || isProfessional ? accent : .palmText)
+                    }
+                    if let status = c.status, !isEditingContract {
+                        PalmStatusChip(text: status.capitalized, tone: status == "active" ? .success : .warning)
                     }
                 }
                 Spacer()
 
-                Button { showStylePicker = true } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "paintbrush.fill")
-                            .font(.system(size: 12))
-                        Text("Style")
-                            .font(.system(size: 12, weight: .semibold))
-                    }
-                    .foregroundColor(accent)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
-                    .background(accent.opacity(0.08))
-                    .cornerRadius(8)
-                }
-
-                Menu {
-                    Button { showEmailSheet = true } label: {
-                        Label("Email Agreement", systemImage: "paperplane.fill")
-                    }
-                    Divider()
-                    Button { Task { await exportFile(type: "contract.pdf") } } label: {
-                        Label("Download PDF", systemImage: "arrow.down.doc.fill")
-                    }
-                    Button { Task { await exportFile(type: "contract.docx") } } label: {
-                        Label("Download DOCX", systemImage: "doc.fill")
-                    }
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 16, weight: .medium))
+                if isEditingContract {
+                    Button {
+                        Task { await saveContractEdits() }
+                    } label: {
+                        HStack(spacing: 4) {
+                            if isSavingContract { ProgressView().scaleEffect(0.6).tint(accent) }
+                            Text("Save").font(.system(size: 12, weight: .semibold))
+                        }
                         .foregroundColor(accent)
-                        .frame(width: 36, height: 36)
-                        .background(accent.opacity(0.08))
-                        .cornerRadius(isClassic ? 4 : 10)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(accent.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    .disabled(isSavingContract)
+                    Button("Cancel") { isEditingContract = false }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmSecondary)
+                } else {
+                    Button { beginContractEdit(c) } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 12))
+                            Text("Edit")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(accent)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(accent.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    Button { showStylePicker = true } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "paintbrush.fill")
+                                .font(.system(size: 12))
+                            Text("Style")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(accent)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(accent.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    Menu {
+                        Button { showEmailSheet = true } label: {
+                            Label("Email Agreement", systemImage: "paperplane.fill")
+                        }
+                        Divider()
+                        Button { Task { await exportFile(type: "contract.pdf") } } label: {
+                            Label("Download PDF", systemImage: "arrow.down.doc.fill")
+                        }
+                        Button { Task { await exportFile(type: "contract.docx") } } label: {
+                            Label("Download DOCX", systemImage: "doc.fill")
+                        }
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(accent)
+                            .frame(width: 36, height: 36)
+                            .background(accent.opacity(0.08))
+                            .cornerRadius(isClassic ? 4 : 10)
+                    }
                 }
+            }
+
+            if isEditingContract {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Hourly rate")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.palmSecondary)
+                        TextField("28", text: $editContractRate)
+                            .keyboardType(.decimalPad)
+                            .font(.system(size: 13, weight: .semibold))
+                            .padding(8)
+                            .background(Color.palmBackground)
+                            .cornerRadius(8)
+                        Text("Weekly hours")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.palmSecondary)
+                        TextField("12", text: $editContractHours)
+                            .keyboardType(.decimalPad)
+                            .font(.system(size: 13, weight: .semibold))
+                            .padding(8)
+                            .background(Color.palmBackground)
+                            .cornerRadius(8)
+                    }
+                    Text("Terms")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                    TextField("Terms and conditions", text: $editContractTerms, axis: .vertical)
+                        .font(.system(size: 13))
+                        .lineLimit(4...12)
+                        .padding(10)
+                        .background(Color.palmBackground)
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                }
+                .padding(.top, 10)
             }
 
             if isClassic {
@@ -586,6 +658,36 @@ extension VisitDetailView {
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 
-    // MARK: - Shared Components
+    func beginContractEdit(_ c: VisitContract) {
+        editContractTitle = c.title ?? ""
+        editContractTerms = c.terms_and_conditions ?? c.content ?? ""
+        editContractRate = c.hourly_rate.map { String(Int($0)) } ?? ""
+        editContractHours = c.weekly_hours.map { String(Int($0)) } ?? ""
+        isEditingContract = true
+    }
 
+    func saveContractEdits() async {
+        guard !isSavingContract else { return }
+        await MainActor.run { isSavingContract = true }
+        defer { Task { @MainActor in isSavingContract = false } }
+        do {
+            let updated = try await api.updateVisitContract(
+                visitId: visitId,
+                title: editContractTitle,
+                termsAndConditions: editContractTerms,
+                hourlyRate: Double(editContractRate),
+                weeklyHours: Double(editContractHours)
+            )
+            await MainActor.run {
+                contract = updated
+                isEditingContract = false
+            }
+            PostHogService.shared.capture("contract_edited")
+        } catch {
+            await MainActor.run {
+                actionError = "Could not save contract: \(error.palmFriendlyMessage)"
+                showActionError = true
+            }
+        }
+    }
 }

@@ -269,6 +269,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     /// Remove recordings left behind by crashes or abandoned uploads. PHI
     /// audio should not accumulate on disk indefinitely; anything older than
     /// `hours` can't belong to an in-flight assessment.
+    /// Queued pending uploads are never deleted here (caregiver still needs them).
     static func purgeStaleRecordings(olderThan hours: Double = 48) {
         guard let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         let recordingsDir = documentsDir.appendingPathComponent("Recordings", isDirectory: true)
@@ -277,8 +278,10 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
             includingPropertiesForKeys: [.contentModificationDateKey]
         ) else { return }
 
+        let protected = PendingUploadStore.protectedFilenames()
         let cutoff = Date().addingTimeInterval(-hours * 3600)
         for file in files {
+            if protected.contains(file.lastPathComponent) { continue }
             let modified = (try? file.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
             if let modified, modified < cutoff {
                 try? FileManager.default.removeItem(at: file)

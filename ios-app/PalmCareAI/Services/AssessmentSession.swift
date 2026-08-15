@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import Network
 
 /// Owns the full lifecycle of a recorded assessment — recorder, live
 /// transcription, audio upload, and pipeline polling — independent of any
@@ -11,7 +12,8 @@ import Combine
 ///  * an in-flight upload/pipeline keeps running and the contract still
 ///    opens when the user comes back,
 ///  * background recording keeps working because the recorder is never
-///    deallocated by view teardown.
+///    deallocated by view teardown,
+///  * failed uploads keep the WAV on device and retry when signal returns.
 @MainActor
 final class AssessmentSession: ObservableObject {
     let recorder = AudioRecorderService()
@@ -29,19 +31,30 @@ final class AssessmentSession: ObservableObject {
     @Published var completedClientName: String?
     /// Errors surfaced from recording/upload/pipeline, shown by RecordView.
     @Published var errorMessage: String?
+    /// Shown when upload failed but audio is still on this iPhone.
+    @Published var audioSavedNotice: String?
     /// A finished recording waiting for a client to be chosen.
     @Published var pendingAudioURL: URL?
     /// Client chosen when recording started. Survives view teardown so the
     /// user is never re-asked for the client at stop time.
     @Published var activeClient: Client?
+    /// Failed uploads waiting for retry (mirrored from PendingUploadStore).
+    @Published private(set) var pendingUploads: [PendingUpload] = []
 
     private let api: APIService
+    private let uploadStore: PendingUploadStore
     private var processingTask: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
+    private let pathMonitor = NWPathMonitor()
+    private let pathMonitorQueue = DispatchQueue(label: "com.palmcareai.pathMonitor")
+    private var isPathSatisfied = true
+    private var isDrainingQueue = false
 
-    init(api: APIService) {
+    init(api: APIService, uploadStore: PendingUploadStore = .shared) {
         self.api = api
+        self.uploadStore = uploadStore
         self.liveTranscription = LiveTranscriptionService(api: api)
+        self.pendingUploads = uploadStore.items
 
         // Republish nested-object changes so any view observing the session
         // re-renders when the recorder or live transcript updates.
@@ -51,12 +64,39 @@ final class AssessmentSession: ObservableObject {
         liveTranscription.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        uploadStore.$items
+            .receive(on: RunLoop.main)
+            .sink { [weak self] items in
+                self?.pendingUploads = items
+            }
+            .store(in: &cancellables)
+
+        startPathMonitor()
+    }
+
+    deinit {
+        pathMonitor.cancel()
     }
 
     /// Mirrors the old @AppStorage("assessmentInProgress") flag used by the
     /// app-level session-timeout policy.
     private func setAssessmentInProgress(_ value: Bool) {
         UserDefaults.standard.set(value, forKey: "assessmentInProgress")
+    }
+
+    private func startPathMonitor() {
+        pathMonitor.pathUpdateHandler = { [weak self] path in
+            Task { @MainActor in
+                guard let self else { return }
+                let satisfied = path.status == .satisfied
+                let becameOnline = satisfied && !self.isPathSatisfied
+                self.isPathSatisfied = satisfied
+                if becameOnline {
+                    self.resumePendingUploadsIfNeeded()
+                }
+            }
+        }
+        pathMonitor.start(queue: pathMonitorQueue)
     }
 
     // MARK: - Recording
@@ -134,92 +174,252 @@ final class AssessmentSession: ObservableObject {
         pipelineFailed = false
     }
 
+    func acknowledgeAudioSavedNotice() {
+        audioSavedNotice = nil
+    }
+
+    // MARK: - Offline queue
+
+    /// Retry every queued upload (manual or when network returns).
+    func resumePendingUploadsIfNeeded() {
+        guard !isProcessing, !isDrainingQueue, !pendingUploads.isEmpty else { return }
+        guard isPathSatisfied else { return }
+        isDrainingQueue = true
+        Task {
+            defer { isDrainingQueue = false }
+            // Snapshot IDs so mutations during drain do not skip items.
+            let ids = pendingUploads.map(\.id)
+            for id in ids {
+                guard !isProcessing else { return }
+                await retryPendingUpload(id: id)
+            }
+        }
+    }
+
+    func retryPendingUpload(id: String) async {
+        guard let item = uploadStore.item(id: id) else { return }
+        guard let audioURL = item.resolvedAudioURL() else {
+            uploadStore.remove(id: id)
+            return
+        }
+        await processQueued(
+            uploadId: item.id,
+            audioURL: audioURL,
+            clientId: item.clientId,
+            clientName: item.clientName,
+            existingVisitId: item.visitId
+        )
+    }
+
+    func discardPendingUpload(id: String) {
+        if let item = uploadStore.item(id: id), let url = item.resolvedAudioURL() {
+            try? FileManager.default.removeItem(at: url)
+        }
+        uploadStore.remove(id: id)
+        if pendingUploads.isEmpty {
+            setAssessmentInProgress(false)
+        }
+    }
+
     // MARK: - Upload + pipeline
 
     func process(audioURL: URL, clientId: String, clientName: String?) {
-        PostHogService.shared.capture("assessment_process_started", properties: [
-            "source": "recording",
-        ])
-        withAnimation {
-            isProcessing = true
-            uploadProgress = "Creating assessment..."
-            pipelineSteps = []
-        }
-        setAssessmentInProgress(true)
-
-        processingTask = Task {
-            do {
-                let visit = try await api.createVisit(clientId: clientId)
-                PostHogService.shared.capture("assessment_visit_created")
-                let data = try Data(contentsOf: audioURL)
-
-                uploadProgress = "Uploading audio..."
-                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: audioURL.lastPathComponent, autoProcess: true)
-                PostHogService.shared.capture("assessment_upload_succeeded", properties: [
-                    "source": "recording",
-                ])
-                try? FileManager.default.removeItem(at: audioURL)
-
-                uploadProgress = "Pipeline running..."
-                await pollPipeline(visitId: visit.id, clientName: clientName)
-            } catch {
-                PostHogService.shared.capture("assessment_upload_failed", properties: [
-                    "source": "recording",
-                ])
-                // Minimize PHI retention on device when upload/processing fails.
-                try? FileManager.default.removeItem(at: audioURL)
-                withAnimation { isProcessing = false }
-                uploadProgress = nil
-                pipelineSteps = []
-                errorMessage = error.palmFriendlyMessage
-                setAssessmentInProgress(false)
-            }
+        let uploadId = UUID().uuidString
+        enqueueOrRefresh(
+            id: uploadId,
+            audioURL: audioURL,
+            clientId: clientId,
+            clientName: clientName,
+            visitId: nil,
+            error: nil
+        )
+        Task {
+            await processQueued(
+                uploadId: uploadId,
+                audioURL: audioURL,
+                clientId: clientId,
+                clientName: clientName,
+                existingVisitId: nil
+            )
         }
     }
 
     /// Upload an audio file picked from Files (security-scoped URL).
     func processPickedFile(url: URL, clientId: String, clientName: String?) {
-        PostHogService.shared.capture("assessment_process_started", properties: [
-            "source": "file_upload",
-        ])
-        withAnimation {
-            isProcessing = true
-            uploadProgress = "Uploading audio file..."
-            pipelineSteps = []
-        }
-        setAssessmentInProgress(true)
-
-        processingTask = Task {
+        Task {
             do {
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
 
                 let data = try Data(contentsOf: url)
                 let filename = url.lastPathComponent
-
-                uploadProgress = "Creating assessment..."
-                let visit = try await api.createVisit(clientId: clientId)
-                PostHogService.shared.capture("assessment_visit_created")
-
-                uploadProgress = "Uploading audio..."
-                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
-                PostHogService.shared.capture("assessment_upload_succeeded", properties: [
-                    "source": "file_upload",
-                ])
-
-                uploadProgress = "Pipeline running..."
-                await pollPipeline(visitId: visit.id, clientName: clientName)
+                // Copy into Recordings/ so a failed upload can retry without
+                // depending on the security-scoped Files bookmark.
+                let localURL = try Self.copyIntoRecordings(data: data, preferredName: filename)
+                let uploadId = UUID().uuidString
+                enqueueOrRefresh(
+                    id: uploadId,
+                    audioURL: localURL,
+                    clientId: clientId,
+                    clientName: clientName,
+                    visitId: nil,
+                    error: nil
+                )
+                await processQueued(
+                    uploadId: uploadId,
+                    audioURL: localURL,
+                    clientId: clientId,
+                    clientName: clientName,
+                    existingVisitId: nil
+                )
             } catch {
                 PostHogService.shared.capture("assessment_upload_failed", properties: [
                     "source": "file_upload",
                 ])
+                errorMessage = error.palmFriendlyMessage
                 withAnimation { isProcessing = false }
                 uploadProgress = nil
-                pipelineSteps = []
-                errorMessage = error.palmFriendlyMessage
-                setAssessmentInProgress(false)
+                setAssessmentInProgress(uploadStore.hasItems)
             }
         }
+    }
+
+    private func processQueued(
+        uploadId: String,
+        audioURL: URL,
+        clientId: String,
+        clientName: String?,
+        existingVisitId: String?
+    ) async {
+        PostHogService.shared.capture("assessment_process_started", properties: [
+            "source": existingVisitId == nil ? "recording" : "retry",
+        ])
+        withAnimation {
+            isProcessing = true
+            uploadProgress = existingVisitId == nil ? "Creating assessment..." : "Retrying upload..."
+            pipelineSteps = []
+            audioSavedNotice = nil
+        }
+        setAssessmentInProgress(true)
+        uploadStore.update(id: uploadId) { item in
+            item.attemptCount += 1
+            item.lastError = nil
+        }
+
+        processingTask?.cancel()
+        processingTask = Task {
+            do {
+                let data = try Data(contentsOf: audioURL)
+                let visitId: String
+                if let existingVisitId {
+                    visitId = existingVisitId
+                } else {
+                    uploadProgress = "Creating assessment..."
+                    let visit = try await api.createVisit(clientId: clientId)
+                    PostHogService.shared.capture("assessment_visit_created")
+                    visitId = visit.id
+                    uploadStore.update(id: uploadId) { $0.visitId = visit.id }
+                }
+
+                uploadProgress = "Uploading audio..."
+                _ = try await api.uploadAudio(
+                    visitId: visitId,
+                    audioData: data,
+                    filename: audioURL.lastPathComponent,
+                    autoProcess: true
+                )
+                PostHogService.shared.capture("assessment_upload_succeeded", properties: [
+                    "source": "recording",
+                ])
+                clearQueuedAudio(uploadId: uploadId, audioURL: audioURL)
+
+                uploadProgress = "Pipeline running..."
+                await pollPipeline(visitId: visitId, clientName: clientName)
+            } catch {
+                PostHogService.shared.capture("assessment_upload_failed", properties: [
+                    "source": "recording",
+                ])
+                handleUploadFailure(
+                    error: error,
+                    uploadId: uploadId,
+                    audioURL: audioURL,
+                    clientId: clientId,
+                    clientName: clientName
+                )
+            }
+        }
+        await processingTask?.value
+    }
+
+    private func enqueueOrRefresh(
+        id: String,
+        audioURL: URL,
+        clientId: String,
+        clientName: String?,
+        visitId: String?,
+        error: String?
+    ) {
+        let existing = uploadStore.items.first { $0.audioPath == audioURL.path || $0.filename == audioURL.lastPathComponent }
+        let item = PendingUpload(
+            id: existing?.id ?? id,
+            audioPath: audioURL.path,
+            clientId: clientId,
+            clientName: clientName,
+            createdAt: existing?.createdAt ?? Date(),
+            attemptCount: existing?.attemptCount ?? 0,
+            lastError: error,
+            visitId: visitId ?? existing?.visitId
+        )
+        uploadStore.upsert(item)
+    }
+
+    private func clearQueuedAudio(uploadId: String, audioURL: URL) {
+        uploadStore.remove(id: uploadId)
+        try? FileManager.default.removeItem(at: audioURL)
+    }
+
+    private func handleUploadFailure(
+        error: Error,
+        uploadId: String?,
+        audioURL: URL?,
+        clientId: String,
+        clientName: String?
+    ) {
+        let message = error.palmFriendlyMessage
+        if let uploadId {
+            uploadStore.update(id: uploadId) { item in
+                item.lastError = message
+            }
+        } else if let audioURL {
+            enqueueOrRefresh(
+                id: UUID().uuidString,
+                audioURL: audioURL,
+                clientId: clientId,
+                clientName: clientName,
+                visitId: nil,
+                error: message
+            )
+        }
+        // Keep the WAV. Trust dies if we delete mid-visit after a bad signal.
+        withAnimation { isProcessing = false }
+        uploadProgress = nil
+        pipelineSteps = []
+        audioSavedNotice = "We still have your audio on this iPhone. Retry when you have a signal."
+        // Stay "in progress" while audio is queued so session timeout does not
+        // treat the caregiver as idle and wipe context.
+        setAssessmentInProgress(uploadStore.hasItems)
+    }
+
+    private static func copyIntoRecordings(data: Data, preferredName: String) throws -> URL {
+        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw RecordingError.failedToStart
+        }
+        let dir = documents.appendingPathComponent("Recordings", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let safeName = preferredName.isEmpty ? "upload-\(UUID().uuidString).wav" : preferredName
+        let dest = dir.appendingPathComponent("pending-\(UUID().uuidString)-\(safeName)")
+        try data.write(to: dest, options: [.atomic])
+        return dest
     }
 
     /// The backend pipeline reports an in-flight step as "processing"
@@ -311,7 +511,7 @@ final class AssessmentSession: ObservableObject {
             } catch {
                 consecutiveErrors += 1
                 if consecutiveErrors >= maxConsecutiveErrors {
-                    uploadProgress = "Connection lost — your assessment is still processing in the background."
+                    uploadProgress = "Connection lost. Your assessment is still processing in the background."
                 }
             }
         }
@@ -333,7 +533,7 @@ final class AssessmentSession: ObservableObject {
             uploadProgress = nil
             pipelineSteps = []
         }
-        setAssessmentInProgress(false)
+        setAssessmentInProgress(uploadStore.hasItems)
         // Set last: RecordView's onReceive uses this as the navigation signal,
         // so all other state must already be in place.
         completedVisitId = visitId

@@ -30,6 +30,10 @@ extension VisitDetailView {
                 statusBadge(v.status)
             }
 
+            if let send = v.agreement_send {
+                agreementSendCard(send)
+            }
+
             if let scheduled = v.scheduled_start {
                 HStack(spacing: 8) {
                     Image(systemName: "calendar")
@@ -61,6 +65,87 @@ extension VisitDetailView {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
     }
 
+    func agreementSendCard(_ send: AgreementSend) -> some View {
+        let status = (send.status ?? "sent").lowercased()
+        let tint: Color = {
+            switch status {
+            case "signed": return .palmGreen
+            case "bounced": return .red
+            case "opened", "delivered": return .palmBlue
+            default: return .palmPurple
+            }
+        }()
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "paperplane.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(tint)
+                Text("Agreement send")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Spacer()
+                Text(send.displayLabel)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(tint)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(tint.opacity(0.12))
+                    .cornerRadius(10)
+            }
+            if let email = send.recipient_email {
+                Text(email)
+                    .font(.system(size: 12))
+                    .foregroundColor(.palmSecondary)
+            }
+            if send.isAwaitingSignature || status == "bounced" {
+                HStack(spacing: 8) {
+                    if send.isAwaitingSignature {
+                        Button {
+                            Task { await markAgreementStatus("signed") }
+                        } label: {
+                            Text("Mark signed")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Color.palmGreen)
+                                .cornerRadius(8)
+                        }
+                        Button {
+                            Task { await markAgreementStatus("bounced") }
+                        } label: {
+                            Text("Mark bounced")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.red)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Color.red.opacity(0.08))
+                                .cornerRadius(8)
+                        }
+                    }
+                    if status == "bounced" {
+                        Button {
+                            showEmailSheet = true
+                        } label: {
+                            Text("Resend")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Color.palmPrimary)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(tint.opacity(0.06))
+        .cornerRadius(10)
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(tint.opacity(0.2), lineWidth: 1))
+    }
+
     func pipelineCard(_ v: Visit) -> some View {
         let steps: [(String, String, String)] = [
             ("transcription", "Transcribe", "waveform"),
@@ -69,11 +154,19 @@ extension VisitDetailView {
             ("note", "Notes", "note.text"),
             ("contract", "Contract", "doc.text.fill"),
         ]
+        let ready = documentReadyCount
+        let retryable = steps.filter { pipelineStepState(v, step: $0.0).canRetry }
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text("Processing Pipeline")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.palmText)
+            HStack(alignment: .firstTextBaseline) {
+                Text("Processing Pipeline")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Spacer()
+                Text("\(ready) of 4 ready")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(ready == 4 ? .palmGreen : .palmSecondary)
+            }
 
             HStack(spacing: 0) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
@@ -86,6 +179,14 @@ extension VisitDetailView {
                             if state.isProcessing {
                                 ProgressView()
                                     .scaleEffect(0.6)
+                            } else if state.isFailed {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(state.color)
+                            } else if state.isStuck {
+                                Image(systemName: "exclamationmark")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(state.color)
                             } else {
                                 Image(systemName: state.isComplete ? "checkmark" : step.2)
                                     .font(.system(size: 13, weight: .semibold))
@@ -106,6 +207,58 @@ extension VisitDetailView {
                             .padding(.bottom, 18)
                     }
                 }
+            }
+
+            if !retryable.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Partial packet. Retry only what failed.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+
+                    ForEach(retryable, id: \.0) { step in
+                        let state = pipelineStepState(v, step: step.0)
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(step.1)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.palmText)
+                                Text(state.errorMessage ?? (state.isStuck
+                                      ? "Stuck for 5+ minutes"
+                                      : "Failed. Retry this document."))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.palmSecondary)
+                                    .lineLimit(2)
+                            }
+                            Spacer()
+                            Button {
+                                Task { await retryPipelineStep(step.0) }
+                            } label: {
+                                HStack(spacing: 4) {
+                                    if retryingPipelineStep == step.0 {
+                                        ProgressView().scaleEffect(0.6).tint(.white)
+                                    } else {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: 11, weight: .bold))
+                                    }
+                                    Text("Retry")
+                                        .font(.system(size: 12, weight: .semibold))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Color.palmPrimary)
+                                .cornerRadius(8)
+                            }
+                            .disabled(retryingPipelineStep != nil)
+                            .accessibilityLabel(pipelineStepRetryLabel(step.0))
+                        }
+                        .padding(10)
+                        .background(Color.palmOrange.opacity(0.08))
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmOrange.opacity(0.25), lineWidth: 1))
+                    }
+                }
+                .padding(.top, 4)
             }
         }
         .padding(16)

@@ -5,6 +5,9 @@ import SwiftUI
 struct VoiceOrb: View {
     let isActive: Bool
     let audioLevel: Float
+    /// Outer box the orb must stay inside. Rings used to draw at 230pt while
+    /// the parent frame was 160pt, which overflowed into the labels below.
+    var size: CGFloat = 240
 
     @State private var rotation: Double = 0
     @State private var morphPhase: CGFloat = 0
@@ -12,6 +15,9 @@ struct VoiceOrb: View {
     private var normalizedLevel: CGFloat {
         CGFloat(max(0, min(1, audioLevel)))
     }
+
+    private var coreSize: CGFloat { size * 0.58 }
+    private var scale: CGFloat { size / 240 }
 
     var body: some View {
         ZStack {
@@ -34,28 +40,30 @@ struct VoiceOrb: View {
                         center: .center
                     )
                 )
-                .frame(width: 140, height: 140)
-                .shadow(color: Color.palmPrimary.opacity(isActive ? 0.6 : 0.3), radius: isActive ? 30 : 15, y: 0)
+                .frame(width: coreSize, height: coreSize)
+                .shadow(color: Color.palmPrimary.opacity(isActive ? 0.55 : 0.28), radius: isActive ? 18 * scale : 10 * scale, y: 0)
                 .overlay(
                     OrbShape(phase: morphPhase, audioLevel: normalizedLevel)
-                        .fill(RadialGradient(colors: [.white.opacity(0.25), .clear], center: .topLeading, startRadius: 0, endRadius: 80))
-                        .frame(width: 140, height: 140)
+                        .fill(RadialGradient(colors: [.white.opacity(0.25), .clear], center: .topLeading, startRadius: 0, endRadius: coreSize * 0.55))
+                        .frame(width: coreSize, height: coreSize)
                 )
 
             if isActive {
-                HStack(spacing: 3) {
+                HStack(spacing: 3 * scale) {
                     ForEach(0..<5, id: \.self) { i in
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.white)
-                            .frame(width: 3, height: barHeight(for: i))
+                            .frame(width: max(2, 3 * scale), height: barHeight(for: i))
                     }
                 }
             } else {
                 Image(systemName: "mic.fill")
-                    .font(.system(size: 40))
+                    .font(.system(size: 40 * scale))
                     .foregroundColor(.white)
             }
         }
+        .frame(width: size, height: size)
+        .clipped()
         .onAppear {
             withAnimation(.linear(duration: 12).repeatForever(autoreverses: false)) { rotation = 360 }
             withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) { morphPhase = 1 }
@@ -63,12 +71,12 @@ struct VoiceOrb: View {
     }
 
     private func orbSize(for ring: Int) -> CGFloat {
-        let base: CGFloat = 170 + CGFloat(ring) * 30
-        return base + (isActive ? normalizedLevel * 15 : 0)
+        let base = size * (0.72 + CGFloat(ring) * 0.11)
+        return min(size, base + (isActive ? normalizedLevel * 8 * scale : 0))
     }
 
     private func barHeight(for index: Int) -> CGFloat {
-        max(6, 12 + normalizedLevel * 24 + sin(morphPhase * .pi * 2 + CGFloat(index) * 1.2) * 8)
+        max(6 * scale, (12 + normalizedLevel * 24 + sin(morphPhase * .pi * 2 + CGFloat(index) * 1.2) * 8) * scale)
     }
 }
 
@@ -131,15 +139,19 @@ struct WrappingHStack: View {
             let sep = i > 0 ? Text(" ") : Text("")
             if LiveTranscriptionService.isMedicalKeyword(word) {
                 text = text + sep + Text(word)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.palmPrimaryLight)
             } else {
                 text = text + sep + Text(word)
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.88))
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.9))
             }
         }
-        return text.lineSpacing(5)
+        return text
+            .lineSpacing(6)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

@@ -469,7 +469,7 @@ async def email_contract(
 
     # Send from the agency's own connected mailbox (Gmail). The agreement comes
     # from their real business address and lands in their Sent folder.
-    await email_sender.send_via_gmail(
+    send_result = await email_sender.send_via_gmail(
         current_user,
         db,
         to=email_request.recipient_email,
@@ -481,13 +481,32 @@ async def email_contract(
         sender_name=current_user.company_name or current_user.full_name,
     )
 
+    from datetime import datetime, timezone
+    from sqlalchemy.orm.attributes import flag_modified
+
+    now = datetime.now(timezone.utc).isoformat()
+    visit.agreement_send = {
+        "recipient_email": str(email_request.recipient_email),
+        "cc_email": str(email_request.cc_email) if email_request.cc_email else None,
+        "provider": "gmail",
+        "provider_message_id": (send_result or {}).get("id"),
+        "status": "sent",
+        "sent_at": now,
+        "delivered_at": None,
+        "opened_at": None,
+        "bounced_at": None,
+        "signed_at": None,
+    }
+    flag_modified(visit, "agreement_send")
+
     # Auto-move client to "proposal" status when contract/proposal is emailed
     try:
         if client.status not in ('proposal', 'active', 'assigned'):
             client.status = 'proposal'
-            db.commit()
     except Exception:
         pass  # Don't fail the email send over a status update
+
+    db.commit()
 
     return {
         "success": True,
@@ -495,6 +514,7 @@ async def email_contract(
         "recipient": email_request.recipient_email,
         "sender": current_user.email_sender_address or current_user.email,
         "client_status_updated": client.status == 'proposal',
+        "agreement_send": visit.agreement_send,
     }
 
 

@@ -210,6 +210,68 @@ extension VisitDetailView {
         }
     }
 
+    /// Re-queue one failed/stuck document without wiping audio or other docs.
+    func retryPipelineStep(_ step: String) async {
+        await MainActor.run { retryingPipelineStep = step }
+        PostHogService.shared.capture("assessment_step_retry_started", properties: [
+            "step": step,
+        ])
+        do {
+            _ = try await api.retryPipelineStep(visitId: visitId, step: step)
+            if let v = try? await api.fetchVisit(id: visitId) {
+                await MainActor.run { visit = v }
+            }
+            await MainActor.run {
+                retryingPipelineStep = nil
+                // Clear the matching tab so the next poll reloads fresh data.
+                switch step {
+                case "transcription", "diarization":
+                    transcript = nil
+                    tabFetchFailed.remove(1)
+                case "billing":
+                    billables = nil
+                    tabFetchFailed.remove(2)
+                case "note":
+                    note = nil
+                    tabFetchFailed.remove(3)
+                case "contract":
+                    contract = nil
+                    tabFetchFailed.remove(4)
+                default:
+                    break
+                }
+            }
+            PostHogService.shared.capture("assessment_step_retry_succeeded", properties: [
+                "step": step,
+            ])
+            await pollPipelineUntilComplete()
+        } catch {
+            PostHogService.shared.capture("assessment_step_retry_failed", properties: [
+                "step": step,
+            ])
+            await MainActor.run {
+                retryingPipelineStep = nil
+                actionError = "Retry failed: \(error.palmFriendlyMessage)"
+                showActionError = true
+            }
+        }
+    }
+
+    func markAgreementStatus(_ status: String) async {
+        do {
+            let updated = try await api.updateAgreementSendStatus(visitId: visitId, status: status)
+            await MainActor.run { visit = updated }
+            PostHogService.shared.capture("agreement_status_updated", properties: [
+                "status": status,
+            ])
+        } catch {
+            await MainActor.run {
+                actionError = "Could not update send status: \(error.palmFriendlyMessage)"
+                showActionError = true
+            }
+        }
+    }
+
     // MARK: - Formatting
 
     func formattedDate(_ isoString: String) -> String {

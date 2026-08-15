@@ -2,10 +2,13 @@ import SwiftUI
 
 struct MainTabView: View {
     @EnvironmentObject var api: APIService
-    @State private var selectedTab = 0
+    @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("OPEN_RECORD_TAB") ? 2 : 0
     @State private var navigationResetIds: [Int: UUID] = [
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
+    @AppStorage("hasSeenSampleVisit") private var hasSeenSampleVisit = false
+    @State private var showSamplePacket = false
+    @State private var showPostWowPaywall = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -13,7 +16,7 @@ struct MainTabView: View {
             // (Command Center, Sales Leads, Investors, Analytics) live only in
             // the web app, so the phone always uses the normal layout.
             normalContent
-                .padding(.bottom, 60)
+                .padding(.bottom, 72)
 
             CustomTabBar(
                 selectedTab: $selectedTab,
@@ -27,6 +30,36 @@ struct MainTabView: View {
             PostHogService.shared.capture("tab_selected", properties: [
                 "tab_index": newTab,
             ])
+        }
+        .onAppear {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
+                hasSeenSampleVisit = true
+                return
+            }
+            #endif
+            if !hasSeenSampleVisit {
+                // Slight delay so Home paints first, then the wow lands.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    showSamplePacket = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showSamplePacket, onDismiss: {
+            hasSeenSampleVisit = true
+            PostHogService.shared.capture("sample_packet_dismissed")
+            // Soft plan ask after the wow, not before.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                showPostWowPaywall = true
+            }
+        }) {
+            SamplePacketView {
+                showSamplePacket = false
+            }
+        }
+        .sheet(isPresented: $showPostWowPaywall) {
+            PaywallView()
+                .environmentObject(api)
         }
     }
 
@@ -90,7 +123,7 @@ struct CustomTabBar: View {
     ]
 
     var body: some View {
-        HStack {
+        HStack(alignment: .center, spacing: 0) {
             ForEach(0..<tabs.count, id: \.self) { index in
                 if index == 2 {
                     palmItButton(index: index)
@@ -99,9 +132,9 @@ struct CustomTabBar: View {
                 }
             }
         }
-        .padding(.horizontal, 4)
-        .padding(.top, 6)
-        .padding(.bottom, 24)
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .padding(.bottom, 26)
         .background(
             Rectangle()
                 .fill(Color(UIColor.systemBackground))
@@ -118,12 +151,9 @@ struct CustomTabBar: View {
         // Red while recording (acts as a stop button) or while on the record
         // tab; teal otherwise.
         let isHot = isRecording || selectedTab == 2
-        return VStack(spacing: 3) {
+        return VStack(spacing: 4) {
             Button {
                 if isRecording {
-                    // Stop the active recording from anywhere — same effect as
-                    // tapping the orb. Jump to the record tab so the user sees
-                    // processing and the contract open.
                     selectedTab = index
                     session.stopRecording(client: nil)
                 } else {
@@ -140,24 +170,23 @@ struct CustomTabBar: View {
                                 ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
-                        .frame(width: 50, height: 50)
+                        .frame(width: 44, height: 44)
                         .shadow(
-                            color: (isHot ? Color.red : Color.palmPrimary).opacity(0.45),
-                            radius: 7, y: 3
+                            color: (isHot ? Color.red : Color.palmPrimary).opacity(0.35),
+                            radius: 6, y: 2
                         )
 
                     Image(systemName: isRecording ? "stop.fill" : tabs[index].icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                 }
             }
             .accessibilityLabel(isRecording ? "Stop recording" : "Record assessment")
-            .offset(y: -20)
 
             Text(isRecording ? "Stop" : tabs[index].label)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(isRecording ? .red : .palmSecondary)
-                .offset(y: -17)
+                .foregroundColor(isRecording ? .red : (selectedTab == index ? .palmPrimary : .palmSecondary))
+                .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
     }
@@ -169,18 +198,20 @@ struct CustomTabBar: View {
             }
             selectedTab = index
         } label: {
-            VStack(spacing: 3) {
+            VStack(spacing: 4) {
                 Image(systemName: tabs[index].icon)
                     .font(.system(size: 20))
                     .foregroundColor(
                         selectedTab == index ? .palmPrimary : .palmSecondary
                     )
+                    .frame(height: 44)
 
                 Text(tabs[index].label)
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(
                         selectedTab == index ? .palmPrimary : .palmSecondary
                     )
+                    .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
         }

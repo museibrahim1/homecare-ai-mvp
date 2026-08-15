@@ -1,0 +1,36 @@
+{
+  "client_name": "Eleanor Whitfield",
+  "agency_name": "Sunrise Home Care",
+  "state": "FL",
+  "tagline": "One recording. Four documents ready to review.",
+  "transcript": [
+    { "speaker": "Caregiver", "text": "Good morning Eleanor. How have you been feeling since our last visit?" },
+    { "speaker": "Eleanor", "text": "A little unsteady getting out of the chair, but the mornings are better when someone helps with breakfast." },
+    { "speaker": "Caregiver", "text": "We will keep meal prep on the plan, and I want to check your blood pressure before we finish." },
+    { "speaker": "Eleanor", "text": "My daughter wants someone here three mornings a week, and she asked about a written agreement." }
+  ],
+  "billables": [
+    { "code": "ADL", "category": "Personal Care", "description": "Bathing and dressing assistance", "minutes": 45 },
+    { "code": "MEAL", "category": "Meal Prep", "description": "Breakfast preparation and cleanup", "minutes": 30 },
+    { "code": "MED", "category": "Medication Reminder", "description": "Morning medication reminder and observation", "minutes": 15 },
+    { "code": "COMP", "category": "Companionship", "description": "Companionship and safety check", "minutes": 40 }
+  ],
+  "note": {
+    "subjective": "Client reports mild morning unsteadiness transferring from chair. Daughter requesting three morning visits per week with a written service agreement.",
+    "objective": "Assisted with bathing and dressing. Prepared breakfast. Reminded client of morning medications. Blood pressure checked and within usual range for this client.",
+    "assessment": "Needs ongoing ADL support and meal assistance. Stable for home care with caregiver present during morning routine.",
+    "plan": "Continue three mornings weekly. Include personal care, meal prep, medication reminders, and companionship. Provide service agreement for family review."
+  },
+  "contract": {
+    "title": "Home Care Service Agreement - Eleanor Whitfield",
+    "hourly_rate": 28,
+    "weekly_hours": 12,
+    "services": [
+      "Personal Care / ADL Assistance",
+      "Meal Preparation",
+      "Medication Reminders",
+      "Companionship"
+    ],
+    "terms": "Services begin after signed agreement. Schedule is Monday, Wednesday, and Friday mornings. Family may cancel with 48 hours notice."
+  }
+}

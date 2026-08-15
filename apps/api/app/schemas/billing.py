@@ -25,6 +25,7 @@ class BillableItemResponse(BaseModel):
 
 
 class BillableItemUpdate(BaseModel):
+    description: Optional[str] = None
     is_approved: Optional[bool] = None
     is_flagged: Optional[bool] = None
     flag_reason: Optional[str] = None

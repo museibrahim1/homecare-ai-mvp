@@ -19,12 +19,28 @@ struct TranscriptWord: Codable, Identifiable {
 }
 
 struct TranscriptSegment: Identifiable {
-    let id = UUID()
+    let id: UUID
     let speaker: Int
     let text: String
     let words: [TranscriptWord]
     let startTime: Double
     let endTime: Double
+
+    init(
+        id: UUID = UUID(),
+        speaker: Int,
+        text: String,
+        words: [TranscriptWord],
+        startTime: Double,
+        endTime: Double
+    ) {
+        self.id = id
+        self.speaker = speaker
+        self.text = text
+        self.words = words
+        self.startTime = startTime
+        self.endTime = endTime
+    }
 
     var speakerLabel: String {
         switch speaker {

@@ -25,10 +25,29 @@ struct VisitDetailView: View {
     @State var isRefreshing = false
     /// Billable IDs with an approve/deny request in flight (double-tap guard).
     @State var pendingBillableIds: Set<String> = []
+    @State var editingBillableId: String?
+    @State var editBillableDescription = ""
+    @State var editBillableMinutes = ""
+    @State var isSavingBillableEdit = false
+    @State var isEditingNote = false
+    @State var editNoteSubjective = ""
+    @State var editNoteObjective = ""
+    @State var editNoteAssessment = ""
+    @State var editNotePlan = ""
+    @State var editNoteNarrative = ""
+    @State var isSavingNote = false
+    @State var isEditingContract = false
+    @State var editContractTitle = ""
+    @State var editContractTerms = ""
+    @State var editContractRate = ""
+    @State var editContractHours = ""
+    @State var isSavingContract = false
     @State var showFullContract = false
     @State var selectedContractStyle = "modern"
     @State var showStylePicker = false
     @State var showEmailSheet = false
+    /// Pipeline step key currently being re-queued (bill / note / contract / …).
+    @State var retryingPipelineStep: String?
     #if DEBUG
     @State var didRunAutomationTabCycle = false
     #endif
@@ -168,7 +187,7 @@ struct VisitDetailView: View {
                 } else if let error = errorMessage {
                     errorView(error)
                 } else {
-                    if isPipelineProcessing {
+                    if isPipelineProcessing || hasFailedPipelineStep || hasStuckPipelineStep {
                         processingBanner
                     }
                     switch activeTab {
@@ -190,15 +209,27 @@ struct VisitDetailView: View {
     /// Shown while the AI pipeline is still running so the user understands
     /// that empty tabs are filling in (not broken).
     var processingBanner: some View {
-        HStack(spacing: 10) {
-            ProgressView()
-                .scaleEffect(0.8)
-                .tint(.palmPrimary)
+        let ready = documentReadyCount
+        let stuck = hasStuckPipelineStep
+        return HStack(spacing: 10) {
+            if stuck {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.palmOrange)
+            } else {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .tint(.palmPrimary)
+            }
             VStack(alignment: .leading, spacing: 2) {
-                Text("Processing assessment…")
+                Text(stuck
+                     ? "Processing is taking longer than usual"
+                     : "\(ready) of 4 ready")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.palmText)
-                Text("Transcript, billables, notes, and contract will appear here automatically.")
+                Text(stuck
+                     ? "Retry the stuck step below. You do not need to restart the whole visit."
+                     : "Transcript, billables, notes, and contract fill in as each step finishes.")
                     .font(.system(size: 11))
                     .foregroundColor(.palmSecondary)
             }
@@ -206,9 +237,9 @@ struct VisitDetailView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.palmPrimary.opacity(0.08))
+        .background((stuck ? Color.palmOrange : Color.palmPrimary).opacity(0.08))
         .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.2), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke((stuck ? Color.palmOrange : Color.palmPrimary).opacity(0.2), lineWidth: 1))
     }
 
 }

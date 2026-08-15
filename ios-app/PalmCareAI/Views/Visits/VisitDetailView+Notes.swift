@@ -10,20 +10,80 @@ extension VisitDetailView {
                         .foregroundColor(.palmText)
                     Spacer()
 
-                    Button { Task { await exportFile(type: "note.pdf") } } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.down.doc.fill").font(.system(size: 12))
-                            Text("PDF").font(.system(size: 12, weight: .semibold))
+                    if isEditingNote {
+                        Button {
+                            Task { await saveNoteEdits() }
+                        } label: {
+                            HStack(spacing: 4) {
+                                if isSavingNote {
+                                    ProgressView().scaleEffect(0.6).tint(.palmPrimary)
+                                }
+                                Text("Save").font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.palmPrimary.opacity(0.08))
+                            .cornerRadius(8)
                         }
-                        .foregroundColor(.palmPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.palmPrimary.opacity(0.08))
-                        .cornerRadius(8)
+                        .disabled(isSavingNote)
+                        Button {
+                            isEditingNote = false
+                        } label: {
+                            Text("Cancel")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.palmSecondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                        }
+                        .disabled(isSavingNote)
+                    } else {
+                        Button { beginNoteEdit(n) } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "pencil").font(.system(size: 12))
+                                Text("Edit").font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.palmPrimary.opacity(0.08))
+                            .cornerRadius(8)
+                        }
+                        Button { Task { await exportFile(type: "note.pdf") } } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.down.doc.fill").font(.system(size: 12))
+                                Text("PDF").font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.palmPrimary.opacity(0.08))
+                            .cornerRadius(8)
+                        }
                     }
                 }
 
-                if let sd = n.structured_data {
+                if isEditingNote {
+                    soapEditField(letter: "S", title: "Subjective", text: $editNoteSubjective, color: .palmBlue)
+                    soapEditField(letter: "O", title: "Objective", text: $editNoteObjective, color: .palmGreen)
+                    soapEditField(letter: "A", title: "Assessment", text: $editNoteAssessment, color: .palmOrange)
+                    soapEditField(letter: "P", title: "Plan", text: $editNotePlan, color: .palmPurple)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Narrative Summary")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmText)
+                        TextField("Narrative", text: $editNoteNarrative, axis: .vertical)
+                            .font(.system(size: 13))
+                            .lineLimit(3...10)
+                            .padding(10)
+                            .background(Color.palmBackground)
+                            .cornerRadius(8)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+                    }
+                    .padding(14)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+                } else if let sd = n.structured_data {
                     if let mood = sd.client_mood, !mood.isEmpty {
                         HStack(spacing: 8) {
                             Image(systemName: "face.smiling")
@@ -126,7 +186,7 @@ extension VisitDetailView {
                     }
                 }
 
-                if let narrative = n.narrative, !narrative.isEmpty {
+                if !isEditingNote, let narrative = n.narrative, !narrative.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 6) {
                             Image(systemName: "doc.plaintext")
@@ -150,7 +210,12 @@ extension VisitDetailView {
             } else if tabFetchFailed.contains(3) {
                 tabErrorState(tab: 3)
             } else {
-                emptyState(icon: "note.text", title: "No Notes", message: "Clinical notes will appear here once the assessment has been processed.")
+                documentEmptyState(
+                    step: "note",
+                    icon: "note.text",
+                    title: "No Notes",
+                    waitingMessage: "Clinical notes will appear here once the assessment has been processed."
+                )
             }
         }
     }
@@ -185,6 +250,76 @@ extension VisitDetailView {
         )
     }
 
-    // MARK: - Contract Tab
+    func soapEditField(letter: String, title: String, text: Binding<String>, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text(letter)
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundColor(.white)
+                    .frame(width: 26, height: 26)
+                    .background(color)
+                    .cornerRadius(7)
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Spacer()
+            }
+            TextField(title, text: text, axis: .vertical)
+                .font(.system(size: 13))
+                .lineLimit(3...8)
+                .padding(10)
+                .background(Color.palmBackground)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1))
+        }
+        .padding(14)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+    }
 
+    func beginNoteEdit(_ n: VisitNote) {
+        let sd = n.structured_data
+        editNoteSubjective = sd?.subjective ?? ""
+        editNoteObjective = sd?.objective ?? ""
+        editNoteAssessment = sd?.assessment ?? ""
+        editNotePlan = sd?.plan ?? ""
+        editNoteNarrative = n.narrative ?? ""
+        isEditingNote = true
+    }
+
+    func saveNoteEdits() async {
+        guard !isSavingNote else { return }
+        await MainActor.run { isSavingNote = true }
+        defer { Task { @MainActor in isSavingNote = false } }
+
+        var structured: [String: Any] = [:]
+        if let existing = note?.structured_data,
+           let data = try? JSONEncoder().encode(existing),
+           let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            structured = obj
+        }
+        structured["subjective"] = editNoteSubjective
+        structured["objective"] = editNoteObjective
+        structured["assessment"] = editNoteAssessment
+        structured["plan"] = editNotePlan
+
+        do {
+            let updated = try await api.updateVisitNote(
+                visitId: visitId,
+                narrative: editNoteNarrative,
+                structuredData: structured
+            )
+            await MainActor.run {
+                note = updated
+                isEditingNote = false
+            }
+            PostHogService.shared.capture("note_edited")
+        } catch {
+            await MainActor.run {
+                actionError = "Could not save notes: \(error.palmFriendlyMessage)"
+                showActionError = true
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01C7BC688E5B3E2306E989C9 /* PalmStatusChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500DEEF976198365C0257355 /* PalmStatusChip.swift */; };
 		022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */; };
 		08A1F6ECC58F3235CABEEC32 /* PalmAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */; };
 		09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F93493E955750982C65A92 /* RecordOrbViews.swift */; };
@@ -15,6 +16,7 @@
 		10CB00EB2F9DAF37EA7EE738 /* APIService+AccountCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067E8000BCB0510C6C94785D /* APIService+AccountCalendar.swift */; };
 		135CE43DA9F154AB373CD239 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7A50D477FC9EE6BF4A0B0F /* User.swift */; };
 		141F927F15C477E97C29E0A1 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FA85219CEFB0BFA3D30AFE /* SettingsComponents.swift */; };
+		1B809200B3B08DDE31D4DDF1 /* LiveTranscriptMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256BBA375C224659F21FD086 /* LiveTranscriptMerger.swift */; };
 		1DC12F7A9BB42680035DC903 /* APIService+PipelineDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */; };
 		2111F0170C3D4836FCA67B49 /* PalmBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7956F027589D97614E56073A /* PalmBackButton.swift */; };
 		238515BF27D5C2CD2B16850B /* ClientDetailView+Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4CEAF003D252EE1B58DE3A /* ClientDetailView+Sections.swift */; };
@@ -60,6 +62,7 @@
 		94648104A496234C1A8DB1D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1131D8E1B71DF1EA9DB392 /* PrivacyInfo.xcprivacy */; };
 		95C12418096B49755FFC26DF /* APIService+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */; };
 		985BF5A55F478AD20D82C0CC /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41812B9582222AD7FD8C0F01 /* WorkspaceView.swift */; };
+		9BE09CBD37BFB68BD551CA92 /* SamplePacketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB111B00D2725B560047368 /* SamplePacketView.swift */; };
 		9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965C098053DF16C330D69A47 /* RegisterView.swift */; };
 		A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */; };
 		A2B75BABEA2C5A151042ECE6 /* EmailSenderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72217ACB74F974613CD621F /* EmailSenderConnector.swift */; };
@@ -80,11 +83,13 @@
 		F550B4192FBBEA3CA2B46F53 /* LiveTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */; };
 		FB1FB140CF8C5B0F8A762ECF /* VisitDetailView+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFCF89DDFD88DAEE7F23451 /* VisitDetailView+Data.swift */; };
 		FBF988D7FAE8979B88BE0767 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4FFE119E970F306B1F7A575 /* Assets.xcassets */; };
+		FE5E3BBEFDAE7F48223A2297 /* PendingUploadStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C749DC52D1DFE6F0507AFC /* PendingUploadStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		067E8000BCB0510C6C94785D /* APIService+AccountCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+AccountCalendar.swift"; sourceTree = "<group>"; };
 		07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionService.swift; sourceTree = "<group>"; };
+		0CB111B00D2725B560047368 /* SamplePacketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamplePacketView.swift; sourceTree = "<group>"; };
 		13FA85219CEFB0BFA3D30AFE /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
 		193202E1C9F4C7DD4D8BB334 /* VisitDetailView+Billables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Billables.swift"; sourceTree = "<group>"; };
 		1A921BCDB8F2E82F6AD0B29E /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
@@ -92,7 +97,9 @@
 		1DFCF89DDFD88DAEE7F23451 /* VisitDetailView+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Data.swift"; sourceTree = "<group>"; };
 		23F93493E955750982C65A92 /* RecordOrbViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordOrbViews.swift; sourceTree = "<group>"; };
 		2493C2EE11530C7F4A668C11 /* SwipeBackGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackGesture.swift; sourceTree = "<group>"; };
+		256BBA375C224659F21FD086 /* LiveTranscriptMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriptMerger.swift; sourceTree = "<group>"; };
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
+		29C749DC52D1DFE6F0507AFC /* PendingUploadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingUploadStore.swift; sourceTree = "<group>"; };
 		2C659B9C3B38D4508AEEEDF9 /* Visit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Visit.swift; sourceTree = "<group>"; };
 		2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmOrbLogo.swift; sourceTree = "<group>"; };
 		2DEA75021BD113DD86530A11 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
@@ -109,6 +116,7 @@
 		46904E0BFAB746224FA5E0A8 /* VisitDetailView+Transcript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Transcript.swift"; sourceTree = "<group>"; };
 		482E38D4A70B9B736C64D377 /* ContractStylesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractStylesView.swift; sourceTree = "<group>"; };
 		4DC7E34D4B0393336B0CBB48 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		500DEEF976198365C0257355 /* PalmStatusChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmStatusChip.swift; sourceTree = "<group>"; };
 		5110B06761239BEB9E7D017F /* EventRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRow.swift; sourceTree = "<group>"; };
 		51D390C4585907D28007C7D7 /* ChangePasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordSheet.swift; sourceTree = "<group>"; };
 		54821013E627C715C0C90140 /* Transcript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcript.swift; sourceTree = "<group>"; };
@@ -186,6 +194,7 @@
 				9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */,
 				7956F027589D97614E56073A /* PalmBackButton.swift */,
 				2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */,
+				500DEEF976198365C0257355 /* PalmStatusChip.swift */,
 				2493C2EE11530C7F4A668C11 /* SwipeBackGesture.swift */,
 			);
 			path = Components;
@@ -308,6 +317,7 @@
 				0F60651A5DD2095D25E5CB58 /* Components */,
 				263F5368A18E9FE4B33D8ADE /* Contracts */,
 				1E3C8272722B68225537C8DC /* Home */,
+				ED84675C740E2185CDC58981 /* Onboarding */,
 				0E963202E75E9B9E4B279805 /* Record */,
 				56A8F7385BB9AA0F719EC9B5 /* Settings */,
 				765334332F1E4FA74A42249E /* Visits */,
@@ -349,10 +359,20 @@
 				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				A72217ACB74F974613CD621F /* EmailSenderConnector.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
+				256BBA375C224659F21FD086 /* LiveTranscriptMerger.swift */,
+				29C749DC52D1DFE6F0507AFC /* PendingUploadStore.swift */,
 				E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */,
 				9FDCB9B2E755AB310D6FB414 /* StoreKitService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		ED84675C740E2185CDC58981 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				0CB111B00D2725B560047368 /* SamplePacketView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		F0B317C9FCFBA5D036E59E8D /* PalmCareAI */ = {
@@ -480,6 +500,7 @@
 				2801AB657853429D4D52D3C9 /* GoogleCalendarSetupSheet.swift in Sources */,
 				441ED8E4CA766509026656D4 /* HomeView.swift in Sources */,
 				3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */,
+				1B809200B3B08DDE31D4DDF1 /* LiveTranscriptMerger.swift in Sources */,
 				F550B4192FBBEA3CA2B46F53 /* LiveTranscriptionService.swift in Sources */,
 				C37109ADE391ED8B9F1A9A57 /* LoginView.swift in Sources */,
 				C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */,
@@ -489,11 +510,14 @@
 				6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */,
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */,
+				01C7BC688E5B3E2306E989C9 /* PalmStatusChip.swift in Sources */,
 				DF8CA83F401B0268F58C05AB /* PaywallView.swift in Sources */,
+				FE5E3BBEFDAE7F48223A2297 /* PendingUploadStore.swift in Sources */,
 				3D2D2E63458DADA4642A6F30 /* PushNotifications.swift in Sources */,
 				09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,
+				9BE09CBD37BFB68BD551CA92 /* SamplePacketView.swift in Sources */,
 				141F927F15C477E97C29E0A1 /* SettingsComponents.swift in Sources */,
 				0B4988B6FD2460A6DC433938 /* SettingsView.swift in Sources */,
 				E5D41CF8D6974242651C9676 /* StoreKitService.swift in Sources */,

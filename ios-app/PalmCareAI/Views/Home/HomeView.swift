@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var api: APIService
+    @EnvironmentObject var session: AssessmentSession
     var onNavigateToRecord: (() -> Void)?
 
     @State private var user: User?
@@ -57,7 +58,6 @@ struct HomeView: View {
                     .padding(.top, 14)
                     .padding(.bottom, 14)
 
-                    // Stats row
                     HStack(spacing: 9) {
                         HomeStatCard(
                             icon: "person.2.fill",
@@ -74,9 +74,9 @@ struct HomeView: View {
                             iconColor: .blue
                         )
                         HomeStatCard(
-                            icon: "clock",
-                            value: "\(pendingVisits)",
-                            label: "Pending",
+                            icon: "tray.full.fill",
+                            value: "\(queueActionCount)",
+                            label: "Waiting",
                             iconBg: Color.orange.opacity(0.08),
                             iconColor: .orange
                         )
@@ -84,7 +84,6 @@ struct HomeView: View {
                     .padding(.horizontal, 14)
                     .padding(.bottom, 14)
 
-                    // CTA bar
                     Button { onNavigateToRecord?() } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
@@ -120,7 +119,6 @@ struct HomeView: View {
                         .background(
                             ZStack {
                                 LinearGradient.palmPrimary
-                                // Decorative circle
                                 Circle()
                                     .fill(Color.white.opacity(0.07))
                                     .frame(width: 100, height: 100)
@@ -134,9 +132,8 @@ struct HomeView: View {
                     .padding(.horizontal, 14)
                     .padding(.bottom, 18)
 
-                    // Recent Visits
                     HStack {
-                        Text("Recent Visits")
+                        Text("Your Queue")
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.palmText)
 
@@ -160,27 +157,80 @@ struct HomeView: View {
                         }
                     } else if loadError != nil {
                         errorView
-                    } else if visits.isEmpty {
+                    } else if queueIsEmpty {
                         EmptyStateCard(
-                            icon: "waveform.path",
-                            title: "No visits yet",
-                            subtitle: "Start a new assessment to see visits here"
+                            icon: "checkmark.circle",
+                            title: "Nothing waiting on you",
+                            subtitle: "Palm It to start a visit, or check See all for past assessments."
                         )
                         .padding(.horizontal, 14)
                     } else {
-                        VStack(spacing: 8) {
-                            ForEach(visits.prefix(5)) { visit in
-                                NavigationLink(destination:
-                                    VisitDetailView(
-                                        visitId: visit.id,
-                                        clientName: visit.client?.full_name
-                                    ).environmentObject(api)
+                        VStack(alignment: .leading, spacing: 16) {
+                            if !session.pendingUploads.isEmpty {
+                                queueSection(
+                                    title: "Failed upload",
+                                    subtitle: "Audio is still on this iPhone",
+                                    tint: .red
                                 ) {
-                                    VisitRow(visit: visit)
+                                    ForEach(session.pendingUploads) { item in
+                                        Button {
+                                            onNavigateToRecord?()
+                                        } label: {
+                                            queueRow(
+                                                title: item.clientName ?? "Saved recording",
+                                                detail: item.lastError ?? "Waiting for a signal",
+                                                badge: "Retry",
+                                                badgeColor: .red
+                                            )
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Retry upload for \(item.clientName ?? "saved recording")")
+                                    }
                                 }
-                                .accessibilityLabel("Visit for \(visit.client?.full_name ?? "Unknown"), \(visit.status)")
-                                .buttonStyle(.plain)
                             }
+
+                            queueVisitSection(
+                                title: "Needs review",
+                                tint: .palmOrange,
+                                visits: needsReviewVisits,
+                                badge: "Review"
+                            )
+                            queueVisitSection(
+                                title: "Failed processing",
+                                tint: .red,
+                                visits: failedProcessingVisits,
+                                badge: "Fix"
+                            )
+                            queueVisitSection(
+                                title: "Still processing",
+                                tint: .palmBlue,
+                                visits: processingVisits,
+                                badge: "Live"
+                            )
+                            queueVisitSection(
+                                title: "Awaiting signature",
+                                tint: .palmPurple,
+                                visits: awaitingSignatureVisits,
+                                badge: "Sent"
+                            )
+                            queueVisitSection(
+                                title: "Bounced",
+                                tint: .red,
+                                visits: bouncedSendVisits,
+                                badge: "Bounce"
+                            )
+                            queueVisitSection(
+                                title: "Ready to send",
+                                tint: .palmPrimary,
+                                visits: readyToSendVisits,
+                                badge: "Send"
+                            )
+                            queueVisitSection(
+                                title: "Follow up tomorrow",
+                                tint: .palmPurple,
+                                visits: followUpTomorrowVisits,
+                                badge: "Tomorrow"
+                            )
                         }
                         .padding(.horizontal, 14)
                     }
@@ -191,6 +241,211 @@ struct HomeView: View {
             .background(Color.palmBackground)
             .refreshable { await loadData(forceRefresh: true) }
             .task { await loadData() }
+    }
+
+    private var queueIsEmpty: Bool {
+        session.pendingUploads.isEmpty
+            && needsReviewVisits.isEmpty
+            && failedProcessingVisits.isEmpty
+            && processingVisits.isEmpty
+            && awaitingSignatureVisits.isEmpty
+            && bouncedSendVisits.isEmpty
+            && readyToSendVisits.isEmpty
+            && followUpTomorrowVisits.isEmpty
+    }
+
+    private var queueActionCount: Int {
+        session.pendingUploads.count
+            + needsReviewVisits.count
+            + failedProcessingVisits.count
+            + awaitingSignatureVisits.count
+            + bouncedSendVisits.count
+            + readyToSendVisits.count
+            + followUpTomorrowVisits.count
+    }
+
+    private var needsReviewVisits: [Visit] {
+        visits.filter { $0.status.lowercased() == "pending_review" }
+    }
+
+    private var failedProcessingVisits: [Visit] {
+        visits.filter { visit in
+            let s = visit.status.lowercased()
+            if s == "pipeline_failed" || s == "failed" { return true }
+            return Self.visitHasFailedStep(visit)
+        }
+        .filter { $0.status.lowercased() != "pending_review" }
+    }
+
+    private var processingVisits: [Visit] {
+        visits.filter { visit in
+            let s = visit.status.lowercased()
+            if s == "processing" || s == "uploading" || s == "pending" { return true }
+            return Self.visitIsActivelyProcessing(visit)
+                && !Self.visitHasFailedStep(visit)
+                && s != "pending_review"
+                && s != "pipeline_failed"
+                && s != "completed"
+        }
+    }
+
+    private var followUpTomorrowVisits: [Visit] {
+        let calendar = Calendar.current
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date()) else { return [] }
+        return visits.filter { visit in
+            guard let raw = visit.scheduled_start, let date = parseISO8601(raw) else { return false }
+            return calendar.isDate(date, inSameDayAs: tomorrow)
+        }
+    }
+
+    private var awaitingSignatureVisits: [Visit] {
+        visits.filter { $0.agreement_send?.isAwaitingSignature == true }
+    }
+
+    private var bouncedSendVisits: [Visit] {
+        visits.filter { ($0.agreement_send?.status ?? "").lowercased() == "bounced" }
+    }
+
+    private var readyToSendVisits: [Visit] {
+        // Completed packets with no send yet, and not claimed by other buckets.
+        let claimed = Set(needsReviewVisits.map(\.id)
+            + failedProcessingVisits.map(\.id)
+            + processingVisits.map(\.id)
+            + awaitingSignatureVisits.map(\.id)
+            + bouncedSendVisits.map(\.id)
+            + followUpTomorrowVisits.map(\.id))
+        return visits.filter { visit in
+            guard !claimed.contains(visit.id) else { return false }
+            if visit.agreement_send != nil { return false }
+            return visit.status.lowercased() == "completed"
+        }
+    }
+
+    private func queueVisitSection(
+        title: String,
+        tint: Color,
+        visits: [Visit],
+        badge: String
+    ) -> some View {
+        Group {
+            if !visits.isEmpty {
+                queueSection(title: title, subtitle: nil, tint: tint) {
+                    ForEach(visits.prefix(5)) { visit in
+                        NavigationLink(destination:
+                            VisitDetailView(
+                                visitId: visit.id,
+                                clientName: visit.client?.full_name
+                            ).environmentObject(api)
+                        ) {
+                            queueRow(
+                                title: visit.client?.full_name ?? "Client",
+                                detail: formattedQueueDate(visit),
+                                badge: badge,
+                                badgeColor: tint
+                            )
+                        }
+                        .accessibilityLabel("\(title): \(visit.client?.full_name ?? "Client")")
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    private func queueSection<Content: View>(
+        title: String,
+        subtitle: String?,
+        tint: Color,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 8, height: 8)
+                Text(title)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.palmText)
+                Spacer()
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                }
+            }
+            content()
+        }
+    }
+
+    private func queueRow(title: String, detail: String, badge: String, badgeColor: Color) -> some View {
+        HStack(spacing: 11) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmText)
+                    .lineLimit(1)
+                Text(detail)
+                    .font(.system(size: 11))
+                    .foregroundColor(.palmSecondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Text(badge)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(badgeColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(badgeColor.opacity(0.12))
+                .cornerRadius(20)
+        }
+        .padding(.horizontal, 13)
+        .padding(.vertical, 11)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+    }
+
+    private func formattedQueueDate(_ visit: Visit) -> String {
+        if let scheduled = visit.scheduled_start, let date = parseISO8601(scheduled) {
+            let display = DateFormatter()
+            display.dateStyle = .medium
+            display.timeStyle = .short
+            return "Scheduled \(display.string(from: date))"
+        }
+        if let date = parseISO8601(visit.created_at) {
+            let display = DateFormatter()
+            display.dateStyle = .medium
+            display.timeStyle = .short
+            return display.string(from: date)
+        }
+        return visit.displayStatus
+    }
+
+    private static func visitHasFailedStep(_ visit: Visit) -> Bool {
+        guard let ps = visit.pipeline_state else { return false }
+        for key in ["transcription", "diarization", "billing", "note", "contract"] {
+            if let dict = ps[key]?.value as? [String: Any],
+               let status = dict["status"] as? String,
+               status.lowercased() == "failed" {
+                return true
+            }
+        }
+        return false
+    }
+
+    private static func visitIsActivelyProcessing(_ visit: Visit) -> Bool {
+        guard let ps = visit.pipeline_state else { return false }
+        for key in ["transcription", "billing", "note", "contract"] {
+            if let dict = ps[key]?.value as? [String: Any],
+               let status = dict["status"] as? String {
+                let s = status.lowercased()
+                if s == "processing" || s == "running" || s == "queued" || s == "pending" {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private var visitsThisWeek: Int {
@@ -210,14 +465,6 @@ struct HomeView: View {
         if let date = formatter.date(from: string) { return date }
         formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: string)
-    }
-
-    private var pendingVisits: Int {
-        let pending = visits.filter {
-            let s = $0.status.lowercased()
-            return s == "pending" || s == "processing" || s == "uploading"
-        }
-        return pending.count
     }
 
     private func loadData(forceRefresh: Bool = false) async {
@@ -334,7 +581,8 @@ struct VisitRow: View {
         switch visit.status.lowercased() {
         case "completed": return .green
         case "processing": return .blue
-        case "pending": return .orange
+        case "pending", "pending_review": return .orange
+        case "pipeline_failed", "failed": return .red
         default: return .palmSecondary
         }
     }
@@ -434,4 +682,5 @@ struct EmptyStateCard: View {
 #Preview {
     HomeView()
         .environmentObject(APIService.shared)
+        .environmentObject(AssessmentSession(api: APIService.shared))
 }

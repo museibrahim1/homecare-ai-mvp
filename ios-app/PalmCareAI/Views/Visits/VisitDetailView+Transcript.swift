@@ -24,7 +24,12 @@ extension VisitDetailView {
             } else if tabFetchFailed.contains(1) {
                 tabErrorState(tab: 1)
             } else {
-                emptyState(icon: "text.quote", title: "No Transcript", message: "The transcript will appear here once the audio has been processed.")
+                documentEmptyState(
+                    step: "transcription",
+                    icon: "text.quote",
+                    title: "No Transcript",
+                    waitingMessage: "The transcript will appear here once the audio has been processed."
+                )
             }
         }
     }

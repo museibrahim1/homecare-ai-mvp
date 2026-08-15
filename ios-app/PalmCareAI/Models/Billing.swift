@@ -45,12 +45,13 @@ struct BillableItem: Codable, Identifiable {
         if isRecommendation {
             return "Recommended"
         }
-        guard let minutes, minutes > 0 else {
+        let displayMinutes = adjusted_minutes ?? minutes
+        guard let displayMinutes, displayMinutes > 0 else {
             return "No time logged"
         }
-        if minutes == 1 {
+        if displayMinutes == 1 {
             return "1 min"
         }
-        return "\(Int(minutes)) min"
+        return "\(Int(displayMinutes)) min"
     }
 }

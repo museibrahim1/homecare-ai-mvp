@@ -245,4 +245,52 @@ extension APIService {
         try await request("PUT", path: "/visits/\(visitId)/billables/\(itemId)", body: ["is_flagged": true, "flag_reason": "Denied by user"])
     }
 
+    /// Edit description and/or minutes before approve. Minutes map to adjusted_minutes.
+    func updateBillableItem(
+        visitId: String,
+        itemId: String,
+        description: String? = nil,
+        adjustedMinutes: Int? = nil,
+        adjustmentReason: String? = nil
+    ) async throws -> BillableItem {
+        var body: [String: Any] = [:]
+        if let description { body["description"] = description }
+        if let adjustedMinutes { body["adjusted_minutes"] = adjustedMinutes }
+        if let adjustmentReason { body["adjustment_reason"] = adjustmentReason }
+        return try await request("PUT", path: "/visits/\(visitId)/billables/\(itemId)", body: body)
+    }
+
+    func updateVisitNote(
+        visitId: String,
+        narrative: String? = nil,
+        structuredData: [String: Any]? = nil,
+        isApproved: Bool? = nil
+    ) async throws -> VisitNote {
+        var body: [String: Any] = [:]
+        if let narrative { body["narrative"] = narrative }
+        if let structuredData { body["structured_data"] = structuredData }
+        if let isApproved { body["is_approved"] = isApproved }
+        return try await request("PUT", path: "/visits/\(visitId)/note", body: body)
+    }
+
+    func updateVisitContract(
+        visitId: String,
+        title: String? = nil,
+        termsAndConditions: String? = nil,
+        hourlyRate: Double? = nil,
+        weeklyHours: Double? = nil
+    ) async throws -> VisitContract {
+        var body: [String: Any] = [:]
+        if let title { body["title"] = title }
+        if let termsAndConditions { body["terms_and_conditions"] = termsAndConditions }
+        if let hourlyRate { body["hourly_rate"] = hourlyRate }
+        if let weeklyHours { body["weekly_hours"] = weeklyHours }
+        return try await request("PUT", path: "/visits/\(visitId)/contract", body: body)
+    }
+
+    @discardableResult
+    func updateAgreementSendStatus(visitId: String, status: String) async throws -> Visit {
+        try await request("POST", path: "/visits/\(visitId)/agreement-send/status", body: ["status": status])
+    }
+
 }

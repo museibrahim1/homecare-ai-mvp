@@ -17,7 +17,12 @@ targets:
     type: application
     platform: iOS
     sources:
-      - PalmCareAI
+      - path: PalmCareAI
+        excludes:
+          - "Resources/**"
+    resources:
+      - path: PalmCareAI/Resources
+        buildPhase: resources
     settings:
       base:
         INFOPLIST_FILE: PalmCareAI/Info.plist

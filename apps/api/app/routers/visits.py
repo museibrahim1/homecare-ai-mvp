@@ -17,7 +17,13 @@ from app.models.audio_asset import AudioAsset
 from app.models.diarization_turn import DiarizationTurn
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.models.business import BusinessUser
-from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
+from app.schemas.visit import (
+    VisitCreate,
+    VisitUpdate,
+    VisitResponse,
+    VisitListResponse,
+    AgreementSendStatusUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +252,49 @@ async def get_visit(
         joinedload(Visit.caregiver),
     ).filter(Visit.id == visit_id).first()
     
+    return visit
+
+
+@router.post("/{visit_id}/agreement-send/status", response_model=VisitResponse)
+async def update_agreement_send_status(
+    visit_id: UUID,
+    body: AgreementSendStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark the latest agreement send as signed or bounced (wet-signature flow)."""
+    from datetime import datetime, timezone
+    from sqlalchemy.orm.attributes import flag_modified
+
+    visit = get_user_visit(db, visit_id, current_user)
+    status_value = (body.status or "").strip().lower()
+    if status_value not in ("signed", "bounced", "sent"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be signed, bounced, or sent",
+        )
+    if not visit.agreement_send:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No agreement has been sent for this visit yet.",
+        )
+
+    send = dict(visit.agreement_send)
+    now = datetime.now(timezone.utc).isoformat()
+    send["status"] = status_value
+    if status_value == "signed":
+        send["signed_at"] = now
+    elif status_value == "bounced":
+        send["bounced_at"] = now
+    visit.agreement_send = send
+    flag_modified(visit, "agreement_send")
+    db.commit()
+    db.refresh(visit)
+
+    visit = db.query(Visit).options(
+        joinedload(Visit.client),
+        joinedload(Visit.caregiver),
+    ).filter(Visit.id == visit_id).first()
     return visit
 
 

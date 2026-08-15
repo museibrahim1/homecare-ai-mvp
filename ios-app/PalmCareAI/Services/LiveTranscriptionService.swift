@@ -28,6 +28,9 @@ class LiveTranscriptionService: ObservableObject {
     /// Prevents overlapping uploads when a slow request outlives the timer
     /// interval — otherwise the same byte range gets transcribed twice.
     private var isSendingChunk = false
+    /// Bumped on start/stop so a late `/live/transcribe` response cannot
+    /// write the previous recording's offset or text onto the next one.
+    private var generation = UUID()
 
     /// PCM bytes already sent for transcription.
     private var lastByteOffset: UInt64 = AudioRecorderService.wavHeaderSize.asUInt64
@@ -55,30 +58,22 @@ class LiveTranscriptionService: ObservableObject {
     }
 
     func startTranscribing(recordingURL: URL) {
-        chunkTimer?.invalidate()
-        chunkTimer = nil
-
+        resetSession(clearTranscript: true)
         isTranscribing = true
-        lastByteOffset = AudioRecorderService.wavHeaderSize.asUInt64
-        didLocateDataChunk = false
-        emptyChunkCount = 0
-        noSpeechDetected = false
-        segments = []
-        fullTranscript = ""
-        transcriptPieces = []
-        lastError = nil
         recordingStart = Date()
+        let gen = generation
 
         // First chunk as soon as we have ~1s of audio, then every 3s.
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 1_200_000_000)
-            guard let self, self.isTranscribing else { return }
+            guard let self, self.generation == gen, self.isTranscribing else { return }
             await self.sendChunk(recordingURL: recordingURL)
         }
 
         chunkTimer = Timer.scheduledTimer(withTimeInterval: chunkInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
+                guard self.generation == gen, self.isTranscribing else { return }
                 await self.sendChunk(recordingURL: recordingURL)
             }
         }
@@ -86,20 +81,41 @@ class LiveTranscriptionService: ObservableObject {
     }
 
     func stopTranscribing() {
+        resetSession(clearTranscript: false)
+    }
+
+    /// Invalidates in-flight chunk work. `clearTranscript` is true on a
+    /// fresh start so the previous visit cannot leak onto this one.
+    private func resetSession(clearTranscript: Bool) {
+        generation = UUID()
         chunkTimer?.invalidate()
         chunkTimer = nil
         isTranscribing = false
+        isSendingChunk = false
+        lastByteOffset = AudioRecorderService.wavHeaderSize.asUInt64
+        didLocateDataChunk = false
+        emptyChunkCount = 0
+        noSpeechDetected = false
+        lastError = nil
+        if clearTranscript {
+            segments = []
+            fullTranscript = ""
+            transcriptPieces = []
+        }
     }
 
     // MARK: - Chunking
 
     private func sendChunk(recordingURL: URL) async {
+        let gen = generation
         guard !isSendingChunk else { return }
         isSendingChunk = true
-        defer { isSendingChunk = false }
+        defer { if generation == gen { isSendingChunk = false } }
 
         guard FileManager.default.fileExists(atPath: recordingURL.path) else {
-            lastError = "File not found"
+            if generation == gen, isTranscribing {
+                lastError = "File not found"
+            }
             return
         }
 
@@ -138,6 +154,7 @@ class LiveTranscriptionService: ObservableObject {
             let wav = Self.wrapPCMInWAV(pcm: pcmChunk)
 
             let response = try await api.liveTranscribe(audioData: wav, diarize: true)
+            guard generation == gen, isTranscribing else { return }
 
             // Advance the offset only on a successful round-trip so a
             // network blip doesn't silently drop audio from the
@@ -160,8 +177,23 @@ class LiveTranscriptionService: ObservableObject {
             noSpeechDetected = false
             transcriptPieces.append(response.transcript)
             fullTranscript = transcriptPieces.joined(separator: " ")
-            segments = mergeSegments(segments, with: response.words, chunkStartSeconds: Date().timeIntervalSince(recordingStart) - response.duration)
+            if response.words.isEmpty {
+                let now = Date().timeIntervalSince(recordingStart)
+                segments = LiveTranscriptMerger.appendUndiarized(
+                    existing: segments,
+                    transcript: response.transcript,
+                    now: now,
+                    duration: response.duration
+                )
+            } else {
+                segments = LiveTranscriptMerger.merge(
+                    existing: segments,
+                    newWords: response.words,
+                    chunkStartSeconds: Date().timeIntervalSince(recordingStart) - response.duration
+                )
+            }
         } catch {
+            guard generation == gen, isTranscribing else { return }
             // Don't advance lastByteOffset on failure; we'll retry the
             // same audio range on the next tick.
             lastError = error.localizedDescription
@@ -224,61 +256,6 @@ class LiveTranscriptionService: ObservableObject {
         header.append(contentsOf: dataSize.littleEndianBytes)
         header.append(pcm)
         return header
-    }
-
-    // MARK: - Segment Merging
-
-    /// Convert Deepgram words into TranscriptSegment objects shifted to
-    /// their absolute timeline position, and append them to the
-    /// previously collected segments. Speaker IDs from chunk to chunk
-    /// may not be stable (Deepgram diarizes per request), but the user
-    /// still sees consecutive speaker turns rendered correctly within
-    /// each chunk.
-    private func mergeSegments(_ existing: [TranscriptSegment], with newWords: [TranscriptWord], chunkStartSeconds: TimeInterval) -> [TranscriptSegment] {
-        guard !newWords.isEmpty else { return existing }
-
-        let offset = max(0, chunkStartSeconds)
-        let shifted = newWords.map { w -> TranscriptWord in
-            TranscriptWord(
-                word: w.word,
-                start: w.start + offset,
-                end: w.end + offset,
-                confidence: w.confidence,
-                speaker: w.speaker
-            )
-        }
-
-        var built: [TranscriptSegment] = []
-        var currentSpeaker = shifted[0].speaker ?? 0
-        var currentWords: [TranscriptWord] = []
-        var segmentStart = shifted[0].start
-
-        for word in shifted {
-            let speaker = word.speaker ?? currentSpeaker
-            if speaker != currentSpeaker && !currentWords.isEmpty {
-                built.append(TranscriptSegment(
-                    speaker: currentSpeaker,
-                    text: currentWords.map { $0.word }.joined(separator: " "),
-                    words: currentWords,
-                    startTime: segmentStart,
-                    endTime: currentWords.last?.end ?? segmentStart
-                ))
-                currentWords = []
-                segmentStart = word.start
-                currentSpeaker = speaker
-            }
-            currentWords.append(word)
-        }
-        if !currentWords.isEmpty {
-            built.append(TranscriptSegment(
-                speaker: currentSpeaker,
-                text: currentWords.map { $0.word }.joined(separator: " "),
-                words: currentWords,
-                startTime: segmentStart,
-                endTime: currentWords.last?.end ?? segmentStart
-            ))
-        }
-        return existing + built
     }
 
     // MARK: - Medical highlighting

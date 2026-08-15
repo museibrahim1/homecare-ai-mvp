@@ -11,6 +11,28 @@ extension APIService {
         try await request("GET", path: "/pipeline/visits/\(visitId)/status")
     }
 
+    /// Re-queue a single pipeline step without wiping the visit audio.
+    /// `step` is the pipeline_state key: transcription, diarization, billing, note, contract.
+    @discardableResult
+    func retryPipelineStep(visitId: String, step: String) async throws -> [String: AnyCodable] {
+        let path: String
+        switch step {
+        case "transcription":
+            path = "/pipeline/visits/\(visitId)/transcribe"
+        case "diarization":
+            path = "/pipeline/visits/\(visitId)/diarize"
+        case "billing":
+            path = "/pipeline/visits/\(visitId)/bill"
+        case "note":
+            path = "/pipeline/visits/\(visitId)/note"
+        case "contract":
+            path = "/pipeline/visits/\(visitId)/contract"
+        default:
+            throw APIError.serverError("Unknown pipeline step.")
+        }
+        return try await request("POST", path: path)
+    }
+
     // MARK: - Live Transcription
 
     func liveTranscribe(audioData: Data, diarize: Bool = true) async throws -> LiveTranscriptResponse {
@@ -139,4 +161,5 @@ struct EmailContractResponse: Decodable {
     let success: Bool
     let message: String?
     let recipient: String?
+    let agreement_send: AgreementSend?
 }

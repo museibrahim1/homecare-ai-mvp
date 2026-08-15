@@ -38,6 +38,15 @@ class Visit(Base, TimestampMixin):
     
     # Admin notes
     admin_notes = Column(Text, nullable=True)
+
+    # Latest agreement email send + delivery/signature status
+    # {
+    #   "recipient_email": "...", "cc_email": null, "provider": "gmail",
+    #   "provider_message_id": "...", "status": "sent",
+    #   "sent_at": "...", "delivered_at": null, "opened_at": null,
+    #   "bounced_at": null, "signed_at": null
+    # }
+    agreement_send = Column(JSONB, nullable=True)
     
     # Relationships
     client = relationship("Client", back_populates="visits")
