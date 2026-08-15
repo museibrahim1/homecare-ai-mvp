@@ -206,6 +206,8 @@ def analyze_transcript_with_claude(
         full_text = full_text[:60000] + "\n\n[... middle portion of conversation ...]\n\n" + full_text[-40000:]
     
     logger.info(f"Analyzing {len(segments)} segments ({len(full_text)} chars) for billable services")
+    from libs.pipeline_efficiency import trim_transcript_for_llm
+    full_text = trim_transcript_for_llm(full_text, max_chars=50000)
     
     prompt = f"""Analyze this recording for IN-HOME CARE services a home care agency would actually provide.
 
@@ -239,7 +241,7 @@ JSON:"""
         client = anthropic.Anthropic(api_key=api_key, timeout=120.0)
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=8000,  # Comprehensive extraction needs more tokens
+            max_tokens=4096,
             messages=[{"role": "user", "content": prompt}]
         )
         

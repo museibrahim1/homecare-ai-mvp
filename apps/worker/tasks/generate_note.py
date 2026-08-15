@@ -62,6 +62,8 @@ def generate_visit_note(self, visit_id: str):
             f"[{s.start_ms // 1000}s] {s.speaker_label or 'Speaker'}: {s.text}"
             for s in segments
         ]) if segments else "No transcript available"
+        from libs.pipeline_efficiency import trim_transcript_for_llm
+        transcript_text = trim_transcript_for_llm(transcript_text, max_chars=50000)
         
         # Prepare visit info
         visit_info = {

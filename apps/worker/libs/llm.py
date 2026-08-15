@@ -1179,15 +1179,130 @@ class LLMService:
         client_info: Dict[str, Any],
         agency_state: str = None,
         agency_billing_context: str = "",
+        deep: bool = False,
     ) -> Dict[str, Any]:
         """
-        Analyze a care assessment transcript to extract contract-relevant information.
-        Dynamically loads the correct state's assessment requirements, billing codes,
-        and regulatory rules based on the agency's location.
-        Uses temperature=0 for consistent, deterministic results.
+        Extract contract-ready assessment data from a transcript.
 
-        agency_billing_context: optional block describing the agency's configured rates
-        and accepted pay sources so the LLM uses the correct numbers.
+        Default path uses a compact prompt (fast). Set deep=True for the
+        legacy full Iowa/EICNA extraction when a richer assessment is needed.
+        """
+        from libs.pipeline_efficiency import trim_transcript_for_llm
+
+        transcript_text = trim_transcript_for_llm(transcript_text)
+        if not deep:
+            compact = self._extract_contract_standard(
+                transcript_text=transcript_text,
+                client_info=client_info,
+                agency_state=agency_state,
+                agency_billing_context=agency_billing_context,
+            )
+            if compact:
+                return compact
+            logger.warning("Standard contract extraction failed; trying legacy deep path")
+
+        return self._analyze_transcript_for_contract_deep(
+            transcript_text=transcript_text,
+            client_info=client_info,
+            agency_state=agency_state,
+            agency_billing_context=agency_billing_context,
+        )
+
+    def _extract_contract_standard(
+        self,
+        transcript_text: str,
+        client_info: Dict[str, Any],
+        agency_state: str = None,
+        agency_billing_context: str = "",
+    ) -> Optional[Dict[str, Any]]:
+        """Fast contract extraction used by the live pipeline."""
+        original_temp = self.temperature
+        self.temperature = 0.0
+
+        state_line = f"Agency state: {agency_state}." if agency_state else ""
+        billing_line = (
+            f"Agency billing context:\n{agency_billing_context}"
+            if agency_billing_context
+            else ""
+        )
+        system_prompt = f"""You extract home care contract facts from assessment audio transcripts.
+{state_line}
+{billing_line}
+
+Rules:
+- Only use facts stated in the transcript. Do not invent ADLs, hours, rates, or diagnoses.
+- conversation_kind must be one of: home_care_intake, home_care_visit, training_with_embedded_intake, out_of_scope.
+- For training_with_embedded_intake, extract the care recipient in the role-play, not coach sales talk.
+- For out_of_scope, return empty services_identified.
+- If a rate is spoken (e.g. "$18 an hour"), set quoted_hourly_rate.
+- If a weekday schedule is spoken (e.g. Monday through Friday 8:30 to 7), set stated_weekly_hours and recommended_schedule.total_hours_per_week from that schedule.
+- evidence must be a direct quote. Never use placeholders.
+- Keep JSON compact. Prefer null/[] over guessing.
+
+Return ONLY JSON:
+{{
+  "conversation_kind": "home_care_intake",
+  "quoted_hourly_rate": null,
+  "stated_weekly_hours": null,
+  "services_identified": [
+    {{"name": "Companion Care", "description": "", "evidence": "quote", "frequency": "", "priority": "High"}}
+  ],
+  "client_profile": {{
+    "primary_diagnosis": null,
+    "secondary_conditions": [],
+    "medications": [],
+    "allergies": [],
+    "mobility_status": null,
+    "cognitive_status": null,
+    "living_situation": null
+  }},
+  "recommended_schedule": {{
+    "total_hours_per_week": 0,
+    "service_hours": [],
+    "preferred_days": [],
+    "preferred_times": "",
+    "rationale": ""
+  }},
+  "eicna_assessment": {{"care_need_level": "LOW|MODERATE|HIGH", "rationale": ""}},
+  "safety_concerns": [],
+  "special_requirements": [],
+  "care_plan_goals": {{"short_term": [], "long_term": []}},
+  "client_condition_summary": ""
+}}"""
+        user_prompt = (
+            f"Client: {client_info.get('full_name', 'Unknown')}\n\n"
+            f"TRANSCRIPT:\n{transcript_text}"
+        )
+        try:
+            raw = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=4096)
+            if "```json" in raw:
+                raw = raw.split("```json")[1].split("```")[0]
+            elif "```" in raw:
+                raw = raw.split("```")[1].split("```")[0]
+            parsed = json.loads(raw.strip())
+            if parsed.get("used_fallback"):
+                return None
+            logger.info(
+                "Standard contract extraction ok kind=%s services=%s",
+                parsed.get("conversation_kind"),
+                len(parsed.get("services_identified") or []),
+            )
+            return parsed
+        except Exception as e:
+            logger.warning(f"Standard contract extraction failed: {e}")
+            return None
+        finally:
+            self.temperature = original_temp
+
+    def _analyze_transcript_for_contract_deep(
+        self,
+        transcript_text: str,
+        client_info: Dict[str, Any],
+        agency_state: str = None,
+        agency_billing_context: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Legacy comprehensive extraction (Iowa/EICNA-style). Slower; used as fallback.
         """
         original_temp = self.temperature
         self.temperature = 0.0
@@ -1973,7 +2088,7 @@ Scheduled Duration: {visit_info.get('scheduled_duration', 'Unknown')}
 Generate the note that matches what this recording actually is. Do not write a home-visit SOAP note if this was an intake, a training role-play, or a clinic interview.
 """
         
-        response = self._call_llm(system_prompt, user_prompt, json_response=True)
+        response = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=3072)
         
         try:
             if "```json" in response:

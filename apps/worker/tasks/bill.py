@@ -69,15 +69,19 @@ def generate_billables(self, visit_id: str):
         # Calculate visit boundaries
         visit_start_ms = min(s.start_ms for s in segments)
         visit_end_ms = max(s.end_ms for s in segments)
-        
-        # Always generate fresh billables from transcript
-        # This ensures each assessment uses only its own data
-        logger.info("Generating billables from transcript (fresh analysis)")
-        billable_blocks = generate_billables_from_transcript(
-            segment_dicts,
-            visit_start_ms,
-            visit_end_ms,
-        )
+
+        conversation_kind = (visit.pipeline_state or {}).get("conversation_kind")
+        if conversation_kind == "out_of_scope":
+            logger.info("Out-of-scope recording: skipping billables LLM")
+            billable_blocks = []
+        else:
+            # Always generate fresh billables from transcript
+            logger.info("Generating billables from transcript (fresh analysis)")
+            billable_blocks = generate_billables_from_transcript(
+                segment_dicts,
+                visit_start_ms,
+                visit_end_ms,
+            )
         
         # Delete existing billables for this visit
         db.query(BillableItem).filter(

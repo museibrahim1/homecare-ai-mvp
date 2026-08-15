@@ -103,13 +103,13 @@ def generate_service_contract(self, visit_id: str):
             f"[{s.start_ms // 1000}s] {s.speaker_label or 'Speaker'}: {s.text}"
             for s in segments
         ]) if segments else "No transcript available"
-        
+
         # Determine insurance type for rate selection
         is_medicaid = bool(client.medicaid_id)
         is_medicare = bool(client.medicare_id)
         insurance_type = "medicaid" if is_medicaid else ("medicare" if is_medicare else "private")
         logger.info(f"Client insurance type: {insurance_type} (client_id={client.id})")
-        
+
         # Prepare client info
         client_info = {
             "full_name": client.full_name,
@@ -121,49 +121,56 @@ def generate_service_contract(self, visit_id: str):
             "medicaid_id": client.medicaid_id,
             "medicare_id": client.medicare_id,
         }
-        
-        # =====================================================================
-        # STEP 1: Extract data from transcript using Claude
-        # =====================================================================
-        logger.info(f"Extracting care data from transcript using Claude...")
-        llm_service = get_llm_service()
-        
-        # Build billing context from agency onboarding so the LLM has real numbers
-        billing_context_parts = []
-        if agency_settings:
-            if getattr(agency_settings, 'state', None):
-                billing_context_parts.append(f"Agency location: {getattr(agency_settings, 'city', '')} {agency_settings.state} {getattr(agency_settings, 'zip_code', '')}")
-            pay_src = getattr(agency_settings, 'pay_sources', None) or []
-            if pay_src:
-                billing_context_parts.append(f"Accepted pay sources: {', '.join(pay_src)}")
-            svc_types = getattr(agency_settings, 'service_types', None) or []
-            if svc_types:
-                billing_context_parts.append(f"Services offered: {', '.join(s.replace('_', ' ') for s in svc_types)}")
-            rate_lines = []
-            for field, label in [
-                ('default_hourly_rate', 'Default hourly'),
-                ('medicaid_companion_rate', 'Medicaid companion'),
-                ('medicaid_personal_care_rate', 'Medicaid personal care'),
-                ('medicaid_respite_rate', 'Medicaid respite'),
-                ('medicare_skilled_rate', 'Medicare skilled nursing'),
-                ('medicare_aide_rate', 'Medicare home health aide'),
-                ('private_pay_rate', 'Private pay'),
-            ]:
-                val = getattr(agency_settings, field, None)
-                if val is not None:
-                    rate_lines.append(f"- {label}: ${float(val):.2f}/hr")
-            if rate_lines:
-                billing_context_parts.append("Configured rates:\n" + "\n".join(rate_lines))
-        billing_context = "\n".join(billing_context_parts)
-        if billing_context:
-            logger.info(f"Agency billing context provided to LLM:\n{billing_context}")
-        
-        assessment_data = llm_service.analyze_transcript_for_contract(
-            transcript_text=transcript_text,
-            client_info=client_info,
-            agency_state=agency_state,
-            agency_billing_context=billing_context,
-        )
+
+        conversation_kind = (visit.pipeline_state or {}).get("conversation_kind")
+        if conversation_kind == "out_of_scope":
+            from libs.pipeline_efficiency import empty_out_of_scope_assessment
+            logger.info("Out-of-scope recording: skipping contract LLM")
+            assessment_data = empty_out_of_scope_assessment(transcript_text)
+        else:
+            # =====================================================================
+            # STEP 1: Extract data from transcript using Claude (compact)
+            # =====================================================================
+            logger.info(f"Extracting care data from transcript using Claude...")
+            llm_service = get_llm_service()
+
+            # Build billing context from agency onboarding so the LLM has real numbers
+            billing_context_parts = []
+            if agency_settings:
+                if getattr(agency_settings, 'state', None):
+                    billing_context_parts.append(f"Agency location: {getattr(agency_settings, 'city', '')} {agency_settings.state} {getattr(agency_settings, 'zip_code', '')}")
+                pay_src = getattr(agency_settings, 'pay_sources', None) or []
+                if pay_src:
+                    billing_context_parts.append(f"Accepted pay sources: {', '.join(pay_src)}")
+                svc_types = getattr(agency_settings, 'service_types', None) or []
+                if svc_types:
+                    billing_context_parts.append(f"Services offered: {', '.join(s.replace('_', ' ') for s in svc_types)}")
+                rate_lines = []
+                for field, label in [
+                    ('default_hourly_rate', 'Default hourly'),
+                    ('medicaid_companion_rate', 'Medicaid companion'),
+                    ('medicaid_personal_care_rate', 'Medicaid personal care'),
+                    ('medicaid_respite_rate', 'Medicaid respite'),
+                    ('medicare_skilled_rate', 'Medicare skilled nursing'),
+                    ('medicare_aide_rate', 'Medicare home health aide'),
+                    ('private_pay_rate', 'Private pay'),
+                ]:
+                    val = getattr(agency_settings, field, None)
+                    if val is not None:
+                        rate_lines.append(f"- {label}: ${float(val):.2f}/hr")
+                if rate_lines:
+                    billing_context_parts.append("Configured rates:\n" + "\n".join(rate_lines))
+            billing_context = "\n".join(billing_context_parts)
+            if billing_context:
+                logger.info(f"Agency billing context provided to LLM:\n{billing_context}")
+
+            assessment_data = llm_service.analyze_transcript_for_contract(
+                transcript_text=transcript_text,
+                client_info=client_info,
+                agency_state=agency_state,
+                agency_billing_context=billing_context,
+                deep=False,
+            )
         
         # Get care need level and client profile early - needed for rate calculation
         eicna = assessment_data.get("eicna_assessment") or {}
