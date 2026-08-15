@@ -49,18 +49,18 @@ const GOOGLE_CLIENT_ID =
   '668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com';
 const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || 'com.palmcareai.web';
 
-function loadScript(id: string, src: string): Promise<void> {
+function loadScript(id: string, src: string, label: string): Promise<void> {
+  const fail = () =>
+    new Error(
+      `Could not load ${label}. Allow third-party scripts from the provider, or turn off blockers, then try again.`,
+    );
   const existing = document.getElementById(id) as HTMLScriptElement | null;
   if (existing) {
     if (id === 'google-gsi' && window.google?.accounts?.id) return Promise.resolve();
     if (id === 'apple-auth' && window.AppleID?.auth) return Promise.resolve();
-    // Script tag exists but API not ready yet — wait for load or resolve if complete.
     return new Promise((resolve, reject) => {
       existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error(`Could not load ${id}`)), {
-        once: true,
-      });
-      // Already loaded before listeners attached
+      existing.addEventListener('error', () => reject(fail()), { once: true });
       if (id === 'google-gsi' && window.google?.accounts?.id) resolve();
       if (id === 'apple-auth' && window.AppleID?.auth) resolve();
     });
@@ -71,7 +71,7 @@ function loadScript(id: string, src: string): Promise<void> {
     script.src = src;
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Could not load ${id}`));
+    script.onerror = () => reject(fail());
     document.body.appendChild(script);
   });
 }
@@ -170,7 +170,7 @@ export default function SocialAuthButtons({ onError }: Props) {
   };
 
   const getGoogleIdToken = async (): Promise<string> => {
-    await loadScript('google-gsi', 'https://accounts.google.com/gsi/client');
+    await loadScript('google-gsi', 'https://accounts.google.com/gsi/client', 'Google Sign In');
     if (!window.google?.accounts?.id) {
       throw new Error('Google Sign In failed to load. Check your network or ad blocker.');
     }
@@ -280,6 +280,7 @@ export default function SocialAuthButtons({ onError }: Props) {
       await loadScript(
         'apple-auth',
         'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
+        'Apple Sign In',
       );
       if (!window.AppleID?.auth) {
         throw new Error('Apple Sign In failed to load. Try again.');
