@@ -961,9 +961,17 @@ class LLMService:
             return self.openai_client
         return self.anthropic_client or self.openai_client
     
-    def _call_llm(self, system_prompt: str, user_prompt: str, json_response: bool = False) -> str:
+    def _call_llm(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        json_response: bool = False,
+        max_tokens: int = None,
+    ) -> str:
         # Try primary provider first, then fallback
         providers_to_try = []
+        if max_tokens is None:
+            max_tokens = 16384 if json_response else 4096
         
         if self.provider == LLMProvider.ANTHROPIC and self.anthropic_client:
             providers_to_try.append(("anthropic", self._call_anthropic))
@@ -980,6 +988,8 @@ class LLMService:
         for provider_name, call_func in providers_to_try:
             try:
                 logger.info(f"Trying LLM provider: {provider_name}")
+                return call_func(system_prompt, user_prompt, json_response, max_tokens=max_tokens)
+            except TypeError:
                 return call_func(system_prompt, user_prompt, json_response)
             except Exception as e:
                 last_error = e
@@ -989,7 +999,13 @@ class LLMService:
         logger.error(f"All LLM providers failed. Last error: {last_error}")
         return self._mock_response(user_prompt)
     
-    def _call_openai(self, system_prompt: str, user_prompt: str, json_response: bool = False) -> str:
+    def _call_openai(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        json_response: bool = False,
+        max_tokens: int = 4096,
+    ) -> str:
         response = self.openai_client.chat.completions.create(
             model=self.model if self.model in self.OPENAI_MODELS else "gpt-4o-mini",
             messages=[
@@ -997,17 +1013,24 @@ class LLMService:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=self.temperature,
+            max_tokens=max_tokens,
             response_format={"type": "json_object"} if json_response else None,
         )
         return response.choices[0].message.content
     
-    def _call_anthropic(self, system_prompt: str, user_prompt: str, json_response: bool = False) -> str:
+    def _call_anthropic(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        json_response: bool = False,
+        max_tokens: int = 4096,
+    ) -> str:
         if json_response:
             system_prompt = f"{system_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No markdown, no explanation, just the JSON object."
         
         response = self.anthropic_client.messages.create(
             model=self.model if self.model in self.ANTHROPIC_MODELS else "claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=max_tokens,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],
             temperature=self.temperature,
@@ -1018,13 +1041,8 @@ class LLMService:
         """Fallback response when LLM is unavailable - HOME CARE services only."""
         if "contract" in prompt.lower() or "home care" in prompt.lower():
             return json.dumps({
-                "services_identified": [
-                    {"name": "Personal Care/ADL Assistance", "description": "Assistance with bathing, dressing, and grooming", "evidence": "Client needs daily assistance", "frequency": "Daily", "priority": "High"},
-                    {"name": "Medication Management", "description": "Medication reminders and pill box organization", "evidence": "Multiple medications mentioned", "frequency": "Daily", "priority": "High"},
-                    {"name": "Meal Preparation", "description": "Preparing nutritious meals", "evidence": "Difficulty cooking safely", "frequency": "Daily", "priority": "High"},
-                    {"name": "Light Housekeeping", "description": "Laundry, dishes, light cleaning", "evidence": "Unable to maintain home", "frequency": "3x/week", "priority": "Medium"},
-                    {"name": "Companion Care", "description": "Supervision and social interaction", "evidence": "Lives alone, needs monitoring", "frequency": "Daily", "priority": "High"},
-                ],
+                "used_fallback": True,
+                "services_identified": [],
                 "client_profile": {
                     "age_estimate": "65+",
                     "gender": "Not specified",
@@ -1108,16 +1126,10 @@ class LLMService:
                     {"requirement": "Fall prevention", "details": "Home safety evaluation needed", "category": "Equipment"}
                 ],
                 "recommended_schedule": {
-                    "frequency": "Daily (5-7 days per week)",
-                    "total_hours_per_week": 35,
-                    "service_hours": [
-                        {"service": "Personal Care", "need_level": "moderate", "hours_per_week": 10, "rationale": "ADL assistance needed daily"},
-                        {"service": "Meal Preparation", "need_level": "high", "hours_per_week": 10, "rationale": "Safety concern with cooking"},
-                        {"service": "Medication Management", "need_level": "moderate", "hours_per_week": 3, "rationale": "Daily reminders needed"},
-                        {"service": "Homemaker Services", "need_level": "moderate", "hours_per_week": 6, "rationale": "Cannot maintain home alone"},
-                        {"service": "Companion Care", "need_level": "moderate", "hours_per_week": 6, "rationale": "Social isolation, needs monitoring"}
-                    ],
-                    "hours_calculation": "Personal Care 10 + Meals 10 + Meds 3 + Homemaker 6 + Companion 6 = 35 hrs/week",
+                    "frequency": "Not stated",
+                    "total_hours_per_week": 0,
+                    "service_hours": [],
+                    "hours_calculation": "LLM unavailable; do not invent hours",
                     "preferred_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
                     "preferred_times": "Morning and early afternoon (8am-2pm)",
                     "visit_duration": "4-6 hour visits recommended",
@@ -1201,9 +1213,21 @@ class LLMService:
 {state_context}
 {billing_block}
 
-## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA""" + """
+## YOUR MISSION: EXTRACT CARE ASSESSMENT DATA FROM THE TRANSCRIPT ONLY
 
-You must extract EVERY piece of relevant information mentioned in the transcript. DO NOT leave fields as "N/A" if there is ANY indication in the conversation. Make reasonable clinical inferences when direct statements aren't available.
+## GROUNDING RULES (these override every instruction below)
+- Extract only what the transcript actually says. Do not invent ADLs, hours, rates, or diagnoses.
+- If a rate is stated (for example "$18 an hour"), set quoted_hourly_rate to that number.
+- If days and times are stated (for example Monday through Friday, 8:30 to 7), compute stated_weekly_hours from that schedule and use it as recommended_schedule.total_hours_per_week. Do not stack category hours when a schedule was stated.
+- If the client declined a service ("I can wash myself", "I know how to take my medicine"), do not add that service.
+- evidence must be a direct quote. Never use placeholders like "Client needs daily assistance".
+- conversation_kind must be one of: home_care_intake, home_care_visit, training_with_embedded_intake, out_of_scope.
+- For training_with_embedded_intake, extract the person who would receive care in the role-play. Ignore coach commentary about how to sell.
+- For out_of_scope (clinic interviews, unrelated recordings), return empty services_identified unless the family clearly asked for in-home help.
+- Do not default to HIGH care or 35 hours when information is missing.
+
+You must extract every relevant fact that IS in the conversation. Leave fields null or empty when they were not discussed. Do not fill gaps with clinical guesses.
+""" + """
 
 ## ASSESSMENT DOMAINS TO EXTRACT
 
@@ -1493,7 +1517,7 @@ Only use these service categories:
 - No health conditions
 - Just needs social interaction
 
-**IMPORTANT: When in doubt, choose HIGH. Most home care clients have complex needs.**
+**IMPORTANT: If the transcript does not support a high-need picture, do not default to HIGH.**
 
 ## SERVICE-BASED HOURS CALCULATION
 
@@ -1559,11 +1583,14 @@ Most clients need 10-25 hours/week total. Only severe cases need 30+ hours.
 Return ONLY valid JSON with ALL fields populated based on transcript analysis:
 
 {
+    "conversation_kind": "home_care_intake | home_care_visit | training_with_embedded_intake | out_of_scope",
+    "quoted_hourly_rate": null,
+    "stated_weekly_hours": null,
     "services_identified": [
         {
             "name": "Service category from valid list",
             "description": "Specific description based on client needs",
-            "evidence": "Direct quote or inference from transcript",
+            "evidence": "Direct quote from the transcript",
             "frequency": "Daily/3x week/Weekly/As needed",
             "priority": "High/Medium/Low"
         }
@@ -1736,21 +1763,65 @@ Extract ONLY home care related needs (personal care, companion care, homemaker s
 DO NOT include hospital services, medical equipment, insurance, or anything outside home care scope."""
         
         try:
-            response = self._call_llm(system_prompt, user_prompt, json_response=True)
+            response = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=16384)
             
             # Try to extract JSON from response (handle markdown code blocks)
             if "```json" in response:
                 response = response.split("```json")[1].split("```")[0]
             elif "```" in response:
                 response = response.split("```")[1].split("```")[0]
-            return json.loads(response.strip())
+            parsed = json.loads(response.strip())
+            if parsed.get("used_fallback"):
+                logger.warning("Contract extraction returned fallback payload; keeping empty services")
+            return parsed
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse LLM response as JSON: {e}")
-            logger.debug(f"Response was: {response[:500]}")
-            return json.loads(self._mock_response("contract"))
+            logger.error(f"Failed to parse LLM contract JSON: {e}")
+            logger.debug(f"Response was: {response[:500] if isinstance(response, str) else response}")
+            compact = self._extract_contract_compact(transcript_text, client_info)
+            if compact:
+                return compact
+            from libs.contract_facts import extract_stated_hourly_rate, extract_stated_weekly_hours
+            return {
+                "used_fallback": True,
+                "services_identified": [],
+                "quoted_hourly_rate": extract_stated_hourly_rate(transcript_text),
+                "stated_weekly_hours": extract_stated_weekly_hours(transcript_text),
+                "recommended_schedule": {"total_hours_per_week": 0, "service_hours": []},
+                "eicna_assessment": {"care_need_level": "MODERATE", "rationale": "Contract JSON parse failed"},
+            }
         finally:
             # Restore original temperature
             self.temperature = original_temp
+
+    def _extract_contract_compact(self, transcript_text: str, client_info: Dict) -> Optional[Dict[str, Any]]:
+        """Smaller extraction when the full assessment JSON fails to parse."""
+        system_prompt = """Return ONLY JSON for a home care agency contract.
+Ground every field in the transcript. Empty services is correct when this is not a home-care assessment.
+Never use placeholder evidence. If a rate or schedule is spoken, capture it.
+JSON shape:
+{
+  "conversation_kind": "home_care_intake | home_care_visit | training_with_embedded_intake | out_of_scope",
+  "quoted_hourly_rate": null,
+  "stated_weekly_hours": null,
+  "services_identified": [{"name": "", "description": "", "evidence": "direct quote", "frequency": "", "priority": ""}],
+  "recommended_schedule": {"total_hours_per_week": 0, "service_hours": [], "preferred_days": [], "preferred_times": ""},
+  "eicna_assessment": {"care_need_level": "LOW|MODERATE|HIGH", "rationale": ""}
+}"""
+        user_prompt = f"Client: {client_info.get('full_name', 'Unknown')}\n\nTRANSCRIPT:\n{transcript_text}"
+        try:
+            raw = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=4096)
+            if "```json" in raw:
+                raw = raw.split("```json")[1].split("```")[0]
+            elif "```" in raw:
+                raw = raw.split("```")[1].split("```")[0]
+            parsed = json.loads(raw.strip())
+            if parsed.get("used_fallback"):
+                return None
+            logger.info("Compact contract extraction succeeded after full JSON parse failure")
+            return parsed
+        except Exception as e:
+            logger.warning(f"Compact contract extraction failed: {e}")
+            return None
     
     def generate_contract_terms(self, services: List, client_info: Dict, schedule: Dict, assessment_data: Optional[Dict] = None) -> Dict[str, Any]:
         """
@@ -1831,43 +1902,37 @@ Generate comprehensive contract terms for this care agreement.
         """
         Generate professional SOAP-style visit documentation for HOME CARE visits.
         """
-        system_prompt = """You are a HOME CARE documentation specialist creating visit notes.
+        system_prompt = """You are a HOME CARE documentation specialist.
 
-## HOME CARE VISIT NOTE - SCOPE
+## WHAT THIS RECORDING IS
 
-This is for an IN-HOME CARE visit. Only document services provided IN THE CLIENT'S HOME:
-- Personal care (bathing, dressing, grooming, toileting assistance)
-- Companion care (conversation, activities, supervision)
-- Homemaker services (meal prep, light housekeeping, laundry)
-- Medication reminders
-- Mobility assistance (transfers, walking, exercises)
-- Vital signs if taken
+First classify the transcript, then write the note to match:
+- home_care_visit: caregiver was in the home delivering care. Document tasks that actually happened.
+- home_care_intake: assessment or meet-and-greet about future care. Document needs discussed. Do not claim tasks were performed today.
+- training_with_embedded_intake: coaching or role-play that contains an intake. Document the care recipient in the role-play (often a parent). Ignore the coach selling to an audience.
+- out_of_scope: clinic visit, doctor interview, or unrelated audio. Do not invent a home visit. Say so in the narrative. You may note functional limitations only if they were clearly stated.
 
-## VALID HOME CARE TASKS ONLY
-
-Only document these types of tasks:
-1. Personal Care - Bathing, dressing, grooming, toileting, oral care
-2. Meal Preparation - Cooking, feeding assistance, nutrition monitoring
-3. Light Housekeeping - Cleaning, laundry, dishes, organizing
-4. Medication Reminder - Reminded client to take medications
-5. Companion Care - Conversation, activities, emotional support
-6. Mobility Assistance - Transfers, ambulation, exercises
-7. Safety Monitoring - Supervision, fall prevention, redirection
+## HARD RULES
+- Never invent a caregiver name or claim a visit happened if it did not.
+- Never document bathing, toileting, meals, or housekeeping as performed unless the transcript describes them happening in the home.
+- If the client declined a service, record the decline.
+- Ignore clinic counseling, prescriptions, and hospital plans except as context.
 
 ## OUTPUT FORMAT
 
 Return ONLY valid JSON:
 {
-    "subjective": "Client's reported feelings, pain, concerns during HOME visit",
-    "objective": "What caregiver observed and HOME CARE tasks completed",
-    "assessment": "Client's status and response to HOME CARE services",
-    "plan": "Continue home care, any changes to care plan",
+    "documentation_type": "home_care_visit | home_care_intake | training_with_embedded_intake | out_of_scope",
+    "subjective": "What the client or family reported",
+    "objective": "What was actually observed. Empty if this was not a home visit.",
+    "assessment": "Clinical or intake impression grounded in the transcript",
+    "plan": "Next steps that were discussed",
     "tasks_summary": [
         {
-            "task": "MUST be valid home care category (Personal Care, Meal Prep, etc.)",
-            "details": "What was specifically done",
-            "duration_minutes": 30,
-            "client_response": "How client participated"
+            "task": "Valid home care category, or empty list if none were delivered",
+            "details": "What was specifically done or requested",
+            "duration_minutes": 0,
+            "client_response": "How the client participated"
         }
     ],
     "vital_signs": {
@@ -1876,18 +1941,16 @@ Return ONLY valid JSON:
         "pulse": "If taken",
         "blood_sugar": "If taken"
     },
-    "client_mood": "Emotional state during visit",
-    "cognitive_status": "Mental status observations",
-    "mobility_observations": "How client moved",
-    "skin_observations": "Any skin concerns",
-    "safety_observations": "Home safety concerns",
-    "medications_discussed": ["Medications mentioned"],
-    "family_communication": "Communication with family",
-    "next_visit_plan": "Focus for next home care visit",
-    "narrative": "Professional summary of HOME CARE visit"
-}
-
-ONLY document home care services. Ignore discussions of hospital stays, doctor visits, or services outside home care."""
+    "client_mood": "Emotional state if described",
+    "cognitive_status": "Mental status if described",
+    "mobility_observations": "Only if discussed",
+    "skin_observations": "Only if discussed",
+    "safety_observations": "Only if discussed",
+    "medications_discussed": ["Only medications named in the transcript"],
+    "family_communication": "Family present and what they said",
+    "next_visit_plan": "What was agreed, if anything",
+    "narrative": "Professional summary that matches documentation_type"
+}"""
         
         billable_summary = "\n".join([
             f"- {b.get('category', 'Service')}: {b.get('description', 'N/A')} ({b.get('minutes', 0)} minutes)"
@@ -1907,7 +1970,7 @@ Scheduled Duration: {visit_info.get('scheduled_duration', 'Unknown')}
 ## VISIT TRANSCRIPT
 {transcript_text}
 
-Generate a comprehensive, professional visit note based on this transcript.
+Generate the note that matches what this recording actually is. Do not write a home-visit SOAP note if this was an intake, a training role-play, or a clinic interview.
 """
         
         response = self._call_llm(system_prompt, user_prompt, json_response=True)

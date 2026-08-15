@@ -56,7 +56,8 @@ TASK_PATTERNS = [
     # Hygiene
     (r"\b(bath|bathing|shower|showering|wash|washing)\b", "ADL_HYGIENE", "Bathing assistance"),
     (r"\b(brush|brushing|teeth|dental|oral)\b", "ADL_HYGIENE", "Oral hygiene"),
-    (r"\b(toileting|bathroom|restroom|toilet)\b", "ADL_HYGIENE", "Toileting assistance"),
+    (r"\b(toileting|commode|bedpan)\b", "ADL_HYGIENE", "Toileting assistance"),
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bathroom|toilet|toileting)\b", "ADL_HYGIENE", "Toileting assistance"),
     
     # Dressing
     (r"\b(dress|dressing|clothes|clothing|dressed|outfit)\b", "ADL_DRESSING", "Dressing assistance"),
@@ -64,7 +65,8 @@ TASK_PATTERNS = [
     
     # Mobility
     (r"\b(walk|walking|walker|cane|wheelchair)\b", "ADL_MOBILITY", "Mobility assistance"),
-    (r"\b(stand|standing|sit|sitting|transfer|transferring)\b", "MOBILITY_ASSIST", "Transfer assistance"),
+    (r"\b(transfer|transferring|wheelchair)\b", "MOBILITY_ASSIST", "Transfer assistance"),
+    (r"\b(help|assist|assistance)\b.{0,40}\b(stand|standing|sit|sitting)\b", "MOBILITY_ASSIST", "Transfer assistance"),
     (r"\b(exercise|exercises|stretch|stretching|physical therapy|pt)\b", "EXERCISE", "Exercise assistance"),
     
     # Housekeeping

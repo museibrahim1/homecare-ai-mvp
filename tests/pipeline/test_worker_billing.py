@@ -53,6 +53,39 @@ class TestTaskDetection:
         categories = [t[0] for t in tasks]
         assert "ADL_MOBILITY" in categories
 
+    def test_sit_stand_does_not_count_as_transfer(self):
+        """Casual sit/stand talk is not a mobility billable (intake role-play false positive)."""
+        tasks = detect_tasks_in_text(
+            "We're going to actually stand up instead of sitting down. Come sit over here."
+        )
+        categories = [t[0] for t in tasks]
+        assert "MOBILITY_ASSIST" not in categories
+        assert "ADL_MOBILITY" not in categories
+
+    def test_real_transfer_still_counts(self):
+        """Actual transfer language should still detect mobility assistance."""
+        tasks = detect_tasks_in_text(
+            "I will help you transfer from the bed to the wheelchair."
+        )
+        categories = [t[0] for t in tasks]
+        assert "MOBILITY_ASSIST" in categories or "ADL_MOBILITY" in categories
+
+    def test_bathroom_symptom_is_not_toileting_care(self):
+        """Medical bathroom/diarrhea talk is not personal-care toileting."""
+        tasks = detect_tasks_in_text(
+            "I have to go to the bathroom all the time. I have really severe diarrhea."
+        )
+        categories = [t[0] for t in tasks]
+        assert "ADL_HYGIENE" not in categories
+
+    def test_toileting_assistance_still_counts(self):
+        """Explicit toileting help should still detect personal care."""
+        tasks = detect_tasks_in_text(
+            "The caregiver will help her with toileting and the commode."
+        )
+        categories = [t[0] for t in tasks]
+        assert "ADL_HYGIENE" in categories
+
     def test_housekeeping_detection(self):
         """Test detecting light housekeeping."""
         tasks = detect_tasks_in_text("I'll do some cleaning in the kitchen.")

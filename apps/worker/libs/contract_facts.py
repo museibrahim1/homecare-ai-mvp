@@ -1,0 +1,161 @@
+"""Facts taken from the assessment transcript, not from LLM defaults.
+
+Used by contract generation so a quoted rate or schedule in the conversation
+wins over agency defaults and mock fallback services.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any, Dict, List, Optional
+
+PLACEHOLDER_EVIDENCE = {
+    "client needs daily assistance",
+    "multiple medications mentioned",
+    "difficulty cooking safely",
+    "unable to maintain home",
+    "lives alone, needs monitoring",
+}
+
+HOUR_WORDS = {
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "noon": 12,
+    "midnight": 0,
+}
+
+RATE_RE = re.compile(
+    r"\$\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:an\s+hour|/hour|/hr|per\s+hour)",
+    re.IGNORECASE,
+)
+WEEKDAY_SPAN_RE = re.compile(
+    r"monday\s+(?:through|to)\s+friday|mon(?:day)?\s*[-/]\s*fri(?:day)?",
+    re.IGNORECASE,
+)
+TIME_RANGE_RE = re.compile(
+    r"\b(?:from\s+)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s+"
+    r"(?:to|until)\s+(?:about\s+)?"
+    r"(\d{1,2}|five|six|seven|eight|nine|ten|eleven|twelve|noon|midnight)"
+    r"(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?",
+    re.IGNORECASE,
+)
+
+
+def _coerce_positive_float(value: Any) -> Optional[float]:
+    if value is None or value == "":
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if number <= 0:
+        return None
+    return number
+
+
+def extract_stated_hourly_rate(text: str) -> Optional[float]:
+    if not text:
+        return None
+    match = RATE_RE.search(text)
+    if not match:
+        return None
+    rate = float(match.group(1))
+    if rate < 8 or rate > 200:
+        return None
+    return rate
+
+
+def _hour_to_minutes(hour: int, minute: int, ampm: Optional[str], *, is_end: bool, start_minutes: Optional[int]) -> int:
+    ampm_l = (ampm or "").lower().replace(".", "")
+    if ampm_l.startswith("p") and hour < 12:
+        hour += 12
+    elif ampm_l.startswith("a") and hour == 12:
+        hour = 0
+    elif not ampm_l:
+        if is_end and start_minutes is not None:
+            candidate = hour * 60 + minute
+            if candidate <= start_minutes:
+                hour += 12
+        elif not is_end and 1 <= hour <= 11:
+            pass
+    return hour * 60 + minute
+
+
+def _parse_hour_token(token: str) -> Optional[int]:
+    token = token.lower()
+    if token in HOUR_WORDS:
+        return HOUR_WORDS[token]
+    if token.isdigit():
+        return int(token)
+    return None
+
+
+def extract_stated_weekly_hours(text: str) -> Optional[float]:
+    if not text:
+        return None
+    if not WEEKDAY_SPAN_RE.search(text):
+        return None
+
+    matches = list(TIME_RANGE_RE.finditer(text))
+    if not matches:
+        return None
+    match = matches[-1]
+    start_hour = int(match.group(1))
+    start_min = int(match.group(2) or 0)
+    start_ampm = match.group(3)
+    end_hour = _parse_hour_token(match.group(4))
+    if end_hour is None:
+        return None
+    end_min = int(match.group(5) or 0)
+    end_ampm = match.group(6)
+
+    start_total = _hour_to_minutes(start_hour, start_min, start_ampm, is_end=False, start_minutes=None)
+    end_total = _hour_to_minutes(end_hour, end_min, end_ampm, is_end=True, start_minutes=start_total)
+    duration_min = end_total - start_total
+    if duration_min < 60 or duration_min > 16 * 60:
+        return None
+    hours_per_day = duration_min / 60
+    weekly = round(hours_per_day * 5, 1)
+    if weekly < 5 or weekly > 80:
+        return None
+    return weekly
+
+
+def prefer_private_pay_rate(
+    quoted_rate: Optional[float],
+    agency_private_pay: Optional[float],
+    agency_default: Optional[float],
+    care_need_level: str = "MODERATE",
+) -> float:
+    quoted = _coerce_positive_float(quoted_rate)
+    if quoted is not None and 8 <= quoted <= 200:
+        return quoted
+    agency_pp = _coerce_positive_float(agency_private_pay)
+    if agency_pp is not None:
+        return agency_pp
+    agency_df = _coerce_positive_float(agency_default)
+    if agency_df is not None:
+        return agency_df
+    return {"HIGH": 28.0, "MODERATE": 24.0, "LOW": 20.0}.get(care_need_level, 24.0)
+
+
+def sanitize_identified_services(services: Optional[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    if not services:
+        return []
+    cleaned: List[Dict[str, Any]] = []
+    for svc in services:
+        if not isinstance(svc, dict):
+            continue
+        evidence = str(svc.get("evidence") or "").strip().lower()
+        if evidence in PLACEHOLDER_EVIDENCE:
+            continue
+        if not evidence:
+            continue
+        cleaned.append(svc)
+    return cleaned

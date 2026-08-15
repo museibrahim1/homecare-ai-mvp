@@ -40,10 +40,13 @@ def upload_file_to_s3(key: str, content: bytes, content_type: str = None):
         extra_args["ContentType"] = content_type
 
     kms_key = os.getenv("S3_KMS_KEY_ID", "")
+    endpoint = (settings.s3_endpoint_url or "").lower()
+    is_minio = any(token in endpoint for token in ("localhost", "127.0.0.1", "minio", ":9000"))
     if kms_key:
         extra_args["ServerSideEncryption"] = "aws:kms"
         extra_args["SSEKMSKeyId"] = kms_key
-    else:
+    elif not is_minio:
+        # AWS S3: SSE-S3. MinIO without KMS returns NotImplemented for AES256.
         extra_args["ServerSideEncryption"] = "AES256"
 
     client.put_object(

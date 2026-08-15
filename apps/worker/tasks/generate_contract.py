@@ -40,6 +40,13 @@ def generate_service_contract(self, visit_id: str):
         from models import Visit, TranscriptSegment, BillableItem, Contract
         from libs.llm import get_llm_service
         from libs.contract_template import generate_contract_from_template, generate_docx_contract
+        from libs.contract_facts import (
+            extract_stated_hourly_rate,
+            extract_stated_weekly_hours,
+            prefer_private_pay_rate,
+            sanitize_identified_services,
+            _coerce_positive_float,
+        )
         
         # Get visit
         visit = db.query(Visit).filter(Visit.id == UUID(visit_id)).first()
@@ -167,36 +174,40 @@ def generate_service_contract(self, visit_id: str):
         # STEP 2: Process extracted data for template
         # =====================================================================
         
-        # Extract services
-        services = assessment_data.get("services_identified", [])
-        if not services:
-            services = [
-                {"name": "Personal Care", "description": "Assistance with daily activities", "frequency": "As needed"},
-                {"name": "Companionship", "description": "Social interaction and supervision", "frequency": "During visits"},
-            ]
+        # Extract services. Never invent Personal Care from an empty/mock payload.
+        services = sanitize_identified_services(assessment_data.get("services_identified", []))
         
         # Extract schedule
-        schedule = assessment_data.get("recommended_schedule", {})
+        schedule = assessment_data.get("recommended_schedule", {}) or {}
+        quoted_rate = _coerce_positive_float(assessment_data.get("quoted_hourly_rate")) or extract_stated_hourly_rate(transcript_text)
+        stated_hours = _coerce_positive_float(assessment_data.get("stated_weekly_hours")) or extract_stated_weekly_hours(transcript_text)
+        if quoted_rate:
+            logger.info(f"Quoted hourly rate from transcript: ${quoted_rate:.2f}")
+        if stated_hours:
+            logger.info(f"Stated weekly hours from transcript: {stated_hours}")
         
         # =====================================================================
         # SERVICE-BASED HOURS CALCULATION
-        # Hours based on service type and need level (light/moderate/high)
+        # Stated schedule in the transcript wins over stacked category hours.
         # =====================================================================
         
-        # Get service hours from schedule
-        service_hours = schedule.get("service_hours", [])
-        if service_hours:
-            calculated_hours = sum(float(sh.get("hours_per_week", 0)) for sh in service_hours)
-            logger.info(f"Service hours from {len(service_hours)} services:")
-            for sh in service_hours:
-                logger.info(f"  - {sh.get('service')} ({sh.get('need_level', 'moderate')}): {sh.get('hours_per_week')} hrs/week")
-            weekly_hours = calculated_hours
-            logger.info(f"Total from service_hours: {weekly_hours} hrs/week")
+        weekly_hours = 0.0
+        if stated_hours:
+            weekly_hours = float(stated_hours)
+            logger.info(f"Using stated weekly hours from transcript: {weekly_hours}")
         else:
-            # Fall back to total_hours_per_week if provided
-            weekly_hours = float(schedule.get("total_hours_per_week", 0))
-            if weekly_hours > 0:
-                logger.info(f"Using total_hours_per_week: {weekly_hours}")
+            service_hours = schedule.get("service_hours") or []
+            if service_hours:
+                calculated_hours = sum(float(sh.get("hours_per_week", 0) or 0) for sh in service_hours)
+                logger.info(f"Service hours from {len(service_hours)} services:")
+                for sh in service_hours:
+                    logger.info(f"  - {sh.get('service')} ({sh.get('need_level', 'moderate')}): {sh.get('hours_per_week')} hrs/week")
+                weekly_hours = calculated_hours
+                logger.info(f"Total from service_hours: {weekly_hours} hrs/week")
+            else:
+                weekly_hours = float(schedule.get("total_hours_per_week", 0) or 0)
+                if weekly_hours > 0:
+                    logger.info(f"Using total_hours_per_week: {weekly_hours}")
         
         # If still no hours, calculate from services using consolidated categories
         if weekly_hours == 0 and services:
@@ -337,22 +348,27 @@ def generate_service_contract(self, visit_id: str):
         else:
             logger.info(f"Applying PRIVATE PAY rates for client_id={client.id}")
             
-            if ag_private_pay:
-                hourly_rate = ag_private_pay
+            hourly_rate = prefer_private_pay_rate(
+                quoted_rate=quoted_rate if quoted_rate else None,
+                agency_private_pay=ag_private_pay,
+                agency_default=ag_default_rate,
+                care_need_level=care_need_level,
+            )
+            if quoted_rate:
+                rate_type = "Quoted in assessment"
+                logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from transcript")
+            elif ag_private_pay:
                 rate_type = "Agency Private Pay"
                 logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from agency config")
             elif ag_default_rate:
-                hourly_rate = ag_default_rate
                 rate_type = "Agency Default"
                 logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from agency config")
             else:
-                base_rate_map = {
-                    "HIGH": 28.00,
-                    "MODERATE": 24.00,
-                    "LOW": 20.00,
-                }
-                base_rate = base_rate_map.get(care_need_level, 24.00)
-                
+                rate_type = f"System default ({care_need_level})"
+                logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
+            
+            if not quoted_rate and not ag_private_pay and not ag_default_rate:
+                base_rate = hourly_rate
                 rate_adjustments = []
                 if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
                     rate_adjustments.append(("Skilled nursing care", 10.00))

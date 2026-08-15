@@ -35,7 +35,8 @@ TASK_PATTERNS = [
     # Personal Care / ADL
     (r"\b(bath|bathing|shower|showering|wash|washing|clean up|cleaned up)\b", "ADL_HYGIENE", "Bathing/showering assistance", "Personal Care"),
     (r"\b(brush|brushing|teeth|dental|oral care|mouth care)\b", "ADL_HYGIENE", "Oral hygiene assistance", "Personal Care"),
-    (r"\b(toileting|bathroom|restroom|toilet|commode|bedpan)\b", "ADL_HYGIENE", "Toileting assistance", "Personal Care"),
+    (r"\b(toileting|commode|bedpan)\b", "ADL_HYGIENE", "Toileting assistance", "Personal Care"),
+    (r"\b(help|assist|assistance|helping|assisting)\b.{0,40}\b(bathroom|toilet|toileting)\b", "ADL_HYGIENE", "Toileting assistance", "Personal Care"),
     (r"\b(dress|dressing|clothes|clothing|dressed|undress|outfit|changing)\b", "ADL_DRESSING", "Dressing assistance", "Personal Care"),
     (r"\b(grooming|shave|shaving|hair|comb|brush)\b", "ADL_GROOMING", "Grooming assistance", "Personal Care"),
     
@@ -58,7 +59,8 @@ TASK_PATTERNS = [
     
     # Mobility
     (r"\b(walk|walking|walker|cane|ambulate|ambulation)\b", "ADL_MOBILITY", "Ambulation assistance", "Mobility"),
-    (r"\b(wheelchair|transfer|transferring|stand|standing|sit|sitting)\b", "MOBILITY_ASSIST", "Transfer/positioning assistance", "Mobility"),
+    (r"\b(wheelchair|transfer|transferring)\b", "MOBILITY_ASSIST", "Transfer/positioning assistance", "Mobility"),
+    (r"\b(help|assist|assistance)\b.{0,40}\b(stand|standing|sit|sitting)\b", "MOBILITY_ASSIST", "Transfer/positioning assistance", "Mobility"),
     (r"\b(exercise|exercises|stretch|stretching|physical therapy|pt|range of motion)\b", "EXERCISE", "Exercise/therapy assistance", "Mobility"),
     (r"\b(fall|falls|falling|balance|steady|unsteady)\b", "MOBILITY_ASSIST", "Fall prevention/safety", "Mobility"),
     
@@ -197,32 +199,31 @@ def analyze_transcript_with_claude(
     
     logger.info(f"Analyzing {len(segments)} segments ({len(full_text)} chars) for billable services")
     
-    prompt = f"""Analyze this home care assessment conversation and extract EVERY care service, task, or need mentioned.
+    prompt = f"""Analyze this recording for IN-HOME CARE services a home care agency would actually provide.
 
-Be EXTREMELY thorough - extract EVERYTHING the client or family mentions needing help with, including:
-- Personal care needs (bathing, dressing, grooming, toileting, hygiene)
-- Medication management and reminders
-- Health monitoring (vitals, blood pressure, glucose, etc.)
-- Meal preparation, cooking, nutrition, feeding assistance
-- Mobility assistance, transfers, walking, fall prevention
-- Housekeeping, cleaning, laundry, bed making
-- Transportation and errands
-- Companionship, emotional support, supervision
-- Pain management, wound care, medical needs
-- Cognitive support, dementia care, memory issues
-- Any other care needs mentioned
+Extract only tasks the client or family asked a caregiver to do, or clearly cannot do at home without help.
+
+Do NOT extract:
+- Clinic, hospital, or doctor-visit care (exams, counseling referrals, prescriptions, procedures)
+- Training or coaching about how to run a home care business
+- Casual words like sit, stand, bathroom, talk, or medicine unless they describe caregiver assistance
+- Services the client declined (for example: "I can wash myself" is not bathing assistance)
+- Independent medication taking ("I know how to take my medicine") is not medication management
+
+If this is a coaching/role-play with an embedded intake, extract from the person who would receive care (often a parent), not the coach.
+If this is a medical interview with no home-care request, return [] unless someone clearly cannot manage meals, housekeeping, or personal care at home.
 
 TRANSCRIPT:
 {full_text}
 
-For EACH service/task mentioned, provide:
-1. category: Choose the best fit from [PERSONAL_CARE, MEDICATION, HEALTH_MONITORING, MEALS, MOBILITY, HOUSEKEEPING, TRANSPORTATION, COMPANIONSHIP, SUPERVISION, MEDICAL_CARE, COGNITIVE_SUPPORT, OTHER]
-2. task: Specific task or need (e.g., "Bathing assistance", "Blood pressure monitoring", "Prepare diabetic meals")
-3. evidence: The exact quote from transcript mentioning this need
-4. priority: HIGH/MEDIUM/LOW based on urgency expressed
-5. frequency: How often mentioned or needed (if stated)
+For EACH real home-care need, provide:
+1. category: Choose from [PERSONAL_CARE, MEDICATION, HEALTH_MONITORING, MEALS, MOBILITY, HOUSEKEEPING, TRANSPORTATION, COMPANIONSHIP, SUPERVISION, COGNITIVE_SUPPORT, OTHER]
+2. task: Specific task (e.g., "Companionship", "Grocery transportation")
+3. evidence: Exact quote. No invented quotes.
+4. priority: HIGH/MEDIUM/LOW
+5. frequency: If stated, else "As needed"
 
-Return as JSON array. Extract EVERY task - do not limit or summarize. Each mention of a different task should be a separate item.
+Return a JSON array. Empty array is correct when no home-care services were requested.
 
 JSON:"""
 
@@ -316,10 +317,10 @@ def generate_billables_from_transcript(
         "TRANSPORTATION": "Transportation",
         "COMPANIONSHIP": "Companionship",
         "SUPERVISION": "Supervision",
-        "MEDICAL_CARE": "Medical Care",
         "COGNITIVE_SUPPORT": "Cognitive Support",
         "OTHER": "Other Services",
     }
+    skip_categories = {"MEDICAL_CARE", "Medical Care"}
     
     category_rates = {
         "Personal Care": 28.00,
@@ -331,7 +332,6 @@ def generate_billables_from_transcript(
         "Transportation": 20.00,
         "Companionship": 22.00,
         "Supervision": 24.00,
-        "Medical Care": 35.00,
         "Cognitive Support": 30.00,
         "Other Services": 25.00,
     }
@@ -341,7 +341,11 @@ def generate_billables_from_transcript(
     
     for service in claude_services:
         cat = service.get("category", "OTHER")
+        if cat in skip_categories:
+            continue
         category_name = category_mapping.get(cat, cat)
+        if category_name in skip_categories:
+            continue
         
         if category_name not in category_tasks:
             category_tasks[category_name] = []

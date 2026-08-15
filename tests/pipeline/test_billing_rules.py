@@ -48,6 +48,14 @@ class TestTaskDetection:
         # Only companionship should match
         assert not any(t[0] in ["MED_REMINDER", "MEAL_PREP", "ADL_HYGIENE"] for t in tasks)
 
+    def test_sit_stand_does_not_count_as_transfer(self):
+        tasks = detect_tasks_in_text("Please sit over here. We can stand up for the camera.")
+        assert not any(t[0] == "MOBILITY_ASSIST" for t in tasks)
+
+    def test_bathroom_symptom_is_not_toileting_care(self):
+        tasks = detect_tasks_in_text("I have to go to the bathroom all the time.")
+        assert not any(t[0] == "ADL_HYGIENE" for t in tasks)
+
 
 class TestBillableGeneration:
     """Tests for billable item generation."""
