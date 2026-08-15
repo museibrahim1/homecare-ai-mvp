@@ -81,9 +81,9 @@ TASK_PATTERNS = [
     (r"\b(lonely|loneliness|companion|companionship)\b", "COMPANIONSHIP", "Companionship/emotional support", "Companionship"),
     (r"\b(company|social\s+interaction|emotional\s+support)\b", "COMPANIONSHIP", "Social interaction", "Companionship"),
     
-    # Supervision/Safety — avoid "safe driver" / "bonded" / "check on"
-    (r"\b(supervise|supervision)\b", "SUPERVISION", "Safety supervision", "Supervision"),
-    (r"\b(safety\s+monitoring|fall\s+prevention|cannot\s+be\s+left\s+alone)\b", "SUPERVISION", "Safety monitoring", "Supervision"),
+    # Supervision/Safety — only explicit leave-alone / monitoring need language
+    (r"\b(cannot\s+be\s+left\s+alone|can't\s+be\s+left\s+alone|must\s+not\s+be\s+left\s+alone)\b", "SUPERVISION", "Safety supervision", "Supervision"),
+    (r"\b(safety\s+monitoring|fall\s+prevention|needs\s+supervision|require[sd]?\s+supervision)\b", "SUPERVISION", "Safety monitoring", "Supervision"),
 ]
 
 # Service category rates (can be customized per agency)
@@ -120,6 +120,82 @@ def detect_tasks_in_text(text: str) -> List[Tuple[str, str, str, str]]:
             seen_categories.add(category)
     
     return detected
+
+
+_SUPERVISION_NEED_RE = re.compile(
+    r"\b("
+    r"cannot\s+be\s+left\s+alone|can't\s+be\s+left\s+alone|"
+    r"must\s+not\s+be\s+left\s+alone|needs?\s+supervision|"
+    r"require[sd]?\s+supervision|safety\s+monitoring|fall\s+prevention|"
+    r"wandering|elopement"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
+def _normalize_for_match(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "").lower()).strip()
+
+
+def evidence_appears_in_transcript(evidence: str, transcript_text: str, min_chars: int = 12) -> bool:
+    """True when evidence is a real substring of the transcript (allowing whitespace drift)."""
+    quote = _normalize_for_match(evidence)
+    haystack = _normalize_for_match(transcript_text)
+    if len(quote) < min_chars or not haystack:
+        return False
+    if quote in haystack:
+        return True
+    # Allow a long quote if a substantial contiguous chunk appears
+    if len(quote) >= 40:
+        chunk = quote[:40]
+        if chunk in haystack:
+            return True
+        chunk = quote[-40:]
+        if chunk in haystack:
+            return True
+    return False
+
+
+def is_valid_supervision_evidence(evidence: str) -> bool:
+    return bool(_SUPERVISION_NEED_RE.search(evidence or ""))
+
+
+def filter_grounded_claude_services(
+    services: Optional[List[Dict[str, Any]]],
+    transcript_text: str,
+) -> List[Dict[str, Any]]:
+    """Keep only Claude billables whose evidence is in the transcript and category-valid."""
+    if not services:
+        return []
+    kept: List[Dict[str, Any]] = []
+    for service in services:
+        if not isinstance(service, dict):
+            continue
+        evidence = str(service.get("evidence") or "").strip()
+        if not evidence_appears_in_transcript(evidence, transcript_text):
+            continue
+        cat = str(service.get("category") or "").upper()
+        if cat == "SUPERVISION" and not is_valid_supervision_evidence(evidence):
+            continue
+        kept.append(service)
+    return kept
+
+
+def format_billable_description(category_name: str, tasks: List[Dict[str, Any]]) -> str:
+    """Human-readable description with verbatim evidence, not a task-count summary."""
+    if not tasks:
+        return category_name
+    parts = []
+    for task in tasks[:4]:
+        name = str(task.get("task") or category_name).strip()
+        quote = str(task.get("evidence") or "").strip()
+        if len(quote) > 140:
+            quote = quote[:137].rstrip() + "..."
+        if quote:
+            parts.append(f'{name}: "{quote}"')
+        else:
+            parts.append(name)
+    return "; ".join(parts)
 
 
 def consolidate_blocks(blocks: List[BillableBlock], min_gap_ms: int = 120000) -> List[BillableBlock]:
@@ -219,6 +295,7 @@ Do NOT extract:
 - Casual words like sit, stand, bathroom, talk, or medicine unless they describe caregiver assistance
 - Services the client declined (for example: "I can wash myself" is not bathing assistance)
 - Independent medication taking ("I know how to take my medicine") is not medication management
+- SUPERVISION unless the transcript clearly says the person cannot be left alone, needs supervision, or needs safety monitoring. Do not invent supervision from coaching, training, or general presence.
 
 If this is a coaching/role-play with an embedded intake, extract from the person who would receive care (often a parent), not the coach.
 If this is a medical interview with no home-care request, return [] unless someone clearly cannot manage meals, housekeeping, or personal care at home.
@@ -229,7 +306,7 @@ TRANSCRIPT:
 For EACH real home-care need, provide:
 1. category: Choose from [PERSONAL_CARE, MEDICATION, HEALTH_MONITORING, MEALS, MOBILITY, HOUSEKEEPING, TRANSPORTATION, COMPANIONSHIP, SUPERVISION, COGNITIVE_SUPPORT, OTHER]
 2. task: Specific task (e.g., "Companionship", "Grocery transportation")
-3. evidence: Exact quote. No invented quotes.
+3. evidence: Exact quote copied from the transcript. No invented quotes.
 4. priority: HIGH/MEDIUM/LOW
 5. frequency: If stated, else "As needed"
 
@@ -286,10 +363,12 @@ def generate_billables_from_transcript(
     """
     logger.info(f"Generating billables from {len(segments)} segments using Claude")
     
+    transcript_text = "\n".join(str(s.get("text") or "") for s in segments)
+
     # Use Claude to extract all services. None = Claude unavailable; [] = no home-care needs.
     claude_services = analyze_transcript_with_claude(segments) if use_llm else None
     llm_succeeded = claude_services is not None
-    claude_services = claude_services or []
+    claude_services = filter_grounded_claude_services(claude_services or [], transcript_text)
     
     # Also run rules-based detection as backup (only used if Claude failed)
     segment_services: Dict[str, List[Dict]] = {}
@@ -378,14 +457,21 @@ def generate_billables_from_transcript(
     result = []
     
     for category_name, tasks in category_tasks.items():
-        # Build task list description
+        evidence_list = [
+            {
+                "text": t["evidence"],
+                "task": t["task"],
+                "priority": t["priority"],
+                "frequency": t.get("frequency"),
+            }
+            for t in tasks
+        ]
         task_list = [t["task"] for t in tasks]
-        evidence_list = [{"text": t["evidence"], "task": t["task"], "priority": t["priority"]} for t in tasks]
         
         item = {
             "code": category_name.upper().replace(" ", "_"),
             "category": category_name,
-            "description": f"{category_name}: {len(tasks)} tasks identified",
+            "description": format_billable_description(category_name, tasks),
             "start_ms": visit_start_ms,
             "end_ms": visit_end_ms,
             "minutes": 0,
@@ -409,11 +495,15 @@ def generate_billables_from_transcript(
             service_type = detections[0]["service_type"] if detections else category
             cat_info = CATEGORY_INFO.get(category, {"label": category, "default_rate": 25.00})
             all_evidence = [d["evidence"] for d in detections]
+            quote = (detections[0]["evidence"].get("text") if detections else "") or ""
+            desc = detections[0]["description"] if detections else category
+            if quote:
+                desc = f'{desc}: "{quote[:140]}"'
             
             item = {
                 "code": category,
                 "category": service_type,
-                "description": detections[0]["description"] if detections else category,
+                "description": desc,
                 "start_ms": min(d["start_ms"] for d in detections),
                 "end_ms": max(d["end_ms"] for d in detections),
                 "minutes": 0,

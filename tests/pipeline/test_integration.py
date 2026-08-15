@@ -66,6 +66,7 @@ class TestBillingWithFixtures:
             visit_start_ms=start_ms,
             visit_end_ms=end_ms,
             min_block_minutes=1,
+            use_llm=False,
         )
         
         assert len(billables) > 0, "Should generate at least one billable"
@@ -74,7 +75,7 @@ class TestBillingWithFixtures:
         categories = {b["category"] for b in billables}
         # Accept either old or new category naming convention
         has_medication = "MED_REMINDER" in categories or "Medication Management" in categories
-        has_meal = "MEAL_PREP" in categories or "Nutrition" in categories
+        has_meal = "MEAL_PREP" in categories or "Nutrition" in categories or "Meal Preparation" in categories
         has_vitals = "VITALS" in categories or "Health Monitoring" in categories
         assert has_medication, f"Should detect medication task. Got: {categories}"
         assert has_meal, f"Should detect meal prep task. Got: {categories}"
@@ -95,6 +96,7 @@ class TestBillingWithFixtures:
             visit_start_ms=start_ms,
             visit_end_ms=end_ms,
             min_block_minutes=1,
+            use_llm=False,
         )
         
         detected_categories = {b["category"] for b in billables}

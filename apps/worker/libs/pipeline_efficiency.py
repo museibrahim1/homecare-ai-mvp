@@ -8,8 +8,6 @@ import os
 import re
 from typing import Any, Dict, Optional
 
-from libs.contract_facts import extract_stated_hourly_rate, extract_stated_weekly_hours
-
 logger = logging.getLogger(__name__)
 
 VALID_KINDS = {
@@ -79,7 +77,9 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
         if re.search(p, sample)
     )
 
-    if clinic_hits >= 3 and home_hits <= 1:
+    if clinic_hits >= 2 and home_hits <= 1:
+        return "out_of_scope"
+    if clinic_hits >= 3 and home_hits <= 2 and training_hits == 0:
         return "out_of_scope"
     if training_hits >= 2 and home_hits >= 2:
         return "training_with_embedded_intake"
@@ -138,18 +138,20 @@ def classify_recording(transcript_text: str) -> str:
 
 
 def empty_out_of_scope_assessment(transcript_text: str) -> Dict[str, Any]:
-    """Skip the heavy contract LLM when the recording is not home care."""
-    quoted = extract_stated_hourly_rate(transcript_text)
-    stated = extract_stated_weekly_hours(transcript_text)
+    """Skip the heavy contract LLM when the recording is not home care.
+
+    Never pull rates or hours from clinic/training audio. Those numbers are not
+    home-care quotes and must not price a contract.
+    """
     return {
         "conversation_kind": "out_of_scope",
         "used_fallback": False,
-        "quoted_hourly_rate": quoted,
-        "stated_weekly_hours": stated,
+        "quoted_hourly_rate": None,
+        "stated_weekly_hours": None,
         "services_identified": [],
         "client_profile": {},
         "recommended_schedule": {
-            "total_hours_per_week": float(stated or 0),
+            "total_hours_per_week": 0,
             "service_hours": [],
             "preferred_days": [],
             "preferred_times": "",
@@ -163,6 +165,9 @@ def empty_out_of_scope_assessment(transcript_text: str) -> Dict[str, Any]:
         "safety_concerns": [],
         "special_requirements": [],
         "care_plan_goals": {},
+        "declined_services": [],
+        "adl_summary": "",
+        "iadl_summary": "",
         "client_condition_summary": (
             "This recording is outside home care scope. No home care services were extracted."
         ),

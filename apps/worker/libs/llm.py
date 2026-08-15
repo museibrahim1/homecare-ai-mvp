@@ -1233,10 +1233,12 @@ Rules:
 - Only use facts stated in the transcript. Do not invent ADLs, hours, rates, or diagnoses.
 - conversation_kind must be one of: home_care_intake, home_care_visit, training_with_embedded_intake, out_of_scope.
 - For training_with_embedded_intake, extract the care recipient in the role-play, not coach sales talk.
-- For out_of_scope, return empty services_identified.
+- For out_of_scope, return empty services_identified and null rates/hours.
 - If a rate is spoken (e.g. "$18 an hour"), set quoted_hourly_rate.
 - If a weekday schedule is spoken (e.g. Monday through Friday 8:30 to 7), set stated_weekly_hours and recommended_schedule.total_hours_per_week from that schedule.
 - evidence must be a direct quote. Never use placeholders.
+- List declined_services when the client refuses a service (e.g. bathing).
+- adl_summary / iadl_summary: short grounded phrases only. Empty string if unknown.
 - Keep JSON compact. Prefer null/[] over guessing.
 
 Return ONLY JSON:
@@ -1247,6 +1249,7 @@ Return ONLY JSON:
   "services_identified": [
     {{"name": "Companion Care", "description": "", "evidence": "quote", "frequency": "", "priority": "High"}}
   ],
+  "declined_services": [{{"name": "Bathing", "evidence": "quote"}}],
   "client_profile": {{
     "primary_diagnosis": null,
     "secondary_conditions": [],
@@ -1256,6 +1259,8 @@ Return ONLY JSON:
     "cognitive_status": null,
     "living_situation": null
   }},
+  "adl_summary": "",
+  "iadl_summary": "",
   "recommended_schedule": {{
     "total_hours_per_week": 0,
     "service_hours": [],
@@ -1266,7 +1271,7 @@ Return ONLY JSON:
   "eicna_assessment": {{"care_need_level": "LOW|MODERATE|HIGH", "rationale": ""}},
   "safety_concerns": [],
   "special_requirements": [],
-  "care_plan_goals": {{"short_term": [], "long_term": []}},
+  "care_plan_goals": {{"short_term": [], "long_term": [], "maintenance": []}},
   "client_condition_summary": ""
 }}"""
         user_prompt = (
@@ -2098,12 +2103,21 @@ Generate the note that matches what this recording actually is. Do not write a h
             return json.loads(response.strip())
         except json.JSONDecodeError:
             return {
-                "subjective": "Client did not express specific concerns during this visit.",
-                "objective": "Visit completed as scheduled. Care tasks performed as documented.",
-                "assessment": "Client stable. Care plan continues to meet needs.",
-                "plan": "Continue current care plan. Next visit as scheduled.",
-                "tasks_summary": [{"task": "Care Services", "details": "Services provided as scheduled", "duration_minutes": 60}],
-                "narrative": "Visit completed successfully. Client tolerated care well. No significant changes noted. Will continue current care plan."
+                "documentation_type": "unknown",
+                "subjective": "",
+                "objective": "",
+                "assessment": "Note generation failed to parse model output. Review the transcript manually.",
+                "plan": "",
+                "tasks_summary": [],
+                "vital_signs": {},
+                "client_mood": "",
+                "cognitive_status": "",
+                "medications_discussed": [],
+                "next_visit_plan": "",
+                "narrative": (
+                    "Automated note generation failed. No visit tasks or outcomes were invented. "
+                    "Review the transcript and rewrite this note before sharing."
+                ),
             }
 
 

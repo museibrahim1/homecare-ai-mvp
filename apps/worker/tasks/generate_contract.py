@@ -183,12 +183,21 @@ def generate_service_contract(self, visit_id: str):
         # =====================================================================
         
         # Extract services. Never invent Personal Care from an empty/mock payload.
-        services = sanitize_identified_services(assessment_data.get("services_identified", []))
+        services = sanitize_identified_services(
+            assessment_data.get("services_identified", []),
+            transcript_text=transcript_text,
+        )
+        conversation_kind = conversation_kind or assessment_data.get("conversation_kind")
         
         # Extract schedule
         schedule = assessment_data.get("recommended_schedule", {}) or {}
-        quoted_rate = _coerce_positive_float(assessment_data.get("quoted_hourly_rate")) or extract_stated_hourly_rate(transcript_text)
-        stated_hours = _coerce_positive_float(assessment_data.get("stated_weekly_hours")) or extract_stated_weekly_hours(transcript_text)
+        if conversation_kind == "out_of_scope":
+            quoted_rate = None
+            stated_hours = None
+            services = []
+        else:
+            quoted_rate = _coerce_positive_float(assessment_data.get("quoted_hourly_rate")) or extract_stated_hourly_rate(transcript_text)
+            stated_hours = _coerce_positive_float(assessment_data.get("stated_weekly_hours")) or extract_stated_weekly_hours(transcript_text)
         if quoted_rate:
             logger.info(f"Quoted hourly rate from transcript: ${quoted_rate:.2f}")
         if stated_hours:
@@ -317,8 +326,19 @@ def generate_service_contract(self, visit_id: str):
             for s in (services or [])
         ]
         service_text = ' '.join(service_names)
-        
-        if is_medicaid:
+
+        # Out-of-scope / empty assessments must not get invented $20/$24 rates.
+        if conversation_kind == "out_of_scope":
+            hourly_rate = 0.0
+            weekly_hours = 0.0
+            rate_type = "Out of scope"
+            logger.info("Out of scope: forcing $0 rate and 0 hours")
+        elif not services and not quoted_rate:
+            hourly_rate = 0.0
+            weekly_hours = 0.0
+            rate_type = "No home-care services identified"
+            logger.info("No grounded services: forcing $0 rate and 0 hours")
+        elif is_medicaid:
             logger.info(f"Applying MEDICAID rates for client_id={client.id}")
             
             has_personal_care = any(x in service_text for x in [
@@ -364,8 +384,13 @@ def generate_service_contract(self, visit_id: str):
                 agency_private_pay=ag_private_pay,
                 agency_default=ag_default_rate,
                 care_need_level=care_need_level,
+                allow_system_default=bool(services),
             )
-            if quoted_rate:
+            if hourly_rate is None:
+                hourly_rate = 0.0
+                rate_type = "No rate available"
+                logger.info("No quoted/agency rate available; using $0")
+            elif quoted_rate:
                 rate_type = "Quoted in assessment"
                 logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from transcript")
             elif ag_private_pay:
@@ -378,7 +403,7 @@ def generate_service_contract(self, visit_id: str):
                 rate_type = f"System default ({care_need_level})"
                 logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
             
-            if not quoted_rate and not ag_private_pay and not ag_default_rate:
+            if not quoted_rate and not ag_private_pay and not ag_default_rate and hourly_rate > 0:
                 base_rate = hourly_rate
                 rate_adjustments = []
                 if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
@@ -614,18 +639,33 @@ def generate_service_contract(self, visit_id: str):
             notes_parts.append(f"ASSESSMENT SUMMARY:\n{condition_summary}")
         
         # ADL Assessment
-        adl_data = assessment_data.get("adl_assessment", {})
-        if adl_data and adl_data.get("adl_summary"):
-            notes_parts.append(f"ADL STATUS: {adl_data['adl_summary']}")
+        adl_data = assessment_data.get("adl_assessment", {}) or {}
+        adl_summary = adl_data.get("adl_summary") or assessment_data.get("adl_summary")
+        if adl_summary:
+            notes_parts.append(f"ADL STATUS: {adl_summary}")
             if adl_data.get("adl_score"):
                 notes_parts.append(f"ADL Score: {adl_data['adl_score']}")
         
         # IADL Assessment
-        iadl_data = assessment_data.get("iadl_assessment", {})
-        if iadl_data and iadl_data.get("iadl_summary"):
-            notes_parts.append(f"IADL STATUS: {iadl_data['iadl_summary']}")
+        iadl_data = assessment_data.get("iadl_assessment", {}) or {}
+        iadl_summary = iadl_data.get("iadl_summary") or assessment_data.get("iadl_summary")
+        if iadl_summary:
+            notes_parts.append(f"IADL STATUS: {iadl_summary}")
             if iadl_data.get("iadl_score"):
                 notes_parts.append(f"IADL Score: {iadl_data['iadl_score']}")
+
+        declined = assessment_data.get("declined_services") or []
+        if declined:
+            declined_bits = []
+            for item in declined:
+                if isinstance(item, dict):
+                    name = item.get("name") or "Service"
+                    evidence = item.get("evidence") or ""
+                    declined_bits.append(f"{name}: \"{evidence}\"" if evidence else str(name))
+                else:
+                    declined_bits.append(str(item))
+            if declined_bits:
+                notes_parts.append("DECLINED SERVICES:\n" + "\n".join(f"- {b}" for b in declined_bits))
         
         # Safety assessment
         safety_data = assessment_data.get("safety_assessment", {})

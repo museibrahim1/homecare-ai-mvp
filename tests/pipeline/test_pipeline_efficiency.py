@@ -44,9 +44,10 @@ class TestHeuristicKind:
 
 
 class TestEmptyOutOfScope:
-    def test_builds_empty_services_and_reads_rate(self):
+    def test_builds_empty_services_and_no_rate(self):
         text = "This clinic visit costs money. Not home care. Maybe $40 something else."
         data = empty_out_of_scope_assessment(text)
         assert data["conversation_kind"] == "out_of_scope"
         assert data["services_identified"] == []
+        assert data["quoted_hourly_rate"] is None
         assert data["eicna_assessment"]["care_need_level"] == "LOW"

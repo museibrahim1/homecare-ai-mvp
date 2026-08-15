@@ -132,7 +132,8 @@ def prefer_private_pay_rate(
     agency_private_pay: Optional[float],
     agency_default: Optional[float],
     care_need_level: str = "MODERATE",
-) -> float:
+    allow_system_default: bool = True,
+) -> Optional[float]:
     quoted = _coerce_positive_float(quoted_rate)
     if quoted is not None and 8 <= quoted <= 200:
         return quoted
@@ -142,21 +143,35 @@ def prefer_private_pay_rate(
     agency_df = _coerce_positive_float(agency_default)
     if agency_df is not None:
         return agency_df
+    if not allow_system_default:
+        return None
     return {"HIGH": 28.0, "MODERATE": 24.0, "LOW": 20.0}.get(care_need_level, 24.0)
 
 
-def sanitize_identified_services(services: Optional[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+def sanitize_identified_services(
+    services: Optional[List[Dict[str, Any]]],
+    transcript_text: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     if not services:
         return []
     cleaned: List[Dict[str, Any]] = []
+    transcript_norm = re.sub(r"\s+", " ", (transcript_text or "").lower()).strip()
     for svc in services:
         if not isinstance(svc, dict):
             continue
-        evidence = str(svc.get("evidence") or "").strip().lower()
-        if evidence in PLACEHOLDER_EVIDENCE:
+        evidence = str(svc.get("evidence") or "").strip()
+        evidence_l = evidence.lower()
+        if not evidence or evidence_l in PLACEHOLDER_EVIDENCE:
             continue
-        if not evidence:
-            continue
+        if transcript_norm:
+            ev_norm = re.sub(r"\s+", " ", evidence_l)
+            if len(ev_norm) >= 12 and ev_norm not in transcript_norm:
+                # Allow long quotes if a substantial chunk appears
+                chunk_ok = False
+                if len(ev_norm) >= 40:
+                    chunk_ok = ev_norm[:40] in transcript_norm or ev_norm[-40:] in transcript_norm
+                if not chunk_ok:
+                    continue
         cleaned.append(svc)
     return cleaned
 

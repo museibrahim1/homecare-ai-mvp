@@ -63,6 +63,45 @@ class TestPreferPrivatePayRate:
             care_need_level="HIGH",
         ) == 28.0
 
+    def test_no_system_default_when_disabled(self):
+        assert prefer_private_pay_rate(
+            quoted_rate=None,
+            agency_private_pay=None,
+            agency_default=None,
+            care_need_level="LOW",
+            allow_system_default=False,
+        ) is None
+
+
+class TestOutOfScopeAssessment:
+    def test_empty_out_of_scope_has_no_rate_or_hours(self):
+        from libs.pipeline_efficiency import empty_out_of_scope_assessment
+
+        data = empty_out_of_scope_assessment(
+            "Doctor said counseling costs $40 an hour for IBS diarrhea physical exam."
+        )
+        assert data["quoted_hourly_rate"] is None
+        assert data["stated_weekly_hours"] is None
+        assert data["services_identified"] == []
+        assert data["recommended_schedule"]["total_hours_per_week"] == 0
+
+
+class TestSanitizeAgainstTranscript:
+    def test_drops_evidence_not_in_transcript(self):
+        services = [
+            {
+                "name": "Companion Care",
+                "evidence": "she is lonely since her husband passed",
+            },
+            {
+                "name": "Personal Care",
+                "evidence": "Client needs daily assistance",
+            },
+        ]
+        transcript = "she is lonely since her husband passed. No bathing help."
+        cleaned = sanitize_identified_services(services, transcript_text=transcript)
+        assert [s["name"] for s in cleaned] == ["Companion Care"]
+
 
 class TestSanitizeServices:
     def test_drops_placeholder_personal_care_without_evidence(self):
