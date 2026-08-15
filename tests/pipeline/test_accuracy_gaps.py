@@ -76,6 +76,7 @@ class TestBillableRecommendations:
         assert len(result) == 1
         assert result[0]["minutes"] == 0
         assert result[0]["is_recommendation"] is True
+        assert result[0]["is_flagged"] is False
         assert "Recommended from assessment" in (result[0]["flag_reason"] or "")
         assert result[0]["frequency"] == "Monday through Friday"
 

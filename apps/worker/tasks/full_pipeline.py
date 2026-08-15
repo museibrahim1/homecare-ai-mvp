@@ -53,7 +53,11 @@ def update_pipeline_state(visit_id: str, step: str, status: str, error: str = No
 
 
 def run_step(visit_id: str, state_key: str, step_name: str, task_func):
-    """Run a single pipeline step with error handling and timing."""
+    """Run a single pipeline step with error handling and timing.
+
+    Pipeline status for this step is owned here. Task bodies should pass
+    manage_status=False so they do not double-write pipeline_state.
+    """
     started = datetime.now(timezone.utc)
     t0 = time.monotonic()
     try:
@@ -65,7 +69,11 @@ def run_step(visit_id: str, state_key: str, step_name: str, task_func):
             started_at=started.isoformat(),
         )
 
-        result = task_func(visit_id=visit_id)
+        try:
+            result = task_func(visit_id=visit_id, manage_status=False)
+        except TypeError:
+            # Standalone tasks or older signatures without manage_status.
+            result = task_func(visit_id=visit_id)
         duration_ms = int((time.monotonic() - t0) * 1000)
 
         update_pipeline_state(

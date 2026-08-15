@@ -7,7 +7,7 @@ import {
   Heart, Pill, Activity, Utensils, PersonStanding, 
   Home, Users, Shield, Sparkles, Clock
 } from 'lucide-react';
-import { BillableItem } from '@/lib/types';
+import { BillableItem, billableTimeLabel, isRecommendedBillable } from '@/lib/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -131,7 +131,10 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
 
   // Calculate stats
   const approvedCount = items.filter(i => i.is_approved).length;
-  const flaggedCount = items.filter(i => i.is_flagged && !i.is_approved).length;
+  const recommendedCount = items.filter(i => isRecommendedBillable(i) && !i.is_approved).length;
+  const flaggedCount = items.filter(
+    i => i.is_flagged && !i.is_approved && !isRecommendedBillable(i)
+  ).length;
 
   // Group items by service type
   const groupedItems = items.reduce((acc, item) => {
@@ -192,10 +195,18 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
             <h3 className="text-lg font-semibold text-slate-900">Identified Care Services</h3>
             <p className="text-slate-500 text-sm">
               {items.length} service{items.length !== 1 ? 's' : ''} extracted from transcript
+              {recommendedCount > 0
+                ? ` · ${recommendedCount} recommended from assessment (not timed visit work)`
+                : ''}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {recommendedCount > 0 && (
+            <span className="px-3 py-1 bg-teal-50 text-teal-700 rounded-lg text-sm">
+              {recommendedCount} recommended
+            </span>
+          )}
           {flaggedCount > 0 && (
             <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-lg text-sm">
               {flaggedCount} to review
@@ -246,6 +257,8 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                   };
                   const Icon = config.icon;
                   const isExpanded = expandedId === item.id;
+                  const recommended = isRecommendedBillable(item);
+                  const denied = item.is_flagged && !recommended;
                   
                   return (
                     <div
@@ -253,8 +266,10 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                       className={`rounded-xl border transition-all ${
                         item.is_approved 
                           ? 'bg-green-500/5 border-emerald-200' 
-                          : item.is_flagged
+                          : denied
                           ? 'bg-orange-500/5 border-orange-200'
+                          : recommended
+                          ? 'bg-teal-50/60 border-teal-200'
                           : 'bg-slate-50/30 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -267,16 +282,28 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                         
                         {/* Service Info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
+                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                             <span className="font-medium text-slate-900">{config.label}</span>
                             {item.is_approved && (
                               <Check className="w-4 h-4 text-emerald-600" />
                             )}
-                            {item.is_flagged && !item.is_approved && (
+                            {recommended && !item.is_approved && (
+                              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-teal-100 text-teal-800">
+                                Recommended
+                              </span>
+                            )}
+                            {denied && !item.is_approved && (
                               <AlertTriangle className="w-4 h-4 text-orange-600" />
                             )}
+                            <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                              <Clock className="w-3 h-3" />
+                              {billableTimeLabel(item)}
+                            </span>
                           </div>
                           <p className="text-slate-500 text-sm truncate">{item.description}</p>
+                          {recommended && item.flag_reason && (
+                            <p className="text-teal-700/80 text-xs mt-1">{item.flag_reason}</p>
+                          )}
                         </div>
 
                         {/* Evidence count & Actions */}

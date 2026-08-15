@@ -4,14 +4,21 @@ extension VisitDetailView {
     var billablesTab: some View {
         VStack(spacing: 14) {
             if let items = billables?.items, !items.isEmpty {
-                let unapprovedCount = items.filter { $0.is_approved != true && $0.is_flagged != true }.count
+                let unapprovedCount = items.filter {
+                    $0.is_approved != true && !($0.is_flagged == true && !$0.isRecommendation)
+                }.count
+                let recommendedCount = items.filter { $0.isRecommendation }.count
 
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Billable Items")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.palmText)
-                        Text("\(items.count) items identified")
+                        Text(
+                            recommendedCount > 0
+                                ? "\(items.count) items · \(recommendedCount) recommended from assessment"
+                                : "\(items.count) items identified"
+                        )
                             .font(.system(size: 12))
                             .foregroundColor(.palmSecondary)
                     }
@@ -48,8 +55,11 @@ extension VisitDetailView {
 
     func billableRow(_ item: BillableItem, index: Int) -> some View {
         let isApproved = item.is_approved == true
-        let isDenied = item.is_flagged == true
-        let borderColor: Color = isApproved ? .palmGreen : (isDenied ? .red : Color.palmBorder)
+        let isDenied = item.is_flagged == true && !item.isRecommendation
+        let isRecommended = item.isRecommendation && !isDenied && !isApproved
+        let borderColor: Color = isApproved
+            ? .palmGreen
+            : (isDenied ? .red : (isRecommended ? .palmPrimary : Color.palmBorder))
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -68,6 +78,9 @@ extension VisitDetailView {
                         .foregroundColor(.palmSecondary)
                 }
                 Spacer()
+                Text(item.timeLabel)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(isRecommended ? .palmPrimary : .palmSecondary)
                 if isApproved {
                     Label("Approved", systemImage: "checkmark.circle.fill")
                         .font(.system(size: 11, weight: .semibold))
@@ -76,6 +89,10 @@ extension VisitDetailView {
                     Label("Denied", systemImage: "xmark.circle.fill")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.red)
+                } else if isRecommended {
+                    Label("Recommended", systemImage: "list.clipboard")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.palmPrimary)
                 }
             }
 
@@ -84,6 +101,12 @@ extension VisitDetailView {
                     .font(.system(size: 13))
                     .foregroundColor(.palmText)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if isRecommended, let reason = item.flag_reason, !reason.isEmpty {
+                Text(reason)
+                    .font(.system(size: 11))
+                    .foregroundColor(.palmSecondary)
             }
 
             if !isApproved && !isDenied {
@@ -134,7 +157,7 @@ extension VisitDetailView {
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor.opacity(isApproved || isDenied ? 0.4 : 0.15), lineWidth: isApproved || isDenied ? 1.5 : 1))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor.opacity(isApproved || isDenied || isRecommended ? 0.4 : 0.15), lineWidth: isApproved || isDenied || isRecommended ? 1.5 : 1))
     }
 
     func approveBillable(_ item: BillableItem, index: Int) async {
@@ -145,7 +168,7 @@ extension VisitDetailView {
             let _ = try await api.approveBillableItem(visitId: visitId, itemId: item.id)
             await MainActor.run {
                 if var items = billables?.items {
-                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: true, is_flagged: false, adjusted_minutes: item.adjusted_minutes)
+                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: true, is_flagged: false, flag_reason: item.flag_reason, adjusted_minutes: item.adjusted_minutes)
                     billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
                 }
             }
@@ -165,7 +188,7 @@ extension VisitDetailView {
             let _ = try await api.denyBillableItem(visitId: visitId, itemId: item.id)
             await MainActor.run {
                 if var items = billables?.items {
-                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: false, is_flagged: true, adjusted_minutes: item.adjusted_minutes)
+                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: false, is_flagged: true, flag_reason: item.flag_reason, adjusted_minutes: item.adjusted_minutes)
                     billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
                 }
             }
@@ -179,7 +202,9 @@ extension VisitDetailView {
 
     func approveAllBillables() async {
         guard let items = billables?.items else { return }
-        for (idx, item) in items.enumerated() where item.is_approved != true && item.is_flagged != true {
+        for (idx, item) in items.enumerated()
+            where item.is_approved != true && !(item.is_flagged == true && !item.isRecommendation)
+        {
             await approveBillable(item, index: idx)
         }
     }

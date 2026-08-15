@@ -31,5 +31,26 @@ struct BillableItem: Codable, Identifiable {
     let evidence: AnyCodable?
     var is_approved: Bool?
     var is_flagged: Bool?
+    let flag_reason: String?
     let adjusted_minutes: Double?
+
+    /// Assessment / intake recommendation (not timed visit work).
+    var isRecommendation: Bool {
+        let reason = (flag_reason ?? "").lowercased()
+        return reason.contains("recommended from assessment")
+            || reason.contains("not timed visit")
+    }
+
+    var timeLabel: String {
+        if isRecommendation {
+            return "Recommended"
+        }
+        guard let minutes, minutes > 0 else {
+            return "No time logged"
+        }
+        if minutes == 1 {
+            return "1 min"
+        }
+        return "\(Int(minutes)) min"
+    }
 }

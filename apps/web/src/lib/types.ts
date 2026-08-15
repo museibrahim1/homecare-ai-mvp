@@ -97,6 +97,20 @@ export interface BillableItem {
   created_at: string;
 }
 
+export function isRecommendedBillable(item: Pick<BillableItem, 'flag_reason' | 'minutes'>): boolean {
+  const reason = (item.flag_reason || '').toLowerCase();
+  return (
+    reason.includes('recommended from assessment') ||
+    reason.includes('not timed visit')
+  );
+}
+
+export function billableTimeLabel(item: Pick<BillableItem, 'flag_reason' | 'minutes'>): string {
+  if (isRecommendedBillable(item)) return 'Recommended';
+  if (!item.minutes || item.minutes <= 0) return 'No time logged';
+  return `${item.minutes} min`;
+}
+
 export interface NoteStructuredData {
   subjective?: string;
   objective?: string;

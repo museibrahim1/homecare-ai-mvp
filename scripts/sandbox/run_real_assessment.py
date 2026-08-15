@@ -200,6 +200,12 @@ def main() -> int:
     print(f"speakers {summary.get('speakers')} segments={summary.get('segment_count')} words={summary.get('word_count')}")
     print(f"kind={kind} timings_ms={timings}")
     print(f"billables {summary.get('billable_count')} { [b.get('category') for b in summary.get('billables') or []] }")
+    for b in summary.get("billables") or []:
+        print(
+            f"  billable {b.get('category')} min={b.get('minutes')} "
+            f"flagged={b.get('is_flagged')} reason={b.get('flag_reason')}"
+        )
+        print(f"    {(b.get('description') or '')[:140]}")
     print(f"note_id {summary.get('note_id')} contract_id {summary.get('contract_id')} hours={summary.get('contract_weekly_hours')}")
     print(
         f"contract declined_section={summary.get('contract_has_declined_section')} "

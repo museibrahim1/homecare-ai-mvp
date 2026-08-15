@@ -16,12 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(name="tasks.bill.generate_billables", bind=True)
-def generate_billables(self, visit_id: str):
+def generate_billables(self, visit_id: str, manage_status: bool = True):
     """
     Generate billable items from transcript.
     
     Args:
         visit_id: UUID of the visit
+        manage_status: When False (full pipeline), skip pipeline_state status
+            writes so run_step remains the single writer.
     """
     logger.info(f"Starting billing generation for visit {visit_id}")
     
@@ -37,14 +39,15 @@ def generate_billables(self, visit_id: str):
 
         conversation_kind = (visit.pipeline_state or {}).get("conversation_kind")
         
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "billing",
-            status="processing",
-            started_at=datetime.now(timezone.utc).isoformat(),
-        )
-        db.commit()
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "billing",
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
+            db.commit()
         
         segments = db.query(TranscriptSegment).filter(
             TranscriptSegment.visit_id == visit.id
@@ -106,17 +109,18 @@ def generate_billables(self, visit_id: str):
             cat = block["category"]
             categories[cat] = categories.get(cat, 0) + block["minutes"]
         
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "billing",
-            status="completed",
-            finished_at=datetime.now(timezone.utc).isoformat(),
-            item_count=len(billable_blocks),
-            total_minutes=total_minutes,
-            categories=categories,
-            conversation_kind=conversation_kind,
-        )
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "billing",
+                status="completed",
+                finished_at=datetime.now(timezone.utc).isoformat(),
+                item_count=len(billable_blocks),
+                total_minutes=total_minutes,
+                categories=categories,
+                conversation_kind=conversation_kind,
+            )
         
         visit.status = "pending_review"
         
@@ -136,19 +140,20 @@ def generate_billables(self, visit_id: str):
     except Exception as e:
         logger.error(f"Billing failed for visit {visit_id}: {str(e)}")
         
-        try:
-            from libs.pipeline_state import patch_pipeline_step
-            patch_pipeline_step(
-                db,
-                visit_id,
-                "billing",
-                status="failed",
-                error=str(e),
-                finished_at=datetime.now(timezone.utc).isoformat(),
-            )
-            db.commit()
-        except Exception:
-            pass
+        if manage_status:
+            try:
+                from libs.pipeline_state import patch_pipeline_step
+                patch_pipeline_step(
+                    db,
+                    visit_id,
+                    "billing",
+                    status="failed",
+                    error=str(e),
+                    finished_at=datetime.now(timezone.utc).isoformat(),
+                )
+                db.commit()
+            except Exception:
+                pass
         
         raise
     finally:

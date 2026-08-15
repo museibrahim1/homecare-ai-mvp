@@ -502,7 +502,9 @@ def generate_billables_from_transcript(
             "tasks": task_list,
             "frequency": primary_frequency,
             "is_recommendation": is_recommendation,
-            "is_flagged": bool(is_recommendation),
+            # Do not set is_flagged for recommendations. That flag means denied
+            # / rejected in the client apps.
+            "is_flagged": False,
             "flag_reason": (
                 "Recommended from assessment (not timed visit work)"
                 if is_recommendation

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(name="tasks.generate_contract.generate_service_contract", bind=True)
-def generate_service_contract(self, visit_id: str):
+def generate_service_contract(self, visit_id: str, manage_status: bool = True):
     """
     Generate a service contract using templates with LLM-extracted data.
     
@@ -30,6 +30,7 @@ def generate_service_contract(self, visit_id: str):
     
     Args:
         visit_id: UUID of the visit
+        manage_status: When False (full pipeline), skip pipeline_state status writes.
     """
     logger.info(f"Starting contract generation for visit {visit_id}")
     
@@ -58,14 +59,15 @@ def generate_service_contract(self, visit_id: str):
         if not visit:
             raise ValueError(f"Visit not found: {visit_id}")
         
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "contract",
-            status="processing",
-            started_at=datetime.now(timezone.utc).isoformat(),
-        )
-        db.commit()
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "contract",
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
+            db.commit()
         
         # Get client
         client = visit.client
@@ -893,15 +895,16 @@ def generate_service_contract(self, visit_id: str):
         ).update({"status": "superseded"})
         
         # Update pipeline state
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "contract",
-            status="completed",
-            finished_at=datetime.now(timezone.utc).isoformat(),
-            care_need_level=care_need_level,
-            services_count=len(contract_services),
-        )
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "contract",
+                status="completed",
+                finished_at=datetime.now(timezone.utc).isoformat(),
+                care_need_level=care_need_level,
+                services_count=len(contract_services),
+            )
         
         db.commit()
         logger.info(f"Contract generation completed for visit {visit_id}")
@@ -922,7 +925,7 @@ def generate_service_contract(self, visit_id: str):
         logger.error(f"Contract generation failed for visit {visit_id}: {str(e)}")
         logger.error(traceback.format_exc())
         
-        if visit:
+        if visit and manage_status:
             try:
                 from libs.pipeline_state import patch_pipeline_step
                 patch_pipeline_step(

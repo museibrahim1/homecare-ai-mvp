@@ -16,12 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(name="tasks.generate_note.generate_visit_note", bind=True)
-def generate_visit_note(self, visit_id: str):
+def generate_visit_note(self, visit_id: str, manage_status: bool = True):
     """
     Generate a visit note from transcript and billables using Claude.
     
     Args:
         visit_id: UUID of the visit
+        manage_status: When False (full pipeline), skip pipeline_state status writes.
     """
     logger.info(f"Starting note generation for visit {visit_id}")
     
@@ -40,14 +41,15 @@ def generate_visit_note(self, visit_id: str):
 
         conversation_kind = (visit.pipeline_state or {}).get("conversation_kind")
         
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "note",
-            status="processing",
-            started_at=datetime.now(timezone.utc).isoformat(),
-        )
-        db.commit()
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "note",
+                status="processing",
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
+            db.commit()
         
         # Get transcript segments
         segments = db.query(TranscriptSegment).filter(
@@ -142,13 +144,14 @@ def generate_visit_note(self, visit_id: str):
             )
             db.add(note)
         
-        patch_pipeline_step(
-            db,
-            visit_id,
-            "note",
-            status="completed",
-            finished_at=datetime.now(timezone.utc).isoformat(),
-        )
+        if manage_status:
+            patch_pipeline_step(
+                db,
+                visit_id,
+                "note",
+                status="completed",
+                finished_at=datetime.now(timezone.utc).isoformat(),
+            )
         
         db.commit()
         logger.info(f"Note generation completed for visit {visit_id}")
@@ -163,19 +166,20 @@ def generate_visit_note(self, visit_id: str):
     except Exception as e:
         logger.error(f"Note generation failed for visit {visit_id}: {str(e)}")
         
-        try:
-            from libs.pipeline_state import patch_pipeline_step
-            patch_pipeline_step(
-                db,
-                visit_id,
-                "note",
-                status="failed",
-                error=str(e),
-                finished_at=datetime.now(timezone.utc).isoformat(),
-            )
-            db.commit()
-        except Exception:
-            pass
+        if manage_status:
+            try:
+                from libs.pipeline_state import patch_pipeline_step
+                patch_pipeline_step(
+                    db,
+                    visit_id,
+                    "note",
+                    status="failed",
+                    error=str(e),
+                    finished_at=datetime.now(timezone.utc).isoformat(),
+                )
+                db.commit()
+            except Exception:
+                pass
         
         raise
     finally:
