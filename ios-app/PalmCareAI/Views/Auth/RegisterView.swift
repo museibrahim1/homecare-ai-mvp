@@ -353,7 +353,7 @@ struct RegisterView: View {
                 await MainActor.run {
                     isLoading = false
                     showConsent = false
-                    errorMessage = error.localizedDescription
+                    errorMessage = error.palmFriendlyMessage
                     showError = true
                 }
             }
@@ -376,7 +376,7 @@ struct RegisterView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = error.localizedDescription
+                    errorMessage = error.palmFriendlyMessage
                     showError = true
                     isLoading = false
                 }

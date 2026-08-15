@@ -96,7 +96,7 @@ struct SocialSignInButtons: View {
             errorMessage = err.errorDescription ?? "Sign-in failed. Try again."
             showError = true
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = error.palmFriendlyMessage
             showError = true
         }
     }
@@ -122,7 +122,7 @@ struct SocialSignInButtons: View {
             }
             showError = true
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = error.palmFriendlyMessage
             showError = true
         }
     }
@@ -193,7 +193,7 @@ struct SocialMFASheet: View {
             _ = try await api.mfaVerify(mfaToken: mfaToken, code: code)
             dismiss()
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = error.palmFriendlyMessage
         }
     }
 }

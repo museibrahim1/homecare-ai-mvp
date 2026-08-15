@@ -460,6 +460,9 @@ enum APIError: LocalizedError {
             if msg.contains("{") || msg.contains("}")
                 || msg.contains("<") || msg.contains("</")
                 || lowered.contains("traceback") || lowered.contains("exception")
+                || lowered.contains("internal server")
+                || lowered.contains("internal error")
+                || lowered == "error"
                 || msg.count > 120 {
                 return "Something went wrong. Please try again."
             }
@@ -620,15 +623,34 @@ extension Error {
         if let api = self as? APIError, let desc = api.errorDescription {
             return desc
         }
+        if let apple = self as? AppleSignInCoordinator.AppleSignInError {
+            switch apple {
+            case .cancelled:
+                return "Sign in was canceled."
+            case .missingToken, .failed:
+                return apple.errorDescription ?? "Sign in with Apple failed. Try again."
+            }
+        }
+        let ns = self as NSError
+        if ns.domain == "com.apple.AuthenticationServices.AuthorizationError"
+            || ns.domain.contains("AuthenticationServices") {
+            return "Sign in with Apple isn't available right now. Try email sign in, or try again on a device signed into iCloud."
+        }
         let raw = localizedDescription
         let lower = raw.lowercased()
+        if lower.contains("authorizationservices") || lower.contains("asauthorization") || lower.contains("error 1000") {
+            return "Sign in with Apple isn't available right now. Try email sign in, or try again on a device signed into iCloud."
+        }
+        if lower.contains("internal server") || lower.contains("internal error") {
+            return "Something went wrong on our side. Please try again in a moment."
+        }
         if lower.contains("invalid") && (lower.contains("credentials") || lower.contains("password") || lower.contains("email")) {
             return "Incorrect email or password."
         }
         if lower.contains("network") || lower.contains("offline") || lower.contains("connection") || lower.contains("timed out") {
             return "Can't reach PALM. Check your internet connection and try again."
         }
-        if raw.contains("{") || raw.contains("<") || raw.count > 120 {
+        if raw.contains("{") || raw.contains("<") || raw.count > 120 || lower.contains("com.apple.") {
             return "Something went wrong. Please try again."
         }
         return raw

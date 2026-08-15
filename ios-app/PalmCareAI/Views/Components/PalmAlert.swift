@@ -1,7 +1,115 @@
 import SwiftUI
+import UIKit
 
-/// Confirmation dialogs that need a custom icon/layout. Prefer native
-/// `.alert` / `.confirmationDialog` for ordinary errors (Apple HIG).
+extension View {
+    func palmAlert(
+        _ title: String,
+        message: String,
+        icon: String = "exclamationmark.triangle.fill",
+        iconColor: Color = .palmOrange,
+        isPresented: Binding<Bool>,
+        primaryButton: PalmAlert.PalmAlertButton,
+        secondaryButton: PalmAlert.PalmAlertButton? = nil
+    ) -> some View {
+        ZStack {
+            self
+
+            if isPresented.wrappedValue {
+                PalmAlert(
+                    title: title,
+                    message: message,
+                    icon: icon,
+                    iconColor: iconColor,
+                    primaryButton: primaryButton,
+                    secondaryButton: secondaryButton,
+                    isPresented: isPresented
+                )
+                .zIndex(999)
+            }
+        }
+    }
+
+    /// True Apple system alert (`UIAlertController`). Avoids branded tint
+    /// leaking into the OK button on iOS 26 liquid-glass alerts.
+    func palmErrorAlert(
+        _ title: String = "Error",
+        message: Binding<String?>,
+        isPresented: Binding<Bool>
+    ) -> some View {
+        background(
+            PalmSystemAlertPresenter(
+                title: title,
+                message: message,
+                isPresented: isPresented
+            )
+        )
+    }
+
+    func palmConfirmAlert(
+        _ title: String,
+        message: String,
+        icon: String = "exclamationmark.triangle.fill",
+        iconColor: Color = .palmOrange,
+        isPresented: Binding<Bool>,
+        confirmTitle: String = "Confirm",
+        confirmStyle: PalmAlert.PalmAlertButton.ButtonStyle = .destructive,
+        onConfirm: @escaping () -> Void
+    ) -> some View {
+        confirmationDialog(title, isPresented: isPresented, titleVisibility: .visible) {
+            Button(confirmTitle, role: confirmStyle == .destructive ? .destructive : nil) {
+                onConfirm()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(message)
+        }
+    }
+}
+
+/// Hosts a real `UIAlertController` so error dialogs match Apple HIG.
+private struct PalmSystemAlertPresenter: UIViewControllerRepresentable {
+    let title: String
+    @Binding var message: String?
+    @Binding var isPresented: Bool
+
+    func makeUIViewController(context: Context) -> Controller {
+        Controller()
+    }
+
+    func updateUIViewController(_ uiViewController: Controller, context: Context) {
+        uiViewController.titleText = title
+        uiViewController.messageText = message
+        uiViewController.isPresented = $isPresented
+        uiViewController.messageBinding = $message
+        if isPresented, uiViewController.presentedViewController == nil {
+            uiViewController.presentAlert()
+        }
+    }
+
+    final class Controller: UIViewController {
+        var titleText: String = "Error"
+        var messageText: String?
+        var isPresented: Binding<Bool>?
+        var messageBinding: Binding<String?>?
+
+        func presentAlert() {
+            guard presentedViewController == nil else { return }
+            let body = (messageText?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 }
+                ?? "Something went wrong. Please try again."
+            let alert = UIAlertController(title: titleText, message: body, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.messageBinding?.wrappedValue = nil
+                self?.isPresented?.wrappedValue = false
+            })
+            // Present on next runloop so we are in the window hierarchy.
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.present(alert, animated: true)
+            }
+        }
+    }
+}
+
 struct PalmAlert: View {
     let title: String
     let message: String
@@ -108,70 +216,6 @@ struct PalmAlert: View {
         case .primary: return .palmPrimary
         case .destructive: return .red
         case .cancel: return .palmSecondary
-        }
-    }
-}
-
-extension View {
-    func palmAlert(
-        _ title: String,
-        message: String,
-        icon: String = "exclamationmark.triangle.fill",
-        iconColor: Color = .palmOrange,
-        isPresented: Binding<Bool>,
-        primaryButton: PalmAlert.PalmAlertButton,
-        secondaryButton: PalmAlert.PalmAlertButton? = nil
-    ) -> some View {
-        ZStack {
-            self
-
-            if isPresented.wrappedValue {
-                PalmAlert(
-                    title: title,
-                    message: message,
-                    icon: icon,
-                    iconColor: iconColor,
-                    primaryButton: primaryButton,
-                    secondaryButton: secondaryButton,
-                    isPresented: isPresented
-                )
-                .zIndex(999)
-            }
-        }
-    }
-
-    /// Native iOS system alert (Apple HIG). Use for errors and simple notices.
-    func palmErrorAlert(
-        _ title: String = "Error",
-        message: Binding<String?>,
-        isPresented: Binding<Bool>
-    ) -> some View {
-        alert(title, isPresented: isPresented) {
-            Button("OK", role: .cancel) {
-                message.wrappedValue = nil
-            }
-        } message: {
-            Text(message.wrappedValue ?? "Something went wrong. Please try again.")
-        }
-    }
-
-    func palmConfirmAlert(
-        _ title: String,
-        message: String,
-        icon: String = "exclamationmark.triangle.fill",
-        iconColor: Color = .palmOrange,
-        isPresented: Binding<Bool>,
-        confirmTitle: String = "Confirm",
-        confirmStyle: PalmAlert.PalmAlertButton.ButtonStyle = .destructive,
-        onConfirm: @escaping () -> Void
-    ) -> some View {
-        confirmationDialog(title, isPresented: isPresented, titleVisibility: .visible) {
-            Button(confirmTitle, role: confirmStyle == .destructive ? .destructive : nil) {
-                onConfirm()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(message)
         }
     }
 }

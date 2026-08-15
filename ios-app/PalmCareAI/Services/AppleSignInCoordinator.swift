@@ -24,8 +24,9 @@ final class AppleSignInCoordinator: NSObject, ObservableObject {
         var errorDescription: String? {
             switch self {
             case .cancelled: return nil
-            case .missingToken: return "Apple Sign In failed. Try again."
-            case .failed(let m): return m
+            case .missingToken: return "Sign in with Apple failed. Try again."
+            case .failed:
+                return "Sign in with Apple isn't available right now. Try email sign in, or try again on a device signed into iCloud."
             }
         }
     }
