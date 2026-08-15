@@ -4,7 +4,7 @@ Full Pipeline Task - Runs all processing steps automatically.
 Steps:
 - Transcription (Deepgram Nova-3, which also separates speakers inline)
 - Classify recording kind (cheap heuristic / tiny LLM)
-- Billing + Note in parallel when in-scope
+- Billing + Note in parallel; Contract starts when billing finishes (overlaps note)
 - Compact contract extraction (skips heavy LLM when out of scope)
 
 Speaker-name identification is an opt-in step (the "Speakers" action), not part
@@ -132,8 +132,8 @@ def run_full_pipeline(self, visit_id: str):
 
     1. Transcribe (Deepgram Nova-3 — separates speakers inline)
     2. Classify recording kind
-    3. Bill + Note in parallel (bill skipped for out_of_scope)
-    4. Contract (compact LLM, or no LLM when out_of_scope)
+    3. Bill + Note in parallel; Contract starts when billing finishes (overlaps note)
+    4. Compact contract extraction (skips heavy LLM when out of scope)
     """
     logger.info(f"Starting full pipeline for visit {visit_id}")
 
@@ -189,29 +189,41 @@ def run_full_pipeline(self, visit_id: str):
     _set_conversation_kind(visit_id, kind, classify_ms)
     logger.info(f"Classified visit {visit_id} as {kind} in {classify_ms}ms")
 
-    out_of_scope = kind == "out_of_scope"
-
     # =========================================================================
-    # Billing + Note (parallel when both needed)
+    # Billing + Note in parallel; start Contract as soon as billing finishes
+    # so note and contract overlap (largest wall-clock win for in-scope visits).
+    # Out-of-scope still uses the same shape: empty bill is cheap, contract is
+    # cheap, note is the slow step.
     # =========================================================================
-    if out_of_scope:
-        # Skip billables LLM; write empty set quickly inside the bill task via kind flag.
-        run_step(visit_id, "billing", "bill", generate_billables)
-        run_step(visit_id, "note", "generate_note", generate_visit_note)
-    else:
-        logger.info(f"Running billing + note in parallel for visit {visit_id}")
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            futures = {
-                pool.submit(run_step, visit_id, "billing", "bill", generate_billables): "billing",
-                pool.submit(run_step, visit_id, "note", "generate_note", generate_visit_note): "note",
-            }
-            for fut in as_completed(futures):
-                step_key, ok, err, duration_ms = fut.result()
-                if not ok:
-                    logger.error(f"Parallel step {step_key} failed: {err}")
+    logger.info(f"Running billing + note in parallel for visit {visit_id}")
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        bill_fut = pool.submit(run_step, visit_id, "billing", "bill", generate_billables)
+        note_fut = pool.submit(run_step, visit_id, "note", "generate_note", generate_visit_note)
+        contract_fut = None
 
-    # Contract (compact, or zero-LLM for out_of_scope)
-    run_step(visit_id, "contract", "generate_contract", generate_service_contract)
+        for fut in as_completed([bill_fut, note_fut]):
+            step_key, ok, err, _duration_ms = fut.result()
+            if not ok:
+                logger.error(f"Parallel step {step_key} failed: {err}")
+            if fut is bill_fut and ok and contract_fut is None:
+                logger.info(
+                    f"Billing done; overlapping contract with note for visit {visit_id}"
+                )
+                contract_fut = pool.submit(
+                    run_step,
+                    visit_id,
+                    "contract",
+                    "generate_contract",
+                    generate_service_contract,
+                )
+
+        if contract_fut is not None:
+            step_key, ok, err, _duration_ms = contract_fut.result()
+            if not ok:
+                logger.error(f"Parallel step {step_key} failed: {err}")
+        else:
+            # Billing failed; still attempt contract for a reviewable artifact.
+            run_step(visit_id, "contract", "generate_contract", generate_service_contract)
 
     # =========================================================================
     # COMPLETE
