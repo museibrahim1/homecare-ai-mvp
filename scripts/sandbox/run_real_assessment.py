@@ -116,6 +116,10 @@ def summarize(session: requests.Session, headers: dict, visit_id: str) -> dict:
     out["contract_weekly_hours"] = cbody.get("weekly_hours")
     out["contract_hourly_rate"] = cbody.get("hourly_rate")
     out["contract_services"] = cbody.get("services")
+    terms = cbody.get("terms_and_conditions") or cbody.get("content") or ""
+    out["contract_has_declined_section"] = "SERVICES NOT INCLUDED" in terms
+    out["contract_has_per_service_schedule"] = "Per-service schedule" in terms or "PER-SERVICE" in terms
+    out["contract_terms_excerpt"] = terms[:2500] if terms else ""
     return out
 
 
@@ -152,15 +156,24 @@ def main() -> int:
     last = ""
     success = False
     polls = 0
+    timings = {}
+    kind = None
     for n in range(1, MAX_POLLS + 1):
         polls = n
         sr = session.get(f"{API}/pipeline/visits/{visit_id}/status", headers=headers, timeout=30)
-        state = (sr.json() or {}).get("pipeline_state") if sr.status_code == 200 else {}
+        body = sr.json() if sr.status_code == 200 else {}
+        state = (body or {}).get("pipeline_state") or {}
+        kind = state.get("conversation_kind") or (state.get("classify") or {}).get("conversation_kind")
+        timings = (state.get("full_pipeline") or {}).get("timings_ms") or timings
         done, success, last = pipeline_done(state)
         elapsed = round(time.monotonic() - t0, 1)
         if n == 1 or n % 6 == 0 or done:
-            print(f"  poll {n} {elapsed}s {last}", flush=True)
+            print(f"  poll {n} {elapsed}s kind={kind} {last}", flush=True)
         if done:
+            timings = (state.get("full_pipeline") or {}).get("timings_ms") or {
+                k: (state.get(k) or {}).get("duration_ms")
+                for k in ("transcription", "classify", "billing", "note", "contract")
+            }
             break
         time.sleep(POLL_SEC)
     elapsed = round(time.monotonic() - t0, 1)
@@ -176,6 +189,8 @@ def main() -> int:
         "polls": polls,
         "success": success,
         "last": last,
+        "conversation_kind": kind,
+        "timings_ms": timings,
         "ran_at": datetime.now(timezone.utc).isoformat(),
         **summary,
     }
@@ -183,8 +198,16 @@ def main() -> int:
     dest = OUT_DIR / f"{FILE.stem[:60].replace(' ', '_')}.json"
     dest.write_text(json.dumps(report, indent=2, default=str))
     print(f"speakers {summary.get('speakers')} segments={summary.get('segment_count')} words={summary.get('word_count')}")
+    print(f"kind={kind} timings_ms={timings}")
     print(f"billables {summary.get('billable_count')} { [b.get('category') for b in summary.get('billables') or []] }")
     print(f"note_id {summary.get('note_id')} contract_id {summary.get('contract_id')} hours={summary.get('contract_weekly_hours')}")
+    print(
+        f"contract declined_section={summary.get('contract_has_declined_section')} "
+        f"per_service_schedule={summary.get('contract_has_per_service_schedule')}"
+    )
+    for s in summary.get("contract_services") or []:
+        if isinstance(s, dict):
+            print(f"  service {s.get('name')} | freq={s.get('frequency')}")
     print(f"wrote {dest}")
     return 0 if success and summary.get("note_id") and summary.get("contract_id") else 1
 

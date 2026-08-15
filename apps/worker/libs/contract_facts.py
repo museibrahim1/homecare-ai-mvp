@@ -210,3 +210,65 @@ def clip_client_field(value: Any, field: str) -> Optional[str]:
             if 0 < len(head) <= limit:
                 return head
     return text[: limit - 1].rstrip() + "…"
+
+
+_BATHING_DECLINE_RE = re.compile(
+    r"("
+    r"don'?t\s+want\s+anybody\s+bathing\s+me|"
+    r"do\s+not\s+want\s+(anybody|anyone)\s+bathing|"
+    r"i\s+can\s+wash\s+myself|"
+    r"i\s+can\s+bathe\s+myself|"
+    r"you\s+can\s+bathe\s+yourself|"
+    r"no\s+(bathing|personal\s+care)|"
+    r"doesn'?t\s+want\s+(help\s+with\s+)?(bathing|showering)|"
+    r"declined\s+(bathing|personal\s+care|shower)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def extract_declined_services(transcript_text: str) -> List[Dict[str, Any]]:
+    """Heuristic declined services from the transcript (bathing first)."""
+    if not transcript_text:
+        return []
+    declined: List[Dict[str, Any]] = []
+    match = _BATHING_DECLINE_RE.search(transcript_text)
+    if match:
+        start = max(0, match.start() - 40)
+        end = min(len(transcript_text), match.end() + 40)
+        snippet = re.sub(r"\s+", " ", transcript_text[start:end]).strip()
+        declined.append(
+            {
+                "name": "Bathing assistance",
+                "evidence": snippet[:200],
+            }
+        )
+    return declined
+
+
+def merge_declined_services(
+    *groups: Optional[List[Dict[str, Any]]],
+) -> List[Dict[str, Any]]:
+    """Merge declined service lists, keeping the first evidence per name."""
+    merged: List[Dict[str, Any]] = []
+    seen = set()
+    for group in groups:
+        if not group:
+            continue
+        for item in group:
+            if isinstance(item, str):
+                name = item.strip()
+                evidence = ""
+            elif isinstance(item, dict):
+                name = str(item.get("name") or "").strip()
+                evidence = str(item.get("evidence") or "").strip()
+            else:
+                continue
+            if not name:
+                continue
+            key = name.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append({"name": name, "evidence": evidence})
+    return merged

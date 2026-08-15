@@ -36,9 +36,19 @@ Emergency Contact: {emergency_contact} ({emergency_phone})
 1. SERVICES TO BE PROVIDED
 ================================================================================
 
-The following home care services will be provided:
+The following home care services will be provided. Each service includes its
+agreed frequency from the assessment:
 
 {services_list}
+
+================================================================================
+1A. SERVICES NOT INCLUDED (DECLINED)
+================================================================================
+
+The client or authorized representative declined the following services. These
+are not included in this Agreement unless added later in writing:
+
+{declined_services_list}
 
 ================================================================================
 2. CARE ASSESSMENT SUMMARY
@@ -55,10 +65,13 @@ Client Profile:
 3. SCHEDULE OF SERVICES
 ================================================================================
 
-Frequency: {frequency}
+Overall Frequency: {frequency}
 Days: {schedule_days}
 Preferred Time: {preferred_time}
 Hours per Week: {weekly_hours}
+
+Per-service schedule:
+{per_service_schedule}
 
 ================================================================================
 4. SERVICE RATES AND PAYMENT
@@ -132,27 +145,74 @@ Long-Term Goals (90+ days):
 
 
 def format_services_list(services: List[Dict]) -> str:
-    """Format services list for template."""
+    """Format services list with an explicit frequency line for every service."""
     if not services:
-        return "• General home care services as needed"
-    
+        return "• No home care services identified for this agreement"
+
     lines = []
-    for i, svc in enumerate(services, 1):
+    for svc in services:
         if isinstance(svc, str):
-            lines.append(f"• {svc}")
-        else:
-            name = svc.get('name', 'Service')
-            desc = svc.get('description', '')
-            freq = svc.get('frequency', '')
-            
-            line = f"• {name}"
-            if desc:
-                line += f"\n  Description: {desc}"
-            if freq:
-                line += f"\n  Frequency: {freq}"
-            lines.append(line)
-    
+            lines.append(f"• {svc}\n  Frequency: As needed")
+            continue
+        name = (svc.get("name") or "Service").strip()
+        desc = (svc.get("description") or "").strip()
+        freq = (svc.get("frequency") or "").strip() or "As needed"
+        line = f"• {name}"
+        if desc:
+            line += f"\n  Description: {desc}"
+        line += f"\n  Frequency: {freq}"
+        evidence = (svc.get("evidence") or "").strip()
+        if evidence:
+            if len(evidence) > 160:
+                evidence = evidence[:157].rstrip() + "..."
+            line += f'\n  Assessment quote: "{evidence}"'
+        lines.append(line)
+
     return "\n\n".join(lines)
+
+
+def format_per_service_schedule(services: List[Dict]) -> str:
+    """Compact schedule table: one line per service with frequency."""
+    if not services:
+        return "• No per-service schedule (no services identified)"
+    lines = []
+    for svc in services:
+        if isinstance(svc, str):
+            lines.append(f"• {svc}: As needed")
+            continue
+        name = (svc.get("name") or "Service").strip()
+        freq = (svc.get("frequency") or "").strip() or "As needed"
+        lines.append(f"• {name}: {freq}")
+    return "\n".join(lines)
+
+
+def format_declined_services_list(declined: Optional[List[Dict]]) -> str:
+    """Client-facing declined / not-included services section."""
+    if not declined:
+        return (
+            "• None recorded. All services listed in Section 1 are included "
+            "as stated."
+        )
+    lines = []
+    for item in declined:
+        if isinstance(item, str):
+            lines.append(
+                f"• {item} (declined / not included in this Agreement)"
+            )
+            continue
+        if not isinstance(item, dict):
+            continue
+        name = (item.get("name") or "Service").strip()
+        evidence = (item.get("evidence") or "").strip()
+        line = f"• {name} (declined / not included in this Agreement)"
+        if evidence:
+            if len(evidence) > 160:
+                evidence = evidence[:157].rstrip() + "..."
+            line += f'\n  Client statement: "{evidence}"'
+        lines.append(line)
+    return "\n\n".join(lines) if lines else (
+        "• None recorded. All services listed in Section 1 are included as stated."
+    )
 
 
 def format_list(items: List, prefix: str = "• ") -> str:
@@ -246,6 +306,51 @@ def generate_contract_from_template(
     
     # Use contract services or extracted services
     services = contract_data.get('services', []) or extracted_services
+
+    # Enrich empty frequencies from overall schedule when possible
+    schedule_days_raw = schedule.get('preferred_days', [])
+    preferred_times = schedule.get('preferred_times') or ""
+    default_freq_bits = []
+    if isinstance(schedule_days_raw, list) and schedule_days_raw:
+        day_bits = [
+            d if isinstance(d, str) else d.get("day", str(d))
+            for d in schedule_days_raw
+        ]
+        if day_bits:
+            default_freq_bits.append(", ".join(day_bits))
+    elif isinstance(schedule_days_raw, str) and schedule_days_raw.strip():
+        default_freq_bits.append(schedule_days_raw.strip())
+    if preferred_times and str(preferred_times).lower() not in ("flexible", "n/a", ""):
+        default_freq_bits.append(str(preferred_times))
+    default_freq = " ".join(default_freq_bits).strip()
+
+    enriched_services = []
+    for svc in services:
+        if isinstance(svc, str):
+            enriched_services.append(
+                {"name": svc, "description": "", "frequency": default_freq or "As needed"}
+            )
+            continue
+        if not isinstance(svc, dict):
+            continue
+        item = dict(svc)
+        freq = (item.get("frequency") or "").strip()
+        if not freq or freq.lower() in ("as needed", "as scheduled", "n/a"):
+            # Keep explicit "As needed" for non-companion add-ons; fill companion-like
+            # services from the overall schedule when we have one.
+            name_l = (item.get("name") or "").lower()
+            if default_freq and any(
+                k in name_l for k in ("companion", "supervision", "personal care", "homemaking", "housekeep")
+            ):
+                item["frequency"] = default_freq
+            elif not freq:
+                item["frequency"] = "As needed"
+        enriched_services.append(item)
+    services = enriched_services
+
+    declined = contract_data.get("declined_services")
+    if not declined and assessment_data:
+        declined = assessment_data.get("declined_services") or []
     
     # Calculate costs
     hourly_rate = float(contract_data.get('hourly_rate', 25))
@@ -289,6 +394,8 @@ def generate_contract_from_template(
         
         # Services
         'services_list': format_services_list(services),
+        'declined_services_list': format_declined_services_list(declined),
+        'per_service_schedule': format_per_service_schedule(services),
         
         # Assessment summary
         'care_need_level': schedule.get('care_need_level', 'MODERATE'),
@@ -297,7 +404,7 @@ def generate_contract_from_template(
         'client_profile': client_profile,
         
         # Schedule
-        'frequency': schedule.get('frequency', 'As scheduled'),
+        'frequency': schedule.get('frequency') or default_freq or 'As scheduled',
         'schedule_days': schedule_days,
         'preferred_time': schedule.get('preferred_times', 'Flexible'),
         'weekly_hours': f"{weekly_hours:.1f}",

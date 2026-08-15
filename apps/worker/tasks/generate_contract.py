@@ -43,6 +43,8 @@ def generate_service_contract(self, visit_id: str):
         from libs.contract_facts import (
             extract_stated_hourly_rate,
             extract_stated_weekly_hours,
+            extract_declined_services,
+            merge_declined_services,
             prefer_private_pay_rate,
             sanitize_identified_services,
             clip_client_field,
@@ -467,6 +469,16 @@ def generate_service_contract(self, visit_id: str):
                     "priority": svc.get("priority", "Medium"),
                     "evidence": svc.get("evidence", ""),
                 })
+
+        declined_services = merge_declined_services(
+            assessment_data.get("declined_services"),
+            extract_declined_services(transcript_text),
+        )
+        if declined_services:
+            logger.info(
+                "Declined services for contract: %s",
+                [d.get("name") for d in declined_services],
+            )
         
         # Build extended schedule with all assessment data
         extended_schedule = {
@@ -480,6 +492,26 @@ def generate_service_contract(self, visit_id: str):
             "family_involvement": assessment_data.get("family_involvement", {}),
             "extracted_mentions": assessment_data.get("extracted_mentions", {}),
         }
+        # Prefer stated weekday span in overall schedule frequency when available.
+        if stated_hours and not extended_schedule.get("frequency"):
+            preferred_times = extended_schedule.get("preferred_times") or ""
+            days = extended_schedule.get("preferred_days") or []
+            if isinstance(days, list) and days:
+                day_label = ", ".join(
+                    d if isinstance(d, str) else str((d or {}).get("day") or d) for d in days
+                )
+            else:
+                day_label = "Monday through Friday"
+            extended_schedule["frequency"] = (
+                f"{day_label} {preferred_times}".strip()
+                if preferred_times
+                else day_label
+            )
+            if not extended_schedule.get("preferred_days"):
+                extended_schedule["preferred_days"] = [
+                    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+                ]
+        extended_schedule["declined_services"] = declined_services
         
         # =====================================================================
         # STEP 3: Generate contract using template
@@ -488,6 +520,7 @@ def generate_service_contract(self, visit_id: str):
         
         contract_data = {
             "services": contract_services,
+            "declined_services": declined_services,
             "schedule": extended_schedule,
             "hourly_rate": hourly_rate,
             "weekly_hours": weekly_hours,
@@ -511,6 +544,10 @@ def generate_service_contract(self, visit_id: str):
             }
 
         # Generate contract text (for preview/display)
+        assessment_data = {
+            **(assessment_data or {}),
+            "declined_services": declined_services,
+        }
         contract_text = generate_contract_from_template(
             contract_data=contract_data,
             client_info=client_info,
@@ -654,7 +691,7 @@ def generate_service_contract(self, visit_id: str):
             if iadl_data.get("iadl_score"):
                 notes_parts.append(f"IADL Score: {iadl_data['iadl_score']}")
 
-        declined = assessment_data.get("declined_services") or []
+        declined = declined_services
         if declined:
             declined_bits = []
             for item in declined:
