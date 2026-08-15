@@ -20,32 +20,37 @@ struct LoginView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                header
-                    .padding(.top, 28)
-                    .padding(.bottom, 20)
+        ZStack {
+            PalmGlassBackground()
 
-                formCard
-                    .padding(.horizontal, 24)
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
+                        .padding(.top, 12)
+                        .padding(.bottom, 20)
 
-                orDivider
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 18)
+                    formCard
+                        .padding(.horizontal, 24)
 
-                SocialSignInButtons(showEmailDivider: false)
-                    .environmentObject(api)
-                    .padding(.horizontal, 24)
+                    orDivider
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 18)
 
-                registerPrompt
-                    .padding(.top, 22)
-                    .padding(.bottom, 36)
+                    SocialSignInButtons(showEmailDivider: false)
+                        .environmentObject(api)
+                        .padding(.horizontal, 24)
+
+                    registerPrompt
+                        .padding(.top, 22)
+                        .padding(.bottom, 36)
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
+            .scrollDismissesKeyboard(.interactively)
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background(PalmGlassBackground())
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .palmTransparentNavBar()
         .palmBackButton()
         .navigationDestination(isPresented: $showRegister) {
             RegisterView().environmentObject(api)

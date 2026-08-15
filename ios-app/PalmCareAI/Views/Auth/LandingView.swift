@@ -263,6 +263,8 @@ struct LandingView: View {
                 RegisterView()
                     .environmentObject(api)
             }
+            .toolbar(.hidden, for: .navigationBar)
+            .palmTransparentNavBar()
         }
     }
 }

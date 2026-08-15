@@ -10,6 +10,7 @@ struct PalmBackButtonModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationBarBackButtonHidden(true)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 // On iOS 26 the system wraps toolbar items in a Liquid Glass
                 // circle — hide it so the chevron stays quiet and seamless.
@@ -37,5 +38,45 @@ struct PalmBackButtonModifier: ViewModifier {
 extension View {
     func palmBackButton(darkBackground: Bool = false) -> some View {
         modifier(PalmBackButtonModifier(darkBackground: darkBackground))
+    }
+
+    /// Clears the system nav bar fill/shadow so mint wash or dark glass
+    /// runs edge-to-edge under the status bar (no white divider strip).
+    func palmTransparentNavBar() -> some View {
+        self
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarBackground(.hidden, for: .tabBar)
+            .background(PalmTransparentNavBarConfigurator())
+    }
+}
+
+private struct PalmTransparentNavBarConfigurator: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> Controller {
+        Controller()
+    }
+
+    func updateUIViewController(_ uiViewController: Controller, context: Context) {
+        uiViewController.apply()
+    }
+
+    final class Controller: UIViewController {
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            apply()
+        }
+
+        func apply() {
+            guard let nav = navigationController else { return }
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.shadowColor = .clear
+            appearance.shadowImage = UIImage()
+            appearance.backgroundColor = .clear
+            nav.navigationBar.standardAppearance = appearance
+            nav.navigationBar.scrollEdgeAppearance = appearance
+            nav.navigationBar.compactAppearance = appearance
+            nav.navigationBar.isTranslucent = true
+            nav.view.backgroundColor = .clear
+        }
     }
 }

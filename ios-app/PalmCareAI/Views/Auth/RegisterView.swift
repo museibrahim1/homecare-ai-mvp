@@ -45,36 +45,41 @@ struct RegisterView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                header
-                    .padding(.top, 8)
-                    .padding(.bottom, 28)
+        ZStack {
+            PalmGlassBackground()
 
-                VStack(spacing: 14) {
-                    SocialSignInButtons()
-                        .environmentObject(api)
-                        .padding(.bottom, 4)
-
-                    nameField
-                    emailField
-                    passwordField
-                    agencyField
-
-                    createButton
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
                         .padding(.top, 8)
+                        .padding(.bottom, 28)
 
-                    bottomLink
-                        .padding(.top, 8)
+                    VStack(spacing: 14) {
+                        SocialSignInButtons()
+                            .environmentObject(api)
+                            .padding(.bottom, 4)
+
+                        nameField
+                        emailField
+                        passwordField
+                        agencyField
+
+                        createButton
+                            .padding(.top, 8)
+
+                        bottomLink
+                            .padding(.top, 8)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background(PalmGlassBackground())
         .navigationTitle("Create Account")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .palmTransparentNavBar()
         .palmBackButton()
         .palmErrorAlert("Registration Failed", message: $errorMessage, isPresented: $showError)
         .alert("Check your email", isPresented: $showMagicLinkSent) {
