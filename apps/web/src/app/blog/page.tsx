@@ -5,14 +5,14 @@ import { BLOG_POSTS } from './data';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Blog — Home Care AI Insights & Industry News',
+  title: 'Blog: Home Care AI Insights and Industry News',
   description:
-    'Expert articles on AI-powered home care software, HIPAA compliance, documentation automation, and agency growth strategies from the PalmCare AI team.',
+    'Guides on AI home care software, HIPAA, documentation automation, and agency operations from the PalmCare AI team.',
   alternates: { canonical: 'https://palmcareai.com/blog' },
   openGraph: {
     title: 'PalmCare AI Blog',
     description:
-      'Expert articles on AI-powered home care software, HIPAA compliance, documentation automation, and agency growth.',
+      'Guides on AI home care software, HIPAA, documentation automation, and agency operations.',
     url: 'https://palmcareai.com/blog',
   },
 };
@@ -58,7 +58,22 @@ export default function BlogPage() {
               Insights for home care leaders
             </h1>
             <p className="text-lg text-slate-600 mt-4">
-              AI, compliance, operations, and growth — practical guides written for the people running agencies.
+              AI, compliance, operations, and growth. Practical guides for people running agencies.
+            </p>
+            <p className="text-sm text-slate-500 mt-4">
+              High-intent pages:{' '}
+              <Link href="/home-care-documentation-software" className="text-primary-700 underline underline-offset-2">
+                documentation software
+              </Link>
+              {', '}
+              <Link href="/compare" className="text-primary-700 underline underline-offset-2">
+                compare options
+              </Link>
+              {', '}
+              <Link href="/alternatives" className="text-primary-700 underline underline-offset-2">
+                alternatives
+              </Link>
+              .
             </p>
           </div>
 

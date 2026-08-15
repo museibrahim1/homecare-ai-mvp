@@ -1,6 +1,6 @@
 # PalmCare AI
 
-> PalmCare AI turns a recorded home care visit into a proposal-ready, state-specific service contract — automatically. Record the visit; PALM writes the care plan, the billables, the visit notes, and the contract. Built for in-home care agencies, caregivers, and nurses.
+> PalmCare AI turns a recorded home care visit into a proposal-ready, state-specific service contract automatically. Record the visit; PALM writes the care plan, the billables, the visit notes, and the contract. Built for in-home care agencies, caregivers, and nurses.
 
 Tagline: Where care meets intelligence.
 Workflow: Record. Transcribe. Contract.
@@ -16,27 +16,36 @@ Workflow: Record. Transcribe. Contract.
 Owners and administrators of in-home care agencies, plus the caregivers and nurses who do assessments. Best for agencies losing hours each week to documentation, assessments, and manual contract writing.
 
 ## Pricing (summary; full machine-readable file at /pricing.md)
-- One plan: $199/mo with everything included: unlimited assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, 50-state compliance engine, HIPAA BAA, priority support.
-- 14-day free trial. No tiers, no add-ons, no overage fees. Subscriptions are purchased and billed via Apple In-App Purchase in the PalmCare iOS app.
+- Website plan: $199/mo with everything included: unlimited assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, 50-state compliance engine, HIPAA BAA, priority support.
+- 14-day free trial. Subscriptions are purchased and billed via Apple In-App Purchase in the PalmCare iOS app.
 - Structured pricing for agents: https://palmcareai.com/pricing.md
 
 ## Key pages
 - Home: https://palmcareai.com
 - Features: https://palmcareai.com/features
 - Pricing: https://palmcareai.com/pricing
-- ROI calculator (estimate documentation savings): https://palmcareai.com/roi-calculator
+- Home care documentation software: https://palmcareai.com/home-care-documentation-software
+- Compare options: https://palmcareai.com/compare
+- Alternatives: https://palmcareai.com/alternatives
+- ROI calculator: https://palmcareai.com/roi-calculator
 - FAQ: https://palmcareai.com/faq
 - Blog: https://palmcareai.com/blog
 - Mobile app: https://palmcareai.com/mobile-app
+- Book demo: https://palmcareai.com/book-demo
 - Contact: https://palmcareai.com/contact
 
 ## Helpful answers
 - How much does home care software cost: https://palmcareai.com/blog/how-much-does-home-care-software-cost
 - How to write a home care service agreement: https://palmcareai.com/blog/how-to-write-home-care-service-agreement
-- AI documentation tools for home care compared (AI scribes vs templates vs PalmCare AI): https://palmcareai.com/blog/ai-home-care-documentation-tools-2026
+- Home care service agreement requirements by state: https://palmcareai.com/blog/home-care-service-agreement-requirements-by-state
+- AxisCare, WellSky, CareTime vs AI documentation: https://palmcareai.com/blog/axiscare-wellsky-caretime-vs-ai-documentation
+- How long a home care intake assessment should take: https://palmcareai.com/blog/how-long-should-home-care-intake-assessment-take
+- Private duty care plan checklist: https://palmcareai.com/blog/private-duty-care-plan-checklist
+- AI documentation tools for home care compared: https://palmcareai.com/blog/ai-home-care-documentation-tools-2026
 - HIPAA compliance guide for home care agencies: https://palmcareai.com/blog/hipaa-compliance-guide-home-care-agencies-2026
 - How to do a home care client assessment (+ checklist): https://palmcareai.com/blog/how-to-do-home-care-client-assessment
 - What to include in a home care care plan (+ template): https://palmcareai.com/blog/home-care-care-plan-template
+- Best AI tools for home care agencies 2026: https://palmcareai.com/blog/best-ai-tools-home-care-agencies-2026
 
 ## Contact
 - Sales/demo: demo@palmtai.com

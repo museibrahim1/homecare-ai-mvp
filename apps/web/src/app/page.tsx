@@ -70,6 +70,9 @@ const NAV_FEATURES = [
 
 const NAV_RESOURCES = [
   { label: 'Blog', href: '/blog' },
+  { label: 'Documentation software', href: '/home-care-documentation-software' },
+  { label: 'Compare options', href: '/compare' },
+  { label: 'Alternatives', href: '/alternatives' },
   { label: 'ROI Calculator', href: '/roi-calculator' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact Us', href: '/contact' },

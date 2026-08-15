@@ -12,6 +12,234 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'home-care-service-agreement-requirements-by-state',
+    title: 'Home Care Service Agreement Requirements by State',
+    description:
+      'What home care service agreements usually need to cover, why state rules differ, and how agencies keep contracts consistent without rewriting every clause from scratch.',
+    date: '2026-08-14',
+    readTime: '9 min read',
+    category: 'Compliance',
+    content: `
+A home care service agreement is the signed document that says what care you will provide, what it costs, and what each party is responsible for. Requirements differ by state. Agencies that copy a generic template into every market miss clauses, dispute windows, or disclosure language that the jurisdiction expects.
+
+## What is a home care service agreement?
+
+A home care service agreement (also called a service contract or client agreement) is the written deal between the agency and the client or responsible party. It is not a Medicare plan of care. It is the commercial and operational contract for non-medical or private-duty services.
+
+## Core sections most agreements need
+
+Regardless of state, strong agreements usually cover:
+
+- **Parties and start date.** Who is receiving care, who is paying, and when services begin.
+- **Services and schedule.** What caregivers will do, how often, and how changes get approved.
+- **Rates and billing.** Hourly or package pricing, overtime rules, deposits, and late payment terms.
+- **Client responsibilities.** Access to the home, supplies, pets, smoking, and notice for schedule changes.
+- **Agency responsibilities.** Staffing, supervision, and how substitutions work when a caregiver is out.
+- **Privacy and records.** How personal and health information is handled.
+- **Termination.** How either party ends the agreement and how final invoices work.
+- **Signatures.** Client or legal representative, and an authorized agency signer.
+
+## Why state rules matter
+
+States regulate home care differently. Some require specific consumer rights language. Some require notice periods before rate changes. Some require that certain disclosures appear before care starts. A Florida agreement and a New York agreement should not be identical word-for-word if your compliance process is serious.
+
+PalmCare AI includes **state-specific contract rules for all 50 states** so the draft agreement matches the jurisdiction where care is delivered. A staff member still reviews and approves before anything is sent.
+
+## How to stay compliant without rewriting every visit
+
+1. Maintain a controlled template per state, or use software that applies state rules automatically.
+2. Pull service details from the assessment so hours, ADLs, and rates match what was discussed.
+3. Have a reviewer check names, rates, and start date before signature.
+4. Store the signed PDF with the client record.
+
+## Common mistakes
+
+- Reusing one national Word doc for every market.
+- Leaving rates blank and filling them in after the family leaves.
+- Writing a care plan that does not match the signed services list.
+- Skipping responsible-party signature when the client cannot sign.
+
+## Related guides
+
+- [How to write a home care service agreement](/blog/how-to-write-home-care-service-agreement)
+- [How to do a home care client assessment](/blog/how-to-do-home-care-client-assessment)
+- [Compare documentation options](/compare)
+
+If you want the assessment recording to draft the care plan, billables, visit notes, and a state-specific contract together, see [PalmCare AI](/home-care-documentation-software) or [start a free trial](/register).
+`,
+  },
+  {
+    slug: 'axiscare-wellsky-caretime-vs-ai-documentation',
+    title: 'AxisCare, WellSky, and CareTime vs AI Documentation',
+    description:
+      'Honest category comparison: what scheduling and billing platforms do well, what AI documentation tools add, and when you need both rather than a swap.',
+    date: '2026-08-14',
+    readTime: '8 min read',
+    category: 'Comparison',
+    content: `
+AxisCare, WellSky, and CareTime are known names in home care operations. They help agencies schedule caregivers, track visits, and run billing. AI documentation tools solve a different job: turning the assessment conversation into finished paperwork. Confusing those jobs leads to bad buying decisions.
+
+## What scheduling and billing platforms are for
+
+Platforms in this category typically focus on:
+
+- Caregiver scheduling and visit verification
+- EVV and payroll-adjacent workflows
+- Client and caregiver records
+- Invoicing and payer billing pathways
+
+They digitize forms and workflows. They do not automatically write a state-specific service contract from a recorded intake conversation.
+
+## What AI documentation tools are for
+
+AI documentation for non-medical home care focuses on:
+
+- Capturing the assessment by voice
+- Drafting care plans and visit notes
+- Extracting billable services from what was said
+- Generating service agreements with the right state rules
+
+PalmCare AI sits in this category. It is built for agencies whose bottleneck is intake paperwork and contracts, not only calendar logistics.
+
+## Side-by-side by job
+
+| Job | Scheduling / billing platforms | AI documentation (PalmCare AI) |
+| --- | --- | --- |
+| Staff a week of visits | Strong fit | Not the primary job |
+| Verify a visit happened | Strong fit | Not the primary job |
+| Write a care plan from the assessment | Manual or forms | Drafted from the recording |
+| Produce a state-specific service contract | Manual or upload | Automatic draft for review |
+| Extract billables from the conversation | Manual | Drafted from the recording |
+
+## Do you replace your ops platform or add documentation?
+
+Most agencies should not rip out a working scheduler to get better contracts. Ask:
+
+1. Is intake paperwork still happening at night after the visit?
+2. Are contracts inconsistent across staff or states?
+3. Do billables get missed because nobody re-reads the assessment?
+
+If yes, add an AI documentation layer that feeds clean documents into the rest of your stack. If your pain is EVV failures and open shifts, fix the ops platform first.
+
+## Related reading
+
+- [PalmCare AI vs AI scribes vs templates vs manual](/compare)
+- [AI home care documentation tools compared](/blog/ai-home-care-documentation-tools-2026)
+- [Alternatives to typing assessments after every visit](/alternatives)
+
+Product facts for PalmCare AI: four documents from one recording, 50-state contract rules, review before send. [Book a demo](/book-demo) or [start a free trial](/register).
+`,
+  },
+  {
+    slug: 'how-long-should-home-care-intake-assessment-take',
+    title: 'How Long Should a Home Care Intake Assessment Take?',
+    description:
+      'A practical timing guide for home care intake assessments: what to cover, what slows teams down, and how to finish paperwork the same day without rushing the family.',
+    date: '2026-08-14',
+    readTime: '7 min read',
+    category: 'Operations',
+    content: `
+There is no single correct clock time for every home care intake. A straightforward companion-care client differs from a complex private-duty case with multiple family decision makers. What matters is finishing a complete assessment and the paperwork that follows without making the family sit through a second interrogation at the kitchen table.
+
+## A practical timing range
+
+For many non-medical intakes:
+
+- **45 to 75 minutes** for the conversation when needs are clear and one decision maker is present.
+- **90 minutes or more** when history is complex, the home has safety issues, or more than one family member must agree.
+- **Same-day paperwork** is realistic when notes, care plan, billables, and the service agreement are drafted from the same capture instead of retyped later.
+
+If your team routinely spends another two to three hours at night rewriting the same facts, the conversation length is not the problem. The documentation process is.
+
+## What must be covered before you leave
+
+- Reason for seeking care and goals
+- ADLs and IADLs the client needs help with
+- Living situation, falls risk, and home access
+- Schedule preferences and who will be home
+- Decision makers and emergency contacts
+- Budget and payer expectations at a high level
+- Consent to record or document, per your policy
+
+Use a checklist so shorter visits still collect the same essentials. See [How to do a home care client assessment](/blog/how-to-do-home-care-client-assessment).
+
+## What makes assessments run long
+
+- Typing into forms while the family talks
+- Re-asking questions because notes are incomplete
+- Leaving contract details for a later office visit
+- No clear owner for billables after the visit
+
+## How to protect the conversation and still finish paperwork
+
+1. Record or capture once (with consent).
+2. Keep eye contact during the visit instead of filling every field live.
+3. Draft care plan, notes, billables, and contract from that capture.
+4. Review for accuracy before the family signs.
+
+PalmCare AI is built for that workflow: record the assessment, review the drafts, send the contract. [See how it works](/features) or [estimate documentation savings](/roi-calculator).
+`,
+  },
+  {
+    slug: 'private-duty-care-plan-checklist',
+    title: 'Private Duty Care Plan Checklist',
+    description:
+      'A practical private duty care plan checklist covering ADLs, schedule, goals, safety, and how the care plan should match the signed service agreement.',
+    date: '2026-08-14',
+    readTime: '6 min read',
+    category: 'Education',
+    content: `
+A private duty care plan tells caregivers what to do, how often, and what “good care” looks like for this client. It should match the signed service agreement. When those two documents disagree, families get confused and agencies get disputes.
+
+## Private duty care plan checklist
+
+Use this list on every new client and every material change of condition.
+
+### Client and household
+- [ ] Preferred name and pronouns
+- [ ] Address, access instructions, parking, pets
+- [ ] Emergency contacts and decision makers
+- [ ] Who else lives in the home
+
+### Goals
+- [ ] Why the family hired care (one or two clear goals)
+- [ ] What success looks like in 30 days
+- [ ] Client preferences the team must respect
+
+### ADLs and IADLs
+- [ ] Bathing, dressing, toileting, transferring, mobility
+- [ ] Meals, med reminders (if in scope), housekeeping, errands
+- [ ] Level of assist for each task (independent, cue, hands-on)
+
+### Schedule and staffing
+- [ ] Days and hours of service
+- [ ] Preferred caregiver traits when relevant
+- [ ] Backup plan when the assigned caregiver is out
+
+### Safety
+- [ ] Fall history and high-risk areas in the home
+- [ ] Oxygen, smoking, weapons, or other hazards noted per policy
+- [ ] When to call 911 vs the agency on-call line
+
+### Alignment with the contract
+- [ ] Services on the care plan appear on the service agreement
+- [ ] Rates and hours match what was sold
+- [ ] Start date and review date are written down
+
+## How often to update the care plan
+
+Update after a hospital return, a clear change in ADLs, a schedule change, or a family complaint about scope. Do not wait for an annual review if daily reality has already moved.
+
+## Related templates and tools
+
+- [Home care care plan template](/blog/home-care-care-plan-template)
+- [How to write a home care service agreement](/blog/how-to-write-home-care-service-agreement)
+- [Home care documentation software](/home-care-documentation-software)
+
+PalmCare AI drafts the care plan from the recorded assessment alongside visit notes, billables, and the state-specific contract so the set stays consistent. [Start a free trial](/register) or [book a demo](/book-demo).
+`,
+  },
+  {
     slug: 'best-ai-tools-home-care-agencies-2026',
     title: 'The 7 Best AI Tools for Home Care Agencies in 2026',
     description:
