@@ -12,8 +12,11 @@ declare global {
         id: {
           initialize: (config: Record<string, unknown>) => void;
           renderButton: (el: HTMLElement, config: Record<string, unknown>) => void;
-          prompt: (momentListener?: (notification: GooglePromptNotification) => void) => void;
+          prompt: (momentListener?: (notification: unknown) => void) => void;
           cancel: () => void;
+        };
+        oauth2: {
+          initCodeClient: (config: Record<string, unknown>) => { requestCode: () => void };
         };
       };
     };
@@ -28,15 +31,6 @@ declare global {
     };
   }
 }
-
-type GooglePromptNotification = {
-  isNotDisplayed: () => boolean;
-  isSkippedMoment: () => boolean;
-  isDismissedMoment: () => boolean;
-  getNotDisplayedReason?: () => string;
-  getSkippedReason?: () => string;
-  getDismissedReason?: () => string;
-};
 
 type Props = {
   onError?: (message: string) => void;
@@ -56,12 +50,16 @@ function loadScript(id: string, src: string, label: string): Promise<void> {
     );
   const existing = document.getElementById(id) as HTMLScriptElement | null;
   if (existing) {
-    if (id === 'google-gsi' && window.google?.accounts?.id) return Promise.resolve();
+    if (id === 'google-gsi' && (window.google?.accounts?.oauth2 || window.google?.accounts?.id)) {
+      return Promise.resolve();
+    }
     if (id === 'apple-auth' && window.AppleID?.auth) return Promise.resolve();
     return new Promise((resolve, reject) => {
       existing.addEventListener('load', () => resolve(), { once: true });
       existing.addEventListener('error', () => reject(fail()), { once: true });
-      if (id === 'google-gsi' && window.google?.accounts?.id) resolve();
+      if (id === 'google-gsi' && (window.google?.accounts?.oauth2 || window.google?.accounts?.id)) {
+        resolve();
+      }
       if (id === 'apple-auth' && window.AppleID?.auth) resolve();
     });
   }
@@ -129,10 +127,18 @@ export default function SocialAuthButtons({ onError }: Props) {
   );
 
   const finish = useCallback(
-    async (provider: 'google' | 'apple', idToken: string, fullName?: string) => {
+    async (
+      provider: 'google' | 'apple',
+      opts: { idToken?: string; authCode?: string; fullName?: string },
+    ) => {
       setBusy(true);
       try {
-        const response = await api.socialLogin(provider, idToken, fullName);
+        const response = await api.socialLogin(
+          provider,
+          opts.idToken,
+          opts.fullName,
+          opts.authCode,
+        );
         if (response.requires_mfa && response.mfa_token) {
           setMfaToken(response.mfa_token);
           return;
@@ -169,104 +175,65 @@ export default function SocialAuthButtons({ onError }: Props) {
     }
   };
 
-  const getGoogleIdToken = async (): Promise<string> => {
+  const getGoogleAuthCode = async (): Promise<string> => {
     await loadScript('google-gsi', 'https://accounts.google.com/gsi/client', 'Google Sign In');
-    if (!window.google?.accounts?.id) {
+    if (!window.google?.accounts?.oauth2?.initCodeClient) {
       throw new Error('Google Sign In failed to load. Check your network or ad blocker.');
     }
 
     return new Promise<string>((resolve, reject) => {
-      let settled = false;
-      const done = (credential?: string, error?: Error) => {
-        if (settled) return;
-        settled = true;
-        try {
-          window.google?.accounts.id.cancel();
-        } catch {
-          /* ignore */
-        }
-        if (credential) resolve(credential);
-        else reject(error || new Error('Google Sign In failed. Try again.'));
-      };
-
-      window.google!.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: (resp: { credential?: string }) => {
-          if (resp.credential) done(resp.credential);
-          else done(undefined, new Error('Google Sign In failed. Try again.'));
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        use_fedcm_for_prompt: true,
-        context: 'signin',
-      });
-
-      // Prefer One Tap / FedCM prompt from our visible button click.
-      window.google!.accounts.id.prompt((notification) => {
-        if (settled) return;
-        if (notification.isDismissedMoment?.()) {
-          const reason = notification.getDismissedReason?.() || '';
-          if (/credential_returned/i.test(reason)) return;
-          done(undefined, new Error('cancelled'));
-          return;
-        }
-        if (notification.isNotDisplayed?.() || notification.isSkippedMoment?.()) {
-          // Fallback: hidden official button, then synthetic click.
-          const host = document.createElement('div');
-          host.style.position = 'fixed';
-          host.style.left = '-9999px';
-          host.style.top = '0';
-          host.style.width = '400px';
-          document.body.appendChild(host);
-          try {
-            window.google!.accounts.id.renderButton(host, {
-              theme: 'outline',
-              size: 'large',
-              width: 400,
-              text: 'continue_with',
-              shape: 'rectangular',
-            });
-            const btn =
-              host.querySelector<HTMLElement>('div[role="button"]') ||
-              host.querySelector<HTMLElement>('iframe') ||
-              host.firstElementChild;
-            if (btn instanceof HTMLElement) {
-              btn.click();
-              // Give GIS time; if nothing returns, fail clearly.
-              setTimeout(() => {
-                host.remove();
-                if (!settled) {
-                  done(
-                    undefined,
-                    new Error(
-                      'Google Sign In could not open. Add https://palmcareai.com as an Authorized JavaScript origin on the Google web client.',
-                    ),
-                  );
-                }
-              }, 8000);
-            } else {
-              host.remove();
-              done(
-                undefined,
-                new Error(
-                  'Google Sign In button failed to render. Add https://palmcareai.com as an Authorized JavaScript origin on the Google web client.',
-                ),
-              );
+      try {
+        const client = window.google!.accounts.oauth2.initCodeClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'openid email profile',
+          ux_mode: 'popup',
+          callback: (resp: {
+            code?: string;
+            error?: string;
+            error_description?: string;
+          }) => {
+            if (resp.code) {
+              resolve(resp.code);
+              return;
             }
-          } catch (e) {
-            host.remove();
-            done(undefined, e instanceof Error ? e : new Error('Google Sign In failed.'));
-          }
-        }
-      });
+            const err = `${resp.error || ''} ${resp.error_description || ''}`;
+            if (/popup_closed|access_denied|user.?cancel/i.test(err)) {
+              reject(new Error('cancelled'));
+              return;
+            }
+            reject(
+              new Error(
+                resp.error_description ||
+                  'Google Sign In failed. In Google Cloud Console, add https://palmcareai.com and https://www.palmcareai.com as Authorized JavaScript origins on the web client.',
+              ),
+            );
+          },
+          error_callback: (err: { type?: string; message?: string }) => {
+            const msg = `${err?.type || ''} ${err?.message || ''}`;
+            if (/popup_closed|popup_failed/i.test(msg)) {
+              reject(new Error('cancelled'));
+              return;
+            }
+            reject(
+              new Error(
+                err?.message ||
+                  'Google Sign In popup was blocked. Allow popups for palmcareai.com and try again.',
+              ),
+            );
+          },
+        });
+        client.requestCode();
+      } catch (e) {
+        reject(e instanceof Error ? e : new Error('Google Sign In failed.'));
+      }
     });
   };
 
   const handleGoogle = async () => {
     setBusy(true);
     try {
-      const idToken = await getGoogleIdToken();
-      await finish('google', idToken);
+      const authCode = await getGoogleAuthCode();
+      await finish('google', { authCode });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Google Sign In failed.';
       if (!/cancelled/i.test(message)) onError?.(message);
@@ -295,7 +262,10 @@ export default function SocialAuthButtons({ onError }: Props) {
       const idToken = res.authorization?.id_token;
       if (!idToken) throw new Error('Apple Sign In failed. Try again.');
       const nameParts = [res.user?.name?.firstName, res.user?.name?.lastName].filter(Boolean);
-      await finish('apple', idToken, nameParts.length ? nameParts.join(' ') : undefined);
+      await finish('apple', {
+        idToken,
+        fullName: nameParts.length ? nameParts.join(' ') : undefined,
+      });
     } catch (err: unknown) {
       const message = appleErrorMessage(err);
       if (!/cancelled/i.test(message)) onError?.(message);

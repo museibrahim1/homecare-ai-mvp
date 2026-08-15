@@ -185,6 +185,66 @@ def verify_google_id_token(id_token: str, nonce: Optional[str] = None) -> Social
     )
 
 
+def exchange_google_auth_code(
+    code: str,
+    redirect_uri: str = "postmessage",
+) -> str:
+    """Exchange a GIS popup auth code for an ID token.
+
+    Web Sign in with Google (oauth2.initCodeClient, ux_mode=popup) returns an
+    authorization code with redirect_uri=postmessage. We redeem it server-side
+    with the web client secret, then verify the ID token like a normal social login.
+    """
+    client_id = (settings.google_client_id or "").strip()
+    client_secret = (settings.google_client_secret or "").strip()
+    if not client_id or not client_secret:
+        raise HTTPException(
+            status_code=500,
+            detail="Google Sign In is not configured on the server.",
+        )
+
+    try:
+        with httpx.Client(timeout=20.0) as client:
+            response = client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                },
+            )
+    except httpx.RequestError as exc:
+        logger.warning("Google code exchange network error: %s", exc)
+        raise HTTPException(status_code=502, detail="Google Sign In failed. Try again.") from exc
+
+    if response.status_code != 200:
+        err = {}
+        try:
+            err = response.json()
+        except Exception:
+            pass
+        logger.warning(
+            "Google code exchange failed status=%s error=%s",
+            response.status_code,
+            err.get("error"),
+        )
+        raise HTTPException(
+            status_code=401,
+            detail="Google Sign In failed. Try again.",
+        )
+
+    tokens = response.json()
+    id_token = tokens.get("id_token")
+    if not id_token or not isinstance(id_token, str):
+        raise HTTPException(
+            status_code=401,
+            detail="Google Sign In did not return an identity token. Try again.",
+        )
+    return id_token
+
+
 def verify_social_token(
     provider: str,
     id_token: str,

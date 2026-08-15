@@ -31,7 +31,11 @@ from app.schemas.auth import (
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
 from app.services.email import email_service
-from app.core.social_auth import verify_social_token, resolve_full_name
+from app.core.social_auth import (
+    verify_social_token,
+    resolve_full_name,
+    exchange_google_auth_code,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -363,11 +367,20 @@ async def social_login(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    """Sign in or sign up with Apple / Google identity token."""
+    """Sign in or sign up with Apple / Google identity token (or Google auth code)."""
     client_ip = get_client_ip(req)
     _check_rate_limit(f"social:{client_ip}")
 
-    claims = verify_social_token(body.provider, body.id_token, nonce=body.nonce)
+    id_token = (body.id_token or "").strip()
+    if not id_token and body.provider == "google" and body.auth_code:
+        id_token = exchange_google_auth_code(body.auth_code.strip())
+    if not id_token or len(id_token) < 20:
+        raise HTTPException(
+            status_code=422,
+            detail="Google or Apple sign-in token is missing. Try again.",
+        )
+
+    claims = verify_social_token(body.provider, id_token, nonce=body.nonce)
     provider = claims.provider
     sub = claims.provider_user_id
     email = claims.email

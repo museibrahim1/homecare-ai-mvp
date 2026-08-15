@@ -49,9 +49,17 @@ class TokenPayload(BaseModel):
 
 class SocialLoginRequest(BaseModel):
     provider: Literal["apple", "google"]
-    id_token: str = Field(..., min_length=20)
+    id_token: Optional[str] = Field(None, min_length=20)
+    # Web Google GIS popup returns an auth code (redirect_uri=postmessage).
+    auth_code: Optional[str] = Field(None, min_length=10)
     full_name: Optional[str] = None
     nonce: Optional[str] = None
+
+    def resolved_id_token(self) -> str:
+        """Prefer a direct id_token; auth_code is exchanged by the router."""
+        if self.id_token and len(self.id_token) >= 20:
+            return self.id_token
+        raise ValueError("id_token required")
 
 
 class SocialLoginResponse(Token):

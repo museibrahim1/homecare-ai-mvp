@@ -151,7 +151,12 @@ class ApiClient {
     }
   }
 
-  async socialLogin(provider: 'apple' | 'google', idToken: string, fullName?: string) {
+  async socialLogin(
+    provider: 'apple' | 'google',
+    idToken?: string,
+    fullName?: string,
+    authCode?: string,
+  ) {
     return this.request<{
       access_token: string;
       token_type: string;
@@ -171,7 +176,8 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({
         provider,
-        id_token: idToken,
+        ...(idToken ? { id_token: idToken } : {}),
+        ...(authCode ? { auth_code: authCode } : {}),
         ...(fullName ? { full_name: fullName } : {}),
       }),
     });
