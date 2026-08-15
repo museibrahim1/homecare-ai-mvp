@@ -13,6 +13,7 @@ const nextConfig = {
   },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    NEXT_PUBLIC_APPLE_CLIENT_ID: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
   },
   async headers() {
     return [
@@ -35,16 +36,19 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), geolocation=(), microphone=(self)' },
           {
             key: 'Content-Security-Policy',
+            // Google / Apple Sign In need script + frame + connect allowlists.
+            // Without these, login buttons fail with "Could not load … Sign In".
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us.i.posthog.com https://us-assets.i.posthog.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us.i.posthog.com https://us-assets.i.posthog.com https://accounts.google.com https://appleid.cdn-apple.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://www.googletagmanager.com https://formspree.io https://accounts.google.com https://api.qrserver.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com http://localhost:8000 http://localhost:3000",
+              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://www.googletagmanager.com https://formspree.io https://accounts.google.com https://appleid.apple.com https://appleid.cdn-apple.com https://api.qrserver.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com http://localhost:8000 http://localhost:3000",
+              "frame-src 'self' https://accounts.google.com https://appleid.apple.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://appleid.apple.com https://accounts.google.com",
             ].join('; '),
           },
           {
