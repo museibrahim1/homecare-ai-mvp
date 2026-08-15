@@ -106,9 +106,14 @@ class TestTaskDetection:
 
     def test_companionship_detection(self):
         """Test detecting companionship."""
-        tasks = detect_tasks_in_text("Let's chat about your grandchildren.")
+        tasks = detect_tasks_in_text("She needs companionship since she gets lonely.")
         categories = [t[0] for t in tasks]
         assert "COMPANIONSHIP" in categories
+
+    def test_casual_talk_is_not_companionship(self):
+        tasks = detect_tasks_in_text("I'd rather talk about something else and listen later.")
+        categories = [t[0] for t in tasks]
+        assert "COMPANIONSHIP" not in categories
 
     def test_multiple_task_detection(self):
         """Test detecting multiple tasks in one segment."""

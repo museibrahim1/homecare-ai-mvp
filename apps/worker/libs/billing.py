@@ -77,13 +77,12 @@ TASK_PATTERNS = [
     (r"\b(trash|garbage|recycling|take out)\b", "HOUSEHOLD_LIGHT", "Trash removal", "Homemaking"),
     (r"\b(bed|beds|bedding|make the bed|change sheets)\b", "HOUSEHOLD_LIGHT", "Bed making/linen change", "Homemaking"),
     
-    # Companionship
-    (r"\b(lonely|loneliness|alone|company|companion|companionship)\b", "COMPANIONSHIP", "Companionship/emotional support", "Companionship"),
-    (r"\b(talk|talking|chat|chatting|conversation|visit|visiting|listen)\b", "COMPANIONSHIP", "Social interaction", "Companionship"),
-    (r"\b(cards|games|read|reading|tv|television|watch)\b", "COMPANIONSHIP", "Recreational activities", "Companionship"),
+    # Companionship — need language, not casual "talk/listen/read"
+    (r"\b(lonely|loneliness|companion|companionship)\b", "COMPANIONSHIP", "Companionship/emotional support", "Companionship"),
+    (r"\b(company|social\s+interaction|emotional\s+support)\b", "COMPANIONSHIP", "Social interaction", "Companionship"),
     
     # Supervision/Safety — avoid "safe driver" / "bonded" / "check on"
-    (r"\b(supervise|supervision|monitor|monitoring)\b", "SUPERVISION", "Safety supervision", "Supervision"),
+    (r"\b(supervise|supervision)\b", "SUPERVISION", "Safety supervision", "Supervision"),
     (r"\b(safety\s+monitoring|fall\s+prevention|cannot\s+be\s+left\s+alone)\b", "SUPERVISION", "Safety monitoring", "Supervision"),
 ]
 
@@ -172,22 +171,26 @@ def consolidate_blocks(blocks: List[BillableBlock], min_gap_ms: int = 120000) ->
 
 def analyze_transcript_with_claude(
     segments: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+) -> Optional[List[Dict[str, Any]]]:
     """
     Use Claude to analyze transcript and extract ALL billable services comprehensively.
+
+    Returns:
+      - list (possibly empty) when Claude answered successfully
+      - None when Claude could not run (caller may fall back to keyword rules)
     """
     import os
     
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         logger.warning("No ANTHROPIC_API_KEY, skipping LLM billables analysis")
-        return []
+        return None
     
     try:
         import anthropic
     except ImportError:
         logger.warning("anthropic package not installed, skipping LLM billables analysis")
-        return []
+        return None
     
     # Combine ALL segments into full transcript (no limit)
     # For very long transcripts, we include all segments but may truncate individual lines
@@ -250,12 +253,17 @@ JSON:"""
         
         # Parse JSON
         services = json.loads(response_text)
+        if isinstance(services, dict):
+            services = services.get("services") or services.get("items") or []
+        if not isinstance(services, list):
+            logger.warning(f"Claude billables returned non-list: {type(services)}")
+            return None
         logger.info(f"Claude extracted {len(services)} billable services")
         return services
         
     except Exception as e:
         logger.warning(f"Claude billables analysis failed: {e}")
-        return []
+        return None
 
 
 def generate_billables_from_transcript(
@@ -276,10 +284,12 @@ def generate_billables_from_transcript(
     """
     logger.info(f"Generating billables from {len(segments)} segments using Claude")
     
-    # Use Claude to extract all services
-    claude_services = analyze_transcript_with_claude(segments)
+    # Use Claude to extract all services. None = Claude unavailable; [] = no home-care needs.
+    claude_services = analyze_transcript_with_claude(segments) if use_llm else None
+    llm_succeeded = claude_services is not None
+    claude_services = claude_services or []
     
-    # Also run rules-based detection as backup
+    # Also run rules-based detection as backup (only used if Claude failed)
     segment_services: Dict[str, List[Dict]] = {}
     for segment in segments:
         text = segment.get("text", "")
@@ -390,9 +400,9 @@ def generate_billables_from_transcript(
         }
         result.append(item)
     
-    # Add rules-based detections only when Claude found nothing.
-    # Keyword matches on long intakes/training audio are too noisy to merge.
-    if not category_tasks:
+    # Keyword rules only when Claude could not run. An empty Claude list means
+    # no home-care services were found (clinic interview, out of scope, etc.).
+    if not llm_succeeded and not category_tasks:
         for category, detections in segment_services.items():
             service_type = detections[0]["service_type"] if detections else category
             cat_info = CATEGORY_INFO.get(category, {"label": category, "default_rate": 25.00})

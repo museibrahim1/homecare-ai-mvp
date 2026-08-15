@@ -166,9 +166,9 @@ def generate_service_contract(self, visit_id: str):
         )
         
         # Get care need level and client profile early - needed for rate calculation
-        eicna = assessment_data.get("eicna_assessment", {})
-        care_need_level = eicna.get("care_need_level", "MODERATE")
-        client_profile = assessment_data.get("client_profile", {})
+        eicna = assessment_data.get("eicna_assessment") or {}
+        care_need_level = eicna.get("care_need_level") or "MODERATE"
+        client_profile = assessment_data.get("client_profile") or {}
         logger.info(f"Extraction complete - Care Need Level: {care_need_level}")
         
         # =====================================================================
@@ -217,7 +217,7 @@ def generate_service_contract(self, visit_id: str):
             
             logger.info(f"Calculating hours from {len(services)} services (consolidated):")
             for svc in services:
-                svc_name = svc.get("name", "").lower() if isinstance(svc, dict) else str(svc).lower()
+                svc_name = (svc.get("name") or "").lower() if isinstance(svc, dict) else str(svc or "").lower()
                 
                 # Map to consolidated category
                 category = None
@@ -305,7 +305,10 @@ def generate_service_contract(self, visit_id: str):
         else:
             logger.info("No agency rates configured — using system defaults")
         
-        service_names = [s.get('name', '').lower() if isinstance(s, dict) else str(s).lower() for s in services]
+        service_names = [
+            (s.get('name') or '').lower() if isinstance(s, dict) else str(s or '').lower()
+            for s in (services or [])
+        ]
         service_text = ' '.join(service_names)
         
         if is_medicaid:
@@ -378,24 +381,26 @@ def generate_service_contract(self, visit_id: str):
                 if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
                     rate_adjustments.append(("Safety supervision", 3.00))
                 if client_profile:
-                    cognitive = client_profile.get('cognitive_status', '').lower()
+                    cognitive = (client_profile.get('cognitive_status') or '').lower()
                     if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
                         if ("Dementia care specialist", 5.00) not in rate_adjustments:
                             rate_adjustments.append(("Cognitive impairment care", 4.00))
-                    mobility = client_profile.get('mobility_status', '').lower()
+                    mobility = (client_profile.get('mobility_status') or '').lower()
                     if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
                         rate_adjustments.append(("Mobility/transfer assistance", 2.00))
-                special_reqs = assessment_data.get('special_requirements', [])
+                special_reqs = assessment_data.get('special_requirements', []) or []
                 for req in special_reqs:
-                    req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+                    req_text = str(req).lower() if isinstance(req, str) else str((req or {}).get('requirement') or '').lower()
                     if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
                         if not any('diet' in adj[0].lower() for adj in rate_adjustments):
                             rate_adjustments.append(("Specialized diet management", 1.00))
                     if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
                         rate_adjustments.append(("Bilingual caregiver", 2.00))
-                safety_concerns = assessment_data.get('safety_concerns', [])
-                high_severity_count = sum(1 for s in safety_concerns 
-                                           if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
+                safety_concerns = assessment_data.get('safety_concerns', []) or []
+                high_severity_count = sum(
+                    1 for s in safety_concerns
+                    if isinstance(s, dict) and (s.get('severity') or '').lower() == 'high'
+                )
                 if high_severity_count >= 2:
                     rate_adjustments.append(("Multiple high-risk factors", 2.00))
                 
@@ -713,7 +718,7 @@ def generate_service_contract(self, visit_id: str):
             # Get specializations needed from assessment
             client_specializations = []
             if client_profile.get("primary_diagnosis"):
-                diag = client_profile["primary_diagnosis"].lower()
+                diag = (client_profile.get("primary_diagnosis") or "").lower()
                 if "dementia" in diag or "alzheimer" in diag:
                     client_specializations.append("dementia")
                 if "diabetes" in diag:
