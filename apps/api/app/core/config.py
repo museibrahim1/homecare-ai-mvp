@@ -65,10 +65,15 @@ class Settings(BaseSettings):
     # the beta. Flip BETA_FREE_ACCESS=false when billing goes live.
     beta_free_access: bool = True
     
-    # Google Calendar
+    # Google Calendar / Gmail OAuth (not identity login)
     google_client_id: str = ""
     google_client_secret: str = ""
-    
+
+    # Sign in with Apple / Google (identity). Comma-separated JWT audiences.
+    # Apple: bundle id + Services ID. Google: iOS + web OAuth client IDs.
+    apple_signin_client_ids: str = "com.palmcareai.app"
+    google_signin_client_ids: str = ""
+
 @lru_cache()
 def get_settings() -> Settings:
     import os

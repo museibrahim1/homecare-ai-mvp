@@ -116,6 +116,9 @@ class APIService: ObservableObject {
 
     var isAuthenticated: Bool { token != nil }
 
+    /// Social signup finished auth but still needs agency + consent.
+    @Published var needsOnboarding: Bool = false
+
     /// Exchange the stored refresh token for a fresh access token.
     /// Returns true on success. Safe to call concurrently.
     @MainActor
@@ -203,6 +206,7 @@ class APIService: ObservableObject {
     /// End the session and wipe everything user-specific from the device:
     /// keychain token, cached PHI, calendar cache, recordings, and temp files.
     func logout() {
+        needsOnboarding = false
         refreshToken = nil
         token = nil
 

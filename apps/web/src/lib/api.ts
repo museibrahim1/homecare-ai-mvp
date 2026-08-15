@@ -151,6 +151,49 @@ class ApiClient {
     }
   }
 
+  async socialLogin(provider: 'apple' | 'google', idToken: string, fullName?: string) {
+    return this.request<{
+      access_token: string;
+      token_type: string;
+      refresh_token?: string;
+      needs_onboarding: boolean;
+      user: {
+        id: string;
+        email: string;
+        full_name: string;
+        role: string;
+        is_active: boolean;
+        needs_onboarding?: boolean;
+      };
+    }>('/auth/social', {
+      method: 'POST',
+      body: JSON.stringify({
+        provider,
+        id_token: idToken,
+        ...(fullName ? { full_name: fullName } : {}),
+      }),
+    });
+  }
+
+  async completeOnboarding(token: string, agencyName: string, consent: boolean) {
+    return this.request<{
+      success: boolean;
+      needs_onboarding: boolean;
+      business_id: string;
+      business_name: string;
+    }>(
+      '/auth/business/complete-onboarding',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          agency_name: agencyName || undefined,
+          consent,
+        }),
+      },
+      token,
+    );
+  }
+
   async getMe(token: string) {
     return this.request<{
       id: string;
@@ -159,6 +202,8 @@ class ApiClient {
       role: string;
       is_active: boolean;
       business_id?: string;
+      needs_onboarding?: boolean;
+      has_password?: boolean;
     }>('/auth/me', {}, token);
   }
 

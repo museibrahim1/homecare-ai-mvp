@@ -11,6 +11,8 @@ struct User: Codable, Identifiable {
     let updated_at: String?
     let permissions: [String]?
     let temp_password: Bool?
+    let needs_onboarding: Bool?
+    let has_password: Bool?
 
     var isAdmin: Bool {
         role == "admin" || role == "admin_team"
@@ -33,6 +35,14 @@ struct LoginResponse: Codable {
     let requires_mfa: Bool?
     let mfa_token: String?
     let refresh_token: String?
+}
+
+struct SocialLoginResponse: Codable {
+    let access_token: String
+    let token_type: String?
+    let refresh_token: String?
+    let needs_onboarding: Bool
+    let user: User
 }
 
 struct BusinessLoginResponse: Codable {

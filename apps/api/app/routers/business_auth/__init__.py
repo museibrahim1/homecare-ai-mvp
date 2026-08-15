@@ -25,6 +25,7 @@ from .login import router as _login_router
 from .magic_link import router as _magic_link_router
 from .profile import router as _profile_router
 from .team import router as _team_router
+from .onboarding import router as _onboarding_router
 
 router = APIRouter()
 router.include_router(_registration_router)
@@ -32,3 +33,4 @@ router.include_router(_login_router)
 router.include_router(_magic_link_router)
 router.include_router(_profile_router)
 router.include_router(_team_router)
+router.include_router(_onboarding_router)

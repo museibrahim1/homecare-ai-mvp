@@ -34,12 +34,56 @@ extension APIService {
         return response
     }
 
+    /// Apple / Google identity token → PalmCare session.
+    @discardableResult
+    func socialLogin(
+        provider: String,
+        idToken: String,
+        fullName: String? = nil,
+        nonce: String? = nil
+    ) async throws -> SocialLoginResponse {
+        var body: [String: Any] = [
+            "provider": provider,
+            "id_token": idToken,
+        ]
+        if let fullName, !fullName.isEmpty { body["full_name"] = fullName }
+        if let nonce, !nonce.isEmpty { body["nonce"] = nonce }
+
+        let response: SocialLoginResponse = try await request(
+            "POST", path: "/auth/social", body: body, noAuth: true
+        )
+        await MainActor.run {
+            if let refresh = response.refresh_token, !refresh.isEmpty {
+                self.refreshToken = refresh
+            }
+            self.token = response.access_token
+            self.needsOnboarding = response.needs_onboarding
+            self.cachedUser = CacheEntry(value: response.user, timestamp: Date())
+        }
+        return response
+    }
+
+    func completeOnboarding(agencyName: String, consent: Bool) async throws {
+        var body: [String: Any] = ["consent": consent]
+        let trimmed = agencyName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { body["agency_name"] = trimmed }
+        let _: [String: AnyCodable] = try await request(
+            "POST",
+            path: "/auth/business/complete-onboarding",
+            body: body
+        )
+        await MainActor.run { self.needsOnboarding = false }
+    }
+
     func fetchUser(forceRefresh: Bool = false) async throws -> User {
         if !forceRefresh, let cached = cachedUser, cached.isValid(ttl: cacheTTL) {
             return cached.value
         }
         let user: User = try await request("GET", path: "/auth/me")
         cachedUser = CacheEntry(value: user, timestamp: Date())
+        if let needs = user.needs_onboarding {
+            await MainActor.run { self.needsOnboarding = needs }
+        }
         return user
     }
 

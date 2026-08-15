@@ -5,15 +5,19 @@ struct DeleteAccountSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var password: String = ""
+    @State private var emailConfirm: String = ""
     @State private var typedConfirmation: String = ""
     @State private var acknowledgedDataLoss: Bool = false
     @State private var isDeleting: Bool = false
     @State private var errorMessage: String?
+    @State private var hasPassword: Bool = true
+    @State private var accountEmail: String = ""
 
     private let requiredConfirmation = "DELETE MY ACCOUNT"
 
     private var canDelete: Bool {
-        !password.isEmpty
+        let authOk = hasPassword ? !password.isEmpty : !emailConfirm.isEmpty
+        return authOk
             && typedConfirmation == requiredConfirmation
             && acknowledgedDataLoss
             && !isDeleting
@@ -51,6 +55,12 @@ struct DeleteAccountSheet: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                         .disabled(isDeleting)
+                }
+            }
+            .task {
+                if let user = try? await api.fetchUser(forceRefresh: true) {
+                    hasPassword = user.has_password ?? true
+                    accountEmail = user.email
                 }
             }
         }
@@ -105,18 +115,37 @@ struct DeleteAccountSheet: View {
 
     private var confirmationFields: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Confirm your password")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.palmTextMuted)
-                SecureField("Current password", text: $password)
-                    .font(.system(size: 14))
-                    .textContentType(.password)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 11)
-                    .background(Color.palmFieldBg)
-                    .cornerRadius(10)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
+            if hasPassword {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Confirm your password")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmTextMuted)
+                    SecureField("Current password", text: $password)
+                        .font(.system(size: 14))
+                        .textContentType(.password)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 11)
+                        .background(Color.palmFieldBg)
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Type your account email to confirm")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmTextMuted)
+                    TextField(accountEmail.isEmpty ? "you@agency.com" : accountEmail, text: $emailConfirm)
+                        .font(.system(size: 14))
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 11)
+                        .background(Color.palmFieldBg)
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
+                }
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -159,40 +188,36 @@ struct DeleteAccountSheet: View {
     }
 
     private var deleteButton: some View {
-        Button { Task { await performDelete() } } label: {
-            HStack(spacing: 8) {
-                if isDeleting {
-                    ProgressView().tint(.white).scaleEffect(0.85)
-                }
-                Text(isDeleting ? "Deleting…" : "Delete my account permanently")
-                    .font(.system(size: 14, weight: .bold))
+        Button {
+            Task { await performDelete() }
+        } label: {
+            HStack {
+                if isDeleting { ProgressView().tint(.white) }
+                Text(isDeleting ? "Deleting…" : "Delete Account")
+                    .font(.system(size: 16, weight: .semibold))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(canDelete ? Color.red : Color.red.opacity(0.35))
+            .frame(height: 50)
+            .background(canDelete ? Color.red : Color.red.opacity(0.4))
             .cornerRadius(12)
         }
         .disabled(!canDelete)
-        .accessibilityLabel("Delete account permanently")
     }
 
     private func performDelete() async {
-        await MainActor.run {
-            isDeleting = true
-            errorMessage = nil
-        }
+        isDeleting = true
+        errorMessage = nil
+        defer { isDeleting = false }
         do {
-            try await api.deleteAccount(password: password)
-            await MainActor.run {
-                isDeleting = false
-                dismiss()
+            if hasPassword {
+                try await api.deleteAccount(password: password)
+            } else {
+                try await api.deleteAccount(emailConfirm: emailConfirm.trimmingCharacters(in: .whitespacesAndNewlines))
             }
+            dismiss()
         } catch {
-            await MainActor.run {
-                isDeleting = false
-                errorMessage = error.palmFriendlyMessage
-            }
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 }

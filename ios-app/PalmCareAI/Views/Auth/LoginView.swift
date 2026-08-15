@@ -29,9 +29,15 @@ struct LoginView: View {
                 form
                     .padding(.horizontal, 24)
 
+                SocialSignInButtons()
+                    .environmentObject(api)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+
                 signInButton
                     .padding(.horizontal, 24)
-                    .padding(.top, 24)
+                    .padding(.top, 8)
 
                 registerPrompt
                     .padding(.top, 24)

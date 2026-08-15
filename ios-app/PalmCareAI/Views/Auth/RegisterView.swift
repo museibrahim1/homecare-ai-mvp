@@ -52,6 +52,10 @@ struct RegisterView: View {
                     .padding(.bottom, 28)
 
                 VStack(spacing: 14) {
+                    SocialSignInButtons()
+                        .environmentObject(api)
+                        .padding(.bottom, 4)
+
                     nameField
                     emailField
                     passwordField

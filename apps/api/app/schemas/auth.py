@@ -1,5 +1,7 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import Optional, Literal
+from pydantic import BaseModel, EmailStr, Field
+
+from app.schemas.user import UserResponse
 
 
 class LoginRequest(BaseModel):
@@ -43,3 +45,20 @@ class TokenPayload(BaseModel):
     exp: int
     iss: str
     iat: int
+
+
+class SocialLoginRequest(BaseModel):
+    provider: Literal["apple", "google"]
+    id_token: str = Field(..., min_length=20)
+    full_name: Optional[str] = None
+    nonce: Optional[str] = None
+
+
+class SocialLoginResponse(Token):
+    needs_onboarding: bool
+    user: UserResponse
+
+
+class CompleteOnboardingRequest(BaseModel):
+    agency_name: Optional[str] = None
+    consent: bool = False

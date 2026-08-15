@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Mic, Waves, Shield, Zap } from 'lucide-react';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -148,13 +149,17 @@ export default function LoginPage() {
             <p className="text-slate-500">Your next client is waiting</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
+              {error}
+            </div>
+          )}
 
+          <div className="mb-6">
+            <SocialAuthButtons onError={setError} />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                 Email address

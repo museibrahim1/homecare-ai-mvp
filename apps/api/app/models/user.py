@@ -19,7 +19,9 @@ class User(Base, TimestampMixin):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    # Nullable for social-only accounts (Apple / Google). Password login must
+    # treat NULL as "no password" (see verify_password).
+    hashed_password = Column(String(255), nullable=True)
     full_name = Column(String(255), nullable=False)
     role = Column(String(50), default='caregiver', nullable=False)  # String to be flexible
     is_active = Column(Boolean, default=True, nullable=False)

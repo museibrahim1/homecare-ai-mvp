@@ -169,8 +169,8 @@ class BusinessUser(Base, TimestampMixin):
     full_name = Column(String(255), nullable=False)
     phone = Column(String(20))
     
-    # Authentication
-    password_hash = Column(String(255), nullable=False)
+    # Authentication — nullable for social-only owners (Apple / Google).
+    password_hash = Column(String(255), nullable=True)
     
     # Role & Status - use String to match PostgreSQL enum lowercase values
     role = Column(String(50), default='staff')

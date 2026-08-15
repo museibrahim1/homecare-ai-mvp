@@ -12,6 +12,7 @@ import { getAttribution, getSignupSource } from '@/lib/attribution';
 import { trackSignUp } from '@/lib/ga';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
 
 const API = '/api';
 
@@ -244,6 +245,12 @@ function RegisterForm() {
                 : 'This sets up your contracts with the right state rules.'}
             </p>
           </div>
+
+          {step === 1 && (
+            <div className="mb-6">
+              <SocialAuthButtons onError={setError} />
+            </div>
+          )}
 
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-2 mb-6">

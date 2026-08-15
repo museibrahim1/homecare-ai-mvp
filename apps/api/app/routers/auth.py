@@ -21,10 +21,16 @@ from app.core.security import (
     _get_redis,
 )
 from app.models.user import User
-from app.schemas.auth import LoginRequest, Token, MFALoginRequest, RefreshRequest
+from app.models.user_identity import UserIdentity
+from app.models.business import BusinessUser
+from app.schemas.auth import (
+    LoginRequest, Token, MFALoginRequest, RefreshRequest,
+    SocialLoginRequest, SocialLoginResponse,
+)
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
 from app.services.email import email_service
+from app.core.social_auth import verify_social_token, resolve_full_name
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +53,59 @@ def _issue_refresh_token(user: User) -> str:
     user.refresh_token_hash = _hash_refresh_token(token)
     user.refresh_token_expires_at = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)
     return token
+
+
+def _user_needs_onboarding(db: Session, user: User) -> bool:
+    """True when no BusinessUser shares this User's id (social User-first path)."""
+    return (
+        db.query(BusinessUser.id)
+        .filter(BusinessUser.id == user.id)
+        .first()
+        is None
+    )
+
+
+def _user_response(db: Session, user: User) -> UserResponse:
+    resp = UserResponse.model_validate(user)
+    resp.needs_onboarding = _user_needs_onboarding(db, user)
+    resp.has_password = bool(user.hashed_password)
+    return resp
+
+
+def _upsert_identity(
+    db: Session,
+    *,
+    user: User,
+    provider: str,
+    provider_user_id: str,
+    email: str | None,
+) -> UserIdentity:
+    identity = (
+        db.query(UserIdentity)
+        .filter(
+            UserIdentity.provider == provider,
+            UserIdentity.provider_user_id == provider_user_id,
+        )
+        .first()
+    )
+    if identity:
+        if identity.user_id != user.id:
+            raise HTTPException(
+                status_code=409,
+                detail="This sign-in is already linked to another account.",
+            )
+        if email:
+            identity.email = email
+        return identity
+    identity = UserIdentity(
+        user_id=user.id,
+        provider=provider,
+        provider_user_id=provider_user_id,
+        email=email,
+    )
+    db.add(identity)
+    return identity
+
 
 # Rate limit settings
 RATE_LIMIT_WINDOW = 60  # seconds
@@ -279,9 +338,110 @@ async def refresh_session(
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: User = Depends(get_current_user)):
+async def get_current_user_info(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get current authenticated user information."""
-    return current_user
+    return _user_response(db, current_user)
+
+
+@router.post("/social", response_model=SocialLoginResponse)
+async def social_login(
+    body: SocialLoginRequest,
+    req: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    """Sign in or sign up with Apple / Google identity token."""
+    client_ip = get_client_ip(req)
+    _check_rate_limit(f"social:{client_ip}")
+
+    claims = verify_social_token(body.provider, body.id_token, nonce=body.nonce)
+    provider = claims.provider
+    sub = claims.provider_user_id
+    email = claims.email
+
+    identity = (
+        db.query(UserIdentity)
+        .filter(
+            UserIdentity.provider == provider,
+            UserIdentity.provider_user_id == sub,
+        )
+        .first()
+    )
+
+    user: User | None = None
+    created = False
+
+    if identity:
+        user = db.query(User).filter(User.id == identity.user_id).first()
+        if not user:
+            db.delete(identity)
+            db.flush()
+            identity = None
+
+    if user is None and email:
+        user = db.query(User).filter(User.email == email).first()
+
+    if user is None:
+        if not email:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Apple did not provide an email. Use email signup or try again."
+                    if provider == "apple"
+                    else "Sign-in did not provide an email. Try again or use email signup."
+                ),
+            )
+        full_name = resolve_full_name(body.full_name, claims.name, email)
+        user = User(
+            email=email,
+            full_name=full_name,
+            hashed_password=None,
+            role="user",
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+        created = True
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+
+    # Mandatory: every successful social auth upserts the identity row
+    _upsert_identity(
+        db,
+        user=user,
+        provider=provider,
+        provider_user_id=sub,
+        email=email or user.email,
+    )
+
+    access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = _issue_refresh_token(user)
+    db.commit()
+    db.refresh(user)
+
+    log_action(
+        db=db,
+        user_id=user.id,
+        action="social_login" if not created else "social_signup",
+        entity_type="user",
+        entity_id=user.id,
+        description=f"{provider} sign-in",
+        changes={"provider": provider, "created": created},
+        ip_address=client_ip,
+    )
+
+    set_session_cookie(response, access_token)
+    user_payload = _user_response(db, user)
+    return SocialLoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        needs_onboarding=bool(user_payload.needs_onboarding),
+        user=user_payload,
+    )
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -307,7 +467,7 @@ async def update_current_user_info(
         current_user.phone = update.phone.strip()[:30]
     db.commit()
     db.refresh(current_user)
-    return current_user
+    return _user_response(db, current_user)
 
 
 @router.post("/session/clear")
@@ -670,8 +830,9 @@ class ChangePasswordRequest(BaseModel):
 
 
 class DeleteAccountRequest(BaseModel):
-    password: str
     confirmation: str  # Must be "DELETE MY ACCOUNT"
+    password: str | None = None  # Required when the account has a password
+    email_confirm: str | None = None  # Required for social-only (no password)
 
 
 @router.post("/change-password")
@@ -717,8 +878,17 @@ async def delete_account(
     if req.confirmation != "DELETE MY ACCOUNT":
         raise HTTPException(status_code=400, detail='Please type "DELETE MY ACCOUNT" to confirm.')
 
-    if not verify_password(req.password, current_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Password is incorrect.")
+    has_password = bool(current_user.hashed_password)
+    if has_password:
+        if not req.password or not verify_password(req.password, current_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Password is incorrect.")
+    else:
+        confirm_email = (req.email_confirm or "").strip().lower()
+        if not confirm_email or confirm_email != (current_user.email or "").lower():
+            raise HTTPException(
+                status_code=400,
+                detail="Type your account email to confirm deletion.",
+            )
 
     is_platform_admin = (
         getattr(current_user, 'role', '') == 'admin'

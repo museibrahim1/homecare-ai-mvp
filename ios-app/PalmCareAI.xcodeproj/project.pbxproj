@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		01C7BC688E5B3E2306E989C9 /* PalmStatusChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500DEEF976198365C0257355 /* PalmStatusChip.swift */; };
 		022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */; };
+		045FBC77C862AE2B763DA33C /* SocialOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6BC3C3FA6C4DD594DCE80B /* SocialOnboardingView.swift */; };
 		08A1F6ECC58F3235CABEEC32 /* PalmAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */; };
 		09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F93493E955750982C65A92 /* RecordOrbViews.swift */; };
 		0B44C3356220A46037ACDE7A /* ContractStylesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482E38D4A70B9B736C64D377 /* ContractStylesView.swift */; };
@@ -40,6 +41,7 @@
 		47688599EAC8C417CDB64E7F /* Transcript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54821013E627C715C0C90140 /* Transcript.swift */; };
 		48B4B1202276E4BD8FE16EBB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 805E8A85451B1B1FABD26BEC /* EventStore.swift */; };
 		4BC6C1F6558E9FF34676385D /* AddClientSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB658C2E819C3876B47045B2 /* AddClientSheet.swift */; };
+		4F95686DA227A1F320A92E65 /* AppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5A9D27346F0895827A632A /* AppleSignInCoordinator.swift */; };
 		500A1B620EC80EC18666B7F2 /* Calendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96879251DCD2FCF4C599FBF /* Calendar.swift */; };
 		51603051071C732DF846A278 /* ClientDetailView+Details.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC192AED9BBFA98A301CFAA8 /* ClientDetailView+Details.swift */; };
 		51D4E2126D45A578E484F820 /* DeleteAccountSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D711F21CC2AD05B3CCF6A697 /* DeleteAccountSheet.swift */; };
@@ -58,7 +60,9 @@
 		7F42517468F4C9C8E7426117 /* APIService+AuthClientsVisits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84658C2E024E0F219EEFFA49 /* APIService+AuthClientsVisits.swift */; };
 		81DA3979CD2EBF542B34428D /* EmailContractSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65CD0559B92384020DE6E53 /* EmailContractSheet.swift */; };
 		89AE5390D532494AB1FC00E6 /* VisitDetailView+Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F7055C89D42D284F45AEFA /* VisitDetailView+Shared.swift */; };
+		8C214AFA94F09FF1C6E27FE7 /* SocialSignInButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FD3446E86633B31F653E57 /* SocialSignInButtons.swift */; };
 		8F8596F06F1792DE50BFF41B /* ContractsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6ABB714B743F12ADFB3D66 /* ContractsView.swift */; };
+		8FFCDA80E65FBFDBCD0FC019 /* GoogleSignInHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 016FF00C73CEB29808D099CF /* GoogleSignInHelper.swift */; };
 		94648104A496234C1A8DB1D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1131D8E1B71DF1EA9DB392 /* PrivacyInfo.xcprivacy */; };
 		95C12418096B49755FFC26DF /* APIService+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */; };
 		985BF5A55F478AD20D82C0CC /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41812B9582222AD7FD8C0F01 /* WorkspaceView.swift */; };
@@ -73,6 +77,7 @@
 		C67C8A33E82D76416FD0DEFA /* EditProfileSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F571D0F9C831B327F6C328 /* EditProfileSheet.swift */; };
 		C97516E5CB88F6CE99E52F81 /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0648ACF01EC24C5F3EB2927 /* SupportView.swift */; };
 		CB8BFB4C0847725F56BE3B88 /* AssessmentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C6E60A4F45E08581497C8 /* AssessmentsListView.swift */; };
+		D00B8BFC805168700ED69C42 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 36BFFF209DDBB02B6C9ED42F /* GoogleSignIn */; };
 		D7ADB4CBA5E29CE2681B99C8 /* ClientPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF2030E920D45AD43C4EF04 /* ClientPickerSheet.swift */; };
 		D7BC1ADD03FE68A611EF1DC2 /* Billing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416BEF412DD2A345AF29F0DA /* Billing.swift */; };
 		DF8CA83F401B0268F58C05AB /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C5BA6789DF7D7FFA6B55EB /* PaywallView.swift */; };
@@ -87,6 +92,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		016FF00C73CEB29808D099CF /* GoogleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInHelper.swift; sourceTree = "<group>"; };
 		067E8000BCB0510C6C94785D /* APIService+AccountCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+AccountCalendar.swift"; sourceTree = "<group>"; };
 		07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionService.swift; sourceTree = "<group>"; };
 		0CB111B00D2725B560047368 /* SamplePacketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamplePacketView.swift; sourceTree = "<group>"; };
@@ -121,6 +127,7 @@
 		51D390C4585907D28007C7D7 /* ChangePasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordSheet.swift; sourceTree = "<group>"; };
 		54821013E627C715C0C90140 /* Transcript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcript.swift; sourceTree = "<group>"; };
 		5A1131D8E1B71DF1EA9DB392 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A6BC3C3FA6C4DD594DCE80B /* SocialOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialOnboardingView.swift; sourceTree = "<group>"; };
 		67623A35EA1ED4ABD37C0500 /* ClientDetailView+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClientDetailView+Data.swift"; sourceTree = "<group>"; };
 		694B1D5D023FE459648FA84F /* LandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingView.swift; sourceTree = "<group>"; };
 		6D7A50D477FC9EE6BF4A0B0F /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -142,6 +149,7 @@
 		A72217ACB74F974613CD621F /* EmailSenderConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSenderConnector.swift; sourceTree = "<group>"; };
 		A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareAIApp.swift; sourceTree = "<group>"; };
 		A96879251DCD2FCF4C599FBF /* Calendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calendar.swift; sourceTree = "<group>"; };
+		AA5A9D27346F0895827A632A /* AppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInCoordinator.swift; sourceTree = "<group>"; };
 		AA6B393D33E424DB4C4C8B75 /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		AE0C6D4F6B7BC50F2DF9EDD2 /* PalmCareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareTheme.swift; sourceTree = "<group>"; };
 		AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientsView.swift; sourceTree = "<group>"; };
@@ -151,6 +159,7 @@
 		BA7229E0471D9D4E3D984E2C /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		BB658C2E819C3876B47045B2 /* AddClientSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddClientSheet.swift; sourceTree = "<group>"; };
 		BC192AED9BBFA98A301CFAA8 /* ClientDetailView+Details.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClientDetailView+Details.swift"; sourceTree = "<group>"; };
+		C1FD3446E86633B31F653E57 /* SocialSignInButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialSignInButtons.swift; sourceTree = "<group>"; };
 		C4891A98B5FCFAF61CA98EF6 /* TermsPrivacySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsPrivacySheet.swift; sourceTree = "<group>"; };
 		D15C6C3E52AD92EF25A44FBF /* ClientDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDetailView.swift; sourceTree = "<group>"; };
 		D4E70150D66675D30AAE7599 /* Subscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscription.swift; sourceTree = "<group>"; };
@@ -159,6 +168,7 @@
 		D877C9B39FFC83C67359CB1B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		D8F2F27F9C01421C91DAE203 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
+		E47BB79E03F3805D6A2F240B /* PalmCareAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PalmCareAI.entitlements; sourceTree = "<group>"; };
 		E65CD0559B92384020DE6E53 /* EmailContractSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailContractSheet.swift; sourceTree = "<group>"; };
 		E8E9F160EB8FA04B4131FCB4 /* PalmCareAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PalmCareAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9F571D0F9C831B327F6C328 /* EditProfileSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileSheet.swift; sourceTree = "<group>"; };
@@ -167,6 +177,17 @@
 		ECAFF8E5E38F965015D46C93 /* AssessmentSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentSession.swift; sourceTree = "<group>"; };
 		F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+PipelineDocuments.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7CDF0CBAB920BEB76628BBB9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D00B8BFC805168700ED69C42 /* GoogleSignIn in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0E4FFEFAEEB641597E25AEB3 /* Products */ = {
@@ -282,6 +303,8 @@
 				694B1D5D023FE459648FA84F /* LandingView.swift */,
 				A62F08AE1496C16DBFA9D619 /* LoginView.swift */,
 				965C098053DF16C330D69A47 /* RegisterView.swift */,
+				5A6BC3C3FA6C4DD594DCE80B /* SocialOnboardingView.swift */,
+				C1FD3446E86633B31F653E57 /* SocialSignInButtons.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -354,10 +377,12 @@
 				EA911CA4DDC1736C1DAE4B66 /* APIService+EmailSender.swift */,
 				F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */,
 				A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */,
+				AA5A9D27346F0895827A632A /* AppleSignInCoordinator.swift */,
 				ECAFF8E5E38F965015D46C93 /* AssessmentSession.swift */,
 				25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */,
 				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				A72217ACB74F974613CD621F /* EmailSenderConnector.swift */,
+				016FF00C73CEB29808D099CF /* GoogleSignInHelper.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
 				256BBA375C224659F21FD086 /* LiveTranscriptMerger.swift */,
 				29C749DC52D1DFE6F0507AFC /* PendingUploadStore.swift */,
@@ -380,6 +405,7 @@
 			children = (
 				D4FFE119E970F306B1F7A575 /* Assets.xcassets */,
 				B7134EA3FF1A06C5E549D8A6 /* Info.plist */,
+				E47BB79E03F3805D6A2F240B /* PalmCareAI.entitlements */,
 				A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */,
 				5A1131D8E1B71DF1EA9DB392 /* PrivacyInfo.xcprivacy */,
 				1A73B0B1771A855E8EC6CD20 /* Models */,
@@ -399,6 +425,7 @@
 			buildPhases = (
 				CAE438DCF8F32C0B50FA2FF0 /* Sources */,
 				98BAA7D30467075526ACE536 /* Resources */,
+				7CDF0CBAB920BEB76628BBB9 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -406,6 +433,7 @@
 			);
 			name = PalmCareAI;
 			packageProductDependencies = (
+				36BFFF209DDBB02B6C9ED42F /* GoogleSignIn */,
 			);
 			productName = PalmCareAI;
 			productReference = E8E9F160EB8FA04B4131FCB4 /* PalmCareAI.app */;
@@ -435,6 +463,9 @@
 			);
 			mainGroup = 525788A2F8B929515D57D8F5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C7027CA3088F0648EAE8BB12 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E4FFEFAEEB641597E25AEB3 /* Products */;
 			projectDirPath = "";
@@ -471,6 +502,7 @@
 				4BC6C1F6558E9FF34676385D /* AddClientSheet.swift in Sources */,
 				2E2862862F270A98F5A3C404 /* AddEventSheet.swift in Sources */,
 				760E9D55BA37BE5FAAF39DD3 /* AnyCodable.swift in Sources */,
+				4F95686DA227A1F320A92E65 /* AppleSignInCoordinator.swift in Sources */,
 				42700FAFF50136D5A01B9936 /* AssessmentSession.swift in Sources */,
 				CB8BFB4C0847725F56BE3B88 /* AssessmentsListView.swift in Sources */,
 				4597BEB2AD073D9AED759923 /* AudioFilePicker.swift in Sources */,
@@ -498,6 +530,7 @@
 				307C2D67E03DB13022F73251 /* EventRow.swift in Sources */,
 				48B4B1202276E4BD8FE16EBB /* EventStore.swift in Sources */,
 				2801AB657853429D4D52D3C9 /* GoogleCalendarSetupSheet.swift in Sources */,
+				8FFCDA80E65FBFDBCD0FC019 /* GoogleSignInHelper.swift in Sources */,
 				441ED8E4CA766509026656D4 /* HomeView.swift in Sources */,
 				3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */,
 				1B809200B3B08DDE31D4DDF1 /* LiveTranscriptMerger.swift in Sources */,
@@ -520,6 +553,8 @@
 				9BE09CBD37BFB68BD551CA92 /* SamplePacketView.swift in Sources */,
 				141F927F15C477E97C29E0A1 /* SettingsComponents.swift in Sources */,
 				0B4988B6FD2460A6DC433938 /* SettingsView.swift in Sources */,
+				045FBC77C862AE2B763DA33C /* SocialOnboardingView.swift in Sources */,
+				8C214AFA94F09FF1C6E27FE7 /* SocialSignInButtons.swift in Sources */,
 				E5D41CF8D6974242651C9676 /* StoreKitService.swift in Sources */,
 				34EAF2246049B247E38B5FD8 /* Subscription.swift in Sources */,
 				C97516E5CB88F6CE99E52F81 /* SupportView.swift in Sources */,
@@ -612,6 +647,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PalmCareAI/PalmCareAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = BM5U63WP92;
@@ -688,6 +724,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PalmCareAI/PalmCareAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = BM5U63WP92;
@@ -724,6 +761,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C7027CA3088F0648EAE8BB12 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		36BFFF209DDBB02B6C9ED42F /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7027CA3088F0648EAE8BB12 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C67865E4E3807A66496AD76C /* Project object */;
 }

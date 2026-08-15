@@ -1,4 +1,5 @@
 from app.models.user import User
+from app.models.user_identity import UserIdentity
 from app.models.client import Client
 from app.models.visit import Visit
 from app.models.audio_asset import AudioAsset
@@ -21,6 +22,7 @@ from app.models.messaging import Channel, Message, Notification
 
 __all__ = [
     "User",
+    "UserIdentity",
     "Client",
     "Visit",
     "AudioAsset",

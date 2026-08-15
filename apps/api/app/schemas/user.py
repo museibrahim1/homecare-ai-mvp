@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional, List
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
 
@@ -35,3 +35,6 @@ class UserResponse(UserBase):
     mfa_enabled: Optional[bool] = False
     google_calendar_connected: Optional[bool] = False
     executive_title: Optional[str] = None
+    # Populated by /auth/me and /auth/social (not ORM columns)
+    needs_onboarding: Optional[bool] = None
+    has_password: Optional[bool] = None

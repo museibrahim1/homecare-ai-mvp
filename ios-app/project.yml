@@ -6,6 +6,11 @@ options:
   xcodeVersion: "15.0"
   createIntermediateGroups: true
 
+packages:
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 8.0.0
+
 settings:
   base:
     SWIFT_VERSION: "5.9"
@@ -23,9 +28,13 @@ targets:
     resources:
       - path: PalmCareAI/Resources
         buildPhase: resources
+    dependencies:
+      - package: GoogleSignIn
+        product: GoogleSignIn
     settings:
       base:
         INFOPLIST_FILE: PalmCareAI/Info.plist
+        CODE_SIGN_ENTITLEMENTS: PalmCareAI/PalmCareAI.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.palmcareai.app
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: BM5U63WP92

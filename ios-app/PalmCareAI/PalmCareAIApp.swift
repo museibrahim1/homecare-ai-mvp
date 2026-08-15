@@ -51,7 +51,10 @@ struct PalmCareAIApp: App {
         WindowGroup {
             Group {
                 if api.isAuthenticated {
-                    if useFaceID && !isBiometricUnlocked {
+                    if api.needsOnboarding {
+                        SocialOnboardingView()
+                            .environmentObject(api)
+                    } else if useFaceID && !isBiometricUnlocked {
                         FaceIDLockScreen(onUnlock: {
                             isBiometricUnlocked = true
                             registerInteraction()
@@ -90,6 +93,8 @@ struct PalmCareAIApp: App {
                     // and revocations made outside the app are enforced.
                     Task { await StoreKitService.shared.syncEntitlements() }
                     Task { await syncAnalyticsIdentity() }
+                    // Refresh needs_onboarding (social User-first path).
+                    Task { _ = try? await api.fetchUser(forceRefresh: true) }
                 } else {
                     PostHogService.shared.capture("auth_logout")
                     PostHogService.shared.reset()
