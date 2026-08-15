@@ -42,7 +42,7 @@ struct ClientDetailView: View {
             .padding(.top, 10)
             .padding(.bottom, 120)
         }
-        .background(Color.palmBackground)
+        .background(PalmGlassBackground())
         .navigationTitle(client.full_name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

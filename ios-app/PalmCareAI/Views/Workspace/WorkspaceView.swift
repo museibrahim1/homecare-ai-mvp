@@ -25,7 +25,7 @@ struct WorkspaceView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }

@@ -82,7 +82,7 @@ struct ClientsView: View {
                 }
             }
         }
-        .background(Color.palmBackground.ignoresSafeArea())
+        .background(PalmGlassBackground())
         .refreshable { await loadClients() }
         .task { await loadClients() }
         .sheet(isPresented: $showAddClient) {
@@ -135,7 +135,7 @@ struct ClientsView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.palmSecondary)
 
-                TextField("Search name, phone, or diagnosis", text: $searchText)
+                TextField("Search clients", text: $searchText)
                     .font(.system(size: 15))
                     .foregroundColor(.palmText)
                     .autocorrectionDisabled()
@@ -150,13 +150,11 @@ struct ClientsView: View {
                     .accessibilityLabel("Clear search")
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
-            .background(Color.palmFieldBg)
-            .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .palmGlassCard(radius: 22, fillOpacity: 0.7)
         }
-        .padding(.horizontal, 18)
+        .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 14)
     }
@@ -386,11 +384,8 @@ struct ClientCard: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.palmSecondary.opacity(0.4))
         }
-        .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder.opacity(0.7), lineWidth: 1))
-        .shadow(color: .black.opacity(0.03), radius: 5, y: 2)
+        .padding(16)
+        .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.62)
     }
 }
 

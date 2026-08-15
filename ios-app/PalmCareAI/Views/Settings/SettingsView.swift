@@ -49,7 +49,7 @@ struct SettingsView: View {
                 .padding(.top, 10)
                 .padding(.bottom, 120)
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showGoogleCalAuth) {

@@ -16,7 +16,7 @@ struct MainTabView: View {
             // (Command Center, Sales Leads, Investors, Analytics) live only in
             // the web app, so the phone always uses the normal layout.
             normalContent
-                .padding(.bottom, 72)
+                .padding(.bottom, 88)
 
             CustomTabBar(
                 selectedTab: $selectedTab,
@@ -24,6 +24,8 @@ struct MainTabView: View {
                     navigationResetIds[tab] = UUID()
                 }
             )
+            .padding(.horizontal, 24)
+            .padding(.bottom, 18)
         }
         .edgesIgnoringSafeArea(.bottom)
         .onChange(of: selectedTab) { newTab in
@@ -132,88 +134,78 @@ struct CustomTabBar: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 8)
-        .padding(.bottom, 26)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .frame(height: 64)
         .background(
-            Rectangle()
-                .fill(Color(UIColor.systemBackground))
-                .shadow(color: .black.opacity(0.06), radius: 8, y: -4)
+            Capsule(style: .continuous)
+                .fill(Color.white.opacity(0.62))
+                .background(.ultraThinMaterial, in: Capsule(style: .continuous))
                 .overlay(
-                    Rectangle().fill(Color.palmBorder.opacity(0.5)).frame(height: 1),
-                    alignment: .top
+                    Capsule(style: .continuous)
+                        .stroke(Color.white.opacity(0.92), lineWidth: 1)
                 )
+                .shadow(color: PalmGlass.shadow, radius: 20, y: 12)
         )
     }
 
     private func palmItButton(index: Int) -> some View {
         let isRecording = session.recorder.isRecording
-        // Red while recording (acts as a stop button) or while on the record
-        // tab; teal otherwise.
-        let isHot = isRecording || selectedTab == 2
-        return VStack(spacing: 4) {
-            Button {
-                if isRecording {
-                    selectedTab = index
-                    session.stopRecording(client: nil)
-                } else {
-                    if selectedTab == index {
-                        onTabReselected?(index)
-                    }
-                    selectedTab = index
+        // Red while recording (acts as a stop button); brand orb otherwise.
+        return Button {
+            if isRecording {
+                selectedTab = index
+                session.stopRecording(client: nil)
+            } else {
+                if selectedTab == index {
+                    onTabReselected?(index)
                 }
-            } label: {
-                ZStack {
+                selectedTab = index
+            }
+        } label: {
+            ZStack {
+                if isRecording {
                     Circle()
                         .fill(
-                            isHot
-                                ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            LinearGradient(
+                                colors: [.red, .red.opacity(0.85)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                        .frame(width: 44, height: 44)
-                        .shadow(
-                            color: (isHot ? Color.red : Color.palmPrimary).opacity(0.35),
-                            radius: 6, y: 2
-                        )
-
-                    Image(systemName: isRecording ? "stop.fill" : tabs[index].icon)
-                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 48, height: 48)
+                        .shadow(color: Color.red.opacity(0.35), radius: 8, y: 2)
+                    Image(systemName: "stop.fill")
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
+                } else {
+                    PalmOrbLogo(size: 48)
+                        .shadow(color: Color.palmPrimary.opacity(0.28), radius: 8, y: 2)
                 }
             }
-            .accessibilityLabel(isRecording ? "Stop recording" : "Record assessment")
-
-            Text(isRecording ? "Stop" : tabs[index].label)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(isRecording ? .red : (selectedTab == index ? .palmPrimary : .palmSecondary))
-                .lineLimit(1)
+            .frame(maxWidth: .infinity)
+            .offset(y: -6)
         }
-        .frame(maxWidth: .infinity)
+        .accessibilityLabel(isRecording ? "Stop recording" : "Record assessment")
     }
 
     private func standardTabButton(index: Int) -> some View {
-        Button {
+        let isSelected = selectedTab == index
+        return Button {
             if selectedTab == index {
                 onTabReselected?(index)
             }
             selectedTab = index
         } label: {
-            VStack(spacing: 4) {
-                Image(systemName: tabs[index].icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(
-                        selectedTab == index ? .palmPrimary : .palmSecondary
-                    )
-                    .frame(height: 44)
-
-                Text(tabs[index].label)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(
-                        selectedTab == index ? .palmPrimary : .palmSecondary
-                    )
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity)
+            Image(systemName: tabs[index].icon)
+                .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
+                .foregroundColor(isSelected ? .palmPrimary : Color.palmText.opacity(0.45))
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(isSelected ? Color.palmPrimary.opacity(0.12) : Color.clear)
+                )
+                .frame(maxWidth: .infinity)
         }
         .accessibilityLabel("\(tabs[index].label) tab")
     }

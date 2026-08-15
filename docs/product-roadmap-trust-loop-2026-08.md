@@ -52,10 +52,10 @@ Caregivers trust Palm in real homes. Weak wifi, mid-visit failures, and approve-
 **Done when:** New user sees one completed packet before subscription pressure.
 **Shipped:** Bundled Eleanor sample packet full-screen on first launch, then soft Paywall sheet.
 
-### P6 — Visual consistency (Pipeline Glass) ✅ started 2026-08-15
+### P6 — Visual consistency (Pipeline Glass) ✅ shipped 2026-08-15
 **Why:** Two apps feeling = lower trust.
-**Done when:** Shared PalmChip / tabs / cards; Record stays intentional dark hero; visit/contract chips match.
-**Shipped:** `PalmStatusChip` shared on visit status; contract inline Edit (title, rate, hours, terms). Full Glass pass can continue.
+**Done when:** Shared PalmChip / tabs / cards; Record stays intentional dark hero while idle; visit/contract chips match.
+**Shipped:** `PalmGlassSurface` mint wash + frost cards; floating glass tab bar with orb center; Home / Clients / Record idle / Settings / Workspace / Client detail restyled to Paper App Glass. Recording stage stays dark.
 
 ## Non-goals (this cycle)
 - Full DocuSign replacement in P4 (can start with Resend delivery/open/bounce).

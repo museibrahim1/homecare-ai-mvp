@@ -60,8 +60,15 @@ struct RecordView: View {
 
     var body: some View {
             ZStack {
-                Color(red: 12/255, green: 12/255, blue: 14/255)
-                    .ignoresSafeArea()
+                Group {
+                    if recorder.isRecording {
+                        Color(red: 12/255, green: 12/255, blue: 14/255)
+                    } else {
+                        PalmGlassBackground()
+                    }
+                }
+                .ignoresSafeArea()
+                .animation(.easeInOut(duration: 0.25), value: recorder.isRecording)
 
                 VStack(spacing: 0) {
                     topBar
@@ -437,27 +444,33 @@ struct RecordView: View {
     }
 
     private var topBar: some View {
-        HStack(alignment: .center, spacing: 12) {
+        let onDark = recorder.isRecording
+        let muted = onDark ? Color.white.opacity(0.45) : Color.palmSecondary
+        let primaryText = onDark ? Color.white.opacity(0.9) : Color.palmText
+        let chipFill = onDark ? Color.white.opacity(0.05) : Color.white.opacity(0.72)
+        let chipStroke = onDark ? Color.white.opacity(0.08) : Color.palmGlassBorder
+
+        return HStack(alignment: .center, spacing: 12) {
             Button { showClientPicker = true } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "person")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(selectedClient != nil ? .palmPrimaryLight : .white.opacity(0.45))
+                        .foregroundColor(selectedClient != nil ? .palmPrimary : muted)
                     Text(selectedClient?.full_name ?? "Select Client")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(selectedClient != nil ? .white.opacity(0.9) : .white.opacity(0.45))
+                        .foregroundColor(selectedClient != nil ? primaryText : muted)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     Image(systemName: "chevron.down")
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(muted.opacity(0.7))
                 }
                 .padding(.horizontal, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 36)
-                .background(Color.white.opacity(0.05))
+                .background(chipFill)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
             }
             .accessibilityLabel("Select client")
 
@@ -482,12 +495,12 @@ struct RecordView: View {
                             Text("Upload")
                                 .font(.system(size: 13, weight: .medium))
                         }
-                        .foregroundColor(.white.opacity(0.45))
+                        .foregroundColor(muted)
                         .padding(.horizontal, 14)
                         .frame(height: 36)
-                        .background(Color.white.opacity(0.05))
+                        .background(chipFill)
                         .clipShape(Capsule())
-                        .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                        .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
                     }
                     .accessibilityLabel("Upload audio file")
                 }
@@ -529,7 +542,25 @@ struct RecordView: View {
     // MARK: - Orb stage (idle + recording)
 
     private var idleLayout: some View {
-        orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording", size: 220)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Ready")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+                Text("Palm It")
+                    .font(.system(size: 34, weight: .heavy))
+                    .foregroundColor(.palmText)
+                    .tracking(-0.8)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+
+            Spacer(minLength: 12)
+            orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording", size: 220)
+            Spacer(minLength: 40)
+        }
     }
 
     private var recordingLayout: some View {
@@ -645,7 +676,7 @@ struct RecordView: View {
             if let caption {
                 Text(caption)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(isActive ? Color.white.opacity(0.5) : Color.palmSecondary)
                     .padding(.top, 18)
                 Spacer(minLength: 12)
             }

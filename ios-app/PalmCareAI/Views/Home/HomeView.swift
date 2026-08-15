@@ -28,114 +28,92 @@ struct HomeView: View {
     var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("PALM IT, \(firstName.uppercased()) 🌴")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.palmSecondary)
-                                .tracking(0.8)
-
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(greeting)
-                                .font(.system(size: 20, weight: .heavy))
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.palmSecondary)
+
+                            Text(firstName)
+                                .font(.system(size: 32, weight: .heavy))
                                 .foregroundColor(.palmText)
-                                .tracking(-0.4)
+                                .tracking(-0.8)
                         }
 
                         Spacer()
 
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient.palmPrimary)
-                                .frame(width: 36, height: 36)
-
-                            Text(String(firstName.prefix(1)).uppercased())
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(.white)
+                        Button { onNavigateToRecord?() } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.palmText)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white.opacity(0.72))
+                                        .overlay(Circle().stroke(Color.palmGlassBorder, lineWidth: 1))
+                                )
+                                .shadow(color: PalmGlass.shadow, radius: 10, y: 4)
                         }
-                        .accessibilityLabel("User profile")
+                        .accessibilityLabel("Start new recording")
                     }
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, 24)
                     .padding(.top, 14)
-                    .padding(.bottom, 14)
+                    .padding(.bottom, 18)
 
-                    HStack(spacing: 9) {
+                    HStack(spacing: 8) {
                         HomeStatCard(
-                            icon: "person.2.fill",
                             value: "\(clients.count)",
-                            label: "Clients",
-                            iconBg: Color.palmPrimary.opacity(0.08),
-                            iconColor: .palmPrimary
+                            label: "Clients"
                         )
                         HomeStatCard(
-                            icon: "calendar.badge.clock",
-                            value: "\(visitsThisWeek)",
-                            label: "This Week",
-                            iconBg: Color.blue.opacity(0.08),
-                            iconColor: .blue
+                            value: "\(dueCount)",
+                            label: "Due"
                         )
                         HomeStatCard(
-                            icon: "tray.full.fill",
-                            value: "\(queueActionCount)",
-                            label: "Waiting",
-                            iconBg: Color.orange.opacity(0.08),
-                            iconColor: .orange
+                            value: "\(needsReviewVisits.count)",
+                            label: "Review"
                         )
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 14)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
 
                     Button { onNavigateToRecord?() } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("START RECORDING")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .tracking(1.5)
+                        HStack(spacing: 14) {
+                            Image(systemName: "waveform")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.95))
+                                .frame(width: 36)
 
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text("Palm It Now")
-                                    .font(.system(size: 16, weight: .heavy))
+                                    .font(.system(size: 17, weight: .heavy))
                                     .foregroundColor(.white)
                                     .tracking(-0.3)
 
-                                Text("Tap to record a new assessment")
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.white.opacity(0.62))
+                                Text(palmItSubtitle)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.78))
+                                    .lineLimit(1)
                             }
 
-                            Spacer()
-
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white.opacity(0.18))
-                                    .frame(width: 42, height: 42)
-                                    .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
-
-                                Image(systemName: "mic.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.white)
-                            }
+                            Spacer(minLength: 0)
                         }
-                        .padding(16)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
                         .background(
-                            ZStack {
-                                LinearGradient.palmPrimary
-                                Circle()
-                                    .fill(Color.white.opacity(0.07))
-                                    .frame(width: 100, height: 100)
-                                    .offset(x: 80, y: -30)
-                            }
+                            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                                .fill(Color.palmPrimary)
                         )
-                        .cornerRadius(12)
-                        .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 4)
+                        .shadow(color: PalmGlass.tealShadow, radius: 14, y: 10)
                     }
-                    .accessibilityLabel("Start new recording")
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 18)
+                    .accessibilityLabel("Palm It Now")
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
 
                     HStack {
                         Text("Your Queue")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.palmText)
+                            .foregroundColor(.palmSecondary)
 
                         Spacer()
 
@@ -146,7 +124,7 @@ struct HomeView: View {
                         }
                         .accessibilityLabel("See all visits")
                     }
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 10)
 
                     if isLoading {
@@ -163,7 +141,7 @@ struct HomeView: View {
                             title: "Nothing waiting on you",
                             subtitle: "Palm It to start a visit, or check See all for past assessments."
                         )
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, 24)
                     } else {
                         VStack(alignment: .leading, spacing: 16) {
                             if !session.pendingUploads.isEmpty {
@@ -232,15 +210,34 @@ struct HomeView: View {
                                 badge: "Tomorrow"
                             )
                         }
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, 24)
                     }
 
                     Spacer().frame(height: 100)
                 }
             }
-            .background(Color.palmBackground)
+            .background(PalmGlassBackground())
             .refreshable { await loadData(forceRefresh: true) }
             .task { await loadData() }
+    }
+
+    private var dueCount: Int {
+        followUpTomorrowVisits.count + awaitingSignatureVisits.count
+    }
+
+    private var palmItSubtitle: String {
+        if let next = followUpTomorrowVisits.first,
+           let name = next.client?.full_name.split(separator: " ").first {
+            return "\(name) is due tomorrow"
+        }
+        if let next = awaitingSignatureVisits.first,
+           let name = next.client?.full_name.split(separator: " ").first {
+            return "\(name) awaits a signature"
+        }
+        if !needsReviewVisits.isEmpty {
+            return "\(needsReviewVisits.count) packet\(needsReviewVisits.count == 1 ? "" : "s") need review"
+        }
+        return "Tap to record a visit"
     }
 
     private var queueIsEmpty: Bool {
@@ -358,52 +355,66 @@ struct HomeView: View {
         tint: Color,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(tint)
-                    .frame(width: 8, height: 8)
-                Text(title)
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.palmText)
-                Spacer()
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.palmSecondary)
-                }
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.palmSecondary)
+            VStack(spacing: 0) {
+                content()
             }
-            content()
+            .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.58, padding: 4)
+            .overlay(alignment: .leading) {
+                Capsule()
+                    .fill(tint)
+                    .frame(width: 3)
+                    .padding(.vertical, 14)
+                    .padding(.leading, 10)
+            }
+            if let subtitle {
+                Text(subtitle)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+            }
         }
     }
 
     private func queueRow(title: String, detail: String, badge: String, badgeColor: Color) -> some View {
-        HStack(spacing: 11) {
+        HStack(spacing: 12) {
+            let initials = title.split(separator: " ").prefix(2).map { String($0.prefix(1)) }.joined().uppercased()
+            Circle()
+                .fill(Color.palmPrimary.opacity(0.12))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Text(initials.isEmpty ? "?" : initials)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.palmPrimary)
+                )
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.palmText)
                     .lineLimit(1)
                 Text(detail)
-                    .font(.system(size: 11))
+                    .font(.system(size: 12))
                     .foregroundColor(.palmSecondary)
                     .lineLimit(1)
             }
-            Spacer()
+            Spacer(minLength: 4)
             Text(badge)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(badgeColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
                 .background(badgeColor.opacity(0.12))
-                .cornerRadius(20)
+                .clipShape(Capsule())
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.palmSecondary.opacity(0.45))
         }
-        .padding(.horizontal, 13)
-        .padding(.vertical, 11)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .padding(.leading, 14)
+        .padding(.trailing, 12)
+        .padding(.vertical, 12)
     }
 
     private func formattedQueueDate(_ visit: Visit) -> String {
@@ -527,40 +538,23 @@ struct HomeView: View {
 // MARK: - Subviews
 
 struct HomeStatCard: View {
-    let icon: String
     let value: String
     let label: String
-    let iconBg: Color
-    let iconColor: Color
 
     var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(iconBg)
-                    .frame(width: 32, height: 32)
-
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundColor(iconColor)
-            }
-
-            Text(value)
-                .font(.system(size: 20, weight: .heavy))
-                .foregroundColor(.palmText)
-                .tracking(-0.5)
-
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.palmSecondary)
+            Text(value)
+                .font(.system(size: 28, weight: .heavy))
+                .foregroundColor(.palmText)
+                .tracking(-0.6)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 13)
-        .padding(.horizontal, 8)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 14)
+        .palmGlassCard(radius: PalmGlass.chipRadius, fillOpacity: 0.62)
         .accessibilityLabel("\(label): \(value)")
     }
 }
