@@ -30,9 +30,17 @@ logger = logging.getLogger(__name__)
 
 
 def update_pipeline_state(visit_id: str, step: str, status: str, error: str = None, **extra):
-    """Update the pipeline state for a specific step."""
+    """Update the pipeline state for a specific step.
+
+    Uses a row lock so parallel bill/note/contract steps do not clobber each other.
+    """
     with get_db_session() as db:
-        visit = db.query(Visit).filter(Visit.id == visit_id).first()
+        visit = (
+            db.query(Visit)
+            .filter(Visit.id == visit_id)
+            .with_for_update()
+            .first()
+        )
         if visit:
             step_data = {"status": status, **extra}
             if error:
@@ -104,7 +112,12 @@ def _load_transcript_text(visit_id: str) -> str:
 
 def _set_conversation_kind(visit_id: str, kind: str, classify_ms: int):
     with get_db_session() as db:
-        visit = db.query(Visit).filter(Visit.id == visit_id).first()
+        visit = (
+            db.query(Visit)
+            .filter(Visit.id == visit_id)
+            .with_for_update()
+            .first()
+        )
         if not visit:
             return
         visit.pipeline_state = {
