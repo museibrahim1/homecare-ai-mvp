@@ -44,7 +44,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: 'Can I use my existing contract templates?',
-        a: 'Yes! Upload your existing Word or PDF templates. Our OCR Template Engine scans every field, maps it to your database, and auto-fills contracts with client data. When you update your template, the engine reconciles changes.',
+        a: 'PalmCare generates the service agreement from the visit using the PALM template. Agencies review and send that document. Custom Word or PDF uploads are not supported.',
       },
       {
         q: 'Does PalmCare AI handle billing?',

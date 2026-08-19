@@ -161,6 +161,18 @@ const nextConfig = {
         destination: '/privacy#hipaa',
         permanent: true,
       },
+      // ADL logging was a local-demo CRM page. Send old bookmarks to Care Tracker.
+      {
+        source: '/adl-logging',
+        destination: '/care-tracker',
+        permanent: true,
+      },
+      // OCR template gallery is retired. Contracts use the PALM Paper template.
+      {
+        source: '/templates',
+        destination: '/contracts/new',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

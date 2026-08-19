@@ -9,7 +9,7 @@ import {
   Mic, Link2, FileText, ChevronRight, Shield, Building2, CreditCard,
   AlertTriangle, Ticket, Activity, DollarSign, Target, CalendarDays, TrendingUp,
   MessageSquare, MessagesSquare, FolderOpen, UserCog, Eye, RefreshCw,
-  HelpCircle, HeartPulse, FilePlus, Layers, Menu, X, Zap,
+  HelpCircle, FilePlus, Layers, Menu, X, Zap,
   ChevronDown, LucideIcon, Rocket, Phone
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -38,7 +38,6 @@ const clientsNavItems: NavItemData[] = [
   { href: '/clients', label: 'All Clients', icon: Users },
   { href: '/visits', label: 'Assessments', icon: Calendar },
   { href: '/care-tracker', label: 'Care Tracker', icon: Activity },
-  { href: '/adl-logging', label: 'ADL Logging', icon: HeartPulse },
   { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw },
 ];
 
@@ -50,7 +49,6 @@ const communicationNavItems: NavItemData[] = [
 const resourcesNavItems: NavItemData[] = [
   { href: '/proposals', label: 'Proposals', icon: FileText },
   { href: '/contracts/new', label: 'Create Contract', icon: FilePlus },
-  { href: '/templates', label: 'OCR Templates', icon: Layers },
   { href: '/documents', label: 'Documents', icon: FolderOpen },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/help', label: 'Help & Support', icon: HelpCircle },

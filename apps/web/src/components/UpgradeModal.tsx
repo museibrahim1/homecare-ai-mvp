@@ -22,7 +22,7 @@ const PLANS = [
       'AI voice to contract',
       'Smart SOAP notes',
       'Advanced analytics and reporting',
-      'Custom contract templates',
+      'PALM service agreement',
       '50 state compliance engine',
       'HIPAA BAA included',
       'Priority support',

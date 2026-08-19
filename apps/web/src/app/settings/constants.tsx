@@ -1,5 +1,5 @@
 // Shared constants for the Settings page.
-import { FileCheck, FileText, File, Image } from 'lucide-react';
+import { FileText, File, Image } from 'lucide-react';
 import { AgencySettings } from './types';
 
 export const API_BASE = '/api';
@@ -41,7 +41,6 @@ export const defaultAgency: AgencySettings = {
 };
 
 export const documentCategories = [
-  { id: 'contract_template', label: 'Contract Template', icon: FileCheck },
   { id: 'policy', label: 'Policy Document', icon: FileText },
   { id: 'procedure', label: 'Procedure Manual', icon: File },
   { id: 'letterhead', label: 'Letterhead / Branding', icon: Image },
