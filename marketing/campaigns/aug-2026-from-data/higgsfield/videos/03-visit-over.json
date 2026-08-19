@@ -1,0 +1,36 @@
+[
+  {
+    "id": "1b0f2185-7030-44ba-9f6a-760e9b72003d",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022925_1b0f2185-7030-44ba-9f6a-760e9b72003d.mp4",
+    "created_at": 1786674565.964605,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "POV hand holds iPhone outside a front door at golden hour. Subtle handheld breathe, phone screen stays sharp showing completed Notes Billables Contract cards in teal UI, soft porch light, photorealistic, no new text overlays.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "81b2326b-be53-4a7a-b7df-699c81309e79",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/81b2326b-be53-4a7a-b7df-699c81309e79_resize.jpg",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

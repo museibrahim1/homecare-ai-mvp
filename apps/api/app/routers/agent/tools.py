@@ -20,6 +20,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users, owned_caregivers
 from app.models.user import User, UserRole
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def _find_client(db: Session, user: User, name: str):
     from app.models.client import Client
     return (
         db.query(Client)
-        .filter(Client.created_by == user.id, Client.full_name.ilike(f"%{name}%"))
+        .filter(owned_by_visible_users(db, user), Client.full_name.ilike(f"%{name}%"))
         .first()
     )
 
@@ -58,7 +59,7 @@ def _find_latest_visit(db: Session, user: User, client_name: str):
 
 def _tool_list_clients(db: Session, user: User, search: str = "", status: str = "", limit: int = 20) -> dict:
     from app.models.client import Client
-    q = db.query(Client).filter(Client.created_by == user.id)
+    q = db.query(Client).filter(owned_by_visible_users(db, user))
     if search:
         pattern = f"%{search}%"
         q = q.filter(or_(Client.full_name.ilike(pattern), Client.phone.ilike(pattern), Client.primary_diagnosis.ilike(pattern)))
@@ -119,7 +120,7 @@ def _tool_update_client(db: Session, user: User, name: str, updates: dict) -> di
 def _tool_list_visits(db: Session, user: User, client_name: str = "", status: str = "", limit: int = 10) -> dict:
     from app.models.client import Client
     from app.models.visit import Visit
-    q = db.query(Visit).join(Client).filter(Client.created_by == user.id)
+    q = db.query(Visit).join(Client).filter(owned_by_visible_users(db, user))
     if client_name:
         q = q.filter(Client.full_name.ilike(f"%{client_name}%"))
     if status:
@@ -307,7 +308,7 @@ def _tool_complete_task(db: Session, user: User, task_title: str) -> dict:
 
 def _tool_list_caregivers(db: Session, user: User, search: str = "", certification: str = "", status: str = "", limit: int = 10) -> dict:
     from app.models.caregiver import Caregiver
-    q = db.query(Caregiver).filter(Caregiver.created_by == user.id)
+    q = db.query(Caregiver).filter(owned_caregivers(db, user))
     if search:
         q = q.filter(Caregiver.full_name.ilike(f"%{search}%"))
     if status:
@@ -330,7 +331,7 @@ def _tool_match_caregiver(db: Session, user: User, client_name: str) -> dict:
     client = _find_client(db, user, client_name)
     if not client:
         return {"error": f"No client found matching '{client_name}'"}
-    caregivers = db.query(Caregiver).filter(Caregiver.created_by == user.id, Caregiver.status == "active").all()
+    caregivers = db.query(Caregiver).filter(owned_caregivers(db, user), Caregiver.status == "active").all()
     if not caregivers:
         return {"error": "No active caregivers found"}
 
@@ -361,11 +362,11 @@ def _tool_get_reports_overview(db: Session, user: User) -> dict:
     from app.models.visit import Visit
     from app.models.contract import Contract
     week_ago = datetime.now(timezone.utc) - timedelta(days=7)
-    total_clients = db.query(func.count(Client.id)).filter(Client.created_by == user.id).scalar() or 0
-    active_clients = db.query(func.count(Client.id)).filter(Client.created_by == user.id, Client.status == "active").scalar() or 0
-    total_visits = db.query(func.count(Visit.id)).join(Client).filter(Client.created_by == user.id).scalar() or 0
-    recent_visits = db.query(func.count(Visit.id)).join(Client).filter(Client.created_by == user.id, Visit.created_at >= week_ago).scalar() or 0
-    total_contracts = db.query(func.count(Contract.id)).join(Client).filter(Client.created_by == user.id).scalar() or 0
+    total_clients = db.query(func.count(Client.id)).filter(owned_by_visible_users(db, user)).scalar() or 0
+    active_clients = db.query(func.count(Client.id)).filter(owned_by_visible_users(db, user), Client.status == "active").scalar() or 0
+    total_visits = db.query(func.count(Visit.id)).join(Client).filter(owned_by_visible_users(db, user)).scalar() or 0
+    recent_visits = db.query(func.count(Visit.id)).join(Client).filter(owned_by_visible_users(db, user), Visit.created_at >= week_ago).scalar() or 0
+    total_contracts = db.query(func.count(Contract.id)).join(Client).filter(owned_by_visible_users(db, user)).scalar() or 0
     return {
         "total_clients": total_clients, "active_clients": active_clients,
         "total_assessments": total_visits, "assessments_this_week": recent_visits,
@@ -381,7 +382,7 @@ def _tool_get_billing_report(db: Session, user: User, days: int = 30) -> dict:
     items = (
         db.query(BillableItem)
         .join(Visit).join(Client)
-        .filter(Client.created_by == user.id, BillableItem.created_at >= since)
+        .filter(owned_by_visible_users(db, user), BillableItem.created_at >= since)
         .all()
     )
     total_mins = sum(getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0) or 0 for i in items)
@@ -408,7 +409,7 @@ def _tool_get_usage(db: Session, user: User) -> dict:
     completed = (
         db.query(func.count(Visit.id))
         .join(Client)
-        .filter(Client.created_by == user.id, Visit.status == "completed")
+        .filter(owned_by_visible_users(db, user), Visit.status == "completed")
         .scalar() or 0
     )
     return {"completed_assessments": completed, "plan": "Free (50 max)" if completed < 50 else "Check subscription", "remaining": max(50 - completed, 0)}
@@ -525,7 +526,7 @@ def _tool_export_billing_report(db: Session, user: User, days: int = 30) -> dict
         db.query(BillableItem, Client.full_name, Visit.visit_date)
         .join(Visit, BillableItem.visit_id == Visit.id)
         .join(Client, Visit.client_id == Client.id)
-        .filter(Client.created_by == user.id, BillableItem.created_at >= since)
+        .filter(owned_by_visible_users(db, user), BillableItem.created_at >= since)
         .all()
     )
     if not items:

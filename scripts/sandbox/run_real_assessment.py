@@ -95,6 +95,9 @@ def summarize(session: requests.Session, headers: dict, visit_id: str) -> dict:
             "category": it.get("category"),
             "description": (it.get("description") or it.get("name") or "")[:200],
             "minutes": it.get("minutes") or it.get("adjusted_minutes") or it.get("duration_minutes"),
+            "is_flagged": it.get("is_flagged"),
+            "flag_reason": it.get("flag_reason"),
+            "is_approved": it.get("is_approved"),
         }
         for it in (items if isinstance(items, list) else [])
         if isinstance(it, dict)
@@ -107,6 +110,8 @@ def summarize(session: requests.Session, headers: dict, visit_id: str) -> dict:
     out["note_narrative"] = (nbody.get("narrative") or "")[:3000]
     sd = nbody.get("structured_data") or {}
     out["note_structured_keys"] = list(sd.keys()) if isinstance(sd, dict) else []
+    out["note_documentation_type"] = sd.get("documentation_type") if isinstance(sd, dict) else None
+    out["note_conversation_kind"] = sd.get("conversation_kind") if isinstance(sd, dict) else None
 
     cr = session.get(f"{API}/visits/{visit_id}/contract", headers=headers, timeout=30)
     cbody = cr.json() if cr.status_code == 200 else {}

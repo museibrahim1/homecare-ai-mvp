@@ -11,6 +11,7 @@ import base64
 import logging
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import get_user_visit
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -19,13 +20,11 @@ from app.models.note import Note
 from app.models.contract import Contract
 from app.models.agency_settings import AgencySettings
 from app.services.document_generation import (
-    generate_note_pdf, 
+    generate_note_pdf,
     generate_contract_pdf,
+    generate_care_plan_pdf,
     generate_note_docx,
     generate_contract_docx,
-    generate_contract_from_uploaded_template,
-    get_template_placeholders,
-    fill_docx_template,
 )
 from app.services.email import get_email_service
 from app.services import email_sender
@@ -41,17 +40,6 @@ class EmailContractRequest(BaseModel):
     cc_email: Optional[EmailStr] = None
 
 router = APIRouter()
-
-
-def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
-    """Helper to get a visit with data isolation enforced."""
-    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
-        Visit.id == visit_id,
-        Client.created_by == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
-    return visit
 
 
 @router.get("/template-status")
@@ -125,7 +113,13 @@ async def export_timesheet_csv(
     items = db.query(BillableItem).filter(
         BillableItem.visit_id == visit_id
     ).order_by(BillableItem.start_ms).all()
-    
+
+    if not items:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No billable items for this visit",
+        )
+
     # Create CSV
     output = io.StringIO()
     writer = csv.writer(output)
@@ -221,6 +215,45 @@ async def export_contract_pdf(
     )
 
 
+@router.get("/visits/{visit_id}/care-plan.pdf")
+async def export_care_plan_pdf(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export care plan as PDF (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
+    client = visit.client
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+
+    contract = db.query(Contract).filter(
+        Contract.client_id == visit.client_id
+    ).order_by(Contract.created_at.desc()).first()
+
+    plan_text = (client.care_plan or "").strip()
+    schedule = (contract.schedule if contract else None) or {}
+    goals = schedule.get("care_plan_goals") if isinstance(schedule, dict) else None
+    has_goals = isinstance(goals, dict) and any(goals.values())
+    has_services = bool(contract and contract.services)
+
+    if not plan_text and not has_goals and not has_services:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Care plan not found",
+        )
+
+    pdf_bytes = generate_care_plan_pdf(client, contract)
+    safe_name = (client.full_name or "client").replace(" ", "_")
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename={safe_name}_Care_Plan.pdf"
+        },
+    )
+
+
 @router.get("/visits/{visit_id}/contract-template.docx")
 async def export_contract_from_template(
     visit_id: UUID,
@@ -228,8 +261,9 @@ async def export_contract_from_template(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Export contract using the uploaded agency template (data isolation enforced).
-    Falls back to default DOCX if no template is uploaded.
+    Export the PALM service agreement as DOCX (data isolation enforced).
+    Uses the built-in Paper PALM template only. OCR and uploaded Word
+    galleries are retired.
     """
     visit = get_user_visit(db, visit_id, current_user)
     
@@ -239,86 +273,9 @@ async def export_contract_from_template(
     
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
-    
-    # --- Priority 1: Check OCR-scanned templates from contract_templates table ---
-    try:
-        from app.models.contract_template import ContractTemplate
-        ocr_template = db.query(ContractTemplate).filter(
-            ContractTemplate.owner_id == current_user.id,
-            ContractTemplate.is_active == True,
-        ).order_by(ContractTemplate.version.desc()).first()
 
-        if ocr_template and ocr_template.file_url:
-            logger.info(f"Using OCR template: {ocr_template.name} v{ocr_template.version}")
-            if ocr_template.file_url.startswith("data:"):
-                _, encoded = ocr_template.file_url.split(",", 1)
-                template_bytes = base64.b64decode(encoded)
-
-                agency_settings = db.query(AgencySettings).filter(
-                    AgencySettings.user_id == current_user.id
-                ).first()
-
-                placeholders = get_template_placeholders(visit.client, contract, agency_settings)
-                template_fm = ocr_template.field_mapping if hasattr(ocr_template, 'field_mapping') else None
-                filled_docx = fill_docx_template(template_bytes, placeholders, template_field_mapping=template_fm)
-
-                client_name = (visit.client.full_name or 'Client').replace(' ', '_')
-                filename = f"Contract_{client_name}.docx"
-
-                return StreamingResponse(
-                    iter([filled_docx]),
-                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
-                )
-    except Exception as e:
-        logger.warning(f"OCR template export failed, falling back: {e}")
-
-    # --- Priority 2: Check agency settings documents / legacy template ---
-    agency_settings = db.query(AgencySettings).filter(
-        AgencySettings.user_id == current_user.id
-    ).first()
-
-    template_base64 = None
-
-    if agency_settings and agency_settings.documents:
-        import json
-        try:
-            documents = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
-            for doc in documents:
-                if doc.get('category') == 'contract_template' and doc.get('content'):
-                    template_base64 = doc['content']
-                    if ',' in template_base64:
-                        template_base64 = template_base64.split(',')[1]
-                    break
-        except Exception as e:
-            logger.error(f"Failed to parse documents: {e}")
-
-    if not template_base64 and agency_settings and agency_settings.contract_template:
-        template_base64 = agency_settings.contract_template
-        if ',' in template_base64:
-            template_base64 = template_base64.split(',')[1]
-
-    if template_base64:
-        try:
-            decoded_bytes = base64.b64decode(template_base64)
-            if decoded_bytes[:4] == b'PK\x03\x04':
-                docx_bytes = generate_contract_from_uploaded_template(
-                    client=visit.client,
-                    contract=contract,
-                    template_base64=template_base64,
-                    agency_settings=agency_settings,
-                )
-                client_name = (visit.client.full_name or 'Client').replace(' ', '_')
-                filename = f"Contract_{client_name}.docx"
-                return StreamingResponse(
-                    iter([docx_bytes]),
-                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    headers={"Content-Disposition": f"attachment; filename={filename}"},
-                )
-        except Exception as e:
-            logger.error(f"Agency template filling failed: {e}")
-
-    # --- Priority 3: Fall back to default DOCX generation ---
+    # Built-in PALM Paper template only. OCR gallery and uploaded Word
+    # templates are retired.
     docx_bytes = generate_contract_docx(visit.client, contract)
     
     return StreamingResponse(

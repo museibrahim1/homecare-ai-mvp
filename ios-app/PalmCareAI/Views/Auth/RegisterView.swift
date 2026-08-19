@@ -196,14 +196,7 @@ struct RegisterView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .background(Color.white.opacity(0.85))
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
-            )
+            .palmGlassField(focused: focusedField == .password)
 
             if !password.isEmpty && !passwordIsStrong {
                 Label("At least 8 characters", systemImage: "info.circle")
@@ -334,14 +327,7 @@ struct RegisterView: View {
                 .focused($focusedField, equals: focus)
                 .onSubmit { focusedField = next }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color.white.opacity(0.85))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
-        )
+        .palmGlassField(focused: focusedField == focus)
     }
 
     /// Called only after the user has accepted the agreements on the consent

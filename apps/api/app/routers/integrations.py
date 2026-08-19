@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User, UserRole
 from app.models.client import Client
 
@@ -669,7 +670,7 @@ async def fetch_from_monday(
         existing = db.query(Client).filter(
             Client.external_id == str(item_id),
             Client.external_source == "monday.com",
-            Client.created_by == current_user.id
+            owned_by_visible_users(db, current_user)
         ).first()
         
         if existing:

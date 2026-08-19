@@ -39,6 +39,31 @@ final class StoreKitService: ObservableObject {
     /// whenever that set changes.
     var hasActiveEntitlement: Bool { !purchasedProductIDs.isEmpty }
 
+    /// Demo accounts and active Apple subscriptions skip paywall prompts.
+    func hasPaidAccess(email: String?) -> Bool {
+        if Self.isDemoEmail(email) { return true }
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("SKIP_PAYWALL")
+            || args.contains("AUTOMATION_STRESS_FLOW")
+            || args.contains("MARKETING_FULL_PIPELINE") {
+            return true
+        }
+        #endif
+        return hasActiveEntitlement
+    }
+
+    static func isDemoEmail(_ email: String?) -> Bool {
+        guard let raw = email?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+              !raw.isEmpty else { return false }
+        if raw == "demo-screenshots@palmtai.com" { return true }
+        if let bundleDemo = Bundle.main.infoDictionary?["DEMO_EMAIL"] as? String,
+           bundleDemo.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == raw {
+            return true
+        }
+        return false
+    }
+
     private var updatesTask: Task<Void, Never>?
 
     private init() {

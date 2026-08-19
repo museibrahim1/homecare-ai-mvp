@@ -1,0 +1,36 @@
+[
+  {
+    "id": "93802c38-7239-4a4e-bd72-6da02bff206c",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_031712_93802c38-7239-4a4e-bd72-6da02bff206c.mp4",
+    "created_at": 1786677432.387168,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Subtle handheld motion on a marketing card about phone assessments for home care. Keep typography sharp, gentle drift, photoreal lighting on the card surface, no new text overlays.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "55541b8d-4f5c-4e14-9549-7fd20af04e3b",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/55541b8d-4f5c-4e14-9549-7fd20af04e3b.png",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

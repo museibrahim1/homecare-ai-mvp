@@ -8,26 +8,13 @@ struct MainTabView: View {
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
     @AppStorage("hasSeenSampleVisit") private var hasSeenSampleVisit = false
+    /// Soft paywall after first launch into the main app (post-sample).
+    @AppStorage("hasShownLaunchPaywall") private var hasShownLaunchPaywall = false
     @State private var showSamplePacket = false
+    @State private var showSoftPaywall = false
 
-    /// The only ways past the hard paywall gate are a real Apple trial/purchase
-    /// or, for automated test runs, an explicit launch argument. There is no
-    /// visible "skip" button anywhere in the UI.
-    private var paywallBypass: Bool {
-        #if DEBUG
-        let args = ProcessInfo.processInfo.arguments
-        return args.contains("SKIP_PAYWALL") || args.contains("AUTOMATION_STRESS_FLOW")
-        #else
-        return false
-        #endif
-    }
-
-    /// Present the required paywall once the user has seen (or skipped) the
-    /// sample packet and still holds no active subscription entitlement.
-    private var shouldGateOnPaywall: Bool {
-        guard !paywallBypass else { return false }
-        guard hasSeenSampleVisit else { return false }
-        return !store.hasActiveEntitlement
+    private var hasAccess: Bool {
+        store.hasPaidAccess(email: api.cachedUserEmail)
     }
 
     var body: some View {
@@ -48,16 +35,20 @@ struct MainTabView: View {
             .padding(.bottom, 18)
         }
         .edgesIgnoringSafeArea(.bottom)
+        // Pipeline / App Glass artboards are day mint. Force light so the
+        // running app matches Paper rather than iOS dark mode night wash.
+        .preferredColorScheme(.light)
         .onChange(of: selectedTab) { newTab in
             PostHogService.shared.capture("tab_selected", properties: [
                 "tab_index": newTab,
             ])
         }
         .onAppear {
-            // Re-verify subscription state on every launch so renewals,
-            // refunds, and revocations made outside the app are enforced and
-            // the hard gate reflects the true entitlement.
-            Task { await store.syncEntitlements() }
+            Task {
+                await store.syncEntitlements()
+                _ = try? await api.fetchUser(forceRefresh: false)
+                promptLaunchPaywallIfNeeded()
+            }
 
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
@@ -66,7 +57,6 @@ struct MainTabView: View {
             }
             #endif
             if !hasSeenSampleVisit {
-                // Slight delay so Home paints first, then the wow lands.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     showSamplePacket = true
                 }
@@ -75,23 +65,29 @@ struct MainTabView: View {
         .fullScreenCover(isPresented: $showSamplePacket, onDismiss: {
             hasSeenSampleVisit = true
             PostHogService.shared.capture("sample_packet_dismissed")
-            // After the wow, `shouldGateOnPaywall` flips true (unless already
-            // subscribed) and the required paywall below takes over.
+            promptLaunchPaywallIfNeeded()
         }) {
             SamplePacketView {
                 showSamplePacket = false
             }
         }
-        // Hard subscription gate: this cover cannot be dismissed by the user.
-        // It appears whenever `shouldGateOnPaywall` is true and disappears only
-        // once an entitlement becomes active (which flips the value to false).
-        .fullScreenCover(isPresented: Binding(
-            get: { shouldGateOnPaywall },
-            set: { _ in }
-        )) {
-            PaywallView(isRequired: true)
+        // Soft prompt: browse freely; Done / swipe dismisses. Assessment start
+        // has its own gate in RecordView.
+        .sheet(isPresented: $showSoftPaywall) {
+            PaywallView(isRequired: false, allowsNotNow: true)
                 .environmentObject(api)
         }
+    }
+
+    private func promptLaunchPaywallIfNeeded() {
+        guard hasSeenSampleVisit else { return }
+        guard !hasShownLaunchPaywall else { return }
+        guard !hasAccess else {
+            hasShownLaunchPaywall = true
+            return
+        }
+        hasShownLaunchPaywall = true
+        showSoftPaywall = true
     }
 
     // MARK: - Caregiver Layout
@@ -104,12 +100,14 @@ struct MainTabView: View {
             NavigationStack {
                 HomeView(onNavigateToRecord: { selectedTab = 2 })
                     .environmentObject(api)
+                    .palmTransparentNavBar()
             }
             .id(navigationResetIds[0])
         case 1:
             NavigationStack {
                 ClientsView()
                     .environmentObject(api)
+                    .palmTransparentNavBar()
             }
             .id(navigationResetIds[1])
         case 2:
@@ -126,12 +124,14 @@ struct MainTabView: View {
             NavigationStack {
                 SettingsView()
                     .environmentObject(api)
+                    .palmTransparentNavBar()
             }
             .id(navigationResetIds[4])
         default:
             NavigationStack {
                 HomeView(onNavigateToRecord: { selectedTab = 2 })
                     .environmentObject(api)
+                    .palmTransparentNavBar()
             }
             .id(navigationResetIds[0])
         }
@@ -142,6 +142,7 @@ struct MainTabView: View {
 
 struct CustomTabBar: View {
     @EnvironmentObject var session: AssessmentSession
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var selectedTab: Int
     var onTabReselected: ((Int) -> Void)?
 
@@ -150,8 +151,11 @@ struct CustomTabBar: View {
         ("person.2.fill", "Clients"),
         ("mic.fill", "Palm It"),
         ("square.grid.2x2.fill", "Workspace"),
-        ("gearshape.fill", "Settings"),
+        // Paper App/Pipeline Glass uses a profile glyph for the last tab (Settings).
+        ("person.crop.circle", "Settings"),
     ]
+
+    private var isNight: Bool { colorScheme == .dark }
 
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
@@ -168,13 +172,25 @@ struct CustomTabBar: View {
         .frame(height: 64)
         .background(
             Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.62))
-                .background(.ultraThinMaterial, in: Capsule(style: .continuous))
+                .fill(isNight ? Color.palmNightGlassFill : Color.white.opacity(0.62))
+                .background {
+                    if !isNight {
+                        Capsule(style: .continuous)
+                            .fill(.ultraThinMaterial)
+                    }
+                }
                 .overlay(
                     Capsule(style: .continuous)
-                        .stroke(Color.white.opacity(0.92), lineWidth: 1)
+                        .stroke(
+                            isNight ? Color.palmNightChromeBorder : Color.white.opacity(0.92),
+                            lineWidth: 1
+                        )
                 )
-                .shadow(color: PalmGlass.shadow, radius: 20, y: 12)
+                .shadow(
+                    color: isNight ? PalmGlass.nightShadow : PalmGlass.shadow,
+                    radius: isNight ? 24 : 20,
+                    y: isNight ? 14 : 12
+                )
         )
     }
 

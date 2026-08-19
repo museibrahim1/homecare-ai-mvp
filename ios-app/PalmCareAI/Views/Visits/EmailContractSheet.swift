@@ -70,11 +70,28 @@ struct EmailContractSheet: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack {
-            Text("Email Agreement")
-                .font(.system(size: 19, weight: .heavy))
-                .foregroundColor(.palmText)
-                .tracking(-0.4)
+        // Pipeline Glass page header (Paper Send): client first-name eyebrow +
+        // large "Send" title sitting directly on the mint wash.
+        let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255)
+        let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255)
+        let firstName: String = {
+            let full = clientName ?? ""
+            return full.split(separator: " ").first.map(String.init) ?? full
+        }()
+
+        return HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 4) {
+                if !firstName.isEmpty {
+                    Text(firstName)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(muted)
+                        .lineLimit(1)
+                }
+                Text("Send")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(ink)
+                    .tracking(-1.4)
+            }
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
@@ -86,13 +103,9 @@ struct EmailContractSheet: View {
             }
             .accessibilityLabel("Close")
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 14)
+        .padding(.horizontal, 24)
+        .padding(.top, 8)
         .padding(.bottom, 12)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Color.palmGlassBorder.opacity(0.7)).frame(height: 1)
-        }
     }
 
     // MARK: - Form

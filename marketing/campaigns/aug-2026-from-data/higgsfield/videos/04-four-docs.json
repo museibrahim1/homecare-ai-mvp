@@ -1,0 +1,36 @@
+[
+  {
+    "id": "ecef8589-023a-4061-bcfb-284465a816b4",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_023239_ecef8589-023a-4061-bcfb-284465a816b4.mp4",
+    "created_at": 1786674759.586343,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Slow product push-in on iPhone flat on desk showing four teal PalmCare document cards. Soft studio light shimmer, subtle camera move, keep UI readable, photorealistic, no new text overlays.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "85b824cf-e7af-421d-ad21-3820fb7e3b9d",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/85b824cf-e7af-421d-ad21-3820fb7e3b9d_resize.jpg",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

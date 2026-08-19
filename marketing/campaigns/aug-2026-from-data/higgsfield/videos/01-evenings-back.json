@@ -1,0 +1,36 @@
+[
+  {
+    "id": "b5f62db3-e141-4152-8e73-c44a6c27b39f",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022636_b5f62db3-e141-4152-8e73-c44a6c27b39f.mp4",
+    "created_at": 1786674396.8233,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Slow subtle push-in on a home care nurse holding an iPhone during a living-room visit. Phone screen shows teal recording waveform. Natural hand micro-motion, soft window light, photorealistic documentary, no text overlays, no logos flying in, keep the same composition.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "fab221f5-60ba-4ab9-a942-b9d8b180978e",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/fab221f5-60ba-4ab9-a942-b9d8b180978e_resize.jpg",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

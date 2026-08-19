@@ -1,85 +1,83 @@
 import SwiftUI
 
 extension ClientDetailView {
-    // MARK: - Profile Card
+    // MARK: - Hero Card
 
-    var profileCard: some View {
-        VStack(spacing: 16) {
-            ClientAvatar(name: client.full_name, size: 72)
+    var heroCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                ClientAvatar(name: client.full_name, size: 64)
 
-            VStack(spacing: 6) {
-                Text(client.full_name)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.palmText)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(client.full_name)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.palmInk)
+                        .tracking(-0.66)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                if let preferred = client.preferred_name, !preferred.isEmpty {
-                    Text("\"\(preferred)\"")
-                        .font(.system(size: 13))
-                        .foregroundColor(.palmSecondary)
+                    if let preferred = cleaned(client.preferred_name) {
+                        Text("\"\(preferred)\"")
+                            .font(.system(size: 13))
+                            .foregroundColor(.palmGlassMuted)
+                    }
+
+                    if let diagnosis = cleaned(client.primary_diagnosis) {
+                        Text(humanized(diagnosis))
+                            .font(.system(size: 14))
+                            .foregroundColor(.palmGlassMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
 
-                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                    Text(diagnosis.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(.system(size: 13))
-                        .foregroundColor(.palmSecondary)
-                        .multilineTextAlignment(.center)
+                Spacer(minLength: 0)
+            }
+
+            if statusLabel != nil || careLevelLabel != nil || cleaned(client.date_of_birth) != nil {
+                HStack(spacing: 8) {
+                    if let status = statusLabel {
+                        HStack(spacing: 6) {
+                            Circle().fill(statusColor).frame(width: 6, height: 6)
+                            Text(status)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(statusColor)
+                        }
+                        .padding(.horizontal, 11)
+                        .frame(height: 26)
+                        .background(Capsule(style: .continuous).fill(statusColor.opacity(0.12)))
+                    }
+
+                    if let care = careLevelLabel {
+                        Text(care)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(careLevelColor)
+                            .padding(.horizontal, 11)
+                            .frame(height: 26)
+                            .background(Capsule(style: .continuous).fill(careLevelColor.opacity(0.12)))
+                    }
+
+                    if let dob = cleaned(client.date_of_birth) {
+                        Text("Born \(dob.palmFormattedDateOnly)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(red: 71 / 255, green: 85 / 255, blue: 105 / 255))
+                            .padding(.horizontal, 11)
+                            .frame(height: 26)
+                            .background(Capsule(style: .continuous).fill(Color(red: 241 / 255, green: 245 / 255, blue: 249 / 255)))
+                    }
                 }
             }
 
-            HStack(spacing: 10) {
-                HStack(spacing: 5) {
-                    Circle().fill(statusColor).frame(width: 7, height: 7)
-                    Text(client.displayStatus.capitalized)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(statusColor)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 5)
-                .background(statusColor.opacity(0.1))
-                .cornerRadius(14)
-
-                if let careLevel = client.care_level, !careLevel.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.palmPink)
-                        Text(careLevel.capitalized)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmPink)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 5)
-                    .background(Color.palmPink.opacity(0.08))
-                    .cornerRadius(14)
-                }
-
-                if let dob = client.date_of_birth, !dob.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "birthday.cake")
-                            .font(.system(size: 10))
-                            .foregroundColor(.palmPurple)
-                        Text(dob.palmFormattedDateOnly)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmPurple)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 5)
-                    .background(Color.palmPurple.opacity(0.08))
-                    .cornerRadius(14)
-                }
-            }
-
-            if let phone = client.phone, !phone.isEmpty {
-                HStack(spacing: 16) {
-                    actionButton(icon: "phone.fill", label: "Call", color: .palmGreen) {
-                        // Strip formatting — "(555) 123-4567" isn't a valid tel: URL.
-                        let dialable = phone.filter { $0.isNumber || $0 == "+" }
-                        if !dialable.isEmpty, let url = URL(string: "tel:\(dialable)") {
-                            UIApplication.shared.open(url)
+            if cleaned(client.phone) != nil || cleaned(client.email) != nil {
+                HStack(spacing: 10) {
+                    if let phone = cleaned(client.phone) {
+                        heroAction(icon: "phone.fill", label: "Call", filled: true) {
+                            let dialable = phone.filter { $0.isNumber || $0 == "+" }
+                            if !dialable.isEmpty, let url = URL(string: "tel:\(dialable)") {
+                                UIApplication.shared.open(url)
+                            }
                         }
                     }
-                    if let email = client.email, !email.isEmpty {
-                        actionButton(icon: "envelope.fill", label: "Email", color: .palmBlue) {
+                    if let email = cleaned(client.email) {
+                        heroAction(icon: "envelope.fill", label: "Email", filled: false) {
                             if let url = URL(string: "mailto:\(email)") {
                                 UIApplication.shared.open(url)
                             }
@@ -88,296 +86,346 @@ extension ClientDetailView {
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 22)
-        .padding(.horizontal, 16)
-        .palmGlassCard(radius: 24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .palmGlassCard(radius: 28, fillOpacity: 0.58)
     }
 
-    func actionButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+    /// Care-level pill color, matching the Clients list (High → danger,
+    /// Moderate → warning, Low → success).
+    var careLevelColor: Color {
+        switch (client.care_level ?? "").uppercased() {
+        case "HIGH": return Color(red: 220 / 255, green: 38 / 255, blue: 38 / 255)
+        case "MODERATE", "MEDIUM": return .palmOrange
+        case "LOW": return .palmGreen
+        default: return statusColor
+        }
+    }
+
+    /// Paper hero action: filled teal "Call", glass "Email". Both 46pt tall.
+    func heroAction(icon: String, label: String, filled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(color)
-                    .frame(width: 40, height: 40)
-                    .background(color.opacity(0.1))
-                    .cornerRadius(12)
                 Text(label)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(color)
+                    .font(.system(size: 15, weight: .semibold))
             }
+            .foregroundColor(filled ? .white : .palmTeal600)
+            .frame(maxWidth: .infinity)
+            .frame(height: 46)
+            .background(
+                Group {
+                    if filled {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.palmPrimary)
+                            .shadow(color: Color.palmPrimary.opacity(0.25), radius: 9, y: 8)
+                    } else {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white.opacity(0.74))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(Color.white.opacity(0.92), lineWidth: 1)
+                            )
+                    }
+                }
+            )
         }
         .accessibilityLabel(label)
     }
 
-    // MARK: - Contact Section
+    // MARK: - Contact
 
     var contactSection: some View {
-        DetailSection(title: "Contact", icon: "phone.fill", iconColor: .palmPrimary) {
-            VStack(spacing: 0) {
-                if let phone = client.phone, !phone.isEmpty {
-                    detailRow(icon: "phone.fill", label: "Phone", value: phone.palmFormattedPhone, color: .palmPrimary)
-                }
-                if let phone2 = client.phone_secondary, !phone2.isEmpty {
-                    detailDivider
-                    detailRow(icon: "phone", label: "Secondary Phone", value: phone2.palmFormattedPhone, color: .palmPrimary)
-                }
-                if let email = client.email, !email.isEmpty {
-                    detailDivider
-                    detailRow(icon: "envelope.fill", label: "Email", value: email, color: .palmBlue)
-                }
-                if let address = client.address, !address.isEmpty {
-                    detailDivider
-                    let full = [address, client.city, client.state, client.zip_code]
-                        .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: ", ")
-                    detailRow(icon: "mappin.circle.fill", label: "Address", value: full, color: .palmOrange)
-                }
-            }
-        }
-    }
-
-    // MARK: - Emergency Section
-
-    var emergencySection: some View {
-        DetailSection(title: "Emergency Contacts", icon: "exclamationmark.shield.fill", iconColor: .red) {
-            VStack(spacing: 0) {
-                if let ecName = client.emergency_contact_name, !ecName.isEmpty {
-                    emergencyContactCard(
-                        label: "Primary Contact",
-                        name: ecName,
-                        phone: client.emergency_contact_phone,
-                        relationship: client.emergency_contact_relationship,
-                        color: .red
-                    )
-                }
-                if let ec2Name = client.emergency_contact_2_name, !ec2Name.isEmpty {
-                    detailDivider
-                    emergencyContactCard(
-                        label: "Secondary Contact",
-                        name: ec2Name,
-                        phone: client.emergency_contact_2_phone,
-                        relationship: client.emergency_contact_2_relationship,
-                        color: .palmOrange
-                    )
-                }
-            }
-        }
-    }
-
-    func emergencyContactCard(label: String, name: String, phone: String?, relationship: String?, color: Color) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "person.crop.circle.badge.exclamationmark.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(color)
-                .frame(width: 30, height: 30)
-                .background(color.opacity(0.1))
-                .cornerRadius(8)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.palmSecondary)
-
-                Text(name)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.palmText)
-
-                HStack(spacing: 12) {
-                    if let phone = phone, !phone.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "phone.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(.palmPrimary)
-                            Text(phone.palmFormattedPhone)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.palmText.opacity(0.8))
-                        }
-                    }
-                    if let rel = relationship, !rel.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "person.2.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(.palmPurple)
-                            Text(rel)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.palmText.opacity(0.8))
-                        }
-                    }
-                }
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-    }
-
-    // MARK: - Medical Section
-
-    var medicalSection: some View {
-        DetailSection(title: "Medical", icon: "heart.fill", iconColor: .red) {
+        DetailSection(title: "Contact") {
             VStack(spacing: 0) {
                 var showDivider = false
 
-                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                    detailRow(icon: "stethoscope", label: "Primary Diagnosis", value: diagnosis.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPrimary)
+                if let phone = cleaned(client.phone) {
+                    factRow(label: "Phone", value: phone.palmFormattedPhone)
                     let _ = (showDivider = true)
                 }
-                if let secondary = client.secondary_diagnoses, !secondary.isEmpty {
+                if let phone2 = cleaned(client.phone_secondary) {
                     if showDivider { detailDivider }
-                    detailRow(icon: "list.clipboard", label: "Secondary Diagnoses", value: secondary, color: .palmPrimary)
+                    factRow(label: "Secondary Phone", value: phone2.palmFormattedPhone)
                     let _ = (showDivider = true)
                 }
-                if let meds = client.medications, !meds.isEmpty {
+                if let email = cleaned(client.email) {
                     if showDivider { detailDivider }
-                    detailRow(icon: "pills.fill", label: "Medications", value: meds, color: .palmPurple)
+                    factRow(label: "Email", value: email)
                     let _ = (showDivider = true)
                 }
-                if let allergies = client.allergies, !allergies.isEmpty {
+                let address = [client.address, client.city, client.state, client.zip_code]
+                    .compactMap { cleaned($0) }
+                    .joined(separator: ", ")
+                if !address.isEmpty {
                     if showDivider { detailDivider }
-                    detailRow(icon: "allergens", label: "Allergies", value: allergies, color: .red)
-                    let _ = (showDivider = true)
-                }
-                if let physician = client.physician_name, !physician.isEmpty {
-                    if showDivider { detailDivider }
-                    let physicianDetail = [physician, client.physician_phone?.palmFormattedPhone]
-                        .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " · ")
-                    detailRow(icon: "person.badge.shield.checkmark.fill", label: "Physician", value: physicianDetail, color: .palmBlue)
-                    let _ = (showDivider = true)
-                }
-                if let mobility = client.mobility_status, !mobility.isEmpty {
-                    if showDivider { detailDivider }
-                    detailRow(icon: "figure.walk", label: "Mobility", value: mobility.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPurple)
-                    let _ = (showDivider = true)
-                }
-                if let cognitive = client.cognitive_status, !cognitive.isEmpty {
-                    if showDivider { detailDivider }
-                    detailRow(icon: "brain.head.profile", label: "Cognitive", value: cognitive.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPurple)
-                    let _ = (showDivider = true)
-                }
-                if let medNotes = client.medical_notes, !medNotes.isEmpty {
-                    if showDivider { detailDivider }
-                    medicalNotesView(medNotes)
+                    factRow(label: "Address", value: address)
                 }
             }
         }
     }
 
-    // MARK: - Care Plan Section
+    // MARK: - Emergency
+
+    var emergencySection: some View {
+        DetailSection(title: "Emergency") {
+            let primaryName = cleaned(client.emergency_contact_name)
+            let usePrimary = primaryName != nil
+            let name = usePrimary ? primaryName! : (cleaned(client.emergency_contact_2_name) ?? "")
+            let relationship = usePrimary
+                ? cleaned(client.emergency_contact_relationship)
+                : cleaned(client.emergency_contact_2_relationship)
+            let phone = usePrimary
+                ? cleaned(client.emergency_contact_phone)
+                : cleaned(client.emergency_contact_2_phone)
+
+            let subParts = [relationship, phone?.palmFormattedPhone].compactMap { $0 }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmInk)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !subParts.isEmpty {
+                    Text(subParts.joined(separator: " · "))
+                        .font(.system(size: 12))
+                        .foregroundColor(.palmHint)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+        }
+    }
+
+    // MARK: - Medical (short fact rows only — never the raw transcript)
+
+    var medicalSection: some View {
+        DetailSection(title: "Medical") {
+            VStack(spacing: 0) {
+                if let diagnosis = cleaned(client.primary_diagnosis) {
+                    factRow(label: "Primary Diagnosis", value: humanized(diagnosis))
+                    detailDivider
+                }
+                if let allergies = cleaned(client.allergies) {
+                    factRow(label: "Allergies", value: allergies)
+                    detailDivider
+                }
+                if let meds = cleaned(client.medications) {
+                    factRow(label: "Medications", value: meds)
+                    detailDivider
+                }
+                if let mobility = cleaned(client.mobility_status) {
+                    factRow(label: "Mobility", value: humanized(mobility))
+                    detailDivider
+                }
+                if let cognitive = cleaned(client.cognitive_status) {
+                    factRow(label: "Cognitive", value: humanized(cognitive))
+                    detailDivider
+                } else {
+                    emptyFactRow(label: "Cognitive")
+                    detailDivider
+                }
+                if let physician = cleaned(client.physician_name) {
+                    let detail = [physician, cleaned(client.physician_phone)?.palmFormattedPhone]
+                        .compactMap { $0 }
+                        .joined(separator: " · ")
+                    factRow(label: "Physician", value: detail)
+                } else {
+                    emptyFactRow(label: "Physician")
+                }
+            }
+        }
+    }
+
+    // MARK: - Latest Assessment (optional, summarized)
+
+    @ViewBuilder
+    var latestAssessmentSection: some View {
+        if let block = latestAssessment(), let summary = assessmentSummary(block) {
+            DetailSection(title: "Latest Assessment") {
+                VStack(alignment: .leading, spacing: 12) {
+                    if let date = block.date {
+                        datePill(date)
+                    }
+
+                    Text(summary)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(.palmText.opacity(0.88))
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let visit = latestAssessmentVisit {
+                        NavigationLink(destination:
+                            VisitDetailView(visitId: visit.id, clientName: client.full_name)
+                                .environmentObject(api)
+                        ) {
+                            HStack(spacing: 6) {
+                                Text("Open visit")
+                                    .font(.system(size: 13, weight: .semibold))
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Open visit for latest assessment")
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+            }
+        }
+    }
+
+    // MARK: - Care
 
     var careSection: some View {
-        DetailSection(title: "Care Plan", icon: "doc.text.fill", iconColor: .palmPrimary) {
+        DetailSection(title: "Care") {
             VStack(spacing: 0) {
-                if let level = client.care_level, !level.isEmpty {
-                    detailRow(icon: "heart.text.square", label: "Care Level", value: level, color: .palmPrimary)
-                }
-                if let living = client.living_situation, !living.isEmpty {
+                if let care = careLevelLabel {
+                    factRow(label: "Care Level", value: care)
                     detailDivider
-                    detailRow(icon: "house.fill", label: "Living Situation", value: living.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmOrange)
                 }
-                if let plan = client.care_plan, !plan.isEmpty {
+                if let living = cleaned(client.living_situation) {
+                    factRow(label: "Living Situation", value: humanized(living))
                     detailDivider
-                    detailRow(icon: "doc.plaintext", label: "Care Plan", value: plan, color: .palmBlue)
+                } else {
+                    emptyFactRow(label: "Living Situation")
+                    detailDivider
                 }
-                if let special = client.special_requirements, !special.isEmpty {
-                    detailDivider
-                    detailRow(icon: "exclamationmark.triangle.fill", label: "Special Requirements", value: special, color: .palmOrange)
+                if let plan = cleaned(client.care_plan) {
+                    let goals = carePlanGoals(plan)
+                    if !goals.isEmpty {
+                        Button { showEditSheet = true } label: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("CARE PLAN")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(0.6)
+                                    .foregroundColor(.palmSecondary)
+                                ForEach(Array(goals.enumerated()), id: \.offset) { _, goal in
+                                    HStack(alignment: .top, spacing: 8) {
+                                        Circle()
+                                            .fill(Color.palmPrimary)
+                                            .frame(width: 5, height: 5)
+                                            .padding(.top, 6)
+                                        Text(goal)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.palmText)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Edit care plan")
+                    } else {
+                        factRow(label: "Care Plan", value: truncated(plan))
+                    }
+                } else {
+                    emptyFactRow(label: "Care Plan")
                 }
             }
         }
     }
-
-    // MARK: - Insurance Section
 
     var insuranceSection: some View {
-        DetailSection(title: "Insurance", icon: "shield.fill", iconColor: .palmGreen) {
+        DetailSection(title: "Insurance") {
             VStack(spacing: 0) {
-                if let provider = client.insurance_provider, !provider.isEmpty {
-                    let insuranceDetail = [provider, client.insurance_id]
+                if let provider = cleaned(client.insurance_provider) {
+                    let detail = [provider, cleaned(client.insurance_id).map { "#\($0)" }]
                         .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " · #")
-                    detailRow(icon: "shield.fill", label: "Insurance", value: insuranceDetail, color: .palmPrimary)
+                        .joined(separator: " · ")
+                    factRow(label: "Insurance", value: detail)
+                } else {
+                    emptyFactRow(label: "Insurance")
                 }
-                if let medicaid = client.medicaid_id, !medicaid.isEmpty {
+                if let medicaid = cleaned(client.medicaid_id) {
                     detailDivider
-                    detailRow(icon: "creditcard.fill", label: "Medicaid ID", value: medicaid, color: .palmGreen)
+                    factRow(label: "Medicaid ID", value: medicaid)
                 }
-                if let medicare = client.medicare_id, !medicare.isEmpty {
+                if let medicare = cleaned(client.medicare_id) {
                     detailDivider
-                    detailRow(icon: "creditcard", label: "Medicare ID", value: medicare, color: .palmBlue)
+                    factRow(label: "Medicare ID", value: medicare)
                 }
-                if let billing = client.billing_address, !billing.isEmpty {
+                if let billing = cleaned(client.billing_address) {
                     detailDivider
-                    detailRow(icon: "mappin.circle.fill", label: "Billing Address", value: billing, color: .palmOrange)
+                    factRow(label: "Billing Address", value: billing)
                 }
             }
         }
     }
-
-    // MARK: - Scheduling Section
 
     var schedulingSection: some View {
-        DetailSection(title: "Scheduling", icon: "calendar", iconColor: .palmBlue) {
+        DetailSection(title: "Scheduling") {
             VStack(spacing: 0) {
-                if let days = client.preferred_days, !days.isEmpty {
-                    detailRow(icon: "calendar.badge.clock", label: "Preferred Days", value: days, color: .palmPrimary)
+                if let days = cleaned(client.preferred_days) {
+                    factRow(label: "Preferred Days", value: days)
+                } else {
+                    emptyFactRow(label: "Preferred Days")
                 }
-                if let times = client.preferred_times, !times.isEmpty {
+                if let times = cleaned(client.preferred_times) {
                     detailDivider
-                    detailRow(icon: "clock.fill", label: "Preferred Times", value: times, color: .palmBlue)
+                    factRow(label: "Preferred Times", value: times)
+                } else {
+                    detailDivider
+                    emptyFactRow(label: "Preferred Times")
                 }
-                if let intake = client.intake_date, !intake.isEmpty {
+                if let intake = cleaned(client.intake_date) {
                     detailDivider
-                    detailRow(icon: "calendar.badge.plus", label: "Intake Date", value: intake.palmFormattedDateOnly, color: .palmGreen)
+                    factRow(label: "Intake Date", value: intake.palmFormattedDateOnly)
                 }
-                if let discharge = client.discharge_date, !discharge.isEmpty {
+                if let discharge = cleaned(client.discharge_date) {
                     detailDivider
-                    detailRow(icon: "calendar.badge.minus", label: "Discharge Date", value: discharge.palmFormattedDateOnly, color: .palmOrange)
+                    factRow(label: "Discharge Date", value: discharge.palmFormattedDateOnly)
                 }
-                if let extId = client.external_id, !extId.isEmpty {
+                if let extId = cleaned(client.external_id) {
                     detailDivider
-                    let extDetail = [extId, client.external_source]
+                    let detail = [extId, cleaned(client.external_source)]
                         .compactMap { $0 }
-                        .filter { !$0.isEmpty }
                         .joined(separator: " · ")
-                    detailRow(icon: "building.2.fill", label: "External ID", value: extDetail, color: .palmPurple)
+                    factRow(label: "External ID", value: detail)
                 }
             }
         }
     }
 
-    // MARK: - Notes Section
+    // MARK: - Notes
 
     var notesSection: some View {
-        DetailSection(title: "Notes", icon: "note.text", iconColor: .palmSecondary) {
-            VStack(spacing: 0) {
-                if let notes = client.notes, !notes.isEmpty {
+        DetailSection(title: "Notes") {
+            if let notes = cleaned(client.notes) {
+                Button { showEditSheet = true } label: {
                     Text(notes)
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(.palmText)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Edit notes")
             }
         }
     }
 
-    // MARK: - Visits Section
+    // MARK: - Visits
 
     var visitsSection: some View {
-        DetailSection(title: "Visits (\(clientVisits.count))", icon: "clock.arrow.circlepath", iconColor: .palmPrimary) {
+        DetailSection(title: "Visits (\(clientVisits.count))") {
             if isLoading {
                 HStack { Spacer(); ProgressView(); Spacer() }
                     .padding(.vertical, 20)
             } else if loadError != nil {
                 visitsErrorView
-            } else if clientVisits.isEmpty {
+            } else if clientVisitsNewestFirst.isEmpty {
                 VStack(spacing: 8) {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .font(.system(size: 26))
@@ -387,10 +435,10 @@ extension ClientDetailView {
                         .foregroundColor(.palmSecondary)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                .padding(.vertical, 24)
             } else {
                 VStack(spacing: 0) {
-                    ForEach(Array(clientVisits.enumerated()), id: \.element.id) { index, visit in
+                    ForEach(Array(clientVisitsNewestFirst.enumerated()), id: \.element.id) { index, visit in
                         NavigationLink(destination:
                             VisitDetailView(
                                 visitId: visit.id,
@@ -401,13 +449,12 @@ extension ClientDetailView {
                         }
                         .accessibilityLabel("\(client.full_name), Assessment \(formattedDate(visit.created_at))")
                         .buttonStyle(.plain)
-                        if index < clientVisits.count - 1 {
-                            Divider().padding(.leading, 54)
+                        if index < clientVisitsNewestFirst.count - 1 {
+                            detailDivider
                         }
                     }
                 }
             }
         }
     }
-
 }

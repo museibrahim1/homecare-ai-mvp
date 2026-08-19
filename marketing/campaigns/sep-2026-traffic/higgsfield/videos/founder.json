@@ -1,0 +1,36 @@
+[
+  {
+    "id": "3aa4cb00-ac63-4b0f-96a3-13b6ba354ebb",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_032201_3aa4cb00-ac63-4b0f-96a3-13b6ba354ebb.mp4",
+    "created_at": 1786677721.537843,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Slow push-in on a founder-voice marketing card about human review before send. Keep text sharp, calm motion, professional brand feel, no new overlays.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "7f4e57a5-2c60-40a3-bd96-160fd50e9545",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/7f4e57a5-2c60-40a3-bd96-160fd50e9545.png",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

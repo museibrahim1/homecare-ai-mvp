@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import get_user_visit
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -332,17 +333,6 @@ def create_transcript_segments(
 # =============================================================================
 # API Endpoints
 # =============================================================================
-
-def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
-    """Helper to get a visit with data isolation enforced."""
-    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
-        Visit.id == visit_id,
-        Client.created_by == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
-    return visit
-
 
 @router.get("/{visit_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(

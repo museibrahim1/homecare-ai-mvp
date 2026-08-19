@@ -27,11 +27,6 @@ struct SettingsView: View {
     @State private var faceIDError: String?
     @State private var cacheCleared = false
 
-    @StateObject private var emailConnector = EmailSenderConnector()
-    @State private var emailSender: EmailSenderStatus?
-    @State private var showDisconnectEmail = false
-    @State private var emailSenderError: String?
-
     var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
@@ -52,6 +47,7 @@ struct SettingsView: View {
             .background(PalmGlassBackground())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            .palmTransparentNavBar()
             .sheet(isPresented: $showGoogleCalAuth) {
                 GoogleCalendarSetupSheet(isConnected: $googleCalConnected)
                     .environmentObject(api)
@@ -84,7 +80,6 @@ struct SettingsView: View {
             } message: {
                 Text(refundMessage ?? "")
             }
-            .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 
     // MARK: - Load Error
@@ -172,10 +167,7 @@ struct SettingsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 22, fillOpacity: 0.72)
     }
 
     // MARK: - Preferences
@@ -444,77 +436,6 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
             }
             .accessibilityLabel(googleCalConnected ? "Manage Google Calendar" : "Connect Google Calendar")
-
-            SettingsDivider()
-
-            businessEmailRow
-        }
-    }
-
-    private var emailConnected: Bool { emailSender?.connected == true }
-
-    private var businessEmailRow: some View {
-        Button {
-            if emailConnected {
-                showDisconnectEmail = true
-            } else {
-                Task { await connectBusinessEmail() }
-            }
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "paperplane.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.palmPrimary)
-                    .frame(width: 32, height: 32)
-                    .background(Color.palmPrimary.opacity(0.1))
-                    .cornerRadius(8)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Send-from email")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.palmText)
-                    Text(emailConnected ? (emailSender?.address ?? "Connected") : "Send agreements from your business email")
-                        .font(.system(size: 11))
-                        .foregroundColor(emailConnected ? .palmGreen : .palmSecondary)
-                        .lineLimit(1)
-                }
-
-                Spacer()
-
-                if emailConnector.isConnecting {
-                    ProgressView().scaleEffect(0.8)
-                } else {
-                    Text(emailConnected ? "Disconnect" : "Connect")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(emailConnected ? .red : .white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(emailConnected ? Color.red.opacity(0.1) : Color.palmPrimary)
-                        .cornerRadius(12)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-        }
-        .disabled(emailConnector.isConnecting)
-        .accessibilityLabel(emailConnected ? "Disconnect business email" : "Connect business email")
-        .palmConfirmAlert(
-            "Disconnect Email",
-            message: "Stop sending agreements from \(emailSender?.address ?? "your business email")? You can reconnect anytime.",
-            icon: "paperplane.fill",
-            iconColor: .red,
-            isPresented: $showDisconnectEmail,
-            confirmTitle: "Disconnect",
-            confirmStyle: .destructive,
-            onConfirm: { Task { await disconnectBusinessEmail() } }
-        )
-        .alert("Business Email", isPresented: Binding(
-            get: { emailSenderError != nil },
-            set: { if !$0 { emailSenderError = nil } }
-        )) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(emailSenderError ?? "")
         }
     }
 
@@ -585,9 +506,8 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
             }
             .accessibilityLabel("Delete account permanently")
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(14)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.red.opacity(0.25), lineWidth: 1))
+            .palmGlassCard(radius: 22, fillOpacity: 0.72)
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.red.opacity(0.25), lineWidth: 1))
         }
     }
 
@@ -600,8 +520,7 @@ struct SettingsView: View {
                 .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(14)
+                .palmGlassCard(radius: 22, fillOpacity: 0.72)
         }
         .accessibilityLabel("Log out")
         .palmConfirmAlert(
@@ -628,33 +547,10 @@ struct SettingsView: View {
             loadFailed = true
         }
         usage = try? await api.fetchUsage()
-        emailSender = try? await api.emailSenderStatus()
         // Sync the cached calendar flag with the server so the row doesn't
         // keep saying "Connected" after a server-side disconnect/expiry.
         if let connected = try? await api.checkGoogleCalendarStatus() {
             googleCalConnected = connected
-        }
-    }
-
-    private func connectBusinessEmail() async {
-        emailSenderError = nil
-        do {
-            let status = try await emailConnector.connect(api: api)
-            await MainActor.run { emailSender = status }
-        } catch let e as EmailSenderConnector.ConnectError {
-            if case .cancelled = e { return }
-            await MainActor.run { emailSenderError = e.localizedDescription }
-        } catch {
-            await MainActor.run { emailSenderError = error.localizedDescription }
-        }
-    }
-
-    private func disconnectBusinessEmail() async {
-        do {
-            try await api.disconnectEmailSender()
-            await MainActor.run { emailSender = EmailSenderStatus(connected: false, address: nil, provider: nil) }
-        } catch {
-            await MainActor.run { emailSenderError = error.localizedDescription }
         }
     }
 

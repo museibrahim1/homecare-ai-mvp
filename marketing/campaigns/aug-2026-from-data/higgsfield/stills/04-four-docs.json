@@ -1,0 +1,22 @@
+[
+  {
+    "id": "3189d328-6e6b-4843-a912-678e742e21f5",
+    "status": "completed",
+    "display_name": "GPT Image 2",
+    "job_set_type": "gpt_image_2",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022339_3189d328-6e6b-4843-a912-678e742e21f5.png",
+    "created_at": 1786674219.861759,
+    "params": {
+      "width": 1520,
+      "height": 2688,
+      "prompt": "Photorealistic iPhone 15 Pro Space Black flat lay on a clean desk, screen showing four PalmCare AI document cards labeled Transcript, Care Plan, Billables, Contract in teal #0d9488 UI. Soft studio light, product photography, vertical 9:16, no marketing slogans, no QR codes, crisp readable UI.",
+      "medias": [],
+      "aspect_ratio": "9:16",
+      "quality": "high",
+      "resolution": "2k",
+      "model": "videotape-alpha",
+      "remove_bg": false,
+      "reference_elements": []
+    }
+  }
+]

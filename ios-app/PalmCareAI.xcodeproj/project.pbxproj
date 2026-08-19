@@ -52,6 +52,7 @@
 		66B8766816DFAE60BD26C157 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC7E34D4B0393336B0CBB48 /* APIService.swift */; };
 		68215DAB044978CD4E6EB632 /* Contract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F88B72C302389E0264C42F1 /* Contract.swift */; };
 		6DAF2292176E3E2ABFF8C93E /* SwipeBackGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2493C2EE11530C7F4A668C11 /* SwipeBackGesture.swift */; };
+		70A3AEB310E635449DC33B2B /* VisitDetailView+CarePlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C532DC9FC4D04F946578FC3 /* VisitDetailView+CarePlan.swift */; };
 		760E9D55BA37BE5FAAF39DD3 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A921BCDB8F2E82F6AD0B29E /* AnyCodable.swift */; };
 		78F106DE65172A8911163DD1 /* APIService+EmailSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA911CA4DDC1736C1DAE4B66 /* APIService+EmailSender.swift */; };
 		793C320774FDC35384B2E964 /* ChangePasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D390C4585907D28007C7D7 /* ChangePasswordSheet.swift */; };
@@ -71,6 +72,7 @@
 		9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965C098053DF16C330D69A47 /* RegisterView.swift */; };
 		A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */; };
 		A2B75BABEA2C5A151042ECE6 /* EmailSenderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72217ACB74F974613CD621F /* EmailSenderConnector.swift */; };
+		B190DA95C692331D50C1DFCC /* PalmPipelineProcessingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2500A1075E4B622CFA11B5F8 /* PalmPipelineProcessingCard.swift */; };
 		B6915EFBEE00792B7042483B /* ClientDetailView+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67623A35EA1ED4ABD37C0500 /* ClientDetailView+Data.swift */; };
 		BEAD7B577F3F8A399991E9D1 /* DemoTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */; };
 		C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7229E0471D9D4E3D984E2C /* MainTabView.swift */; };
@@ -104,6 +106,7 @@
 		1DFCF89DDFD88DAEE7F23451 /* VisitDetailView+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Data.swift"; sourceTree = "<group>"; };
 		23F93493E955750982C65A92 /* RecordOrbViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordOrbViews.swift; sourceTree = "<group>"; };
 		2493C2EE11530C7F4A668C11 /* SwipeBackGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackGesture.swift; sourceTree = "<group>"; };
+		2500A1075E4B622CFA11B5F8 /* PalmPipelineProcessingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmPipelineProcessingCard.swift; sourceTree = "<group>"; };
 		256BBA375C224659F21FD086 /* LiveTranscriptMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriptMerger.swift; sourceTree = "<group>"; };
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
 		29C749DC52D1DFE6F0507AFC /* PendingUploadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingUploadStore.swift; sourceTree = "<group>"; };
@@ -144,6 +147,7 @@
 		965C098053DF16C330D69A47 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmAlert.swift; sourceTree = "<group>"; };
 		9C251ED4559A23FDD4AA9F4C /* PalmGlassSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmGlassSurface.swift; sourceTree = "<group>"; };
+		9C532DC9FC4D04F946578FC3 /* VisitDetailView+CarePlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+CarePlan.swift"; sourceTree = "<group>"; };
 		9C94F6F7BFB3DC576CE615EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9FDCB9B2E755AB310D6FB414 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
 		A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+Support.swift"; sourceTree = "<group>"; };
@@ -218,6 +222,7 @@
 				7956F027589D97614E56073A /* PalmBackButton.swift */,
 				9C251ED4559A23FDD4AA9F4C /* PalmGlassSurface.swift */,
 				2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */,
+				2500A1075E4B622CFA11B5F8 /* PalmPipelineProcessingCard.swift */,
 				500DEEF976198365C0257355 /* PalmStatusChip.swift */,
 				2493C2EE11530C7F4A668C11 /* SwipeBackGesture.swift */,
 			);
@@ -290,6 +295,7 @@
 				E65CD0559B92384020DE6E53 /* EmailContractSheet.swift */,
 				EB838A8AD893DD563742F9EF /* VisitDetailView.swift */,
 				193202E1C9F4C7DD4D8BB334 /* VisitDetailView+Billables.swift */,
+				9C532DC9FC4D04F946578FC3 /* VisitDetailView+CarePlan.swift */,
 				7FE5716DE1D6F7505F157C68 /* VisitDetailView+Contract.swift */,
 				1DFCF89DDFD88DAEE7F23451 /* VisitDetailView+Data.swift */,
 				41F9CED57A1C1BBE9397AD09 /* VisitDetailView+Notes.swift */,
@@ -547,6 +553,7 @@
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				3A3C950EFEED6F6F90C3F392 /* PalmGlassSurface.swift in Sources */,
 				022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */,
+				B190DA95C692331D50C1DFCC /* PalmPipelineProcessingCard.swift in Sources */,
 				01C7BC688E5B3E2306E989C9 /* PalmStatusChip.swift in Sources */,
 				DF8CA83F401B0268F58C05AB /* PaywallView.swift in Sources */,
 				FE5E3BBEFDAE7F48223A2297 /* PendingUploadStore.swift in Sources */,
@@ -568,6 +575,7 @@
 				135CE43DA9F154AB373CD239 /* User.swift in Sources */,
 				79680044B7D5D35B6DC2DD68 /* Visit.swift in Sources */,
 				328D935D4431B3066DBAFE35 /* VisitDetailView+Billables.swift in Sources */,
+				70A3AEB310E635449DC33B2B /* VisitDetailView+CarePlan.swift in Sources */,
 				45B1B84E31D94626D5723FEA /* VisitDetailView+Contract.swift in Sources */,
 				FB1FB140CF8C5B0F8A762ECF /* VisitDetailView+Data.swift in Sources */,
 				33EA7E5745ED4A1155C9032F /* VisitDetailView+Notes.swift in Sources */,

@@ -4,6 +4,7 @@ import AuthenticationServices
 /// Apple + Google buttons for Login and Register.
 struct SocialSignInButtons: View {
     @EnvironmentObject var api: APIService
+    @Environment(\.colorScheme) private var colorScheme
     /// When false, hide the trailing "or use email" rule (login already has email above).
     var showEmailDivider: Bool = true
 
@@ -39,14 +40,17 @@ struct SocialSignInButtons: View {
                     Text("Continue with Google")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .foregroundColor(.palmText)
+                .foregroundColor(Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255))
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(Color.white.opacity(0.72))
+                .background(Color.white.opacity(colorScheme == .dark ? 0.92 : 0.72))
                 .clipShape(Capsule(style: .continuous))
                 .overlay(
                     Capsule(style: .continuous)
-                        .stroke(Color.palmGlassBorder, lineWidth: 1)
+                        .stroke(
+                            colorScheme == .dark ? Color.palmNightGlassBorder : Color.palmGlassBorder,
+                            lineWidth: 1
+                        )
                 )
             }
             .disabled(isLoading)

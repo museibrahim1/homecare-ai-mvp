@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.rate_limit import limiter
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import get_user_visit
 from app.core.tier_limits import enforce_ai_tier_limit
 
 # Expensive AI work (Deepgram + Claude) is gated by two layers: a hard
@@ -17,17 +18,6 @@ from app.models.transcript_segment import TranscriptSegment
 from app.services.jobs import enqueue_task
 
 router = APIRouter(dependencies=[Depends(enforce_ai_tier_limit)])
-
-
-def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
-    """Helper to get a visit with data isolation enforced."""
-    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
-        Visit.id == visit_id,
-        Client.created_by == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
-    return visit
 
 
 @router.post("/visits/{visit_id}/process-transcript")

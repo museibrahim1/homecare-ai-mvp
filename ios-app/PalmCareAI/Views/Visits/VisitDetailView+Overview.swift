@@ -144,33 +144,41 @@ extension VisitDetailView {
     }
 
     func pipelineCard(_ v: Visit) -> some View {
-        // The four deliverable documents shown in the Processing checklist —
-        // one row each, so the count matches the visible items ("X of 4").
-        let docSteps: [(String, String, String)] = [
+        // Deliverable documents shown in the Processing checklist —
+        // one row each, so the count matches the visible items ("X of N").
+        var docSteps: [(String, String, String)] = [
             ("transcription", "Transcript", "text.quote"),
             ("billing", "Billables", "dollarsign.circle.fill"),
             ("note", "Notes", "note.text"),
+            ("care_plan", "Care Plan", "list.clipboard.fill"),
             ("contract", "Contract", "doc.text.fill"),
         ]
+        if !shouldShowBillablesTab {
+            docSteps.removeAll { $0.0 == "billing" }
+        }
         // Speakers/diarization isn't a deliverable document, but keep it in the
         // retry list so a failed speaker pass can still be re-queued.
-        let retrySteps: [(String, String, String)] = [
+        var retrySteps: [(String, String, String)] = [
             ("transcription", "Transcript", "text.quote"),
             ("diarization", "Speakers", "person.2.fill"),
             ("billing", "Billables", "dollarsign.circle.fill"),
             ("note", "Notes", "note.text"),
             ("contract", "Contract", "doc.text.fill"),
         ]
+        if !shouldShowBillablesTab {
+            retrySteps.removeAll { $0.0 == "billing" }
+        }
         let ready = documentReadyCount
+        let total = documentExpectedCount
         let retryable = retrySteps.filter { pipelineStepState(v, step: $0.0).canRetry }
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
                 PalmGlassLabel(text: "Documents")
                 Spacer()
-                Text("\(ready) of 4 ready")
+                Text("\(ready) of \(total) ready")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(ready == 4 ? .palmGreen : .palmSecondary)
+                    .foregroundColor(ready == total ? .palmGreen : .palmSecondary)
             }
 
             VStack(spacing: 0) {
@@ -289,28 +297,37 @@ extension VisitDetailView {
                 label: "Transcript",
                 value: transcript?.word_count.map { "\($0) words" } ?? "—",
                 color: .palmPrimary,
-                tapAction: { activeTab = 1 }
+                tapAction: { selectTab(id: "transcript") }
             )
-            statCard(
-                icon: "dollarsign.circle.fill",
-                label: "Billables",
-                value: billables?.items.map { "\($0.count) items" } ?? "—",
-                color: .palmGreen,
-                tapAction: { activeTab = 2 }
-            )
+            if shouldShowBillablesTab {
+                statCard(
+                    icon: "dollarsign.circle.fill",
+                    label: "Billables",
+                    value: billables?.items.map { "\($0.count) items" } ?? "—",
+                    color: .palmGreen,
+                    tapAction: { selectTab(id: "billables") }
+                )
+            }
             statCard(
                 icon: "note.text",
                 label: "Notes",
                 value: note != nil ? "SOAP Ready" : "—",
                 color: .palmBlue,
-                tapAction: { activeTab = 3 }
+                tapAction: { selectTab(id: "notes") }
+            )
+            statCard(
+                icon: "list.clipboard.fill",
+                label: "Care Plan",
+                value: hasCarePlanContent ? "Ready" : "—",
+                color: .palmTeal600,
+                tapAction: { selectTab(id: "care_plan") }
             )
             statCard(
                 icon: "doc.text.fill",
                 label: "Contract",
                 value: contractStatValue,
                 color: .palmPurple,
-                tapAction: { activeTab = 4 }
+                tapAction: { selectTab(id: "contract") }
             )
         }
     }

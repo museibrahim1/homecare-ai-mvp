@@ -1,0 +1,12 @@
+file Simulated Interview Demonstration of Patient and her Husband.mp3 bytes=11987018
+logged in demo-screenshots@palmtai.com
+client a4c9a92e-f81a-4220-8641-b7350e9c83c0 visit d30e3d62-ec2a-4ed6-9af7-e90e9facf475
+upload 201 6570ms {"id":"d2b1650f-ae74-4a2e-bc73-0ce9d6d82753","visit_id":"d30e3d62-ec2a-4ed6-9af7-e90e9facf475","s3_key":"visits/d30e3d62-ec2a-4ed6-9af7-e90e9facf475/audio/Simulated Interview Demonstration of Patient and her Husband.mp3","original_filename"
+  poll 1 6.7s kind=None transcription=processing billing=pending note=pending contract=pending
+  poll 6 32.2s kind=out_of_scope full_pipeline completed
+pipeline ok after 32.2s polls=6 full_pipeline completed
+speakers {'SPEAKER_1': 54, 'SPEAKER_0': 144, 'SPEAKER_2': 47} segments=245 words=2913
+kind=out_of_scope timings_ms={'note': 16945, 'billing': 59, 'classify': 16, 'contract': None, 'transcription': 5978}
+billables 0 []
+note_id 3155d42e-c071-4623-aee5-2ed52a13a247 contract_id 9aa1f3a1-0d08-4958-a276-6f2c0decee2a hours=0.00
+wrote /Users/musaibrahim/Desktop/AI Voice Contracter/scripts/sandbox/assessment-runs/Simulated_Interview_Demonstration_of_Patient_and_her_Husband.json

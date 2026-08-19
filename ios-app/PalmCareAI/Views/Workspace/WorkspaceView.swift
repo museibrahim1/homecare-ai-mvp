@@ -28,6 +28,7 @@ struct WorkspaceView: View {
             .background(PalmGlassBackground())
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
+            .palmTransparentNavBar()
         }
     }
 

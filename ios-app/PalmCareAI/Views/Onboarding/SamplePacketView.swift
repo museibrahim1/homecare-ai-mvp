@@ -31,6 +31,7 @@ struct SamplePacketView: View {
             .background(PalmGlassBackground())
             .navigationTitle(packet?.client_name ?? "Sample visit")
             .navigationBarTitleDisplayMode(.inline)
+            .palmTransparentNavBar()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { onDone() }

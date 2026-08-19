@@ -22,45 +22,81 @@ SITE_URL = site("/", source="email", medium="email", campaign="agency_outreach",
 PITCH_DECK_URL = deck_link(source="email", medium="email", campaign="agency_outreach", content="deck")
 
 AGENCY_SUBJECT_HOOKS = [
-    "How much time does your team spend on documentation?",
-    "Your staff shouldn't be doing this...",
-    "This is changing how agencies handle documentation",
-    "What if assessments took 60 seconds?",
-    "Are your caregivers still filling out paper forms?",
-    "30 seconds to see why agencies are switching",
-    "The documentation tool agencies are switching to",
-    "Quick question about your documentation process",
-    "Three steps to zero paperwork",
-    "Saw you're in {state}, thought this might help",
+    "Don't type the assessment twice",
+    "Same-day contracts for {state} agencies",
+    "Get Tuesday nights back",
+    "Try PALM on one visit",
+    "Point your iPhone camera at this email",
+    "Care plan, billables, and contract from one recording",
+    "PALM is on the App Store",
+    "Record once. Docs write themselves.",
 ]
 
+APP_STORE = "https://palmcareai.com/app"
+QR_APP = "https://palmcareai.com/marketing/social/palm-appstore-qr.png"
+
 AGENCY_FOOTER = f"""
-<div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;">
-<p style="font-size:14px;color:#1a1a1a;margin:0 0 2px 0;font-weight:600;">Muse Ibrahim</p>
-<p style="font-size:13px;color:#6b7280;margin:0 0 2px 0;">Founder &amp; CEO, PalmCare AI</p>
-<p style="font-size:13px;color:#6b7280;margin:0 0 8px 0;">213-569-7693 &middot; sales@palmtai.com</p>
-<a href="{SITE_URL}" style="font-size:12px;color:#0d9488;text-decoration:none;">palmcareai.com</a>
-</div>
+<p style="margin:18px 0 0;font-size:12px;color:#94A3B8;text-align:center;">
+  Muse Ibrahim · PalmCare AI · Omaha, NE ·
+  <a href="{SITE_URL}" style="color:#94A3B8;">palmcareai.com</a>
+</p>
 """
 
 
 def _agency_template(city, state):
+    note_state = state or "your state"
     templates = [
-        lambda c, s: f"""<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Hi there,</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">I noticed your agency is based in {c}, {s}. Quick question: how much time does your team currently spend on care assessments and documentation?</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">We built PalmCare AI specifically for home care agencies like yours. Our platform turns a voice recording of a patient assessment into a complete care plan, SOAP note, and service contract — automatically.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Agencies using it are cutting documentation time by 70% and generating contracts the same day as the assessment.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Would it be worth a quick 15-minute demo to see how it works?</p>""",
-        lambda c, s: f"""<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Hi there,</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">I wanted to reach out because we've been working with home care agencies in {s} and the same problem keeps coming up: documentation is eating everyone's time.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">We built PalmCare AI to fix that. Record a patient assessment on your phone, and our AI handles everything — transcription, care plan, billable items, and a ready-to-sign contract.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">It takes about 60 seconds instead of 45 minutes.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Happy to show you a quick demo if you're interested — no pressure at all.</p>""",
-        lambda c, s: f"""<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Hi there,</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Your agency in {c} caught my attention. I'm reaching out because we've built something that's been a game-changer for agencies dealing with slow documentation workflows.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">PalmCare AI is a complete CRM for home care — but what makes it different is the AI. Record an assessment, and the platform generates your care plan, clinical notes, and service contract automatically.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Agencies tell us it's saving them 15-20 hours a week on paperwork alone.</p>
-<p style="font-size:15px;color:#1a1a1a;line-height:1.7;">Would you be open to a brief call this week to see if it'd be a fit?</p>""",
+        lambda c, s: f"""\
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border:1px solid #e2e8f0;border-radius:20px;">
+  <tr><td style="padding:28px 24px 8px;">
+    <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#0f172a;">PalmCare AI</p>
+    <div style="width:36px;height:3px;border-radius:99px;background:#0d9488;margin:0 0 20px;"></div>
+    <h1 style="margin:0 0 12px;font-size:24px;line-height:30px;font-weight:700;color:#0f172a;">Don't type it twice</h1>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">Hi,</p>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">Every assessment gets documented out loud, then again at a keyboard. PALM keeps the first one.</p>
+  </td></tr>
+  <tr><td align="center" style="padding:8px 24px 20px;">
+    <a href="{APP_STORE}" style="display:inline-block;background:#0d9488;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;">Download PALM for iPhone</a>
+  </td></tr>
+  <tr><td align="center" style="padding:0 24px 24px;">
+    <img src="{QR_APP}" width="120" height="120" alt="Scan to download PALM" style="display:block;width:120px;height:120px;border-radius:12px;border:1px solid #e2e8f0;" />
+    <p style="margin:10px 0 0;font-size:12px;color:#94A3B8;">Scan with your iPhone camera</p>
+  </td></tr>
+</table>""",
+        lambda c, s: f"""\
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border:1px solid #e2e8f0;border-radius:20px;">
+  <tr><td style="padding:28px 24px 8px;">
+    <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#0f172a;">PalmCare AI</p>
+    <div style="width:36px;height:3px;border-radius:99px;background:#0d9488;margin:0 0 20px;"></div>
+    <h1 style="margin:0 0 12px;font-size:24px;line-height:30px;font-weight:700;color:#0f172a;">One visit. Docs ready.</h1>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">Hi,</p>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">For agencies in {c}, {s}: record the assessment. Review the care plan and contract before you leave.</p>
+  </td></tr>
+  <tr><td align="center" style="padding:8px 24px 20px;">
+    <a href="{APP_STORE}" style="display:inline-block;background:#0d9488;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;">Download PALM for iPhone</a>
+  </td></tr>
+  <tr><td align="center" style="padding:0 24px 24px;">
+    <img src="{QR_APP}" width="120" height="120" alt="Scan to download PALM" style="display:block;width:120px;height:120px;border-radius:12px;border:1px solid #e2e8f0;" />
+    <p style="margin:10px 0 0;font-size:12px;color:#94A3B8;">Scan with your iPhone camera · {note_state} rules built in</p>
+  </td></tr>
+</table>""",
+        lambda c, s: f"""\
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#FFFFFF;border:1px solid #e2e8f0;border-radius:20px;">
+  <tr><td style="padding:28px 24px 8px;">
+    <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#0f172a;">PalmCare AI</p>
+    <div style="width:36px;height:3px;border-radius:99px;background:#0d9488;margin:0 0 20px;"></div>
+    <h1 style="margin:0 0 12px;font-size:24px;line-height:30px;font-weight:700;color:#0f172a;">Get Tuesday nights back</h1>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">Hi,</p>
+    <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#475569;">Finish at 4. Skip the keyboard at 8. The visit was already documented out loud.</p>
+  </td></tr>
+  <tr><td align="center" style="padding:8px 24px 20px;">
+    <a href="{APP_STORE}" style="display:inline-block;background:#0d9488;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;">Download PALM for iPhone</a>
+  </td></tr>
+  <tr><td align="center" style="padding:0 24px 24px;">
+    <img src="{QR_APP}" width="120" height="120" alt="Scan to download PALM" style="display:block;width:120px;height:120px;border-radius:12px;border:1px solid #e2e8f0;" />
+    <p style="margin:10px 0 0;font-size:12px;color:#94A3B8;">Just Palm It · Free for 14 days</p>
+  </td></tr>
+</table>""",
     ]
     h = int(hashlib.md5(f"{city}{state}".encode()).hexdigest(), 16)
     return templates[h % len(templates)](city, state)
@@ -70,12 +106,16 @@ def build_agency_email(provider_name, city, state):
     h = int(hashlib.md5(provider_name.encode()).hexdigest(), 16)
     subject = AGENCY_SUBJECT_HOOKS[h % len(AGENCY_SUBJECT_HOOKS)].format(state=state or "your state")
     body_content = _agency_template(city or "your area", state or "US")
-    body = f"""<html>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#ffffff;">
-<div style="max-width:580px;margin:0 auto;padding:20px;">
+    body = f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="color-scheme" content="light only"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#F8FAFC;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;">
+  <tr><td align="center" style="padding:28px 16px;">
 {body_content}
 {AGENCY_FOOTER}
-</div>
+  </td></tr>
+</table>
 </body>
 </html>"""
     return subject, body

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import get_user_visit, owned_by_visible_users, iter_visible_client_ids, visible_user_ids
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -78,7 +79,7 @@ async def get_usage(
     completed_count = db.query(Visit).join(
         Client, Visit.client_id == Client.id
     ).filter(
-        Client.created_by == current_user.id,
+        owned_by_visible_users(db, current_user),
         Visit.status.in_(['pending_review', 'approved', 'exported', 'in_progress']),
     ).count()
     
@@ -86,7 +87,7 @@ async def get_usage(
     total_visits = db.query(Visit).join(
         Client, Visit.client_id == Client.id
     ).filter(
-        Client.created_by == current_user.id,
+        owned_by_visible_users(db, current_user),
     ).count()
     
     sub_info = _get_user_subscription(db, current_user)
@@ -120,12 +121,10 @@ async def list_visits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List visits with pagination and filters (strict data isolation - only your clients)."""
-    # Get client IDs that belong to this user for strict data isolation
-    # Only show visits for clients created by this user (HIPAA compliant)
-    user_client_ids = [c[0] for c in db.query(Client.id).filter(
-        Client.created_by == current_user.id
-    ).all()]
+    """List visits with pagination and filters (agency-scoped data isolation)."""
+    # Clients owned by this user, a case-variant duplicate account, or a
+    # teammate on the same business — never another agency.
+    user_client_ids = list(iter_visible_client_ids(db, current_user))
     
     if not user_client_ids:
         return VisitListResponse(items=[], total=0, page=page, page_size=page_size)
@@ -168,7 +167,7 @@ async def create_visit(
         total_visits = db.query(Visit).join(
             Client, Visit.client_id == Client.id
         ).filter(
-            Client.created_by == current_user.id,
+            owned_by_visible_users(db, current_user),
         ).count()
         if total_visits >= FREE_ASSESSMENT_LIMIT:
             raise HTTPException(
@@ -179,7 +178,7 @@ async def create_visit(
     # Verify client exists AND belongs to current user
     client = db.query(Client).filter(
         Client.id == visit_in.client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user),
     ).first()
     if not client:
         raise HTTPException(
@@ -197,12 +196,10 @@ async def create_visit(
         caregiver = current_user
     else:
         caregiver = db.query(User).filter(User.id == caregiver_id).first()
-        same_company = (
-            caregiver is not None
-            and current_user.company_name is not None
-            and caregiver.company_name == current_user.company_name
+        same_agency = caregiver is not None and caregiver.id in visible_user_ids(
+            db, current_user
         )
-        if not caregiver or not same_company:
+        if not caregiver or not same_agency:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Caregiver not found",
@@ -218,21 +215,6 @@ async def create_visit(
     db.add(visit)
     db.commit()
     db.refresh(visit)
-    return visit
-
-
-def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
-    """Helper to get a visit with strict data isolation - only your clients."""
-    # User can only access visits for clients they created (own)
-    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
-        Visit.id == visit_id,
-        Client.created_by == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
     return visit
 
 
@@ -348,8 +330,7 @@ async def delete_all_visits(
     current_user: User = Depends(get_current_user),
 ):
     """Delete ALL visits for the current user's clients. Use with caution!"""
-    # Only delete visits for clients you own (strict data isolation)
-    user_client_ids = [c[0] for c in db.query(Client.id).filter(Client.created_by == current_user.id).all()]
+    user_client_ids = list(iter_visible_client_ids(db, current_user))
     
     if not user_client_ids:
         return {"deleted": 0}

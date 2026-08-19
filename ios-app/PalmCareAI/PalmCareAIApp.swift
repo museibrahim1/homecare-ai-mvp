@@ -15,27 +15,29 @@ struct PalmCareAIApp: App {
     @State private var isBiometricUnlocked = false
     @State private var enteredBackgroundAt: Date?
     @State private var lastInteractionAt = Date()
+    @State private var showAuthPaywall = false
     private let sessionReauthTimeout: TimeInterval = 300
     private let foregroundInactivityTimeout: TimeInterval = 600
     private let activityTick = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     init() {
         let navAppearance = UINavigationBarAppearance()
-        navAppearance.configureWithOpaqueBackground()
-        navAppearance.backgroundColor = UIColor.systemBackground
+        navAppearance.configureWithTransparentBackground()
+        navAppearance.backgroundColor = .clear
         navAppearance.titleTextAttributes = [
             .foregroundColor: UIColor.label
         ]
         navAppearance.largeTitleTextAttributes = [
             .foregroundColor: UIColor.label
         ]
-        // No hairline divider under the nav bar — the back chevron should
-        // blend straight into the screen for a seamless, modern flow.
+        // No hairline divider under the nav bar — glass screens run edge to edge.
         navAppearance.shadowColor = .clear
+        navAppearance.shadowImage = UIImage()
 
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
         UINavigationBar.appearance().compactAppearance = navAppearance
+        UINavigationBar.appearance().isTranslucent = true
         UINavigationBar.appearance().tintColor = UIColor(red: 13/255, green: 148/255, blue: 136/255, alpha: 1)
 
         // PHI hygiene: clear out recordings orphaned by crashes or
@@ -82,6 +84,16 @@ struct PalmCareAIApp: App {
                         .environmentObject(api)
                 }
             }
+            .sheet(isPresented: $showAuthPaywall) {
+                PaywallView(isRequired: false, allowsNotNow: true)
+                    .environmentObject(api)
+            }
+            .onChange(of: api.needsOnboarding) { needs in
+                // After agency setup finishes, soft-prompt subscribe once.
+                if !needs && api.isAuthenticated {
+                    promptAuthPaywallIfNeeded()
+                }
+            }
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
                 if newValue {
@@ -94,7 +106,12 @@ struct PalmCareAIApp: App {
                     Task { await StoreKitService.shared.syncEntitlements() }
                     Task { await syncAnalyticsIdentity() }
                     // Refresh needs_onboarding (social User-first path).
-                    Task { _ = try? await api.fetchUser(forceRefresh: true) }
+                    Task {
+                        _ = try? await api.fetchUser(forceRefresh: true)
+                        await MainActor.run {
+                            promptAuthPaywallIfNeeded()
+                        }
+                    }
                 } else {
                     PostHogService.shared.capture("auth_logout")
                     PostHogService.shared.reset()
@@ -106,6 +123,13 @@ struct PalmCareAIApp: App {
             // tests don't depend on flaky synthetic keyboard input.
             .task {
                 let env = ProcessInfo.processInfo.environment
+                let args = ProcessInfo.processInfo.arguments
+                // Marketing/demo automation: never block on Face ID.
+                if args.contains("MARKETING_FULL_PIPELINE")
+                    || args.contains("LIVE_TRANSCRIPT_SMOKE")
+                    || args.contains("AUTOMATION_STRESS_FLOW") {
+                    isBiometricUnlocked = true
+                }
                 guard !api.isAuthenticated,
                       let email = env["AUTOMATION_LOGIN_EMAIL"],
                       let password = env["AUTOMATION_LOGIN_PASSWORD"] else { return }
@@ -156,6 +180,7 @@ struct PalmCareAIApp: App {
             .onReceive(activityTick) { _ in
                 enforceForegroundInactivityPolicy()
             }
+            // Day = Paper mint glass. Night = Paper glass night (#0B1014 + frost).
             .preferredColorScheme(isDarkMode ? .dark : .light)
             .task {
                 #if DEBUG
@@ -189,6 +214,15 @@ struct PalmCareAIApp: App {
             api.logout()
         }
         registerInteraction()
+    }
+
+    private func promptAuthPaywallIfNeeded() {
+        guard api.isAuthenticated, !api.needsOnboarding else { return }
+        // First-run users get the sample packet, then the launch paywall.
+        // Skip here so we don't stack two sheets back to back.
+        if !UserDefaults.standard.bool(forKey: "hasSeenSampleVisit") { return }
+        guard !StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else { return }
+        showAuthPaywall = true
     }
 
     private func syncAnalyticsIdentity() async {

@@ -1,0 +1,201 @@
+{
+  "sent": [
+    {
+      "fund_name": "Bread and Butter Ventures",
+      "contact_email": "hello@breadandbutterventures.com",
+      "contact_name": "Team",
+      "location": "St. Paul, MN",
+      "website": "https://www.breadandbutterventures.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "HealthTech",
+        "SaaS"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Early Revenue"
+      ],
+      "check_size_display": "$250K-$750K",
+      "description": "Health tech and enterprise SaaS. Minneapolis early-stage fund.",
+      "relevance_reason": "Thesis explicitly covers health tech and enterprise SaaS. Check size fits $250K SAFE.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You back early health tech and enterprise SaaS, so this should sit in your lane."
+    },
+    {
+      "fund_name": "JumpStart Ventures",
+      "contact_email": "info@jumpstart.vc",
+      "contact_name": "Team",
+      "location": "Cleveland, OH",
+      "website": "https://jumpstart.vc/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Healthcare",
+        "B2B Software"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Early Revenue"
+      ],
+      "check_size_display": "$250K-$2M",
+      "description": "B2B enterprise software and healthcare companies in Ohio and the Midwest.",
+      "relevance_reason": "Healthcare + B2B software thesis matches PalmCare AI assessment-to-contract workflow.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You invest in B2B software and healthcare companies, which is exactly where we sit."
+    },
+    {
+      "fund_name": "Tamarind Hill",
+      "contact_email": "info@tamarind-hill.com",
+      "contact_name": "Team",
+      "location": "Dublin, OH",
+      "website": "https://tamarind-hill.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Healthcare IT",
+        "B2B"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Early Revenue"
+      ],
+      "check_size_display": "$500K-$3M",
+      "description": "B2B Healthcare IT with early product-market fit.",
+      "relevance_reason": "Narrow B2B Healthcare IT thesis. PalmCare is AI documentation for home care agencies.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You focus on B2B Healthcare IT with early commercial traction, which matches where we are."
+    },
+    {
+      "fund_name": "Boomerang Ventures",
+      "contact_email": "hello@boomerang.vc",
+      "contact_name": "Team",
+      "location": "Indianapolis, IN",
+      "website": "https://www.boomerang.vc",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Connected Health",
+        "Healthcare"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "$250K-$5M",
+      "description": "Connected health technology: healthcare informatics and care models.",
+      "relevance_reason": "Connected health thesis. PalmCare turns assessment voice into clinical and contract docs.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You back connected health technology. PalmCare gives home care agencies their evenings back."
+    },
+    {
+      "fund_name": "First Trust Capital Partners",
+      "contact_email": "info@ftcapitalpartners.com",
+      "contact_name": "Team",
+      "location": "Wheaton, IL",
+      "website": "https://ftcapitalpartners.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Healthcare Technology",
+        "Financial Services"
+      ],
+      "focus_stages": [
+        "Early Revenue",
+        "Growth"
+      ],
+      "check_size_display": "$200K-$1M",
+      "description": "Early and growth stage with focus on healthcare technology.",
+      "relevance_reason": "Healthcare technology focus. Live App Store product with subscriptions.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You focus on healthcare technology. We are live on the App Store for home care agencies."
+    },
+    {
+      "fund_name": "Plow Ventures",
+      "contact_email": "hello@plowvc.com",
+      "contact_name": "Josh Oeding",
+      "location": "Wichita, KS",
+      "website": "https://www.plowvc.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "B2B SaaS",
+        "FinTech"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Early Revenue"
+      ],
+      "check_size_display": "$50K-$200K",
+      "description": "B2B SaaS in overlooked US geographies.",
+      "relevance_reason": "Vertical B2B SaaS outside coastal hubs. Strong Midwest fit.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You back B2B SaaS outside the usual coastal hubs. That is our theater too."
+    },
+    {
+      "fund_name": "The Idea Fund",
+      "contact_email": "glauderdale@ideafundvc.com",
+      "contact_name": "Garrett Lauderdale",
+      "location": "La Crosse, WI",
+      "website": "https://www.ideafundvc.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "SaaS"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Pre-Seed"
+      ],
+      "check_size_display": "$50K-$1M",
+      "description": "Industry agnostic SaaS in the upper Midwest.",
+      "relevance_reason": "Upper Midwest SaaS seed investor. Geographic and stage fit.",
+      "priority": "high",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You invest in SaaS across the upper Midwest. We built PalmCare from the field, for agencies in that same market."
+    },
+    {
+      "fund_name": "Capital Midwest",
+      "contact_email": "seinhorn@capitalmidwest.com",
+      "contact_name": "Daniel Einhorn",
+      "location": "Mequon, WI",
+      "website": "https://www.capitalmidwest.com",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Enterprise SaaS"
+      ],
+      "focus_stages": [
+        "Early Revenue"
+      ],
+      "check_size_display": "$500K-$2M",
+      "description": "Enterprise SaaS in the central United States.",
+      "relevance_reason": "Enterprise SaaS for agency operators. Midwest HQ.",
+      "priority": "medium",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You invest in enterprise SaaS across the central US. PalmCare is live software for home care operators."
+    },
+    {
+      "fund_name": "IrishAngels",
+      "contact_email": "admin@irishangels.com",
+      "contact_name": "Team",
+      "location": "Chicago, IL",
+      "website": "http://irishangels.com/",
+      "investor_type": "angel_network",
+      "focus_sectors": [
+        "Software",
+        "Medical"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "$150K-$1M",
+      "description": "Chicago angel network. Software and medical companies.",
+      "relevance_reason": "Software + medical thesis. Seed stage Chicago network.",
+      "priority": "medium",
+      "source": "openvc_midwest_jul2026",
+      "focus_line": "You back software and medical companies at seed. Home care documentation sits right in that intersection."
+    }
+  ],
+  "count": 9,
+  "failed": 0
+}

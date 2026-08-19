@@ -21,8 +21,8 @@ extension VisitDetailView {
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
                     transcriptBubble(segment)
                 }
-            } else if tabFetchFailed.contains(1) {
-                tabErrorState(tab: 1)
+            } else if tabFetchFailed.contains("transcript") {
+                tabErrorState(tab: "transcript")
             } else {
                 documentEmptyState(
                     step: "transcription",

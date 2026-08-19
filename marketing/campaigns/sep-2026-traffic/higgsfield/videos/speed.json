@@ -1,0 +1,36 @@
+[
+  {
+    "id": "196d2520-7ce7-4d97-b376-f77d1f8f405c",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_031712_196d2520-7ce7-4d97-b376-f77d1f8f405c.mp4",
+    "created_at": 1786677432.328266,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Subtle camera push-in on a bold teal marketing card about winning the client with a clear agreement. Soft parallax, clean motion, keep all text sharp and readable, no new text, no glitches.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "98374c79-2364-42ac-80b1-173119cf83bb",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/98374c79-2364-42ac-80b1-173119cf83bb.png",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

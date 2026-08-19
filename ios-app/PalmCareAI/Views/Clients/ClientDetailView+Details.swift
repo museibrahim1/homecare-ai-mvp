@@ -1,113 +1,147 @@
 import SwiftUI
 
 extension ClientDetailView {
+    // MARK: - Value hygiene
+
+    /// Placeholder / "no signal" strings the AI pipeline and imports emit.
+    /// These must never render as a fact value.
+    static let noiseValues: Set<String> = [
+        "unknown", "n/a", "na", "none", "not applicable", "not provided",
+        "not specified", "not assessed", "not documented", "pending",
+        "cannot determine", "no data", "no information", "tbd", "-", "—"
+    ]
+
+    /// Trims a value and drops it entirely if it's empty or recognizable
+    /// noise ("Unable to assess", "Unknown", "insufficient information", …).
+    func cleaned(_ raw: String?) -> String? {
+        guard let raw = raw?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else { return nil }
+        let lower = raw.lowercased()
+        if Self.noiseValues.contains(lower) { return nil }
+        if lower.hasPrefix("unknown") { return nil }
+        let noisePhrases = ["unable to assess", "insufficient information", "not assessed", "cannot determine", "full assessment required"]
+        if noisePhrases.contains(where: { lower.contains($0) }) { return nil }
+        return raw
+    }
+
+    /// "long_term_memory" → "Long Term Memory".
+    func humanized(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+
+    /// Hard cap for prose that isn't structured into goals.
+    func truncated(_ raw: String, limit: Int = 180) -> String {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard text.count > limit else { return text }
+        let end = text.index(text.startIndex, offsetBy: limit)
+        return String(text[..<end]).trimmingCharacters(in: .whitespaces) + "…"
+    }
+
     // MARK: - Row Helpers
 
     var detailDivider: some View {
-        Divider().padding(.leading, 54)
+        Rectangle()
+            .fill(Color.palmChevron.opacity(0.35))
+            .frame(height: 1)
+            .padding(.horizontal, 16)
     }
 
-    func detailRow(icon: String, label: String, value: String, color: Color) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(color)
-                .frame(width: 30, height: 30)
-                .background(color.opacity(0.1))
-                .cornerRadius(8)
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.palmSecondary)
-                Text(value)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.palmText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-    }
-
-    func medicalNotesView(_ rawNotes: String) -> some View {
-        let assessments = parseAssessments(rawNotes)
-
-        return VStack(alignment: .leading, spacing: 0) {
+    /// Paper App Glass fact row: muted label on the left, ink value on the
+    /// right. Tap opens the edit sheet so every fact stays editable.
+    func factRow(label: String, value: String) -> some View {
+        Button {
+            showEditSheet = true
+        } label: {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "note.text")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.palmSecondary)
-                    .frame(width: 30, height: 30)
-                    .background(Color.palmSecondary.opacity(0.1))
-                    .cornerRadius(8)
-
-                Text("Medical Notes")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.palmSecondary)
-
-                Spacer()
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-
-            if assessments.isEmpty {
-                Text(rawNotes)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.palmText)
+                Text(label)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmHint)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 10)
-            } else {
-                ForEach(Array(assessments.enumerated()), id: \.offset) { idx, assessment in
-                    VStack(alignment: .leading, spacing: 10) {
-                        if let date = assessment.date {
-                            HStack(spacing: 6) {
-                                Image(systemName: "calendar")
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.palmPrimary)
-                                Text("Assessment: \(date)")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.palmPrimary)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.palmPrimary.opacity(0.08))
-                            .cornerRadius(8)
-                        }
-
-                        ForEach(Array(assessment.sections.enumerated()), id: \.offset) { _, section in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(section.title)
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.palmText)
-
-                                Text(section.content)
-                                    .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.palmText.opacity(0.85))
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-
-                    if idx < assessments.count - 1 {
-                        Divider()
-                            .background(Color.palmSecondary.opacity(0.15))
-                            .padding(.horizontal, 14)
-                    }
-                }
+                Spacer(minLength: 12)
+                Text(value)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.palmInk)
+                    .multilineTextAlignment(.trailing)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 9)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Edit \(label)")
     }
+
+    func emptyFactRow(label: String, hint: String = "Tap to add") -> some View {
+        factRow(label: label, value: hint)
+    }
+
+    /// Small teal date pill for the Latest Assessment card.
+    func datePill(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .bold))
+            .foregroundColor(.palmPrimary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Capsule(style: .continuous).fill(Color.palmPrimary.opacity(0.1)))
+    }
+
+    // MARK: - Care plan parsing
+
+    /// If a care plan reads like a list of goals ("- Assist with bathing"),
+    /// return up to 3 short bullets. Otherwise return [] and the caller
+    /// truncates the prose instead.
+    func carePlanGoals(_ raw: String) -> [String] {
+        let lines = raw
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        var goals: [String] = []
+        for line in lines {
+            var text: String?
+            if let first = line.first, "-•*–●▪".contains(first) {
+                text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
+            } else if let first = line.first, first.isNumber,
+                      let sep = line.firstIndex(where: { $0 == "." || $0 == ")" }),
+                      line.distance(from: line.startIndex, to: sep) <= 2 {
+                text = String(line[line.index(after: sep)...]).trimmingCharacters(in: .whitespaces)
+            }
+            if let text, !text.isEmpty { goals.append(text) }
+        }
+        return Array(goals.prefix(3))
+    }
+
+    // MARK: - Latest assessment
 
     struct AssessmentBlock {
         let date: String?
         let sections: [(title: String, content: String)]
+    }
+
+    /// The most recent parsed assessment from `medical_notes`, if any.
+    func latestAssessment() -> AssessmentBlock? {
+        guard let raw = client.medical_notes, !raw.isEmpty else { return nil }
+        return parseAssessments(raw).last
+    }
+
+    /// A 2–3 line summary for the latest assessment, skipping noise sections.
+    /// Prefers an explicit "ASSESSMENT SUMMARY" section.
+    func assessmentSummary(_ block: AssessmentBlock) -> String? {
+        let good = block.sections.filter { cleaned($0.content) != nil }
+        if let summary = good.first(where: { $0.title.uppercased().contains("SUMMARY") }) {
+            return summary.content
+        }
+        let combined = good.prefix(2)
+            .map { "\($0.title.capitalized): \($0.content)" }
+            .joined(separator: "  ")
+        return combined.isEmpty ? nil : combined
+    }
+
+    /// Best matching visit to open from the Latest Assessment card — newest
+    /// client visit, or nil if the client has none.
+    var latestAssessmentVisit: Visit? {
+        clientVisitsNewestFirst.first
     }
 
     func parseAssessments(_ raw: String) -> [AssessmentBlock] {
@@ -183,6 +217,8 @@ extension ClientDetailView {
         return assessments
     }
 
+    // MARK: - Visit row
+
     func visitRow(_ visit: Visit) -> some View {
         let visitStatusColor: Color = {
             switch visit.status.lowercased() {
@@ -206,7 +242,7 @@ extension ClientDetailView {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Assessment")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.palmText)
                 Text(formattedDate(visit.created_at))
                     .font(.system(size: 11))
@@ -223,8 +259,8 @@ extension ClientDetailView {
                 .background(visitStatusColor.opacity(0.1))
                 .cornerRadius(10)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 
     func formattedDate(_ isoString: String) -> String {
@@ -241,5 +277,4 @@ extension ClientDetailView {
         display.timeStyle = .short
         return display.string(from: parsedDate)
     }
-
 }

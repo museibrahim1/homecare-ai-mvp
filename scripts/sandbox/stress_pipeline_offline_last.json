@@ -1,0 +1,25 @@
+{
+  "n": 50,
+  "ok": 50,
+  "failed": 0,
+  "elapsed_sec": 7.83,
+  "p50_ms": 1777,
+  "p95_ms": 2123,
+  "max_ms": 2240,
+  "failures": [],
+  "sample_ok": {
+    "intake_facts": {
+      "kind": "training_with_embedded_intake",
+      "rate": 18.0,
+      "hours": 52.5,
+      "billables": 5
+    },
+    "clinic_short_circuit": {
+      "kind": "out_of_scope",
+      "billables": 0
+    },
+    "adversarial_junk": {
+      "junk_cases": 5
+    }
+  }
+}

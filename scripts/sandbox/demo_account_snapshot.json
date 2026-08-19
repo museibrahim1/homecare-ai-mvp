@@ -1,0 +1,382 @@
+[
+  {
+    "visit_id": "1fbc2276-8d96-41ec-95b5-c7acb8d3ead2",
+    "client": "GI Interview v10",
+    "status": "pending_review",
+    "created": "2026-08-15T04:52:25.134048Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "0.00",
+    "hourly_rate": "0.00",
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "c4151f16-0c8c-4794-8bbd-16f854ebe42a",
+    "client": "Intake Role Play v10",
+    "status": "pending_review",
+    "created": "2026-08-15T04:51:13.408308Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "Monday, Tuesday, Wednesday, Thursday, Friday 8:30 AM to 7:00 PM",
+    "service_hour_rows": 1,
+    "billables": 4,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "792f9daa-a9df-4110-95e6-a3b638bf1502",
+    "client": "Intake Role Play v9",
+    "status": "pending_review",
+    "created": "2026-08-15T04:41:15.003245Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "pending",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "Monday, Tuesday, Wednesday, Thursday, Friday 8:30am to 7:00pm",
+    "service_hour_rows": 1,
+    "billables": 4,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "b3103e70-68c1-4abe-bb76-a95dc55c35b4",
+    "client": "Intake Role Play v8",
+    "status": "pending_review",
+    "created": "2026-08-15T04:11:42.323501Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "processing",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "Monday, Tuesday, Wednesday, Thursday, Friday 8:30 AM to 7:00 PM",
+    "service_hour_rows": 1,
+    "billables": 4,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "d0352148-9ff1-40ba-a8c6-3030c78c96f6",
+    "client": "GI Interview v7",
+    "status": "pending_review",
+    "created": "2026-08-15T04:01:36.314973Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "processing",
+      "note": "completed",
+      "contract": "pending",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "0.00",
+    "hourly_rate": "0.00",
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "1c1cbe90-43db-4c6d-8a24-3f02643c1f70",
+    "client": "Intake Role Play v7",
+    "status": "pending_review",
+    "created": "2026-08-15T04:00:21.625310Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "pending",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "",
+    "service_hour_rows": 1,
+    "billables": 4,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "d30e3d62-ec2a-4ed6-9af7-e90e9facf475",
+    "client": "GI Interview v6",
+    "status": "pending_review",
+    "created": "2026-08-15T03:50:50.779567Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "processing",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "0.00",
+    "hourly_rate": "20.00",
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "71f08912-5b8f-4beb-a632-8dee53b5d559",
+    "client": "Intake Role Play v6",
+    "status": "pending_review",
+    "created": "2026-08-15T03:47:46.090751Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "pending",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "",
+    "service_hour_rows": 1,
+    "billables": 5,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "c7856507-451d-4efc-80f2-a8113e82a494",
+    "client": "GI Interview v5",
+    "status": "pending_review",
+    "created": "2026-08-15T03:44:54.657299Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "0.00",
+    "hourly_rate": "20.00",
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "cde7eead-963a-4715-b5fc-3912c6478d74",
+    "client": "Intake Role Play v5",
+    "status": "pending_review",
+    "created": "2026-08-15T03:43:22.690131Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "processing",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "",
+    "service_hour_rows": 1,
+    "billables": 4,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "3c75376f-4631-4a37-a94b-73c54afff0ac",
+    "client": "Ms. Smith (interview v4)",
+    "status": "pending_review",
+    "created": "2026-08-15T03:32:41.200194Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "0.00",
+    "hourly_rate": "24.00",
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "0b6e52b3-2d26-4b28-a5d2-16fd23ee3bfb",
+    "client": "Ms. Smith (interview v3)",
+    "status": "pipeline_failed",
+    "created": "2026-08-15T03:28:57.803443Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "failed",
+      "full_pipeline": "failed"
+    },
+    "weekly_hours": null,
+    "hourly_rate": null,
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 2,
+    "contract_http": 404
+  },
+  {
+    "visit_id": "47144613-ac07-4159-91ba-60cf7e6d032a",
+    "client": "Sharon (intake v3)",
+    "status": "pending_review",
+    "created": "2026-08-15T03:26:23.908962Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "52.50",
+    "hourly_rate": "18.00",
+    "freq": "5 days per week (Monday through Friday)",
+    "service_hour_rows": 1,
+    "billables": 5,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "bd18e7cc-67c4-4e1c-ab9a-41f480d3e009",
+    "client": "Sharon (intake v2 fixed)",
+    "status": "pipeline_failed",
+    "created": "2026-08-15T03:20:08.954489Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "failed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": null,
+    "hourly_rate": null,
+    "freq": "",
+    "service_hour_rows": 0,
+    "billables": 9,
+    "contract_http": 404
+  },
+  {
+    "visit_id": "25e497e7-68d1-4988-9f89-4abdacc4b39a",
+    "client": "Ms. Smith (simulated interview)",
+    "status": "pending_review",
+    "created": "2026-08-15T02:41:43.312145Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "35.00",
+    "hourly_rate": "28.00",
+    "freq": "Daily (5-7 days per week)",
+    "service_hour_rows": 5,
+    "billables": 9,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "e6ffc833-43e7-4fa5-9579-ec1587ac223a",
+    "client": "Sharon (intake role play)",
+    "status": "pending_review",
+    "created": "2026-08-15T02:38:20.670652Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "35.00",
+    "hourly_rate": "28.00",
+    "freq": "Daily (5-7 days per week)",
+    "service_hour_rows": 5,
+    "billables": 10,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "c03f86d3-ab78-4432-8ba3-6a664745a007",
+    "client": "Mrs. Johnson (fixture assessment)",
+    "status": "pending_review",
+    "created": "2026-08-15T02:32:46.290553Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "processing",
+      "contract": "completed",
+      "full_pipeline": null
+    },
+    "weekly_hours": "35.00",
+    "hourly_rate": "28.00",
+    "freq": "Daily (5-7 days per week)",
+    "service_hour_rows": 5,
+    "billables": 8,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "d7968474-f060-439a-b0c1-2bbd4a5f551d",
+    "client": "Prod check 0 022919",
+    "status": "pending_review",
+    "created": "2026-08-15T02:29:19.790612Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "14.00",
+    "hourly_rate": "28.00",
+    "freq": "Daily, 7 days per week",
+    "service_hour_rows": 3,
+    "billables": 3,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "6fbf39a8-3203-43d2-bbf3-aa1b08e953d8",
+    "client": "Prod check 1 022919",
+    "status": "pending_review",
+    "created": "2026-08-15T02:29:19.756145Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "completed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "21.00",
+    "hourly_rate": "30.00",
+    "freq": "Daily, 7 days per week",
+    "service_hour_rows": 5,
+    "billables": 3,
+    "contract_http": 200
+  },
+  {
+    "visit_id": "9ad4d53c-99f8-4323-80c3-2af4b1254a60",
+    "client": "Eleanor Whitfield",
+    "status": "pipeline_failed",
+    "created": "2026-07-26T23:14:42.705160Z",
+    "steps": {
+      "transcription": "completed",
+      "billing": "failed",
+      "note": "completed",
+      "contract": "completed",
+      "full_pipeline": "completed"
+    },
+    "weekly_hours": "18.00",
+    "hourly_rate": "24.00",
+    "freq": "To be determined after assessment completion",
+    "service_hour_rows": 0,
+    "billables": 0,
+    "contract_http": 200
+  }
+]

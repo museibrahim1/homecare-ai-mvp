@@ -49,6 +49,7 @@ struct RecordView: View {
     @State private var showHeldRecordingPrompt = false
     @State private var showAudioSavedPrompt = false
     @State private var audioSavedMessage = "We still have your audio on this iPhone. Retry when you have a signal."
+    @State private var showAssessmentPaywall = false
     #if DEBUG
     @State private var didRunAutomationDemo = false
     #endif
@@ -60,79 +61,29 @@ struct RecordView: View {
 
     var body: some View {
             ZStack {
-                Group {
-                    if recorder.isRecording {
-                        Color(red: 12/255, green: 12/255, blue: 14/255)
-                    } else {
-                        PalmGlassBackground()
-                    }
-                }
-                .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.25), value: recorder.isRecording)
+                // Pipeline Glass: mint wash for Palm It, Recording, and Processing.
+                PalmGlassBackground()
+                    .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    topBar
-                    
-                    #if DEBUG
-                    if isDemoMode || recorder.isRecording {
-                        recordingLayout
-                    } else {
-                        idleLayout
-                    }
-                    #else
-                    if recorder.isRecording {
-                        recordingLayout
-                    } else {
-                        idleLayout
-                    }
-                    #endif
-                }
-
-                // Processing overlay with pipeline progress
                 if isProcessing {
-                    VStack {
-                        Spacer()
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack(spacing: 10) {
-                                ProgressView().tint(.palmPrimary).scaleEffect(0.8)
-                                Text(uploadProgress ?? "Processing assessment...")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.palmText)
-                                Spacer()
-                            }
-
-                            if !pipelineSteps.isEmpty {
-                                VStack(spacing: 0) {
-                                    ForEach(Array(pipelineSteps.enumerated()), id: \.offset) { index, entry in
-                                        let (step, status) = entry
-                                        HStack(spacing: 10) {
-                                            pipelineIcon(for: status)
-                                                .frame(width: 16, height: 16)
-                                            Text(step)
-                                                .font(.system(size: 13, weight: .medium))
-                                                .foregroundColor(.palmText)
-                                            Spacer()
-                                            let s = pipelineStatusDescriptor(for: status)
-                                            PalmPipelinePill(text: s.0, color: s.1, showsSpinner: s.2)
-                                        }
-                                        .padding(.vertical, 9)
-
-                                        if index < pipelineSteps.count - 1 {
-                                            Divider()
-                                                .overlay(Color.palmGlassBorder)
-                                                .padding(.leading, 26)
-                                        }
-                                    }
-                                }
-                            }
+                    processingScreen
+                        .transition(.opacity)
+                } else {
+                    VStack(spacing: 0) {
+                        #if DEBUG
+                        if isDemoMode || recorder.isRecording {
+                            recordingLayout
+                        } else {
+                            idleLayout
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 18)
-                        .palmGlassCard(radius: 22)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 100)
+                        #else
+                        if recorder.isRecording {
+                            recordingLayout
+                        } else {
+                            idleLayout
+                        }
+                        #endif
                     }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
                 // Phone call / Siri interruption banner — recording is paused
@@ -145,14 +96,12 @@ struct RecordView: View {
                                 .foregroundColor(.palmOrange)
                             Text("Recording paused by a call. It will resume automatically.")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.palmText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .background(Color(red: 40/255, green: 28/255, blue: 12/255).opacity(0.95))
-                        .cornerRadius(14)
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmOrange.opacity(0.4), lineWidth: 1))
+                        .palmGlassCard(radius: 14)
                         .padding(.horizontal, 20)
                         .padding(.top, 70)
                         Spacer()
@@ -179,7 +128,7 @@ struct RecordView: View {
                     VisitDetailView(
                         visitId: visitId,
                         clientName: completedClientName,
-                        initialTab: pipelineFailed ? 0 : 4
+                        initialTab: pipelineFailed ? 0 : 5
                     )
                     .environmentObject(api)
                 }
@@ -189,6 +138,12 @@ struct RecordView: View {
                     clients.insert(newClient, at: 0)
                 })
                 .environmentObject(api)
+            }
+            .sheet(isPresented: $showAssessmentPaywall, onDismiss: {
+                // If they subscribed, start recording on the next tap.
+            }) {
+                PaywallView(isRequired: true, allowsNotNow: true)
+                    .environmentObject(api)
             }
             .palmConfirmAlert(
                 "Microphone Access",
@@ -230,10 +185,13 @@ struct RecordView: View {
                 )
             }
             .task {
-                permissionGranted = await recorder.requestPermission()
+                // Do not prompt on appear — Paper Palm It is a clean Ready screen.
+                // Ask for the mic only when the user starts a recording.
+                permissionGranted = recorder.checkPermissionStatus()
                 await loadClients()
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("LIVE_TRANSCRIPT_SMOKE"),
+                   !ProcessInfo.processInfo.arguments.contains("MARKETING_FULL_PIPELINE"),
                    !didRunAutomationDemo {
                     didRunAutomationDemo = true
                     aiConsentAccepted = true
@@ -245,6 +203,32 @@ struct RecordView: View {
                 #endif
             }
             #if DEBUG
+            .task {
+                guard ProcessInfo.processInfo.arguments.contains("MARKETING_FULL_PIPELINE") else { return }
+                guard !didRunAutomationDemo else { return }
+                didRunAutomationDemo = true
+                aiConsentAccepted = true
+                // Let login + clients load settle so the Record screen is visible.
+                try? await Task.sleep(nanoseconds: 4_000_000_000)
+                if clients.isEmpty {
+                    await loadClients()
+                }
+                await MainActor.run {
+                    selectedClient = clients.first(where: {
+                        $0.full_name.localizedCaseInsensitiveContains("Eleanor")
+                    }) ?? clients.first
+                }
+                // Hold on the ready screen briefly so the recording CTA is clear.
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                await MainActor.run { startRecording() }
+                // Record long enough for live transcript + marketing beat.
+                try? await Task.sleep(nanoseconds: 40_000_000_000)
+                await MainActor.run {
+                    if recorder.isRecording {
+                        stopAndProcess()
+                    }
+                }
+            }
             .task {
                 guard ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") else { return }
                 guard !didRunAutomationDemo else { return }
@@ -412,10 +396,10 @@ struct RecordView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("We still have your audio")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.palmText)
                 Text(subtitle)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.75))
+                    .foregroundColor(.palmSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if let err = session.pendingUploads.first?.lastError, !err.isEmpty {
                     Text(err)
@@ -442,73 +426,82 @@ struct RecordView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color(red: 20/255, green: 28/255, blue: 28/255).opacity(0.95))
-        .cornerRadius(14)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmPrimary.opacity(0.35), lineWidth: 1))
+        .palmGlassCard(radius: 14)
     }
 
-    private var topBar: some View {
-        let onDark = recorder.isRecording
-        let muted = onDark ? Color.white.opacity(0.45) : Color.palmSecondary
-        let primaryText = onDark ? Color.white.opacity(0.9) : Color.palmText
-        let chipFill = onDark ? Color.white.opacity(0.05) : Color.white.opacity(0.72)
-        let chipStroke = onDark ? Color.white.opacity(0.08) : Color.palmGlassBorder
+    /// Paper Palm It: Select Client + Upload sit under the title, not above it.
+    private var idleActionPills: some View {
+        let chipFill = Color.white.opacity(0.58)
+        let chipStroke = Color.white.opacity(0.88)
+        let ink = Color(red: 17 / 255, green: 24 / 255, blue: 39 / 255) // #111827
 
-        return HStack(alignment: .center, spacing: 12) {
+        return HStack(spacing: 8) {
+            Button { showClientPicker = true } label: {
+                Text(selectedClient?.full_name ?? "Select Client")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(chipFill)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
+            }
+            .accessibilityLabel("Select client")
+
+            Button { showFilePicker = true } label: {
+                Text("Upload")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ink)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(chipFill)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
+            }
+            .accessibilityLabel("Upload audio file")
+        }
+    }
+
+    /// Compact client + timer chrome while recording (kept for DEBUG demos /
+    /// future Recording variants; Paper Recording uses Live/Recording header).
+    private var recordingTopBar: some View {
+        HStack(alignment: .center, spacing: 12) {
             Button { showClientPicker = true } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "person")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(selectedClient != nil ? .palmPrimary : muted)
+                        .foregroundColor(selectedClient != nil ? .palmPrimary : Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255))
                     Text(selectedClient?.full_name ?? "Select Client")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(selectedClient != nil ? primaryText : muted)
+                        .foregroundColor(Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     Image(systemName: "chevron.down")
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(muted.opacity(0.7))
+                        .foregroundColor(Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255).opacity(0.7))
                 }
                 .padding(.horizontal, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 36)
-                .background(chipFill)
+                .background(Color.white.opacity(0.58))
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
+                .overlay(Capsule().stroke(Color.white.opacity(0.88), lineWidth: 1))
             }
             .accessibilityLabel("Select client")
 
-            Group {
-                if recorder.isRecording {
-                    HStack(spacing: 6) {
-                        Circle().fill(Color.red).frame(width: 6, height: 6)
-                        Text(timeString(recorder.duration))
-                            .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                            .foregroundColor(.white.opacity(0.9))
-                    }
-                    .padding(.horizontal, 14)
-                    .frame(height: 36)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.red.opacity(0.25), lineWidth: 1))
-                } else {
-                    Button { showFilePicker = true } label: {
-                        HStack(spacing: 7) {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 12, weight: .medium))
-                            Text("Upload")
-                                .font(.system(size: 13, weight: .medium))
-                        }
-                        .foregroundColor(muted)
-                        .padding(.horizontal, 14)
-                        .frame(height: 36)
-                        .background(chipFill)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(chipStroke, lineWidth: 1))
-                    }
-                    .accessibilityLabel("Upload audio file")
-                }
+            HStack(spacing: 6) {
+                Circle().fill(Color.red).frame(width: 6, height: 6)
+                Text(timeString(recorder.duration))
+                    .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                    .foregroundColor(Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255))
             }
+            .padding(.horizontal, 14)
+            .frame(height: 36)
+            .background(Color.white.opacity(0.58))
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color.red.opacity(0.28), lineWidth: 1))
             .fixedSize()
         }
         .padding(.horizontal, 20)
@@ -546,29 +539,145 @@ struct RecordView: View {
     // MARK: - Orb stage (idle + recording)
 
     private var idleLayout: some View {
-        VStack(spacing: 0) {
+        let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255) // #10211F
+        let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255) // #4B6B66
+
+        return VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Ready")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.palmSecondary)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(muted)
                 Text("Palm It")
-                    .font(.system(size: 34, weight: .heavy))
-                    .foregroundColor(.palmText)
-                    .tracking(-0.8)
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(ink)
+                    .tracking(-1.4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 24)
             .padding(.top, 8)
-            .padding(.bottom, 12)
+            .padding(.bottom, 18)
 
-            Spacer(minLength: 12)
-            orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording", size: 220)
+            VStack(spacing: 16) {
+                idleActionPills
+                orbStage(isActive: false, audioLevel: 0, caption: "Tap to start recording", size: 220)
+            }
+            .padding(.horizontal, 24)
+
             Spacer(minLength: 40)
         }
     }
 
+    /// Paper Pipeline Glass → Processing. Full-screen process card over mint wash.
+    private var processingScreen: some View {
+        let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255)
+        let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255)
+
+        return VStack(spacing: 0) {
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(processingClientFirstName.isEmpty ? "Client" : processingClientFirstName)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(muted)
+                        .lineLimit(1)
+                    Text("Processing")
+                        .font(.system(size: 34, weight: .bold))
+                        .tracking(-1.4)
+                        .foregroundColor(ink)
+                }
+                Spacer(minLength: 12)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+            .padding(.bottom, 18)
+
+            PalmPipelineProcessingCard(
+                readyCount: processingReadyCount,
+                totalCount: max(processingDocSteps.count, 1),
+                clientFirstName: processingClientFirstName,
+                subtitle: processingSubtitle,
+                steps: processingDocSteps
+            )
+            .padding(.horizontal, 24)
+            .padding(.bottom, 110)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var processingClientFirstName: String {
+        let full = selectedClient?.full_name ?? ""
+        return full.split(separator: " ").first.map(String.init) ?? full
+    }
+
+    private var processingSubtitle: String {
+        // Keep the Paper Processing hero line stable. Step-level status
+        // already shows in the checklist rows below.
+        "Care plan, billables, notes, and the contract."
+    }
+
+    private var processingReadyCount: Int {
+        processingDocSteps.filter { $0.status == .ready }.count
+    }
+
+    /// Map live pipeline rows into the four Paper Processing docs.
+    private var processingDocSteps: [PalmPipelineProcessingCard.Step] {
+        let aliases: [(String, [String])] = [
+            ("Care plan", ["care plan", "care_plan"]),
+            ("Billables", ["billable", "billing"]),
+            ("Notes", ["note", "clinical"]),
+            ("Contract", ["contract"]),
+        ]
+        var mapped: [PalmPipelineProcessingCard.Step] = []
+        for (title, keys) in aliases {
+            let match = pipelineSteps.first { step, _ in
+                let lower = step.lowercased()
+                return keys.contains { lower.contains($0) }
+            }
+            let status = palmProcessingStatus(match?.1)
+            mapped.append(.init(id: title, title: title, status: status))
+        }
+        if pipelineSteps.isEmpty {
+            return [
+                .init(id: "Care plan", title: "Care plan", status: .writing),
+                .init(id: "Billables", title: "Billables", status: .next),
+                .init(id: "Notes", title: "Notes", status: .next),
+                .init(id: "Contract", title: "Contract", status: .next),
+            ]
+        }
+        return mapped
+    }
+
+    private func palmProcessingStatus(_ raw: String?) -> PalmPipelineProcessingCard.Step.Status {
+        switch (raw ?? "").lowercased() {
+        case "completed": return .ready
+        case "running", "processing": return .writing
+        case "failed": return .failed
+        case "queued", "pending": return .next
+        default: return .next
+        }
+    }
+
     private var recordingLayout: some View {
-        VStack(spacing: 0) {
+        let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255)
+        let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255)
+        let hasTranscript = !transcriptBlocks.isEmpty || !liveFullTranscript.isEmpty
+
+        return VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Live")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(muted)
+                Text("Recording")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(ink)
+                    .tracking(-1.4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+            .padding(.bottom, 18)
+
+            // Paper Recording artboard: large orb + "Tap to stop".
+            // Live transcript stays below when speech arrives (product need).
             orbStage(
                 isActive: true,
                 audioLevel: {
@@ -577,25 +686,17 @@ struct RecordView: View {
                     #endif
                     return recorder.audioLevel
                 }(),
-                caption: nil,
-                size: 132
+                caption: hasTranscript ? nil : "Tap to stop",
+                size: 220
             )
-            .padding(.top, 8)
-            .padding(.bottom, 4)
+            .padding(.horizontal, 24)
 
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(Color.palmPrimary)
-                    .frame(width: 6, height: 6)
-                Text("LIVE TRANSCRIPT")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.38))
-                    .tracking(1.6)
+            if hasTranscript || liveNoSpeech || (liveError != nil && !(liveError ?? "").isEmpty) {
+                transcriptStream
+                    .padding(.top, 12)
+            } else {
+                Spacer(minLength: 40)
             }
-            .padding(.top, 10)
-            .padding(.bottom, 14)
-
-            transcriptStream
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -611,7 +712,7 @@ struct RecordView: View {
             } else if transcriptBlocks.isEmpty, liveNoSpeech {
                 Text("No speech detected yet. Speak near the microphone.")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white.opacity(0.38))
+                    .foregroundColor(.palmSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
             } else if transcriptBlocks.isEmpty, !liveFullTranscript.isEmpty {
@@ -623,7 +724,7 @@ struct RecordView: View {
             } else if transcriptBlocks.isEmpty {
                 Text("Listening…")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(.palmSecondary)
             } else {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
@@ -680,7 +781,7 @@ struct RecordView: View {
             if let caption {
                 Text(caption)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(isActive ? Color.white.opacity(0.5) : Color.palmSecondary)
+                    .foregroundColor(.palmSecondary)
                     .padding(.top, 18)
                 Spacer(minLength: 12)
             }
@@ -736,6 +837,13 @@ struct RecordView: View {
                 return
             }
 
+            let email = await MainActor.run { api.cachedUserEmail }
+            if !StoreKitService.shared.hasPaidAccess(email: email) {
+                // Soft browse is fine; recording requires a trial or plan.
+                await MainActor.run { showAssessmentPaywall = true }
+                return
+            }
+
             // Usage limits are enforced server-side on submit, not here.
             await MainActor.run {
                 liveSegments = []
@@ -762,6 +870,10 @@ struct RecordView: View {
     }
 
     private func handlePickedAudioFile(_ url: URL) {
+        guard StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else {
+            showAssessmentPaywall = true
+            return
+        }
         guard let client = selectedClient else {
             errorMessage = "Please select a client first."
             showError = true
@@ -771,54 +883,6 @@ struct RecordView: View {
         // clear the same consent gate as a live recording.
         requireAIConsent {
             session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
-        }
-    }
-
-    @ViewBuilder
-    private func pipelineIcon(for status: String) -> some View {
-        switch status.lowercased() {
-        case "completed":
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 12))
-                .foregroundColor(.palmGreen)
-        case "running", "processing":
-            ProgressView()
-                .scaleEffect(0.5)
-                .tint(.palmPrimary)
-        case "failed":
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 12))
-                .foregroundColor(.red)
-        case "queued", "pending":
-            Image(systemName: "clock.fill")
-                .font(.system(size: 12))
-                .foregroundColor(.palmOrange)
-        default:
-            Image(systemName: "circle")
-                .font(.system(size: 12))
-                .foregroundColor(.palmSecondary.opacity(0.4))
-        }
-    }
-
-    private func pipelineColor(for status: String) -> Color {
-        switch status.lowercased() {
-        case "completed": return .palmGreen
-        case "running", "processing": return .palmPrimary
-        case "failed": return .red
-        case "queued", "pending": return .palmOrange
-        default: return .palmSecondary
-        }
-    }
-
-    /// Status pill descriptor (label, color, spinner) for the Processing
-    /// checklist — mirrors the Overview Pipeline Glass statuses.
-    private func pipelineStatusDescriptor(for status: String) -> (String, Color, Bool) {
-        switch status.lowercased() {
-        case "completed": return ("Ready", .palmGreen, false)
-        case "running", "processing": return ("Writing", .palmPrimary, true)
-        case "failed": return ("Failed", .red, false)
-        case "queued", "pending": return ("Next", .palmOrange, false)
-        default: return ("Waiting", .palmSecondary, false)
         }
     }
 

@@ -16,6 +16,7 @@ import io
 import csv
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -156,7 +157,7 @@ async def get_overview_stats(
     
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).subquery()
     
     # Assessments this week (only for user's clients)
@@ -210,7 +211,7 @@ async def get_weekly_timesheet(
     
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).subquery()
     
     # Get visits in date range for user's clients only
@@ -310,7 +311,7 @@ async def get_monthly_summary(
     
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).subquery()
     
     # Get all visits for the month (user's clients only)
@@ -336,7 +337,7 @@ async def get_monthly_summary(
         and_(
             Client.created_at >= start_date,
             Client.created_at < end_date,
-            Client.created_by == current_user.id
+            owned_by_visible_users(db, current_user)
         )
     ).count()
     
@@ -422,7 +423,7 @@ async def get_billing_report(
     
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).subquery()
     
     # Get visits in date range (user's clients only)
@@ -524,7 +525,7 @@ async def get_client_activity(
     """
     # Get clients belonging to current user only
     clients = db.query(Client).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).order_by(Client.created_at.desc()).all()
     
     client_items = []

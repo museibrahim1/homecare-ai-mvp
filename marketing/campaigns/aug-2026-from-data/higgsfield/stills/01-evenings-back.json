@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1359eae3-5460-41ee-bda1-14dbab76c010",
+    "status": "completed",
+    "display_name": "GPT Image 2",
+    "job_set_type": "gpt_image_2",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022128_1359eae3-5460-41ee-bda1-14dbab76c010.png",
+    "created_at": 1786674088.264963,
+    "params": {
+      "width": 1520,
+      "height": 2688,
+      "prompt": "Photorealistic iPhone 15 Pro Space Black held by a home care nurse in a warm living room during an in-home visit, three-quarter angle, soft natural window light. Phone screen shows PalmCare AI recording UI with teal #0d9488 accent, simple waveform, Record label. No logos other than subtle teal UI. No on-screen marketing text. Documentary photo style, shallow depth of field, authentic caregiver moment, no stock smile, no fake brand overlays.",
+      "medias": [],
+      "aspect_ratio": "9:16",
+      "quality": "high",
+      "resolution": "2k",
+      "model": "videotape-alpha",
+      "remove_bg": false,
+      "reference_elements": []
+    }
+  }
+]

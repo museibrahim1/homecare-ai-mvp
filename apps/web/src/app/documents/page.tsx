@@ -117,6 +117,7 @@ export default function DocumentsPage() {
     try {
       const response = await fetch(`${API_URL}/documents`, {
         headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       
       if (response.ok) {
@@ -169,12 +170,13 @@ export default function DocumentsPage() {
     return matchesSearch && matchesFolder;
   });
 
-  const handleFileUpload = (uploadedFiles: FileList | null) => {
-    if (!uploadedFiles) return;
-    
-    Array.from(uploadedFiles).forEach(file => {
+  const handleFileUpload = async (uploadedFiles: FileList | null) => {
+    if (!uploadedFiles || !token) return;
+
+    const incoming = Array.from(uploadedFiles);
+    const optimistic: Document[] = incoming.map((file) => {
       const ext = file.name.split('.').pop()?.toUpperCase() || 'FILE';
-      const newFile: Document = {
+      return {
         id: String(Date.now() + Math.random()),
         name: file.name,
         type: 'uploaded',
@@ -183,9 +185,40 @@ export default function DocumentsPage() {
         created_at: new Date().toISOString(),
         folder: selectedFolder || 'Contracts',
       };
-      setFiles(prev => [newFile, ...prev]);
     });
+    setFiles(prev => [...optimistic, ...prev]);
     setShowUploadModal(false);
+
+    try {
+      const agencyRes = await fetch(`${API_URL}/agency`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+      });
+      const agency = agencyRes.ok ? await agencyRes.json() : { documents: [] };
+      const existing = Array.isArray(agency.documents) ? agency.documents : [];
+      const stored = incoming.map((file, i) => ({
+        id: optimistic[i].id,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        category: 'uploaded',
+        content: '',
+        uploaded_at: optimistic[i].created_at,
+      }));
+      const put = await fetch(`${API_URL}/agency`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ documents: [...existing, ...stored] }),
+      });
+      if (!put.ok) {
+        setError('Could not save the upload. Try again from Settings.');
+      }
+    } catch {
+      setError('Could not save the upload. Check your connection.');
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {

@@ -8,19 +8,17 @@ struct SettingsSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(title)
-                .font(.system(size: 13, weight: .semibold))
+            Text(title.uppercased())
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.7)
                 .foregroundColor(.palmSecondary)
-                .padding(.leading, 4)
-                .padding(.bottom, 8)
+                .padding(.leading, 6)
+                .padding(.bottom, 10)
 
             VStack(spacing: 0) {
                 content
             }
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(14)
-            .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
+            .palmGlassCard(radius: 22, fillOpacity: 0.62)
         }
     }
 }
@@ -98,9 +96,15 @@ struct SettingsIcon: View {
 }
 
 struct SettingsDivider: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Rectangle()
-            .fill(Color.palmBorder.opacity(0.5))
+            .fill(
+                colorScheme == .dark
+                    ? Color.palmNightGlassBorder
+                    : Color.palmBorder.opacity(0.5)
+            )
             .frame(height: 1)
             .padding(.leading, 58)
     }

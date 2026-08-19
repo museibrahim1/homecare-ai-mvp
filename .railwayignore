@@ -1,0 +1,14 @@
+# Keep Railway uploads small (worker/api deploy from monorepo root)
+marketing/
+videos/
+ios-app/
+apps/web/
+node_modules/
+**/.venv/
+**/__pycache__/
+*.mp3
+*.mp4
+*.mov
+*.wav
+.cursor/
+scripts/sandbox/assessment-runs/

@@ -166,304 +166,415 @@ _APP_STORE = _utm("/app", content="cta_button", campaign="app_download")
 _REGISTER = _utm("/register", content="cta_trial")
 _PRIVACY = _utm("/privacy", content="footer")
 _UNSUB = _utm("/unsubscribe", content="footer")
-_QR_APP = f"{_GH_MARKETING}/social/palm-appstore-qr.png"
+_QR_APP = f"{_SITE}/marketing/social/palm-appstore-qr.png"
 _LAUNCH_VIDEO = _utm("/launch/palm-app-launch.mp4", content="launch_video", campaign="app_download")
+# Paper glass UI (Pipeline / App / Web), not legacy dark App Store captures.
+_SHOT = f"{_SITE}/screenshots/glass"
+_IMG_RECORD = f"{_SHOT}/pipeline-recording.png"
+_IMG_CONTRACT = f"{_SHOT}/pipeline-contract.png"
+_IMG_HOME = f"{_SHOT}/pipeline-palm-it.png"
+_IMG_CARE = f"{_SHOT}/pipeline-care-plan.png"
+_IMG_BILLABLES = f"{_SHOT}/pipeline-billables.png"
+_IMG_NOTES = f"{_SHOT}/pipeline-notes.png"
+_IMG_PROCESS = f"{_SHOT}/pipeline-processing.png"
+_IMG_WEB_HOME = f"{_SHOT}/web-home.png"
+_IMG_WEB_CLIENTS = f"{_SHOT}/web-clients.png"
 
-
-def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
-    """Apple-style clean email wrapper with PALM IT branding."""
-    return (
-        '<div style="font-family: Inter, -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, '
-        'sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">'
-        # Header
-        '<div style="background: linear-gradient(135deg, #0d9488, #0891b2); '
-        'padding: 32px 40px; text-align: center; border-radius: 0;">'
-        '<p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; '
-        'letter-spacing: -0.3px;">PalmCare AI</p>'
-        '<p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); '
-        'letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>'
-        '</div>'
-        # Body
-        f'<div style="padding: 40px; color: {_SLATE_900}; font-size: 15px; line-height: 1.7;">'
-        f'{body_sections}'
-        '</div>'
-        # Signature
-        f'<div style="padding: 0 40px 32px; border-top: 1px solid {_SLATE_200}; padding-top: 24px;">'
-        f'<p style="margin: 0; font-weight: 700; font-size: 15px; color: {_SLATE_900};">The PalmCare AI Team</p>'
-        f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">Palm Technologies, Inc.</p>'
-        f'<p style="margin: 6px 0 0;"><a href="{_SITE_LINK}" '
-        f'style="color: {_TEAL}; text-decoration: none; font-size: 13px; font-weight: 500;">'
-        f'palmcareai.com</a></p>'
-        '</div>'
-        # Product showcase — iPhone + CRM
-        '<div style="padding: 0 40px 32px; text-align: center;">'
-        f'<a href="{_SITE_LINK}" style="text-decoration: none;">'
-        f'<img src="{_GH_MARKETING}/social/w1-phone-record.png" '
-        'alt="This screen replaces your clipboard. Press record at the assessment." '
-        'style="max-width: 520px; width: 100%; border-radius: 12px; '
-        f'border: 1px solid {_SLATE_200};" />'
-        '</a></div>'
-        # iPhone app previews
-        '<div style="padding: 0 40px 24px; text-align: center;">'
-        f'<img src="{_GH_MARKETING}/social/w3-phone-transcript.png" alt="PALM knows who said what" '
-        'style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
-        f'<img src="{_GH_MARKETING}/social/w4-phone-billables.png" alt="Billables, caught live" '
-        'style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
-        f'<img src="{_GH_MARKETING}/social/w2-phone-contract.png" alt="The contract writes itself" '
-        'style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
-        '</div>'
-        # CTA banner — the app download is the ask
-        '<div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); '
-        'border-radius: 12px; padding: 28px 32px; text-align: center;">'
-        f'<p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM is on the App Store.</p>'
-        '<p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">'
-        'It sits in on the assessment, writes the care plan, finds the billables, and builds the contract.</p>'
-        f'<a href="{_APP_STORE}" style="display: inline-block; background-color: #ffffff; '
-        f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 700; '
-        'padding: 12px 28px; border-radius: 8px;">Download PALM for iPhone</a>'
-        '<p style="margin: 12px 0 0; font-size: 12px;">'
-        f'<a href="{_REGISTER}" style="color: rgba(255,255,255,0.9); text-decoration: underline;">'
-        'Start your 14 day free trial</a></p>'
-        '</div>'
-        # Footer
-        f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
-        f'border-top: 1px solid {_SLATE_200}; text-align: center;">'
-        f'<a href="{_APP_STORE}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
-        f'<img src="{_QR_APP}" alt="Scan to download PALM on the App Store" '
-        'style="width: 88px; height: 88px; border-radius: 8px; border: 1px solid #e2e8f0;" />'
-        '</a><br>'
-        f'<p style="margin: 0 0 4px; font-size: 11px; color: #94a3b8;">Scan with your iPhone camera to download PALM</p>'
-        f'<p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: {_SLATE_900};">'
-        'PalmCare AI</p>'
-        f'<p style="margin: 0 0 12px; font-size: 12px; color: {_SLATE_600};">'
-        'Built for care professionals</p>'
-        f'<p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">'
-        f'Palm Technologies, Inc. &middot; Omaha, NE<br>'
-        f'You received this because {provider_name} is listed in public agency directories.</p>'
-        '<p style="margin: 0;">'
-        f'<a href="{_PRIVACY}" style="color: #94a3b8; text-decoration: underline; '
-        'font-size: 11px;">Privacy</a>'
-        '&nbsp;&middot;&nbsp;'
-        # Per-recipient one-click unsubscribe. Rendered by render_email() which
-        # fills {unsubscribe_url} with a signed link for the actual recipient.
-        '<a href="{unsubscribe_url}" style="color: #94a3b8; text-decoration: underline; '
-        'font-size: 11px;">Unsubscribe</a>'
-        '</p></div>'
-        '</div>'
-    )
-
-
-def _section(heading: str, body: str) -> str:
-    """Apple-style content section with teal heading accent."""
-    return (
-        f'<div style="margin-bottom: 28px;">'
-        f'<p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: {_TEAL}; '
-        f'text-transform: uppercase; letter-spacing: 0.08em;">{heading}</p>'
-        f'<p style="margin: 0; font-size: 15px; color: {_SLATE_900}; line-height: 1.7;">{body}</p>'
-        f'</div>'
-    )
-
-
-def _stat_block(stat: str, label: str) -> str:
-    """Inline stat block for data-driven emails."""
-    return (
-        f'<div style="display: inline-block; text-align: center; padding: 16px 24px; '
-        f'background-color: {_SLATE_100}; border: 1px solid {_SLATE_200}; border-radius: 12px; '
-        f'margin: 0 8px 12px 0;">'
-        f'<div style="font-size: 28px; font-weight: 800; color: {_TEAL};">{stat}</div>'
-        f'<div style="font-size: 11px; color: {_SLATE_600}; font-weight: 600; margin-top: 4px; '
-        f'text-transform: uppercase; letter-spacing: 0.05em;">{label}</div>'
-        f'</div>'
-    )
-
-
-_P = f"margin: 0 0 16px 0; color: {_SLATE_900};"
-_P_MUTED = f"margin: 0 0 16px 0; color: {_SLATE_600}; font-size: 14px;"
-
-
-_PALM_IT_BTN = (
-    f'<div style="text-align: center; margin: 24px 0;">'
-    f'<p style="margin: 0 0 12px; font-size: 22px; font-weight: 800; color: {_TEAL};">Just PALM IT.</p>'
-    f'<a href="{_APP_STORE}" style="display: inline-block; '
-    f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
-    'text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 32px; '
-    'border-radius: 10px;">Download PALM Today</a></div>'
+_FONT = (
+    "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;"
 )
 
-_DOWNLOAD_BTN = (
-    f'<div style="text-align: center; margin: 24px 0;">'
-    f'<a href="{_APP_STORE}" style="display: inline-block; '
-    f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
-    'text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 32px; '
-    'border-radius: 10px;">Download PALM on the App Store</a></div>'
-)
+
+def _email_wrap(
+    headline: str,
+    body_html: str,
+    *,
+    preview_html: str = "",
+    note: str = "14-day free trial. No credit card.",
+    provider_name: str = "{provider_name}",
+) -> str:
+    """Glass drip card: short copy, product preview, one CTA, QR.
+
+    Forced light so Apple Mail does not invert the card. Still one job per
+    email: show the product, then download.
+    """
+    logo = f"{_SITE}/app-logo.png"
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<title>PalmCare AI</title>
+</head>
+<body style="margin:0;padding:0;background:#F8FAFC;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;">
+  <tr><td align="center" style="padding:28px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border:1px solid {_SLATE_200};border-radius:20px;">
+      <tr><td style="padding:28px 24px 4px;">
+        <table role="presentation" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align:middle;padding-right:12px;width:40px;">
+              <img src="{logo}" width="40" height="40" alt="PalmCare AI" style="display:block;width:40px;height:40px;border-radius:10px;border:0;" />
+            </td>
+            <td style="vertical-align:middle;{_FONT}font-size:16px;font-weight:700;color:{_SLATE_900};">PalmCare AI</td>
+          </tr>
+        </table>
+        <div style="width:36px;height:3px;border-radius:99px;background:{_TEAL};margin:16px 0 20px;"></div>
+        <h1 style="margin:0 0 12px;{_FONT}font-size:24px;line-height:30px;font-weight:700;color:{_SLATE_900};letter-spacing:-0.03em;">{headline}</h1>
+        <div style="{_FONT}font-size:15px;line-height:24px;color:{_SLATE_600};">{body_html}</div>
+      </td></tr>
+      {preview_html}
+      <tr><td align="center" style="padding:16px 24px 16px;">
+        <a href="{_APP_STORE}" style="display:inline-block;background:{_TEAL};color:#FFFFFF;text-decoration:none;{_FONT}font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;">Download PALM for iPhone</a>
+      </td></tr>
+      <tr><td align="center" style="padding:0 24px 8px;">
+        <a href="{_APP_STORE}" style="text-decoration:none;">
+          <img src="{_QR_APP}" width="100" height="100" alt="Scan to download PALM" style="display:block;width:100px;height:100px;border-radius:12px;border:1px solid {_SLATE_200};" />
+        </a>
+        <p style="margin:8px 0 0;{_FONT}font-size:12px;color:#94A3B8;">Scan with your iPhone camera</p>
+      </td></tr>
+      <tr><td style="padding:8px 24px 24px;">
+        <div style="background:#F0FDFA;border:1px solid #99F6E4;border-radius:12px;padding:14px 16px;">
+          <p style="margin:0;{_FONT}font-size:13px;font-weight:600;color:{_TEAL_DARK};">Just Palm It</p>
+          <p style="margin:4px 0 0;{_FONT}font-size:13px;line-height:20px;color:{_SLATE_600};">{note}</p>
+        </div>
+      </td></tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+      <tr><td align="center" style="padding:18px 8px 0;">
+        <p style="margin:0 0 4px;{_FONT}font-size:12px;font-weight:500;color:{_SLATE_600};">PalmCare AI · Omaha, NE</p>
+        <p style="margin:0 0 10px;{_FONT}font-size:11px;color:#94A3B8;line-height:16px;">
+          You received this because {provider_name} is listed in public agency directories.
+        </p>
+        <p style="margin:0;{_FONT}font-size:11px;color:#94A3B8;">
+          <a href="{_PRIVACY}" style="color:#94A3B8;text-decoration:underline;">Privacy</a>
+          &nbsp;·&nbsp;
+          <a href="{{unsubscribe_url}}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
+
+
+def _p(text: str) -> str:
+    return (
+        f'<p style="margin:0 0 12px;{_FONT}font-size:15px;line-height:24px;color:{_SLATE_600};">{text}</p>'
+    )
+
+
+def _bullets(items: list[str]) -> str:
+    rows = "".join(
+        f'<tr><td style="padding:0 0 8px;{_FONT}font-size:14px;line-height:20px;color:{_SLATE_900};">'
+        f'<span style="color:{_TEAL};font-weight:700;">&#10003;</span>&nbsp;&nbsp;{item}</td></tr>'
+        for item in items
+    )
+    return (
+        f'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" '
+        f'style="margin:4px 0 16px;">{rows}</table>'
+    )
+
+
+def _preview_pair(left_src: str, left_alt: str, right_src: str, right_alt: str, caption: str) -> str:
+    return f"""
+      <tr><td style="padding:8px 20px 4px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{_SLATE_100};border-radius:16px;">
+          <tr>
+            <td width="50%" style="padding:14px 6px 14px 14px;" align="center">
+              <a href="{_APP_STORE}" style="text-decoration:none;">
+                <img src="{left_src}" width="200" alt="{left_alt}" style="display:block;width:100%;max-width:200px;border-radius:12px;border:1px solid {_SLATE_200};" />
+              </a>
+            </td>
+            <td width="50%" style="padding:14px 14px 14px 6px;" align="center">
+              <a href="{_APP_STORE}" style="text-decoration:none;">
+                <img src="{right_src}" width="200" alt="{right_alt}" style="display:block;width:100%;max-width:200px;border-radius:12px;border:1px solid {_SLATE_200};" />
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:10px 0 0;{_FONT}font-size:12px;line-height:16px;color:#94A3B8;text-align:center;">{caption}</p>
+      </td></tr>"""
+
+
+def _preview_wide(src: str, alt: str, caption: str) -> str:
+    return f"""
+      <tr><td style="padding:8px 20px 4px;" align="center">
+        <a href="{_APP_STORE}" style="text-decoration:none;">
+          <img src="{src}" width="460" alt="{alt}" style="display:block;width:100%;max-width:460px;border-radius:14px;border:1px solid {_SLATE_200};" />
+        </a>
+        <p style="margin:10px 0 0;{_FONT}font-size:12px;line-height:16px;color:#94A3B8;text-align:center;">{caption}</p>
+      </td></tr>"""
+
+
+def _preview_phone(src: str, alt: str, caption: str) -> str:
+    return f"""
+      <tr><td style="padding:8px 20px 4px;" align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="background:{_SLATE_100};border-radius:16px;">
+          <tr><td style="padding:16px 40px;" align="center">
+            <a href="{_APP_STORE}" style="text-decoration:none;">
+              <img src="{src}" width="220" alt="{alt}" style="display:block;width:220px;max-width:100%;border-radius:14px;border:1px solid {_SLATE_200};" />
+            </a>
+          </td></tr>
+        </table>
+        <p style="margin:10px 0 0;{_FONT}font-size:12px;line-height:16px;color:#94A3B8;text-align:center;">{caption}</p>
+      </td></tr>"""
+
+
+def _preview_triple(
+    left_src: str,
+    mid_src: str,
+    right_src: str,
+    caption: str,
+) -> str:
+    cell = (
+        'style="padding:12px 4px;" align="center"'
+    )
+    img = (
+        f'style="display:block;width:100%;max-width:140px;border-radius:12px;border:1px solid {_SLATE_200};"'
+    )
+    return f"""
+      <tr><td style="padding:8px 16px 4px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{_SLATE_100};border-radius:16px;">
+          <tr>
+            <td width="33%" {cell}>
+              <a href="{_APP_STORE}" style="text-decoration:none;">
+                <img src="{left_src}" width="140" alt="Record" {img} />
+              </a>
+            </td>
+            <td width="33%" {cell}>
+              <a href="{_APP_STORE}" style="text-decoration:none;">
+                <img src="{mid_src}" width="140" alt="Care plan" {img} />
+              </a>
+            </td>
+            <td width="33%" {cell}>
+              <a href="{_APP_STORE}" style="text-decoration:none;">
+                <img src="{right_src}" width="140" alt="Contract" {img} />
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:10px 0 0;{_FONT}font-size:12px;line-height:16px;color:#94A3B8;text-align:center;">{caption}</p>
+      </td></tr>"""
+
 
 EMAIL_TEMPLATES = {
-    # ─── New (Jul 2026) app-download marketing emails. Used by the drip
-    # sequence, the opened-reengage cron, and the broad resend. ───
+    # Product-proof glass drips (Aug 2026). Same SEQUENCE_ORDER / cadence.
     "just_palm_it": {
         "id": "just_palm_it",
         "name": "Just PALM IT",
         "subject": "stop typing what was already said out loud",
-        "description": "Standalone — punchy download push. The Just PALM IT ask.",
+        "description": "Day 0 — double documentation → record + contract preview.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">Every care assessment at {{provider_name}} gets documented twice. '
-            'Once out loud in the living room, and once again at a keyboard that night.</p>'
-            f'<p style="{_P}">PALM keeps the first one and deletes the second. Record the visit '
-            'on your iPhone and it writes the care plan, prices the billables, and builds a '
-            'contract on your state\'s rules. You review and sign.</p>'
-            + '<div style="text-align: center; margin: 24px 0;">'
-            + _stat_block("1", "Recording")
-            + _stat_block("4", "Documents")
-            + _stat_block("0", "Evenings lost")
-            + '</div>'
-            + f'<p style="{_P}" align="center"><strong>Don\'t type it. Just PALM IT.</strong></p>'
-            + _DOWNLOAD_BTN,
-            "{provider_name}",
+            "Don't type it twice",
+            _p("Hi,")
+            + _p(
+                "At agencies like {provider_name}, every assessment is said out loud, then typed again "
+                "into a care plan, billables, and a contract. That second pass is where evenings disappear."
+            )
+            + _p(
+                "PALM records the visit on iPhone and writes the paperwork from that conversation. "
+                "Your assessor reviews once. The family can sign the same day."
+            )
+            + _bullets(
+                [
+                    "One recording becomes care plan, billables, notes, and contract",
+                    "Built for home care agencies, not generic AI chat",
+                    "You review before anything is final",
+                ]
+            ),
+            preview_html=_preview_pair(
+                _IMG_RECORD,
+                "Voice recording screen",
+                _IMG_CONTRACT,
+                "Contract ready on iPhone",
+                "Record the visit. Contract is ready to review.",
+            ),
+            note="Free for 14 days. No credit card to start.",
         ),
     },
     "app_qr_download": {
         "id": "app_qr_download",
         "name": "The QR Download",
         "subject": "point your iPhone camera at this email",
-        "description": "Standalone — QR-first. The fastest path from inbox to install.",
+        "description": "Day 3 — install + home screen proof.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">This is the shortest software pitch you will get this year. '
-            'Point your iPhone camera at the code below.</p>'
-            + '<div style="text-align: center; margin: 24px 0;">'
-            f'<a href="{_APP_STORE}" style="text-decoration: none;">'
-            f'<img src="{_QR_APP}" alt="Scan to download PALM" '
-            'style="width: 160px; height: 160px; border-radius: 12px; '
-            f'border: 1px solid {_SLATE_200};" /></a>'
-            f'<p style="margin: 8px 0 0; font-size: 13px; color: {_SLATE_600};">'
-            'Scan to download PALM from the App Store</p>'
-            '</div>'
-            + _section(
-                "What happens next",
-                "Record your next client assessment in the app. PALM writes the transcript, "
-                "the care plan, the billable items, and a service contract built on "
-                "{state_full} rules. A staff member reviews before anything is final."
+            "Your next assessment starts on iPhone",
+            _p("Hi,")
+            + _p(
+                "Scan the code, install PALM, and open the app before your next home visit. "
+                "Clients, visits, and docs live in one place so the office and the field stop "
+                "handing papers back and forth."
             )
-            + f'<p style="{_P_MUTED}">The first 14 days are free, no card. '
-            f'Prefer a link? <a href="{_APP_STORE}" style="color: {_TEAL}; font-weight: 600;">'
-            'Download PALM here</a>. Just PALM IT.</p>',
-            "{provider_name}",
+            + _bullets(
+                [
+                    "Field staff record assessments during the visit",
+                    "{state_full} contract rules are already loaded",
+                    "Office sees the same packet without retyping",
+                ]
+            ),
+            preview_html=_preview_phone(
+                _IMG_HOME,
+                "PALM Palm It screen",
+                "Start screen: tap Palm It to record the next visit.",
+            ),
+            note="Scan below. Free for 14 days.",
         ),
     },
     "seven_second_demo": {
         "id": "seven_second_demo",
         "name": "The 7 Second Demo",
         "subject": "a 7 second demo of your evenings coming back",
-        "description": "Standalone — launch video lead. Show, then download.",
+        "description": "Day 7 — glass product flow + video.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">We made the product demo 7 seconds long because that is honestly '
-            'all there is to show. '
-            f'<a href="{_LAUNCH_VIDEO}" style="color: {_TEAL}; font-weight: 600;">Watch it here</a>.</p>'
-            + _section(
-                "What you are watching",
-                "A recorded assessment turning into the care plan, the billable items, and a "
-                "signed service contract. No forms. No retyping. The visit was already "
-                "documented out loud, and PALM was listening."
+            "7 seconds. That's the demo.",
+            _p("Hi,")
+            + _p(
+                f'Assessment in. Care plan, billables, and contract out. '
+                f'<a href="{_LAUNCH_VIDEO}" style="color:{_TEAL};font-weight:600;text-decoration:none;">Watch the 7-second clip</a>, '
+                "then download the app and try it on a real visit."
             )
-            + _section(
-                "Why agencies keep it",
-                "The contract is drafted before the assessor leaves the driveway, so the "
-                "family signs the same day. In home care, the first clear agreement on the "
-                "table usually wins the client."
-            )
-            + _DOWNLOAD_BTN
-            + f'<p style="{_P_MUTED}" align="center">Free for 14 days. Just PALM IT.</p>',
-            "{provider_name}",
+            + _bullets(
+                [
+                    "Voice assessment on the phone in the home",
+                    "Four documents from one recording",
+                    "Same-day signature when the family is ready",
+                ]
+            ),
+            preview_html=_preview_triple(
+                _IMG_RECORD,
+                _IMG_CARE,
+                _IMG_CONTRACT,
+                "Record → care plan → contract. The new glass UI.",
+            ),
+            note="Product facts only. No pitch call required to try it.",
         ),
     },
     "evenings_back": {
         "id": "evenings_back",
         "name": "Your Evenings Back",
         "subject": "what would you do with Tuesday nights again",
-        "description": "Standalone — emotional relief angle. Just PALM IT download push.",
+        "description": "Day 12 — evenings + web glass office view.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">Most assessors at agencies like {{provider_name}} finish the visit at 4pm '
-            'and start the paperwork at 8pm. The visit was already documented out loud. '
-            'PALM was just not in the room yet.</p>'
-            + _section(
-                "What changes with one download",
-                "Record the assessment on your iPhone. PALM writes the care plan, finds the "
-                "billable items, and builds the contract on your state's rules. You review "
-                "and sign before you leave the driveway."
+            "Get Tuesday nights back",
+            _p("Hi,")
+            + _p(
+                "Most assessors finish the visit at 4 and start typing at 8. "
+                "The hard part already happened in the living room. PALM keeps that version "
+                "so paperwork does not restart when they get home."
             )
-            + _PALM_IT_BTN,
-            "{provider_name}",
+            + _p(
+                "Review the care plan and contract before you leave the driveway. "
+                "Then go home. The office still gets a clean packet."
+            )
+            + _bullets(
+                [
+                    "Docs drafted before the car leaves the curb",
+                    "Office dashboard stays in sync with the field",
+                    "Less after-hours typing for your team",
+                ]
+            ),
+            preview_html=_preview_wide(
+                _IMG_WEB_HOME,
+                "PalmCare web glass dashboard",
+                "Office view: glass dashboard stays in sync with the field.",
+            ),
+            note="Review in the driveway. Sign when the family is ready.",
         ),
     },
     "same_day_contract": {
         "id": "same_day_contract",
         "name": "Same Day Contract",
         "subject": "the family signed before dinner",
-        "description": "Standalone — speed to signature. Just PALM IT.",
+        "description": "Day 18 — glass contract preview + state rules.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            + _section(
-                "The agency that wins the client",
-                "In home care, the first clear service agreement in front of the family "
-                "usually wins them. Most agencies take days. The ones running PALM put the "
-                "contract on the table the same afternoon as the assessment."
+            "The family signed before dinner",
+            _p("Hi,")
+            + _p(
+                "When the service agreement is clear and sitting in front of the family "
+                "the same afternoon as the assessment, decisions happen faster. "
+                "PALM drafts that contract from the visit recording."
             )
-            + _section(
-                "How",
-                "PALM sits in on the visit, drafts the care plan and billables from what was "
-                "said, and builds a contract on {state_full} rules. A coordinator reviews, "
-                "the family signs. Same day."
+            + _p(
+                "Built on {state_full} rules. Your team reviews every line before anything is final. "
+                "No overnight wait for someone to type the agreement."
             )
-            + _PALM_IT_BTN,
-            "{provider_name}",
+            + _bullets(
+                [
+                    "Contract drafted from the assessment conversation",
+                    "State rules included so you are not starting from a blank page",
+                    "Send or sign after a human review",
+                ]
+            ),
+            preview_html=_preview_phone(
+                _IMG_CONTRACT,
+                "Contract ready on iPhone",
+                "Contract screen: review, then send or sign.",
+            ),
+            note="You review before anything is final.",
         ),
     },
     "one_visit_proof": {
         "id": "one_visit_proof",
         "name": "One Visit Proof",
         "subject": "try it on one visit, then decide",
-        "description": "Standalone — low commitment proof. Just PALM IT.",
+        "description": "Day 25 — one-visit proof with glass recording UI.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">You do not need to switch your whole workflow to judge PALM. '
-            'Run it on one assessment and compare the output to what your team produces '
-            'after three hours at a keyboard.</p>'
-            + '<div style="text-align: center; margin: 24px 0;">'
-            + _stat_block("1", "Visit recorded")
-            + _stat_block("4", "Documents drafted")
-            + _stat_block("14", "Day free trial")
-            + '</div>'
-            + f'<p style="{_P}">Record the visit. Read the care plan, the billables, and the '
-            'contract PALM hands back. If it is not better than your current process, delete '
-            'the app and we will not follow up.</p>'
-            + _PALM_IT_BTN,
-            "{provider_name}",
+            "Prove it on one visit",
+            _p("Hi,")
+            + _p(
+                "Pick one upcoming assessment at {provider_name}. Record it in PALM. "
+                "Compare the care plan, billables, and contract to your usual process."
+            )
+            + _p(
+                "If the packet is better than what your team types by hand, keep the app. "
+                "If not, delete it. No pitch call required."
+            )
+            + _bullets(
+                [
+                    "14-day free trial on the App Store",
+                    "Works on a real client visit, not a sandbox demo",
+                    "One visit is enough to judge the fit",
+                ]
+            ),
+            preview_html=_preview_phone(
+                _IMG_RECORD,
+                "Recording an assessment",
+                "Tap record. Talk through the assessment. PALM writes the docs.",
+            ),
+            note="One visit. Real docs. Then you decide.",
         ),
     },
     "download_today": {
         "id": "download_today",
         "name": "Download Today",
         "subject": "PALM is on your App Store, download today",
-        "description": "Standalone — direct urgency. QR + Just PALM IT.",
+        "description": "Day 33 — glass product flow + direct ask.",
         "body": _email_wrap(
-            f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">PALM is live on the App Store. It sits in on the client assessment, '
-            'writes the care plan, finds the billable items, and builds the service contract. '
-            'Your team reviews and signs.</p>'
-            + '<div style="text-align: center; margin: 24px 0;">'
-            f'<a href="{_APP_STORE}" style="text-decoration: none;">'
-            f'<img src="{_QR_APP}" alt="Scan to download PALM" '
-            'style="width: 140px; height: 140px; border-radius: 12px; '
-            f'border: 1px solid {_SLATE_200};" /></a>'
-            f'<p style="margin: 8px 0 0; font-size: 13px; color: {_SLATE_600};">'
-            'Scan with your iPhone camera</p>'
-            '</div>'
-            + _PALM_IT_BTN,
-            "{provider_name}",
+            "PALM is on the App Store",
+            _p("Hi,")
+            + _p(
+                "Home care agencies use PALM so assessors stop rebuilding the same visit "
+                "on a keyboard after hours. Record once. Review the care plan, billables, "
+                "notes, and contract. Sign when the family is ready."
+            )
+            + _bullets(
+                [
+                    "iPhone app for the field, web for the office",
+                    "50-state contract rules built in",
+                    "14-day free trial. Download today.",
+                ]
+            ),
+            preview_html=_preview_triple(
+                _IMG_HOME,
+                _IMG_BILLABLES,
+                _IMG_CONTRACT,
+                "Palm It → billables → contract. Download today.",
+            ),
+            note="Just Palm It. Free for 14 days.",
         ),
     },
 }

@@ -183,6 +183,9 @@ class APIService: ObservableObject {
     var cachedClients: CacheEntry<[Client]>?
     var cachedVisits: CacheEntry<[Visit]>?
     var cachedUser: CacheEntry<User>?
+
+    /// Latest known email for demo-account / paywall checks.
+    var cachedUserEmail: String? { cachedUser?.value.email }
     let cacheTTL: TimeInterval = 30 // 30 seconds
     lazy var session: URLSession = {
         let config = URLSessionConfiguration.ephemeral

@@ -128,9 +128,11 @@ class TestHeuristicUsesFullTranscript:
         text = path.read_text(encoding="utf-8", errors="replace")
         assert heuristic_conversation_kind(text) == "training_with_embedded_intake"
 
-    def test_real_clinic_interview_transcript(self):
+    def test_simulated_patient_interview_is_assessment(self):
         path = RUNS / "assess2_transcript.txt"
         if not path.exists():
             return
         text = path.read_text(encoding="utf-8", errors="replace")
-        assert heuristic_conversation_kind(text) == "out_of_scope"
+        kind = heuristic_conversation_kind(text)
+        assert kind != "out_of_scope"
+        assert kind in {"home_care_intake", "training_with_embedded_intake"}

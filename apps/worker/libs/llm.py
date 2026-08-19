@@ -17,6 +17,7 @@ from enum import Enum
 try:
     from libs.llm_rules import (
         get_rules_for_prompt,
+        get_product_guardrails_for_prompt,
         HOURLY_RATES,
         SERVICE_CATEGORIES,
         HIGH_CARE_INDICATORS,
@@ -28,6 +29,8 @@ try:
     RULES_LOADED = True
 except ImportError:
     RULES_LOADED = False
+    def get_product_guardrails_for_prompt() -> str:
+        return ""
 
 logger = logging.getLogger(__name__)
 
@@ -759,6 +762,10 @@ When analyzing a transcript, identify:
 """
 
 CONTRACT_GENERATION_CONTEXT = """
+## WHAT PALMCARE IS BUILDING
+PalmCare turns one recorded assessment into care-plan facts, billables, notes,
+and a service contract. Schedule and rates from the assessment are first-class.
+
 ## HOME CARE SERVICE CONTRACT COMPONENTS
 
 When generating a contract from an assessment conversation:
@@ -1180,6 +1187,7 @@ class LLMService:
         agency_state: str = None,
         agency_billing_context: str = "",
         deep: bool = False,
+        conversation_kind: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Extract contract-ready assessment data from a transcript.
@@ -1196,6 +1204,7 @@ class LLMService:
                 client_info=client_info,
                 agency_state=agency_state,
                 agency_billing_context=agency_billing_context,
+                conversation_kind=conversation_kind,
             )
             if compact:
                 return compact
@@ -1206,6 +1215,7 @@ class LLMService:
             client_info=client_info,
             agency_state=agency_state,
             agency_billing_context=agency_billing_context,
+            conversation_kind=conversation_kind,
         )
 
     def _extract_contract_standard(
@@ -1214,6 +1224,7 @@ class LLMService:
         client_info: Dict[str, Any],
         agency_state: str = None,
         agency_billing_context: str = "",
+        conversation_kind: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """Fast contract extraction used by the live pipeline."""
         original_temp = self.temperature
@@ -1225,17 +1236,25 @@ class LLMService:
             if agency_billing_context
             else ""
         )
+        from libs.pipeline_efficiency import assessment_mode_instructions
+
+        kind_block = assessment_mode_instructions(conversation_kind)
         system_prompt = f"""You extract home care contract facts from assessment audio transcripts.
 {state_line}
 {billing_line}
+{kind_block}
+
+{get_product_guardrails_for_prompt()}
 
 Rules:
 - Only use facts stated in the transcript. Do not invent ADLs, hours, rates, or diagnoses.
 - conversation_kind must be one of: home_care_intake, home_care_visit, training_with_embedded_intake, out_of_scope.
 - For training_with_embedded_intake, extract the care recipient in the role-play, not coach sales talk.
+- A simulated patient/family interview that describes inability to manage at home or needing help is an assessment, not out_of_scope.
 - For out_of_scope, return empty services_identified and null rates/hours.
 - If a rate is spoken (e.g. "$18 an hour"), set quoted_hourly_rate.
-- If a weekday schedule is spoken (e.g. Monday through Friday 8:30 to 7), set stated_weekly_hours and recommended_schedule.total_hours_per_week from that schedule.
+- If a schedule is spoken in ANY form, set stated_weekly_hours and recommended_schedule.total_hours_per_week from it. Examples: "Monday through Friday 8:30 to 7", "10 hours a week", "4 hours a day, 5 days a week".
+- Never invent TBD / "to be determined" / 0 hrs/wk service_hours rows. If no schedule was spoken, leave service_hours as [] and total_hours_per_week as 0. Do not invent a schedule because a formal state assessment is incomplete.
 - evidence must be a direct quote. Never use placeholders.
 - List declined_services when the client refuses a service (e.g. bathing).
 - adl_summary / iadl_summary: short grounded phrases only. Empty string if unknown.
@@ -1305,6 +1324,7 @@ Return ONLY JSON:
         client_info: Dict[str, Any],
         agency_state: str = None,
         agency_billing_context: str = "",
+        conversation_kind: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Legacy comprehensive extraction (Iowa/EICNA-style). Slower; used as fallback.
@@ -1329,21 +1349,29 @@ Return ONLY JSON:
 {agency_billing_context}
 """
         
+        from libs.pipeline_efficiency import assessment_mode_instructions
+        kind_block = assessment_mode_instructions(conversation_kind)
+        
         system_prompt = f"""You are a HOME CARE assessment specialist with expertise in all 50 US states' Medicaid billing requirements, HCBS waiver programs, and home care assessment standards.
 {state_context}
 {billing_block}
+{kind_block}
+
+{get_product_guardrails_for_prompt()}
 
 ## YOUR MISSION: EXTRACT CARE ASSESSMENT DATA FROM THE TRANSCRIPT ONLY
 
 ## GROUNDING RULES (these override every instruction below)
 - Extract only what the transcript actually says. Do not invent ADLs, hours, rates, or diagnoses.
 - If a rate is stated (for example "$18 an hour"), set quoted_hourly_rate to that number.
-- If days and times are stated (for example Monday through Friday, 8:30 to 7), compute stated_weekly_hours from that schedule and use it as recommended_schedule.total_hours_per_week. Do not stack category hours when a schedule was stated.
+- If a schedule is stated in ANY form, set stated_weekly_hours and recommended_schedule.total_hours_per_week from it. Examples: Monday through Friday 8:30 to 7; "10 hours a week"; "4 hours a day, five days a week". Do not stack category hours when a schedule was stated.
+- Never invent TBD / "to be determined" / 0 hrs/wk rows in service_hours. Never say frequency cannot be set until a full formal assessment if the patient already stated hours or days. If no schedule was spoken, leave service_hours as [] and total_hours_per_week as 0.
 - If the client declined a service ("I can wash myself", "I know how to take my medicine"), do not add that service.
 - evidence must be a direct quote. Never use placeholders like "Client needs daily assistance".
 - conversation_kind must be one of: home_care_intake, home_care_visit, training_with_embedded_intake, out_of_scope.
 - For training_with_embedded_intake, extract the person who would receive care in the role-play. Ignore coach commentary about how to sell.
-- For out_of_scope (clinic interviews, unrelated recordings), return empty services_identified unless the family clearly asked for in-home help.
+- A simulated patient or family interview that describes inability to manage at home, housework, or "we need help" is an assessment (training_with_embedded_intake or home_care_intake), not out_of_scope.
+- For out_of_scope (unrelated recordings with no in-home functional need), return empty services_identified.
 - Do not default to HIGH care or 35 hours when information is missing.
 
 You must extract every relevant fact that IS in the conversation. Leave fields null or empty when they were not discussed. Do not fill gaps with clinical guesses.
@@ -1799,17 +1827,17 @@ Return ONLY valid JSON with ALL fields populated based on transcript analysis:
         }
     ],
     "recommended_schedule": {
-        "frequency": "Daily/5-7 days per week/3-4 days per week",
+        "frequency": "Daily/5-7 days per week/3-4 days per week — or the exact spoken schedule",
         "total_hours_per_week": 40,
         "service_hours": [
             {"service": "Personal Care", "need_level": "high/moderate/light", "hours_per_week": 14, "rationale": "Based on ADL assessment"},
             {"service": "Meal Services", "need_level": "...", "hours_per_week": 12, "rationale": "..."}
         ],
-        "hours_calculation": "Show math: service1 X + service2 Y = total",
+        "hours_calculation": "Show math: service1 X + service2 Y = total. If the patient stated weekly hours, use that total and leave service_hours empty or as one stated-schedule row.",
         "preferred_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         "preferred_times": "Morning preferred/Afternoon preferred/Flexible",
         "visit_duration": "2-4 hour visits recommended",
-        "rationale": "Full explanation of schedule recommendation"
+        "rationale": "Full explanation of schedule recommendation. Never use TBD or invent 0 hrs/wk rows."
     },
     "eicna_assessment": {
         "care_need_level": "HIGH/MODERATE/LOW",
@@ -1825,10 +1853,11 @@ Return ONLY valid JSON with ALL fields populated based on transcript analysis:
     },
     "client_condition_summary": "3-5 sentence comprehensive summary of client's condition, needs, and care requirements. Be specific about diagnoses, functional limitations, and care needs.",
     "care_plan_goals": {
-        "short_term": ["Specific 30-day goals with measurable outcomes"],
-        "long_term": ["Specific 90+ day goals with measurable outcomes"],
-        "maintenance_goals": ["Ongoing goals to prevent decline"]
+        "short_term": ["Visit-derived aide goals only, e.g. support morning shower safety 5 days/week"],
+        "long_term": ["Visit-derived outcomes, e.g. maintain transfers with standby assist"],
+        "maintenance_goals": ["Ongoing aide work from the visit, e.g. evening med reminder with organizer"]
     },
+    "_care_plan_goals_rules": "ONLY aide-facing goals grounded in the transcript. NEVER put SLUMS, PHQ, NSI, CMP assessment completion, prior authorization, waiver enrollment, or baseline scoring into care_plan_goals. Those go in special_requirements.",
     "billing_codes": {
         "primary_codes": ["State-specific Medicaid billing codes that apply based on services identified"],
         "code_rationale": "Why these codes apply under this state's Medicaid program"
@@ -1888,8 +1917,10 @@ DO NOT include hospital services, medical equipment, insurance, or anything outs
     def _extract_contract_compact(self, transcript_text: str, client_info: Dict) -> Optional[Dict[str, Any]]:
         """Smaller extraction when the full assessment JSON fails to parse."""
         system_prompt = """Return ONLY JSON for a home care agency contract.
+""" + get_product_guardrails_for_prompt() + """
 Ground every field in the transcript. Empty services is correct when this is not a home-care assessment.
 Never use placeholder evidence. If a rate or schedule is spoken, capture it.
+Never invent TBD / 0 hrs/wk schedule rows because a formal assessment is incomplete.
 JSON shape:
 {
   "conversation_kind": "home_care_intake | home_care_visit | training_with_embedded_intake | out_of_scope",
@@ -2012,6 +2043,8 @@ Generate comprehensive contract terms for this care agreement.
         )
         system_prompt = f"""You are a HOME CARE documentation specialist.
 
+{get_product_guardrails_for_prompt()}
+
 ## WHAT THIS RECORDING IS
 
 {kind_line}
@@ -2019,8 +2052,8 @@ Generate comprehensive contract terms for this care agreement.
 Meaning of each type:
 - home_care_visit: caregiver was in the home delivering care. Document tasks that actually happened.
 - home_care_intake: assessment or meet-and-greet about future care. Document needs discussed. Do not claim tasks were performed today.
-- training_with_embedded_intake: coaching or role-play that contains an intake. Document the care recipient in the role-play (often a parent). Ignore the coach selling to an audience.
-- out_of_scope: clinic visit, doctor interview, or unrelated audio. Do not invent a home visit. Say so in the narrative. You may note functional limitations only if they were clearly stated.
+- training_with_embedded_intake: coaching or role-play that contains an assessment. Document the care recipient's in-home needs from the role-play (housework they cannot do, help the family asked for). Write it as an intake, not as "this is not home care."
+- out_of_scope: unrelated audio with no in-home functional need. Do not invent a home visit. A clinic-framed interview that still describes inability to manage at home is an assessment, not out_of_scope.
 
 ## HARD RULES
 - Never invent a caregiver name or claim a visit happened if it did not.
@@ -2084,7 +2117,7 @@ Pipeline conversation_kind: {kind or 'unknown'}
 ## VISIT TRANSCRIPT
 {transcript_text}
 
-Generate the note that matches documentation_type. Do not write a home-visit SOAP note if this was an intake, a training role-play, or a clinic interview.
+Generate the note that matches documentation_type. If this is an intake or training_with_embedded_intake, document the in-home needs that were spoken. A clinic-framed interview that still describes inability to manage at home is an assessment.
 """
         
         response = self._call_llm(system_prompt, user_prompt, json_response=True, max_tokens=3072)

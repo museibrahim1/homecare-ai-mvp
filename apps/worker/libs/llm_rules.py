@@ -314,35 +314,93 @@ AGENCY_INFO = {
 # CUSTOM PROMPTS - Override default LLM behavior
 # =============================================================================
 
-# Add custom instructions to the contract extraction prompt
-CUSTOM_EXTRACTION_INSTRUCTIONS = """
-# Add your custom instructions here. Examples:
+# PalmCare product intent + hard extraction guardrails.
+# Injected into assessment/contract LLM prompts. State knowledge informs
+# compliance fields; it must never erase facts the patient already stated.
+PRODUCT_INTENT = """
+PalmCare AI turns ONE recorded home-care assessment into four deliverables:
+1) care plan needs, 2) billable items, 3) clinical/intake notes, 4) service contract.
 
-# - Always identify if client is a veteran (VA benefits may apply)
-# - Check for long-term care insurance mentions
-# - Note if client prefers morning or afternoon visits
-# - Flag if client has pets that may affect care
-# - Identify cultural or religious considerations
+The contract Schedule, weekly hours, hourly rate, and identified services are
+first-class product outputs. Agencies use them the same day. Missing a spoken
+schedule or rate is a product failure.
+"""
+
+EXTRACTION_GUARDRAILS = """
+HARD GUARDRAILS (override state knowledge, examples, and JSON defaults):
+
+1. TRANSCRIPT WINS
+   - Extract only what the recording says. Empty/null beats inventing.
+   - Do not invent ADLs, diagnoses, hours, rates, services, or schedules.
+
+2. SPOKEN SCHEDULE IS MANDATORY TO CAPTURE
+   - If the client/family states ANY schedule, cadence, or hours, you MUST set:
+     stated_weekly_hours, recommended_schedule.total_hours_per_week,
+     preferred_days and/or preferred_times when stated, and frequency.
+   - Accept any phrasing: "Mon-Fri 8:30 to 7", "10 hours a week",
+     "4 hours a day, 5 days a week", "Tuesdays and Thursdays", etc.
+   - NEVER invent TBD / "to be determined" / 0 hrs/wk service_hours rows.
+   - NEVER wipe or refuse a spoken schedule because a formal state tool
+     (SLUMS, PHQ, NSI, ADL scoring, prior authorization, full CMP assessment)
+     is still incomplete. Put unfinished formal tools ONLY in
+     special_requirements. Do not put them in care_plan_goals or in
+     recommended_schedule as a reason to leave hours at 0.
+
+2b. CARE PLAN GOALS ARE VISIT-DERIVED CARE, NOT ADMIN CHECKLISTS
+   - care_plan_goals must describe what the aide will do for this client
+     from the conversation (bathing, med reminders, meals, transfers,
+     fall safety, companionship, housekeeping).
+   - FORBIDDEN in care_plan_goals: completing a state assessment tool,
+     SLUMS / PHQ / NSI / CMP forms, prior authorization, waiver enrollment,
+     "establish baseline scores", "obtain managed-care auth", "complete
+     full assessment within N days", or any paperwork the agency still
+     owes. Those are special_requirements or follow-up admin, never goals.
+
+3. SPOKEN RATE IS MANDATORY TO CAPTURE
+   - If a dollar rate is spoken ("$18 an hour"), set quoted_hourly_rate.
+
+4. SERVICES
+   - Only home-care services grounded with a direct transcript quote as evidence.
+   - Declined services go in declined_services, not services_identified.
+   - If this is unrelated audio with no in-home functional need (out_of_scope),
+     empty services is correct. A simulated patient interview that describes
+     inability to manage at home or "we need help" is an assessment.
+
+5. STATE KNOWLEDGE ROLE
+   - Use state rules for required disclosures, billing codes, and missing-field
+     checklists. Do not use state rules to invent clinical facts or erase spoken ones.
+
+6. OUTPUT DISCIPLINE
+   - Prefer null/[] when unknown. Prefer a spoken approximate over blank when
+     the patient stated one. Never fabricate precision.
+"""
+
+# Add custom instructions to the contract extraction prompt
+CUSTOM_EXTRACTION_INSTRUCTIONS = f"""
+## WHAT WE ARE BUILDING
+{PRODUCT_INTENT.strip()}
+
+## EXTRACTION GUARDRAILS
+{EXTRACTION_GUARDRAILS.strip()}
 """
 
 # Add custom instructions to the contract generation prompt
 CUSTOM_CONTRACT_INSTRUCTIONS = """
-# Add your custom contract clauses here. Examples:
-
-# - Pet policy: Caregiver is not responsible for pet care
-# - Smoking policy: No smoking during visits
-# - Holiday rate: 1.5x regular rate applies on major holidays
-# - Background check: All caregivers pass FBI background check
+Contract schedule and rates must reflect assessment facts:
+- Prefer stated_weekly_hours and quoted_hourly_rate from the assessment.
+- Do not replace a spoken schedule with "to be determined" boilerplate.
+- Formal assessment / prior-auth follow-ups belong in special_requirements,
+  not care_plan_goals and not as zeroed schedule rows.
+- care_plan_goals must be aide-facing goals grounded in the visit
+  (personal care, meds, meals, mobility). Never list SLUMS, PHQ, NSI,
+  CMP, prior auth, or waiver paperwork as goals.
 """
 
 # Add custom instructions to the note generation prompt
 CUSTOM_NOTE_INSTRUCTIONS = """
-# Add your custom note requirements here. Examples:
-
-# - Always document fluid intake for clients on diuretics
-# - Note if client ate breakfast before AM visit
-# - Document fall risk assessment on each visit
-# - Record pain level (0-10) if applicable
+When the intake discussed schedule or hours, mention them in the plan or
+assessment narrative. Do not claim formal scoring tools were completed unless
+the transcript says they were.
 """
 
 # =============================================================================
@@ -368,9 +426,20 @@ EXCLUDED_SERVICES = [
 # HELPER FUNCTION - Get rules as dict for LLM prompt
 # =============================================================================
 
+def get_product_guardrails_for_prompt() -> str:
+    """Product intent + hard extraction guardrails for assessment/contract LLMs."""
+    return f"""## WHAT PALMCARE IS BUILDING
+{PRODUCT_INTENT.strip()}
+
+## HARD EXTRACTION GUARDRAILS (override everything else in this prompt)
+{EXTRACTION_GUARDRAILS.strip()}
+"""
+
+
 def get_rules_for_prompt() -> str:
     """Format rules for inclusion in LLM prompts."""
-    rules = f"""
+    rules = get_product_guardrails_for_prompt()
+    rules += f"""
 ## YOUR AGENCY'S BUSINESS RULES
 
 ### Private Pay Hourly Rates
@@ -404,8 +473,6 @@ def get_rules_for_prompt() -> str:
 ### Care Level Assignment
 Assign HIGH level if any of these present:
 {', '.join(HIGH_CARE_INDICATORS[:10])}...
-
-{CUSTOM_EXTRACTION_INSTRUCTIONS}
 
 ### Contract Terms
 - Cancellation notice: {CONTRACT_RULES['cancellation_notice_hours']} hours

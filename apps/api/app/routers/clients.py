@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.client import Client
 from app.models.contract import Contract
@@ -34,7 +35,7 @@ async def list_clients(
     """List clients created by the current user (data isolation)."""
     # Filter by created_by for strict data isolation - only show user's own clients
     clients = db.query(Client).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).offset(skip).limit(limit).all()
     return clients
 
@@ -64,7 +65,7 @@ async def get_client(
     """Get a specific client (data isolation enforced)."""
     client = db.query(Client).filter(
         Client.id == client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(
@@ -85,7 +86,7 @@ async def update_client(
     """Update a client (data isolation enforced)."""
     client = db.query(Client).filter(
         Client.id == client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(
@@ -128,7 +129,7 @@ async def delete_client(
     """Delete a client and all related records (data isolation enforced)."""
     client = db.query(Client).filter(
         Client.id == client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(
@@ -168,7 +169,7 @@ async def activate_client_policy(
     """
     client = db.query(Client).filter(
         Client.id == client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(

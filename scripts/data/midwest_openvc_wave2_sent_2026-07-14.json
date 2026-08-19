@@ -1,0 +1,243 @@
+{
+  "sent": [
+    {
+      "fund_name": "Connetic Ventures",
+      "contact_email": "apply@conneticventures.com",
+      "contact_name": "Team",
+      "location": "Covington, KY",
+      "website": "https://conneticventures.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Software",
+        "AI",
+        "Fintech"
+      ],
+      "focus_stages": [
+        "Seed",
+        "Early Revenue"
+      ],
+      "check_size_display": "$100K-$500K",
+      "description": "Early-stage software VC near Cincinnati. Uses AI for deal flow.",
+      "relevance_reason": "Software focus, Heartland location, check size fits seed.",
+      "priority": "high",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You back early software companies in the Heartland. PalmCare is live AI software for home care agencies."
+    },
+    {
+      "fund_name": "Mudita Venture Partners",
+      "contact_email": "pitch@muditavp.com",
+      "contact_name": "Team",
+      "location": "Bingham Farms, MI",
+      "website": "https://muditavp.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "B2B SaaS",
+        "FinTech",
+        "InsurTech"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$500K-$1M",
+      "description": "Michigan VC focused on B2B SaaS and adjacent software categories.",
+      "relevance_reason": "B2B SaaS thesis. Detroit metro HQ.",
+      "priority": "high",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest in B2B SaaS. PalmCare is the assessment-to-contract stack for home care agencies."
+    },
+    {
+      "fund_name": "Newlin",
+      "contact_email": "grant@newlin.vc",
+      "contact_name": "Grant",
+      "location": "Chicago, IL",
+      "website": "https://www.newlin.vc/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "SaaS",
+        "B2B",
+        "AI"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "$15K-$100K",
+      "description": "Chicago early-stage VC across SaaS and B2B.",
+      "relevance_reason": "Chicago seed. SaaS and AI covered in thesis.",
+      "priority": "medium",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest early in SaaS and AI. We just launched PalmCare AI on the App Store."
+    },
+    {
+      "fund_name": "Render Capital",
+      "contact_email": "patrick@render.capital",
+      "contact_name": "Patrick",
+      "location": "Louisville, KY",
+      "website": "https://render.capital/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Midwest Tech"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$100K-$350K",
+      "description": "Midwest early-stage investor. Software only, no hardware.",
+      "relevance_reason": "Explicit Midwest thesis. Software only. Check size fits.",
+      "priority": "high",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest in the Midwest and stay out of hardware. PalmCare is pure software for home care agencies."
+    },
+    {
+      "fund_name": "Banana Capital",
+      "contact_email": "turner@bananacapital.vc",
+      "contact_name": "Turner Novak",
+      "location": "Ann Arbor, MI",
+      "website": "https://www.bananacapital.vc/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Consumer",
+        "Health",
+        "B2B Software"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "$25K-$300K",
+      "description": "Ann Arbor solo GP. Health and B2B software among interests.",
+      "relevance_reason": "Health + B2B software interest. Midwest HQ. Early check.",
+      "priority": "high",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You have backed health and B2B software from Ann Arbor. PalmCare turns home care assessments into contracts in minutes."
+    },
+    {
+      "fund_name": "Origin Ventures",
+      "contact_email": "inquire@originventures.com",
+      "contact_name": "Team",
+      "location": "Chicago, IL",
+      "website": "https://originventures.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Software",
+        "Marketplaces"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$250K-$6M",
+      "description": "Chicago software and marketplace investor.",
+      "relevance_reason": "Chicago software fund. Alternate inbox after prior bounce on info@.",
+      "priority": "medium",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You back software businesses from Chicago. PalmCare is live for home care agencies nationwide."
+    },
+    {
+      "fund_name": "Flyover Capital",
+      "contact_email": "investors@flyovercapital.com",
+      "contact_name": "Team",
+      "location": "Kansas City, MO",
+      "website": "https://www.flyovercapital.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Midwest Tech"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$500K-$2M",
+      "description": "Midwest early-stage tech across 19 states.",
+      "relevance_reason": "Midwest thesis. Alternate email after info@ bounce.",
+      "priority": "high",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest across the Midwest. PalmCare was built for agencies outside the coastal hubs too."
+    },
+    {
+      "fund_name": "Fontinalis Partners",
+      "contact_email": "pitch@fontinalis.com",
+      "contact_name": "Team",
+      "location": "Detroit, MI",
+      "website": "http://fontinalis.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Mobility",
+        "Software"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$100K-$5M",
+      "description": "Detroit seed investor historically focused on mobility tech.",
+      "relevance_reason": "Detroit HQ. Software-capable seed check. Lower thesis fit but Midwest.",
+      "priority": "low",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest from Detroit at seed. PalmCare is live software giving home care agencies time back."
+    },
+    {
+      "fund_name": "Motivate Venture Capital",
+      "contact_email": "david@motivate.vc",
+      "contact_name": "David Wieland",
+      "location": "Chicago, IL",
+      "website": "https://motivate.vc/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Fintech",
+        "B2B SaaS"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "$250K-$3M",
+      "description": "Chicago early-stage. Fintech and B2B SaaS with ARR.",
+      "relevance_reason": "B2B SaaS lean. Chicago. Founded IrishAngels so knows medical/software.",
+      "priority": "medium",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You back early B2B SaaS from Chicago. PalmCare is App Store subscriptions for home care agencies."
+    },
+    {
+      "fund_name": "Accelerate Venture Partners",
+      "contact_email": "hello@nxtus.io",
+      "contact_name": "Team",
+      "location": "Wichita, KS",
+      "website": "https://www.avpict.com/",
+      "investor_type": "angel_network",
+      "focus_sectors": [
+        "Midwest Tech"
+      ],
+      "focus_stages": [
+        "Seed"
+      ],
+      "check_size_display": "$100K-$500K",
+      "description": "Wichita angel network for Midwest early-stage companies.",
+      "relevance_reason": "Midwest angel network. Geographic fit.",
+      "priority": "medium",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest in early Midwest companies from Wichita. PalmCare is live for home care agencies."
+    },
+    {
+      "fund_name": "Dundee Venture Capital",
+      "contact_email": "greg@dundeevc.com",
+      "contact_name": "Greg",
+      "location": "Omaha, NE",
+      "website": "https://dundeeventurecapital.com/",
+      "investor_type": "vc_fund",
+      "focus_sectors": [
+        "Commerce",
+        "Software"
+      ],
+      "focus_stages": [
+        "Pre-Seed",
+        "Seed"
+      ],
+      "check_size_display": "Seed",
+      "description": "Omaha seed investor. Commerce and software. Alternate after info@ bounce.",
+      "relevance_reason": "Omaha Midwest seed. Alternate inbox.",
+      "priority": "low",
+      "source": "openvc_midwest_wave2_jul2026",
+      "focus_line": "You invest early from Omaha. PalmCare is live software for home care agencies."
+    }
+  ],
+  "count": 11,
+  "failed": 0
+}

@@ -1,0 +1,50 @@
+{
+  "title": "Home Care Service Agreement - Sharon (intake role play)",
+  "weekly_hours": "35.00",
+  "hourly_rate": "28.00",
+  "services": [
+    {
+      "name": "Personal Care/ADL Assistance",
+      "evidence": "Client needs daily assistance",
+      "priority": "High",
+      "frequency": "Daily",
+      "description": "Assistance with bathing, dressing, and grooming"
+    },
+    {
+      "name": "Medication Management",
+      "evidence": "Multiple medications mentioned",
+      "priority": "High",
+      "frequency": "Daily",
+      "description": "Medication reminders and pill box organization"
+    },
+    {
+      "name": "Meal Preparation",
+      "evidence": "Difficulty cooking safely",
+      "priority": "High",
+      "frequency": "Daily",
+      "description": "Preparing nutritious meals"
+    },
+    {
+      "name": "Light Housekeeping",
+      "evidence": "Unable to maintain home",
+      "priority": "Medium",
+      "frequency": "3x/week",
+      "description": "Laundry, dishes, light cleaning"
+    },
+    {
+      "name": "Companion Care",
+      "evidence": "Lives alone, needs monitoring",
+      "priority": "High",
+      "frequency": "Daily",
+      "description": "Supervision and social interaction"
+    }
+  ],
+  "care_need": null,
+  "care_level": null,
+  "status": "draft",
+  "state": null,
+  "effective_date": null,
+  "generated_content": null,
+  "generated_content_len": 0,
+  "generated_content_head": ""
+}

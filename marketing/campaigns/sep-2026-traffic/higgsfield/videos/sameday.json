@@ -1,0 +1,36 @@
+[
+  {
+    "id": "97a729d5-f034-429c-967f-670db6637b4a",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_032432_97a729d5-f034-429c-967f-670db6637b4a.mp4",
+    "created_at": 1786677872.538223,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Subtle motion on a same-day proposal marketing card, teal PALM branding, keep copy readable, gentle camera drift, no new text.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "4ce4a6eb-dc01-475e-9446-85c37091125a",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/4ce4a6eb-dc01-475e-9446-85c37091125a.png",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

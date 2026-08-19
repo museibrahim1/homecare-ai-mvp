@@ -13,6 +13,7 @@ import pyotp
 from app.core.cookies import set_session_cookie, clear_session_cookie
 from app.core.rate_limit import get_client_ip
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import find_user_by_email
 from app.core.security import (
     verify_password, create_access_token, get_password_hash,
     check_account_lockout, record_failed_login, clear_login_attempts,
@@ -70,12 +71,24 @@ def _user_needs_onboarding(db: Session, user: User) -> bool:
         return False
     if getattr(user, "invited_by", None):
         return False
-    return (
+    if (
         db.query(BusinessUser.id)
         .filter(BusinessUser.id == user.id)
         .first()
-        is None
-    )
+        is not None
+    ):
+        return False
+    email = (user.email or "").strip().lower()
+    if email:
+        from sqlalchemy import func
+        if (
+            db.query(BusinessUser.id)
+            .filter(func.lower(BusinessUser.email) == email)
+            .first()
+            is not None
+        ):
+            return False
+    return True
 
 
 def _user_response(db: Session, user: User) -> UserResponse:
@@ -207,7 +220,7 @@ async def login(request: LoginRequest, req: Request, response: Response, db: Ses
             detail=f"Account temporarily locked due to too many failed attempts. Try again in {minutes} minutes.",
         )
     
-    user = db.query(User).filter(User.email == email).first()
+    user = find_user_by_email(db, email)
     
     # HIPAA: Generic error to prevent user enumeration
     if not user or not verify_password(request.password, user.hashed_password):
@@ -417,7 +430,7 @@ async def social_login(
                     "account, or sign up with email and password."
                 ),
             )
-        existing = db.query(User).filter(User.email == email).first()
+        existing = find_user_by_email(db, email)
         if existing:
             user = existing
             linked_by_email = True
@@ -633,7 +646,7 @@ async def forgot_password(
     _check_rate_limit(f"forgot:{client_ip}")
     
     email = request.email.lower().strip()
-    user = db.query(User).filter(User.email == email).first()
+    user = find_user_by_email(db, email)
     
     if user and user.is_active:
         # Generate a secure reset token
@@ -695,7 +708,7 @@ async def mfa_login(
             detail=f"Account temporarily locked. Try again in {seconds_remaining} seconds.",
         )
 
-    user = db.query(User).filter(User.email == email).first()
+    user = find_user_by_email(db, email)
     if not user or not verify_password(request.password, user.hashed_password):
         record_failed_login(email)
         raise HTTPException(

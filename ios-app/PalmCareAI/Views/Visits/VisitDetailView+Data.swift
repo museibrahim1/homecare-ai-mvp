@@ -20,19 +20,21 @@ extension VisitDetailView {
     }
 
     func loadTabDataIfNeeded() async {
-        if activeTab == 0 {
+        if activeTabId == "overview" {
             await loadAllTabData()
             return
         }
 
-        switch activeTab {
-        case 1:
+        switch activeTabId {
+        case "transcript":
             await loadTranscript()
-        case 2:
+        case "billables":
             await loadBillables()
-        case 3:
+        case "notes":
             await loadNote()
-        case 4:
+        case "care_plan":
+            await loadCarePlan()
+        case "contract":
             await loadContract()
         default:
             break
@@ -44,18 +46,19 @@ extension VisitDetailView {
         async let b: () = loadBillables()
         async let n: () = loadNote()
         async let c: () = loadContract()
-        _ = await (t, b, n, c)
+        async let p: () = loadCarePlan()
+        _ = await (t, b, n, c, p)
     }
 
     func loadTranscript() async {
         guard transcript == nil else { return }
         do {
             let t = try await api.fetchVisitTranscript(visitId: visitId)
-            await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
+            await MainActor.run { transcript = t; tabFetchFailed.remove("transcript") }
         } catch {
             // While the pipeline is still running, a missing result isn't an
             // error — show the friendly "processing" state, not "Failed to Load".
-            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(1) } }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert("transcript") } }
         }
     }
 
@@ -63,9 +66,13 @@ extension VisitDetailView {
         guard billables == nil else { return }
         do {
             let b = try await api.fetchVisitBillables(visitId: visitId)
-            await MainActor.run { billables = b; tabFetchFailed.remove(2) }
+            await MainActor.run {
+                billables = b
+                tabFetchFailed.remove("billables")
+                clampActiveTabToVisible()
+            }
         } catch {
-            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(2) } }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert("billables") } }
         }
     }
 
@@ -73,9 +80,9 @@ extension VisitDetailView {
         guard note == nil else { return }
         do {
             let n = try await api.fetchVisitNote(visitId: visitId)
-            await MainActor.run { note = n; tabFetchFailed.remove(3) }
+            await MainActor.run { note = n; tabFetchFailed.remove("notes") }
         } catch {
-            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(3) } }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert("notes") } }
         }
     }
 
@@ -83,9 +90,64 @@ extension VisitDetailView {
         guard contract == nil else { return }
         do {
             let c = try await api.fetchVisitContract(visitId: visitId)
-            await MainActor.run { contract = c; tabFetchFailed.remove(4) }
+            await MainActor.run { contract = c; tabFetchFailed.remove("contract") }
+            // Care plan is written with the contract. Refresh client text after.
+            await loadCarePlan(force: true)
         } catch {
-            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(4) } }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert("contract") } }
+        }
+    }
+
+    func loadCarePlan(force: Bool = false) async {
+        if !force {
+            let alreadyLoaded = await MainActor.run {
+                carePlanText != nil || hasCarePlanContent
+            }
+            if alreadyLoaded { return }
+        }
+
+        if let existing = visit?.client?.care_plan?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !existing.isEmpty {
+            await MainActor.run {
+                carePlanText = existing
+                tabFetchFailed.remove("care_plan")
+            }
+            return
+        }
+
+        let clientId = await MainActor.run { visit?.client_id }
+        guard let clientId else {
+            await MainActor.run {
+                if hasCarePlanContent {
+                    tabFetchFailed.remove("care_plan")
+                } else if !isPipelineProcessing {
+                    _ = tabFetchFailed.insert("care_plan")
+                }
+            }
+            return
+        }
+
+        do {
+            let client = try await api.fetchClient(id: clientId)
+            await MainActor.run {
+                let plan = client.care_plan?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let plan, !plan.isEmpty {
+                    carePlanText = plan
+                }
+                if hasCarePlanContent {
+                    tabFetchFailed.remove("care_plan")
+                } else if !isPipelineProcessing {
+                    _ = tabFetchFailed.insert("care_plan")
+                }
+            }
+        } catch {
+            await MainActor.run {
+                if hasCarePlanContent {
+                    tabFetchFailed.remove("care_plan")
+                } else if !isPipelineProcessing {
+                    _ = tabFetchFailed.insert("care_plan")
+                }
+            }
         }
     }
 
@@ -195,6 +257,7 @@ extension VisitDetailView {
                 billables = nil
                 note = nil
                 contract = nil
+                carePlanText = nil
                 tabFetchFailed = []
             }
             // The pipeline is running again — resume the auto-refresh loop so
@@ -227,16 +290,18 @@ extension VisitDetailView {
                 switch step {
                 case "transcription", "diarization":
                     transcript = nil
-                    tabFetchFailed.remove(1)
+                    tabFetchFailed.remove("transcript")
                 case "billing":
                     billables = nil
-                    tabFetchFailed.remove(2)
+                    tabFetchFailed.remove("billables")
                 case "note":
                     note = nil
-                    tabFetchFailed.remove(3)
+                    tabFetchFailed.remove("notes")
                 case "contract":
                     contract = nil
-                    tabFetchFailed.remove(4)
+                    carePlanText = nil
+                    tabFetchFailed.remove("care_plan")
+                    tabFetchFailed.remove("contract")
                 default:
                     break
                 }

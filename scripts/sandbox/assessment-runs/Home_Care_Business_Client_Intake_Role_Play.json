@@ -1,0 +1,124 @@
+{
+  "file": "/Users/musaibrahim/Downloads/Home Care Business Client Intake Role Play.mp3",
+  "name": "Intake Role Play v10",
+  "visit_id": "c4151f16-0c8c-4794-8bbd-16f854ebe42a",
+  "client_id": "33acd430-5c01-4432-8c4c-5aa89d4b7737",
+  "elapsed_sec": 70.4,
+  "polls": 13,
+  "success": true,
+  "last": "full_pipeline completed",
+  "conversation_kind": "training_with_embedded_intake",
+  "timings_ms": {
+    "note": 41367,
+    "billing": 10759,
+    "classify": 2282,
+    "contract": 39947,
+    "transcription": 7780
+  },
+  "ran_at": "2026-08-15T04:52:24.355102+00:00",
+  "transcript_http": 200,
+  "segment_count": 237,
+  "speakers": {
+    "SPEAKER_0": 156,
+    "SPEAKER_1": 21,
+    "SPEAKER_2": 60
+  },
+  "word_count": 5675,
+  "transcript_excerpt": "[SPEAKER_0] Hello, guys. This is coach Michelle coming to you live from\n[SPEAKER_1] Heavenly healing hand.\n[SPEAKER_1] Where are we? Where are Where we? Where are\n[SPEAKER_0] Guys, look. This is a special, special, special opportunity.\n[SPEAKER_0] So many of you that are not my clients, this is where you,\n[SPEAKER_0] lack. Right? A lot of you don't know what to do or how to do it when you go into the client's home. So Sharon has gracefully\n[SPEAKER_0] beginnings. Say what I've decided to do with her permission is actually record this. So this is her very first time. You guys seen Sharon two weeks ago, and she did fabulous during the home bit the phone\n[SPEAKER_0] call role play. So what we've decided to do is just go live.\n[SPEAKER_0] No script. Just go live so you guys could see and then hear my critique as well, and maybe this will bless you guys in your business. So again,\n[SPEAKER_0] I wanna give a super shout out. You guys give some love to Sharon for allowing us in her home.\n[SPEAKER_0] This is her private session, and she agreed that you guys could be a part of this to bless those of you that may not be in a position to hire me, those of you that are not in a position to really know what it is you should be doing at this particular moment. So hopefully this will help you guys. So here we go. And we just set the camera up here, so we don't know if it's in a perfect spot. So we're gonna actually stand up instead of sitting down to try to give you guys as much info behind the scene as possible.\n[SPEAKER_0] Here we go.\n[SPEAKER_0] Okay.\n[SPEAKER_0] Who is it? My name is Sharon McKenzie with Heavenly Healing Hands. Oh, hi. Hello. Come on in. Hi. And your name? I'm Michelle. So very nice to meet you. Thank you. Thank you for coming over. You're welcome. Thanks for I love it. And thank you for the invite. Wonderful. So come on over here. Absolutely. And we can sit here. The service is for my mom like I mentioned to you online\n[SPEAKER_0] Okay. During our phone call. However, she's upstairs. I'll get her in a moment. Awesome. So\n[SPEAKER_2] what do we need to do? Well, thank you very much again for the invite and I just wanted to really do a meet and greet and thank you for inviting me into your home.\n[SPEAKER_2] And so basically I'm just coming out to give you a little bit more information about my company what we have to offer\n[SPEAKER_2] and and hopefully we will just get ready to get started. When would you like for us to start? I hope very soon.\n[SPEAK",
+  "transcript_tail": "e you got something from this. If you have any questions, jot them down. We'll see them later. They're giving you some hearts. Oh, thank you so much. How you feel? How you feel? I feel great. Actually, I'm I'm ready. I'm ready now. But just being being having her here with me doing the one on one,\n[SPEAKER_2] I am ecstatic.\n[SPEAKER_2] I am getting ready to ball. I I'm not gonna have the time of my life doing what I do, but I love what I'm doing so that's important. So I'm just excited because now I all of the things that I was feeling the anxiety of of just not carrying on with the business, it's like now I have all the tools to succeed. I have all the tools of feeling the confident that I needed to be able to go out there and do what I do. So I'm happy. I mean, it was worth the investment.\n[SPEAKER_1] That's why I got to get that check.\n[SPEAKER_1] It helps with this investment,\n[SPEAKER_1] but but yeah. But I thank her so much. She's beautiful. Her heart is Spent that check and got it right back. Yeah. There's some there's a rap talk. I heard that somewhere. Spit that check and got it right back.\n[SPEAKER_1] Spit that check and got it right back. So\n[SPEAKER_2] I'm ready. I'm excited, but thank you guys for giving me the accolades. I really appreciate it. Thank you so much. Alright.\n[SPEAKER_0] See you guys. Love you. Take care. Have a super fantastic weekend. Be safe. God bless. Enjoy your family over the holiday weekend. Love you guys. Love you guys. Take care. Bye. Bye.",
+  "billables_http": 200,
+  "billable_count": 4,
+  "billables": [
+    {
+      "category": "Companionship",
+      "description": "Companionship for grieving/lonely senior [Monday through Friday, 8:30 AM to 7:00 PM]: \"she really needs some companion. You know, her husband died about six months ago and she's just kinda lonely. Rig",
+      "minutes": null,
+      "is_flagged": false,
+      "flag_reason": "Recommended from assessment (not timed visit work)",
+      "is_approved": false
+    },
+    {
+      "category": "Transportation",
+      "description": "Transportation to hair salon and nail salon [As needed]: \"Take her to the hair salon, nail salon, pick up her groceries. You know, just let her get out in the community.\"; Grocery store transportation",
+      "minutes": null,
+      "is_flagged": false,
+      "flag_reason": "Recommended from assessment (not timed visit work)",
+      "is_approved": false
+    },
+    {
+      "category": "Nutrition",
+      "description": "Meal preparation assistance (helping client cook) [As needed]: \"my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her b",
+      "minutes": null,
+      "is_flagged": false,
+      "flag_reason": "Recommended from assessment (not timed visit work)",
+      "is_approved": false
+    },
+    {
+      "category": "Homemaking",
+      "description": "Light housekeeping in client's areas [Monday through Friday, 8:30 AM to 7:00 PM]: \"she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light break",
+      "minutes": null,
+      "is_flagged": false,
+      "flag_reason": "Recommended from assessment (not timed visit work)",
+      "is_approved": false
+    }
+  ],
+  "note_http": 200,
+  "note_id": "a0d8ff83-d751-4996-9390-16378e4ce2e9",
+  "note_narrative": "This recording documents a live training session conducted by Coach Michelle (SPEAKER_0) with trainee Sharon McKenzie of Heavenly Healing Hands (SPEAKER_2). The session consisted of an unscripted intake role-play in which Coach Michelle portrayed a prospective family client and Sharon practiced conducting a home care meet-and-greet and intake. The role-play was broadcast to a coaching audience for educational purposes. This note documents the care recipient and care needs established within the role-play scenario only; no actual home care visit occurred and no billable services were delivered.\n\nWithin the role-play, the prospective client is an elderly woman, Miss King, residing in her adult daughter's home. The daughter initiated services following her mother's increased social isolation after the death of her husband six months ago. Miss King is independent with all ADLs including bathing and medication management. She has a diagnosis of diabetes and hypertension, both self-managed. Primary care needs identified are companionship, community transportation (grocery store, hair salon, nail salon), and kitchen assistance. The family confirmed private-pay and expressed readiness to begin services. A service agreement and intake paperwork were completed during the session. An RN comprehensive assessment was scheduled for the following Saturday to complete a full body systems review, document medications, obtain baseline vital signs, and develop the formal care plan. Services were agreed to begin the following Tuesday, Monday through Friday, 8:30 AM to 7:00 PM at a rate of $18 per hour, with consistent caregiver assignment and guaranteed backup coverage. Coach Michelle provided real-time feedback throughout, including guidance on closing the service agreement at time of visit, care plan documentation standards, payroll and billing alignment, and caregiver shoe policy for client homes.",
+  "note_structured_keys": [
+    "plan",
+    "objective",
+    "assessment",
+    "subjective",
+    "visit_info",
+    "client_mood",
+    "vital_signs",
+    "next_visit_plan",
+    "tasks_performed",
+    "cognitive_status",
+    "conversation_kind",
+    "documentation_type",
+    "safety_observations",
+    "medications_discussed"
+  ],
+  "note_documentation_type": "training_with_embedded_intake",
+  "note_conversation_kind": "training_with_embedded_intake",
+  "contract_http": 200,
+  "contract_id": "31a46b72-f449-4cce-9695-5e82d4bc3d70",
+  "contract_title": "Home Care Service Agreement - Intake Role Play v10",
+  "contract_weekly_hours": "52.50",
+  "contract_hourly_rate": "18.00",
+  "contract_services": [
+    {
+      "name": "Companion Care",
+      "evidence": "she really needs some companion. You know, her husband died about six months ago and she's just kinda lonely. Right? And so I really want someone to be there with her that provide the companionship.",
+      "priority": "High",
+      "frequency": "Monday through Friday, 8:30 AM to 7:00 PM",
+      "description": "Companionship for senior whose husband passed six months ago; client is lonely"
+    },
+    {
+      "name": "Transportation / Errands",
+      "evidence": "Take her to the hair salon, nail salon, pick up her groceries. You know, just let her get out in the community.",
+      "priority": "High",
+      "frequency": "Monday through Friday as needed",
+      "description": "Transport client to grocery store, hair salon, nail salon; community outings"
+    },
+    {
+      "name": "Meal Preparation Assistance",
+      "evidence": "my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her but she wants to make sure the caregiver can help her cook",
+      "priority": "Moderate",
+      "frequency": "Daily",
+      "description": "Caregiver to assist client with cooking; client does not want caregiver to cook for her independently"
+    },
+    {
+      "name": "Light Housekeeping",
+      "evidence": "she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light breakfast, she goes and she cleans up behind herself.",
+      "priority": "Moderate",
+      "frequency": "Daily",
+      "description": "Tidying areas related to client's needs; cleaning up after light meal prep; making bed"
+    }
+  ],
+  "contract_has_declined_section": true,
+  "contract_has_per_service_schedule": true,
+  "contract_terms_excerpt": "\nHOME CARE SERVICE AGREEMENT\n\nThis Home Care Service Agreement (\"Agreement\") is entered into on August 15, 2026\n\nBETWEEN:\n\nService Provider: Sunrise Home Care\nAddress: 200 Biscayne Blvd, Miami, FL, 33131\nPhone: 3055550142\n\nAND\n\nClient: Intake Role Play v10\nAddress: Not provided\nPhone: Not provided\nEmergency Contact: None (None)\n\n================================================================================\n1. SERVICES TO BE PROVIDED\n================================================================================\n\nThe following home care services will be provided. Each service includes its\nagreed frequency from the assessment:\n\n\u2022 Companion Care\n  Description: Companionship for senior whose husband passed six months ago; client is lonely\n  Frequency: Monday through Friday, 8:30 AM to 7:00 PM\n  Assessment quote: \"she really needs some companion. You know, her husband died about six months ago and she's just kinda lonely. Right? And so I really want someone to be there...\"\n\n\u2022 Transportation / Errands\n  Description: Transport client to grocery store, hair salon, nail salon; community outings\n  Frequency: Monday through Friday as needed\n  Assessment quote: \"Take her to the hair salon, nail salon, pick up her groceries. You know, just let her get out in the community.\"\n\n\u2022 Meal Preparation Assistance\n  Description: Caregiver to assist client with cooking; client does not want caregiver to cook for her independently\n  Frequency: Daily\n  Assessment quote: \"my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her but she wants to make...\"\n\n\u2022 Light Housekeeping\n  Description: Tidying areas related to client's needs; cleaning up after light meal prep; making bed\n  Frequency: Daily\n  Assessment quote: \"she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light breakfast, she goes and she cleans up behind...\"\n\n================================================================================\n1A. SERVICES NOT INCLUDED (DECLINED)\n================================================================================\n\nThe client or authorized representative declined the following services. These\nare not included in this Agreement unless added later in writing:\n\n\u2022 Bathing / Personal Care (declined / not included in this Agreement)\n  Client statement: \"She can do everything. I know, mom. You can bathe yourself. She's like, I don't want anybody bathing me"
+}

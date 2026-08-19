@@ -140,11 +140,11 @@ struct WrappingHStack: View {
             if LiveTranscriptionService.isMedicalKeyword(word) {
                 text = text + sep + Text(word)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.palmPrimaryLight)
+                    .foregroundColor(.palmPrimary)
             } else {
                 text = text + sep + Text(word)
                     .font(.system(size: 17))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.palmText)
             }
         }
         return text

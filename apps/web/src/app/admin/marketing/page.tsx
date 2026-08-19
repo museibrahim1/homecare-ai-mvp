@@ -19,16 +19,14 @@ interface Asset {
 }
 
 const ASSETS: Asset[] = [
-  // Email assets
-  { src: '/screenshots/email/app_interface.png', title: 'App Interface Banner', category: 'email', dimensions: '580px wide', use: 'Agency outreach emails — full-width CTA banner' },
-  { src: '/screenshots/email/recording_screen.png', title: 'Voice Recording Screen', category: 'email', dimensions: '280px wide', use: 'Template 1 email — side-by-side with contract' },
-  { src: '/screenshots/email/contract_view.png', title: 'Contract View', category: 'email', dimensions: '280px wide', use: 'Template 1 email — shows AI-generated contract' },
-  { src: '/screenshots/email/home_dashboard.png', title: 'Mobile Dashboard', category: 'email', dimensions: '280px wide', use: 'Email headers, mobile app showcase' },
-  { src: '/screenshots/email/crm_dashboard.png', title: 'CRM Dashboard', category: 'email', dimensions: '580px wide', use: 'Template 2 email — full-width platform overview' },
-  { src: '/screenshots/email/crm_clients.png', title: 'Client Management', category: 'email', dimensions: '280px wide', use: 'Template 2 email — CRM client list' },
-  { src: '/screenshots/email/crm_pipeline.png', title: 'Deals Pipeline', category: 'email', dimensions: '280px wide', use: 'Template 2 email — visual pipeline' },
-  { src: '/screenshots/email/crm_assessments.png', title: 'Assessments View', category: 'email', dimensions: '280px wide', use: 'Template 3 email — assessment tracking' },
-  { src: '/screenshots/email/crm_contract.png', title: 'Contract Preview', category: 'email', dimensions: '280px wide', use: 'Template 3 email — contract generation' },
+  // Glass drip emails (Paper Pipeline / App / Web glass screens)
+  { src: '/screenshots/glass/pipeline-recording.png', title: 'Drip preview — Recording', category: 'email', dimensions: 'Glass UI', use: 'D0 / D25. Live recording screen from Pipeline Glass.' },
+  { src: '/screenshots/glass/pipeline-contract.png', title: 'Drip preview — Contract', category: 'email', dimensions: 'Glass UI', use: 'D0 / D18. Contract review from Pipeline Glass.' },
+  { src: '/screenshots/glass/pipeline-palm-it.png', title: 'Drip preview — Palm It', category: 'email', dimensions: 'Glass UI', use: 'D3 / D33. Start recording screen.' },
+  { src: '/screenshots/glass/pipeline-care-plan.png', title: 'Drip preview — Care Plan', category: 'email', dimensions: 'Glass UI', use: 'D7 flow. Care plan from one recording.' },
+  { src: '/screenshots/glass/pipeline-billables.png', title: 'Drip preview — Billables', category: 'email', dimensions: 'Glass UI', use: 'D33 flow. Billables sheet.' },
+  { src: '/screenshots/glass/web-home.png', title: 'Drip preview — Web Home', category: 'email', dimensions: 'Glass UI', use: 'D12 evenings. Office glass dashboard.' },
+  { src: '/screenshots/glass/web-clients.png', title: 'Drip preview — Web Clients', category: 'email', dimensions: 'Glass UI', use: 'Office client list in Web Glass.' },
 
   // ── LinkedIn / Facebook / Twitter (Nano Banana Pro — palm tree brand) ──
   { src: '/marketing/social/linkedin_palm_hero.png', title: 'LinkedIn Hero — Palm Trees', category: 'social', dimensions: '2K 16:9', use: 'LinkedIn cover, website hero, palm tree brand imagery' },
@@ -99,7 +97,7 @@ const ASSETS: Asset[] = [
 
 const CATEGORIES: { key: Category; label: string; icon: typeof Layers }[] = [
   { key: 'all', label: 'All Assets', icon: Layers },
-  { key: 'email', label: 'Email Templates', icon: Mail },
+  { key: 'email', label: 'Email Drip', icon: Mail },
   { key: 'social', label: 'Social Media', icon: Share2 },
   { key: 'crm', label: 'CRM Screenshots', icon: Monitor },
   { key: 'ios', label: 'iOS App', icon: Smartphone },

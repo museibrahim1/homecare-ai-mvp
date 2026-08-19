@@ -1,0 +1,18 @@
+file Home Care Business Client Intake Role Play.mp3 bytes=19262716
+logged in demo-screenshots@palmtai.com
+client 1cd7db6a-6824-4dee-920e-34a085194893 visit 792f9daa-a9df-4110-95e6-a3b638bf1502
+upload 201 11200ms {"id":"80fa91df-5557-4452-a013-d0c69a1e9c2f","visit_id":"792f9daa-a9df-4110-95e6-a3b638bf1502","s3_key":"visits/792f9daa-a9df-4110-95e6-a3b638bf1502/audio/Home Care Business Client Intake Role Play.mp3","original_filename":"Home Care Busine
+  poll 1 11.3s kind=None transcription=pending billing=pending note=pending contract=pending
+  poll 6 37.0s kind=training_with_embedded_intake transcription=completed billing=completed note=pending contract=processing
+  poll 12 67.7s kind=training_with_embedded_intake full_pipeline completed
+pipeline ok after 67.7s polls=12 full_pipeline completed
+speakers {'SPEAKER_0': 158, 'SPEAKER_1': 20, 'SPEAKER_2': 60} segments=238 words=5674
+kind=training_with_embedded_intake timings_ms={'note': 38844, 'billing': 10612, 'classify': 1813, 'contract': 36960, 'transcription': 5438}
+billables 4 ['Companionship', 'Transportation', 'Homemaking', 'Nutrition']
+note_id 81f34858-b91e-42f7-88e1-5c025cd54bb7 contract_id 7684fedf-2ff6-4c58-bf9b-173ebb6d6acd hours=52.50
+contract declined_section=True per_service_schedule=True
+  service Companion Care | freq=Monday through Friday 8:30am to 7:00pm
+  service Transportation | freq=Monday through Friday as needed
+  service Light Housekeeping | freq=Monday through Friday
+  service Meal Preparation Assistance | freq=Monday through Friday as needed
+wrote /Users/musaibrahim/Desktop/AI Voice Contracter/scripts/sandbox/assessment-runs/Home_Care_Business_Client_Intake_Role_Play.json

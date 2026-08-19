@@ -1,0 +1,22 @@
+[
+  {
+    "id": "8eb96a9d-7500-4b19-aea1-4e836eca2a45",
+    "status": "completed",
+    "display_name": "GPT Image 2",
+    "job_set_type": "gpt_image_2",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022129_8eb96a9d-7500-4b19-aea1-4e836eca2a45.png",
+    "created_at": 1786674089.025687,
+    "params": {
+      "width": 1520,
+      "height": 2688,
+      "prompt": "Photorealistic POV looking down at an iPhone 15 Pro Space Black in a caregiver hand just outside a client's front door at golden hour. Screen shows PalmCare AI teal #0d9488 UI with completed cards for Notes, Billables, Contract. Photoreal product UI look, documentary style, no marketing slogans on image, shallow depth of field.",
+      "medias": [],
+      "aspect_ratio": "9:16",
+      "quality": "high",
+      "resolution": "2k",
+      "model": "videotape-alpha",
+      "remove_bg": false,
+      "reference_elements": []
+    }
+  }
+]

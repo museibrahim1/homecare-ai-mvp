@@ -47,7 +47,11 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
             extract_declined_services,
             merge_declined_services,
             prefer_private_pay_rate,
+            sanitize_care_plan_goals,
+            care_goal_text,
             sanitize_identified_services,
+            apply_in_scope_home_need_fallback,
+            sanitize_recommended_schedule,
             clip_client_field,
             _coerce_positive_float,
         )
@@ -175,7 +179,14 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
                 agency_state=agency_state,
                 agency_billing_context=billing_context,
                 deep=False,
-            )
+                conversation_kind=conversation_kind,
+            ) or {}
+
+        assessment_data = apply_in_scope_home_need_fallback(
+            assessment_data,
+            transcript_text,
+            conversation_kind,
+        )
         
         # Get care need level and client profile early - needed for rate calculation
         eicna = assessment_data.get("eicna_assessment") or {}
@@ -192,10 +203,20 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
             assessment_data.get("services_identified", []),
             transcript_text=transcript_text,
         )
+        if not services:
+            assessment_data = apply_in_scope_home_need_fallback(
+                {**assessment_data, "services_identified": []},
+                transcript_text,
+                conversation_kind,
+            )
+            services = sanitize_identified_services(
+                assessment_data.get("services_identified", []),
+                transcript_text=transcript_text,
+            )
         conversation_kind = conversation_kind or assessment_data.get("conversation_kind")
         
-        # Extract schedule
-        schedule = assessment_data.get("recommended_schedule", {}) or {}
+        # Extract schedule — strip LLM "TBD / full assessment" placeholders and
+        # prefer hours the patient actually stated in the transcript.
         if conversation_kind == "out_of_scope":
             quoted_rate = None
             stated_hours = None
@@ -203,6 +224,10 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
         else:
             quoted_rate = _coerce_positive_float(assessment_data.get("quoted_hourly_rate")) or extract_stated_hourly_rate(transcript_text)
             stated_hours = _coerce_positive_float(assessment_data.get("stated_weekly_hours")) or extract_stated_weekly_hours(transcript_text)
+        schedule = sanitize_recommended_schedule(
+            assessment_data.get("recommended_schedule", {}) or {},
+            stated_weekly_hours=stated_hours,
+        )
         if quoted_rate:
             logger.info(f"Quoted hourly rate from transcript: ${quoted_rate:.2f}")
         if stated_hours:
@@ -333,12 +358,19 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
         service_text = ' '.join(service_names)
 
         # Out-of-scope / empty assessments must not get invented $20/$24 rates.
+        # Spoken schedule hours still stand even when no billable service rows
+        # survived grounding — only wipe hours when nothing was stated either.
         if conversation_kind == "out_of_scope":
             hourly_rate = 0.0
             weekly_hours = 0.0
             rate_type = "Out of scope"
             logger.info("Out of scope: forcing $0 rate and 0 hours")
-        elif not services and not quoted_rate:
+        elif assessment_data.get("home_need_fallback") and not quoted_rate and not stated_hours:
+            hourly_rate = 0.0
+            weekly_hours = 0.0
+            rate_type = "No rate or schedule spoken"
+            logger.info("Home-need fallback without spoken rate/hours: keeping $0")
+        elif not services and not quoted_rate and not stated_hours:
             hourly_rate = 0.0
             weekly_hours = 0.0
             rate_type = "No home-care services identified"
@@ -491,7 +523,9 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
             "client_profile": assessment_data.get("client_profile", {}),
             "safety_concerns": assessment_data.get("safety_concerns", []),
             "special_requirements": assessment_data.get("special_requirements", []),
-            "care_plan_goals": assessment_data.get("care_plan_goals", {}),
+            "care_plan_goals": sanitize_care_plan_goals(
+                assessment_data.get("care_plan_goals", {})
+            ),
             "family_involvement": assessment_data.get("family_involvement", {}),
             "extracted_mentions": assessment_data.get("extracted_mentions", {}),
         }
@@ -740,20 +774,23 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
             client.medical_notes = existing_notes + new_notes
             updates_made.append("medical_notes")
         
-        # Care plan goals
-        care_goals = assessment_data.get("care_plan_goals", {})
+        # Care plan goals (aide-facing only; admin checklists already stripped)
+        care_goals = sanitize_care_plan_goals(assessment_data.get("care_plan_goals", {}))
         if care_goals:
             short_term = care_goals.get("short_term", [])
             long_term = care_goals.get("long_term", [])
-            maintenance = care_goals.get("maintenance_goals", [])
+            maintenance = care_goals.get("maintenance_goals") or care_goals.get("maintenance") or []
             
             care_plan_parts = []
-            if short_term:
-                care_plan_parts.append("SHORT-TERM GOALS (30 days):\n" + "\n".join(f"• {g}" for g in short_term if g))
-            if long_term:
-                care_plan_parts.append("LONG-TERM GOALS (90+ days):\n" + "\n".join(f"• {g}" for g in long_term if g))
-            if maintenance:
-                care_plan_parts.append("MAINTENANCE GOALS:\n" + "\n".join(f"• {g}" for g in maintenance if g))
+            short_lines = [care_goal_text(g) for g in short_term if care_goal_text(g)]
+            long_lines = [care_goal_text(g) for g in long_term if care_goal_text(g)]
+            maint_lines = [care_goal_text(g) for g in maintenance if care_goal_text(g)]
+            if short_lines:
+                care_plan_parts.append("SHORT-TERM GOALS (30 days):\n" + "\n".join(f"• {g}" for g in short_lines))
+            if long_lines:
+                care_plan_parts.append("LONG-TERM GOALS (90+ days):\n" + "\n".join(f"• {g}" for g in long_lines))
+            if maint_lines:
+                care_plan_parts.append("MAINTENANCE GOALS:\n" + "\n".join(f"• {g}" for g in maint_lines))
             
             if care_plan_parts:
                 client.care_plan = "\n\n".join(care_plan_parts)

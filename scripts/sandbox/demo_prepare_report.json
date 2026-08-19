@@ -1,0 +1,35 @@
+{
+  "ran_at": "2026-08-16T18:05:45.405998+00:00",
+  "api": "https://api-production-a0a2.up.railway.app",
+  "dry_run": false,
+  "before_client_count": 24,
+  "deleted_clients": [
+    "Intake Role Play v8",
+    "Prod check 1 022919",
+    "Mrs. Johnson (fixture assessment)",
+    "Intake Role Play v9",
+    "Ms. Smith (interview v4)",
+    "GI Interview v10",
+    "Intake Role Play v5",
+    "Sharon (intake role play)",
+    "GI Interview v5",
+    "Ms. Smith (simulated interview)",
+    "Intake Role Play v6",
+    "Sharon (intake v2 fixed)",
+    "GI Interview v6",
+    "Intake Role Play v10",
+    "Sharon (intake v3)",
+    "Ms. Smith (interview v3)",
+    "GI Interview v7",
+    "Prod check 0 022919",
+    "Intake Role Play v7"
+  ],
+  "after_client_count": 5,
+  "showcase_clients": [
+    "Margaret Okafor",
+    "Eleanor Whitfield",
+    "Harold Jensen",
+    "Rosa Delgado",
+    "Robert Calloway"
+  ]
+}

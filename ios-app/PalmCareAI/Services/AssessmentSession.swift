@@ -485,6 +485,11 @@ final class AssessmentSession: ObservableObject {
                         }
                         let label = stepLabels[key] ?? key.capitalized
                         if stateStr == "skipped" { continue }
+                        // Care plan is written with the contract step. Surface it
+                        // as its own checklist row so the packet matches Documents.
+                        if key == "contract" {
+                            steps.append(("Care Plan", stateStr))
+                        }
                         steps.append((label, stateStr))
                         // Wait until every step reaches a terminal state —
                         // navigating away on the first failure would hide

@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.smart_note import SmartNote
 from app.models.task import Task
@@ -105,7 +106,7 @@ async def create_note(
         from app.models.client import Client
         client = db.query(Client).filter(
             Client.id == note_in.related_client_id,
-            Client.created_by == current_user.id,
+            owned_by_visible_users(db, current_user),
         ).first()
         if not client:
             raise HTTPException(status_code=404, detail="Client not found")
@@ -215,7 +216,7 @@ async def create_task(
         from app.models.client import Client
         client = db.query(Client).filter(
             Client.id == task_in.related_client_id,
-            Client.created_by == current_user.id,
+            owned_by_visible_users(db, current_user),
         ).first()
         if not client:
             raise HTTPException(status_code=404, detail="Client not found")

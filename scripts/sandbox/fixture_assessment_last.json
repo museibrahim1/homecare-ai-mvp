@@ -1,0 +1,67 @@
+{
+  "visit_id": "c03f86d3-ab78-4432-8ba3-6a664745a007",
+  "client_id": "39cd668f-7bd6-4d8f-8c06-32b98b2172e2",
+  "pipeline_ok": false,
+  "pipeline_summary": "billing=completed note=processing contract=completed",
+  "artifacts": {
+    "billables": {
+      "status": 200,
+      "body_keys": [
+        "visit_id",
+        "items",
+        "total_minutes",
+        "total_adjusted_minutes",
+        "categories"
+      ],
+      "count": 8,
+      "categories": [
+        "Other Services",
+        "Medication Management",
+        "Nutrition",
+        "Health Monitoring",
+        "Mobility",
+        "Homemaking",
+        "Companionship",
+        "Supervision"
+      ]
+    },
+    "note": {
+      "status": 200,
+      "body_keys": [
+        "id",
+        "visit_id",
+        "structured_data",
+        "narrative",
+        "is_approved",
+        "approved_by_id",
+        "version",
+        "created_at",
+        "updated_at"
+      ],
+      "id": "f31af6ed-8553-4a4c-b9e1-ea09e5d41647"
+    },
+    "contract": {
+      "status": 200,
+      "body_keys": [
+        "client_id",
+        "title",
+        "services",
+        "schedule",
+        "hourly_rate",
+        "weekly_hours",
+        "start_date",
+        "end_date",
+        "cancellation_policy",
+        "terms_and_conditions",
+        "id",
+        "contract_number",
+        "status",
+        "client_signature_date",
+        "agency_signature_date",
+        "created_at",
+        "updated_at"
+      ],
+      "id": "3511e15d-8580-4e45-a20b-070a4e4191dd"
+    }
+  }
+}

@@ -1,0 +1,304 @@
+[
+  {
+    "id": "c2b5f981-c861-47fb-841c-2188eb811a58",
+    "category": "Companionship",
+    "description": "Companionship: 3 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Companionship and emotional support",
+        "text": "she really needs some companion... I really want someone to be there with her that provide the companionship",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Grief and loneliness support following spousal loss",
+        "text": "her husband died about six months ago and she's just kinda lonely",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Social engagement and community participation",
+        "text": "just let her get out in the community",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "8c259cc1-8a70-4483-b65f-ec5d3f18285b",
+    "category": "Transportation",
+    "description": "Transportation: 4 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Grocery store transportation",
+        "text": "she was like oh well can they take me to the grocery store because then that, you know, will free you up some. So will you guys be able or the caregiver take my mom to the grocery store?",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Hair salon transportation",
+        "text": "Take her to the hair salon, nail salon",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Nail salon transportation",
+        "text": "Take her to the hair salon, nail salon",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "General community outings and errands",
+        "text": "pick up her groceries. You know, just let her get out in the community",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "id": "cbf9991e-b5fd-4fa7-bd08-0096b40d2f57",
+    "category": "Homemaking",
+    "description": "Homemaking: 3 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Light housekeeping and tidying client's areas",
+        "text": "she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light breakfast she goes and she cleans up behind herself",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Bed making and bedroom tidying",
+        "text": "she tidies up all of the areas of your mother needs. So basically her bed",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Bathroom tidying",
+        "text": "just to tidy up her bathroom",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "id": "051f321e-f541-417f-87cb-44be961833bc",
+    "category": "Nutrition",
+    "description": "Nutrition: 3 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Meal preparation assistance and cooking support",
+        "text": "my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her but she wants to make sure the caregiver can help her cook",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Light breakfast preparation and cleanup",
+        "text": "if she fix her like a little light breakfast she goes and she cleans up behind herself",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Diabetic-aware meal preparation support",
+        "text": "She does. She's a diabetic... my mom wanted to make sure that the caregiver knows how to cook, you know, to help her",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "5c3671b4-d809-4017-885d-d3144d58e463",
+    "category": "Medication Management",
+    "description": "Medication Management: 2 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Diabetes medication management awareness",
+        "text": "She does. She's a diabetic... I know, mom, you know how to take your medicine. She's like, I know how to take my medicine",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Hypertension/blood pressure medication management awareness",
+        "text": "she also has high blood pressure. She suffers with that, so hypertension",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "2c1c58c4-1f0b-466a-b57d-c0513a05bb6f",
+    "category": "Health Monitoring",
+    "description": "Health Monitoring: 5 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Blood pressure monitoring",
+        "text": "taking your blood pressure, writing that down",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Temperature monitoring",
+        "text": "Also to take her temperature, do things like that. Like an evaluation just like when you go to the doctor, basically, that's what the nurse is gonna be doing",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Diabetes monitoring and management awareness",
+        "text": "She does. She's a diabetic. Okay. And and then she also also has high blood pressure",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Comprehensive nursing assessment and evaluation",
+        "text": "The evaluation, basically, the nurse is gonna have a conversation with you just to make sure all of the information is correct... taking your blood pressure, writing that down",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Medication documentation and review during nursing assessment",
+        "text": "Also to make sure to write down all the different medications that your mother is on",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "28c0f228-701b-4455-b131-9fcd0bf8c7c1",
+    "category": "Personal Care",
+    "description": "Personal Care: 1 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Bathing - client self-directed (caregiver on standby)",
+        "text": "She can do everything. I know, mom. You can bathe yourself. She's like, I don't want anybody bathing me. I can wash myself",
+        "priority": "LOW"
+      }
+    ]
+  },
+  {
+    "id": "7da82a57-f261-42be-926d-f0353742e29e",
+    "category": "Supervision",
+    "description": "Supervision: 6 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "General supervision and safety oversight while family member works from home",
+        "text": "I work from home. Okay. And but I really can't be busy. I'm always downstairs",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Overnight supervision and care during family travel",
+        "text": "in that case, would you would the caregiver be able to stay overnight? Like if I went away for the weekend? Yes.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Holiday care and supervision",
+        "text": "we do holiday as well. Holiday as well. We do holidays as well just in case if you decide to take a trip or something like that and it's a holiday and your mother wants to stay at home",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Weekend care and supervision",
+        "text": "I'm okay on the weekend right now. Do you guys provide weekend care? We do.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Consistent caregiver assignment for continuity of care",
+        "text": "Monday through Friday would it be the same caregiver? Yeah it will be the same. Absolutely.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Backup caregiver coverage to ensure no service gaps",
+        "text": "So what would happen if the caregiver is sick or can't come or something?... I will send someone else out to be able to accommodate you as well. Oh, so I won't be without service?",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "d336d07f-ea44-4bc1-9801-27764173f8f0",
+    "category": "Other Services",
+    "description": "Other Services: 3 tasks identified",
+    "name": null,
+    "minutes": null,
+    "start_ms": 719,
+    "end_ms": 1778309,
+    "confidence": null,
+    "evidence": [
+      {
+        "task": "Allergy awareness and documentation",
+        "text": "is she allergic to something or any allergies or anything like that",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Care plan/service plan development and implementation",
+        "text": "from that comprehensive assessment, she's gonna complete a service plan a care plan a service plan... That care plan is the bible that stays in the home",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Caregiver driving record verification and safe transportation",
+        "text": "A safe driver, you say you check background. Do you check the driving record? We do. We check the driver's record. We make sure their license is up to date and we also their insurance to make sure they're insured as well",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "id": "5b9d28d6-6394-4a26-99e4-3d1d84b2932a",
+    "category": "Mobility",
+    "description": "Transfer/positioning assistance",
+    "name": null,
+    "minutes": null,
+    "start_ms": 74265,
+    "end_ms": 648430,
+    "confidence": null,
+    "evidence": [
+      {
+        "text": "This is her private session, and she agreed that you guys could be a part of this to bless those of you that may not be in a position to hire me, those of you that are not in a position to really know what it is you should be doing at this particular moment. So hopefully this will help you guys. So ",
+        "end_ms": 102174,
+        "matched": "stand",
+        "speaker": "SPEAKER_0",
+        "start_ms": 74265,
+        "segment_id": "504b506a-49cf-4f15-9c85-34dceeed5e3a"
+      },
+      {
+        "text": "Who is it? My name is Sharon McKenzie with Heavenly Healing Hands. Oh, hi. Hello. Come on in. Hi. And your name? I'm Michelle. So very nice to meet you. Thank you. Thank you for coming over. You're welcome. Thanks for I love it. And thank you for the invite. Wonderful. So come on over here. Absolute",
+        "end_ms": 130574,
+        "matched": "sit",
+        "speaker": "SPEAKER_0",
+        "start_ms": 109580,
+        "segment_id": "c9af9202-c051-4713-884e-d7ce2034f717"
+      },
+      {
+        "text": "now will I be able to pick the caregiver that's sitting with my mom? Well what we normally do they're highly screened the background check and all of that we basically if we get their license we do very very thorough.",
+        "end_ms": 270635,
+        "matched": "sitting",
+        "speaker": "SPEAKER_2",
+        "start_ms": 258740,
+        "segment_id": "7b8d8e17-6743-46a8-aa8f-bee6d904e217"
+      },
+      {
+        "text": "my employee to do. That's basically what we do again based up on the service agreement. Okay. Okay, sweetie. Well, nice meeting you. I'm a sit over here and listen. Okay? Very well. So very nice to meet you and I look forward in to working with you. Okay. Thank you.",
+        "end_ms": 648430,
+        "matched": "sit",
+        "speaker": "SPEAKER_2",
+        "start_ms": 633430,
+        "segment_id": "057bb50f-0321-4370-b549-4332d43b71d3"
+      }
+    ]
+  }
+]

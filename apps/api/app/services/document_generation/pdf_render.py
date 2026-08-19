@@ -428,4 +428,122 @@ def generate_note_pdf(visit: Any, note: Any) -> bytes:
     return buffer.getvalue()
 
 
+def generate_care_plan_pdf(client: Any, contract: Any = None) -> bytes:
+    """Generate a care plan PDF from client.care_plan and optional contract schedule/services."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=0.5 * inch,
+        leftMargin=0.5 * inch,
+        topMargin=0.5 * inch,
+        bottomMargin=0.5 * inch,
+    )
+
+    styles = get_custom_styles()
+    story = []
+
+    story.append(Paragraph("HOME CARE PLAN", styles["ContractTitle"]))
+    story.append(Spacer(1, 8))
+
+    client_name = getattr(client, "full_name", None) or "N/A"
+    info_data = [
+        [
+            Paragraph(f"<b>Client:</b> {client_name}", styles["BodyText"]),
+            Paragraph(
+                f"<b>Date:</b> {date.today().isoformat()}",
+                styles["BodyText"],
+            ),
+        ]
+    ]
+    info_table = Table(info_data, colWidths=[3.5 * inch, 3.5 * inch])
+    info_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f7fafc")),
+                ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#e2e8f0")),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+    story.append(info_table)
+    story.append(Spacer(1, 12))
+
+    schedule = {}
+    services = []
+    if contract is not None:
+        schedule = getattr(contract, "schedule", None) or {}
+        if not isinstance(schedule, dict):
+            schedule = {}
+        services = getattr(contract, "services", None) or []
+        if not isinstance(services, list):
+            services = []
+
+    goals = schedule.get("care_plan_goals") or {}
+    if isinstance(goals, dict) and any(goals.values()):
+        story.append(Paragraph("CARE PLAN GOALS", styles["SectionHeader"]))
+        for label, key in (
+            ("Short-term (30 days)", "short_term"),
+            ("Long-term (90+ days)", "long_term"),
+            ("Maintenance", "maintenance"),
+        ):
+            items = goals.get(key) or []
+            if not items:
+                continue
+            story.append(Paragraph(label, styles["BodyText"]))
+            bullets = "".join(f"• {html_escape(str(g))}<br/>" for g in items if g)
+            story.append(Paragraph(bullets, styles["BulletItem"]))
+
+    plan_text = (getattr(client, "care_plan", None) or "").strip()
+    if plan_text:
+        story.append(Paragraph("CARE PLAN", styles["SectionHeader"]))
+        for block in plan_text.split("\n\n"):
+            cleaned = html_escape(block).replace("\n", "<br/>")
+            if cleaned.strip():
+                story.append(Paragraph(cleaned, styles["BodyText"]))
+                story.append(Spacer(1, 6))
+
+    if services:
+        story.append(Paragraph("SERVICES", styles["SectionHeader"]))
+        for svc in services:
+            if isinstance(svc, dict):
+                name = svc.get("name") or svc.get("service") or "Service"
+                rate = svc.get("rate")
+                unit = svc.get("unit") or "hour"
+                line = f"• {html_escape(str(name))}"
+                if rate is not None:
+                    line += f" (${rate}/{unit})"
+                story.append(Paragraph(line, styles["BulletItem"]))
+            else:
+                story.append(Paragraph(f"• {html_escape(str(svc))}", styles["BulletItem"]))
+
+    if not plan_text and not (isinstance(goals, dict) and any(goals.values())) and not services:
+        story.append(Paragraph("CARE PLAN", styles["SectionHeader"]))
+        story.append(
+            Paragraph(
+                "No care plan details have been saved for this client yet.",
+                styles["BodyText"],
+            )
+        )
+
+    story.append(Spacer(1, 20))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#e2e8f0")))
+    story.append(Spacer(1, 8))
+    story.append(Paragraph(f"Client ID: {getattr(client, 'id', '')}", styles["SmallText"]))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def html_escape(text: str) -> str:
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
 # Keep DOCX functions for backward compatibility

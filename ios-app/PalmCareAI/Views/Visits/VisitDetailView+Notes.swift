@@ -1,203 +1,45 @@
 import SwiftUI
 
 extension VisitDetailView {
+    // MARK: - Notes Tab (Paper Pipeline Glass → Notes)
+
     var notesTab: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 0) {
             if let n = note {
-                HStack {
-                    PalmGlassLabel(text: "Clinical Notes · SOAP")
-                    Spacer()
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        notesSheetHeader(n)
 
-                    if isEditingNote {
+                        if isEditingNote {
+                            noteEditBody
+                        } else {
+                            noteReadBody(n)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+                    .padding(.bottom, 16)
+
+                    if !isEditingNote {
                         Button {
-                            Task { await saveNoteEdits() }
+                            Task { await exportFile(type: "note.pdf") }
                         } label: {
-                            HStack(spacing: 4) {
-                                if isSavingNote {
-                                    ProgressView().scaleEffect(0.6).tint(.palmPrimary)
-                                }
-                                Text("Save").font(.system(size: 12, weight: .semibold))
-                            }
-                            .foregroundColor(.palmPrimary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.palmPrimary.opacity(0.08))
-                            .cornerRadius(8)
+                            Text("Approve notes")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(Capsule(style: .continuous).fill(Color.palmPrimary))
+                                .shadow(color: PalmGlass.tealShadow, radius: 14, y: 8)
                         }
-                        .disabled(isSavingNote)
-                        Button {
-                            isEditingNote = false
-                        } label: {
-                            Text("Cancel")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.palmSecondary)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                        }
-                        .disabled(isSavingNote)
-                    } else {
-                        Button { beginNoteEdit(n) } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "pencil").font(.system(size: 12))
-                                Text("Edit").font(.system(size: 12, weight: .semibold))
-                            }
-                            .foregroundColor(.palmPrimary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.palmPrimary.opacity(0.08))
-                            .cornerRadius(8)
-                        }
-                        Button { Task { await exportFile(type: "note.pdf") } } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "arrow.down.doc.fill").font(.system(size: 12))
-                                Text("PDF").font(.system(size: 12, weight: .semibold))
-                            }
-                            .foregroundColor(.palmPrimary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.palmPrimary.opacity(0.08))
-                            .cornerRadius(8)
-                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 18)
+                        .accessibilityLabel("Approve notes and export as PDF")
                     }
                 }
-
-                if isEditingNote {
-                    soapEditField(letter: "S", title: "Subjective", text: $editNoteSubjective, color: .palmBlue)
-                    soapEditField(letter: "O", title: "Objective", text: $editNoteObjective, color: .palmGreen)
-                    soapEditField(letter: "A", title: "Assessment", text: $editNoteAssessment, color: .palmOrange)
-                    soapEditField(letter: "P", title: "Plan", text: $editNotePlan, color: .palmPurple)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Narrative Summary")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmText)
-                        TextField("Narrative", text: $editNoteNarrative, axis: .vertical)
-                            .font(.system(size: 13))
-                            .lineLimit(3...10)
-                            .padding(10)
-                            .background(Color.white.opacity(0.75))
-                            .cornerRadius(8)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
-                    }
-                    .padding(14)
-                    .palmGlassCard(radius: 18)
-                } else if let sd = n.structured_data {
-                    if let mood = sd.client_mood, !mood.isEmpty {
-                        HStack(spacing: 8) {
-                            Image(systemName: "face.smiling")
-                                .font(.system(size: 14))
-                                .foregroundColor(.palmOrange)
-                            Text("Mood: \(mood)")
-                                .font(.system(size: 13))
-                                .foregroundColor(.palmText)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(Color.palmOrange.opacity(0.06))
-                        .cornerRadius(10)
-                    }
-
-                    if let subjective = sd.subjective, !subjective.isEmpty {
-                        soapSection(letter: "S", title: "Subjective", content: subjective, color: .palmBlue)
-                    }
-                    if let objective = sd.objective, !objective.isEmpty {
-                        soapSection(letter: "O", title: "Objective", content: objective, color: .palmGreen)
-                    }
-                    if let assessment = sd.assessment, !assessment.isEmpty {
-                        soapSection(letter: "A", title: "Assessment", content: assessment, color: .palmOrange)
-                    }
-                    if let plan = sd.plan, !plan.isEmpty {
-                        soapSection(letter: "P", title: "Plan", content: plan, color: .palmPurple)
-                    }
-
-                    let taskStrings = sd.tasksAsStrings
-                    if !taskStrings.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "checklist")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.palmPrimary)
-                                Text("Tasks Performed")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.palmText)
-                            }
-                            ForEach(taskStrings, id: \.self) { task in
-                                HStack(alignment: .top, spacing: 8) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.palmGreen)
-                                        .padding(.top, 2)
-                                    Text(task)
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.palmText)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                        }
-                        .padding(14)
-                        .palmGlassCard(radius: 18)
-                    }
-
-                    if let safety = sd.safety_observations, !safety.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "exclamationmark.shield.fill")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.red)
-                                Text("Safety Observations")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.palmText)
-                            }
-                            Text(safety)
-                                .font(.system(size: 13))
-                                .foregroundColor(.palmText)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(14)
-                        .palmGlassCard(radius: 18)
-                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.red.opacity(0.25), lineWidth: 1))
-                    }
-
-                    if let next = sd.next_visit_plan, !next.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "calendar.badge.clock")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.palmBlue)
-                                Text("Next Visit Plan")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.palmText)
-                            }
-                            Text(next)
-                                .font(.system(size: 13))
-                                .foregroundColor(.palmText)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(14)
-                        .palmGlassCard(radius: 18)
-                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.palmBlue.opacity(0.25), lineWidth: 1))
-                    }
-                }
-
-                if !isEditingNote, let narrative = n.narrative, !narrative.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "doc.plaintext")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.palmSecondary)
-                            Text("Narrative Summary")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.palmText)
-                        }
-                        Text(narrative)
-                            .font(.system(size: 13))
-                            .foregroundColor(.palmText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(14)
-                    .palmGlassCard(radius: 18)
-                }
-            } else if tabFetchFailed.contains(3) {
-                tabErrorState(tab: 3)
+                .palmGlassCard(radius: 28, fillOpacity: 0.62)
+            } else if tabFetchFailed.contains("notes") {
+                tabErrorState(tab: "notes")
             } else {
                 documentEmptyState(
                     step: "note",
@@ -209,51 +51,194 @@ extension VisitDetailView {
         }
     }
 
-    func soapSection(letter: String, title: String, content: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Text(letter)
-                    .font(.system(size: 14, weight: .black))
-                    .foregroundColor(.white)
-                    .frame(width: 26, height: 26)
-                    .background(color)
-                    .cornerRadius(7)
-                Text(title.uppercased())
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundColor(.palmText)
+    // MARK: - Sheet header (VISIT NOTE · date / SOAP note)
+
+    @ViewBuilder
+    func notesSheetHeader(_ n: VisitNote) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(noteDateEyebrow)
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(0.8)
+                        .foregroundColor(.palmPrimary)
+                    Text("SOAP note")
+                        .font(.system(size: 22, weight: .bold))
+                        .tracking(-0.4)
+                        .foregroundColor(.palmText)
+                }
                 Spacer()
+
+                if isEditingNote {
+                    Button {
+                        Task { await saveNoteEdits() }
+                    } label: {
+                        HStack(spacing: 4) {
+                            if isSavingNote {
+                                ProgressView().scaleEffect(0.6).tint(.palmPrimary)
+                            }
+                            Text("Save").font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(.palmPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(8)
+                    }
+                    .disabled(isSavingNote)
+                    Button {
+                        isEditingNote = false
+                    } label: {
+                        Text("Cancel")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.palmSecondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                    }
+                    .disabled(isSavingNote)
+                } else {
+                    Button { beginNoteEdit(n) } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "pencil").font(.system(size: 12))
+                            Text("Edit").font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(.palmPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(8)
+                    }
+                    .accessibilityLabel("Edit clinical notes")
+                }
             }
 
-            Text(content)
-                .font(.system(size: 13))
-                .foregroundColor(.palmText)
-                .fixedSize(horizontal: false, vertical: true)
+            if let summary = noteSummaryLine(n) {
+                Text(summary)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .padding(14)
-        .palmGlassCard(radius: 18)
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(color.opacity(0.3), lineWidth: 1)
-        )
     }
 
-    func soapEditField(letter: String, title: String, text: Binding<String>, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Text(letter)
-                    .font(.system(size: 14, weight: .black))
-                    .foregroundColor(.white)
-                    .frame(width: 26, height: 26)
-                    .background(color)
-                    .cornerRadius(7)
-                Text(title.uppercased())
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundColor(.palmText)
-                Spacer()
+    // MARK: - Read view (SOAP + supporting sections)
+
+    @ViewBuilder
+    func noteReadBody(_ n: VisitNote) -> some View {
+        if let sd = n.structured_data {
+            if let mood = sd.client_mood, !mood.isEmpty {
+                paperNoteSection(eyebrow: "MOOD", content: mood)
             }
-            TextField(title, text: text, axis: .vertical)
+            if let subjective = sd.subjective, !subjective.isEmpty {
+                paperNoteSection(eyebrow: "S · SUBJECTIVE", content: subjective)
+            }
+            if let objective = sd.objective, !objective.isEmpty {
+                paperNoteSection(eyebrow: "O · OBJECTIVE", content: objective)
+            }
+            if let assessment = sd.assessment, !assessment.isEmpty {
+                paperNoteSection(eyebrow: "A · ASSESSMENT", content: assessment)
+            }
+            if let plan = sd.plan, !plan.isEmpty {
+                paperNoteSection(eyebrow: "P · PLAN", content: plan)
+            }
+
+            let taskStrings = sd.tasksAsStrings
+            if !taskStrings.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("TASKS PERFORMED")
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(0.8)
+                        .foregroundColor(.palmPrimary)
+                    ForEach(taskStrings, id: \.self) { task in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.palmGreen)
+                                .padding(.top, 2)
+                            Text(task)
+                                .font(.system(size: 13))
+                                .foregroundColor(paperInkColor)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
+                .overlay(alignment: .top) {
+                    Rectangle().fill(Color.palmText.opacity(0.08)).frame(height: 1)
+                }
+            }
+
+            if let safety = sd.safety_observations, !safety.isEmpty {
+                paperNoteSection(eyebrow: "SAFETY OBSERVATIONS", content: safety)
+            }
+            if let next = sd.next_visit_plan, !next.isEmpty {
+                paperNoteSection(eyebrow: "NEXT VISIT PLAN", content: next)
+            }
+        }
+
+        if let narrative = n.narrative, !narrative.isEmpty, narrative != noteSummaryLine(n) {
+            paperNoteSection(eyebrow: "NARRATIVE SUMMARY", content: narrative)
+        }
+    }
+
+    /// One teal-eyebrow section separated from the previous block by a hairline,
+    /// matching the Paper Notes SOAP rows.
+    func paperNoteSection(eyebrow: String, content: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(eyebrow)
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.8)
+                .foregroundColor(.palmPrimary)
+            Text(content)
+                .font(.system(size: 13))
+                .foregroundColor(paperInkColor)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 12)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Color.palmText.opacity(0.08)).frame(height: 1)
+        }
+    }
+
+    // MARK: - Edit view
+
+    @ViewBuilder
+    var noteEditBody: some View {
+        soapEditField(letter: "S · SUBJECTIVE", text: $editNoteSubjective)
+        soapEditField(letter: "O · OBJECTIVE", text: $editNoteObjective)
+        soapEditField(letter: "A · ASSESSMENT", text: $editNoteAssessment)
+        soapEditField(letter: "P · PLAN", text: $editNotePlan)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("NARRATIVE SUMMARY")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.8)
+                .foregroundColor(.palmPrimary)
+            TextField("Narrative", text: $editNoteNarrative, axis: .vertical)
+                .font(.system(size: 13))
+                .lineLimit(3...10)
+                .padding(10)
+                .background(Color.white.opacity(0.75))
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 12)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Color.palmText.opacity(0.08)).frame(height: 1)
+        }
+    }
+
+    func soapEditField(letter: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(letter)
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.8)
+                .foregroundColor(.palmPrimary)
+            TextField(letter, text: text, axis: .vertical)
                 .font(.system(size: 13))
                 .lineLimit(3...8)
                 .padding(10)
@@ -261,9 +246,39 @@ extension VisitDetailView {
                 .cornerRadius(8)
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
         }
-        .padding(14)
-        .palmGlassCard(radius: 18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 12)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Color.palmText.opacity(0.08)).frame(height: 1)
+        }
     }
+
+    // MARK: - Display helpers
+
+    /// "VISIT NOTE · AUG 14, 2026" when a date is available, else "VISIT NOTE".
+    var noteDateEyebrow: String {
+        guard let raw = note?.created_at ?? note?.updated_at else { return "VISIT NOTE" }
+        let withFractional = ISO8601DateFormatter()
+        withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+        guard let date = withFractional.date(from: raw) ?? plain.date(from: raw) else {
+            return "VISIT NOTE"
+        }
+        let out = DateFormatter()
+        out.dateFormat = "MMM d, yyyy"
+        return "VISIT NOTE · \(out.string(from: date).uppercased())"
+    }
+
+    /// First line of the narrative, used as the short summary under the title.
+    func noteSummaryLine(_ n: VisitNote) -> String? {
+        guard let narrative = n.narrative else { return nil }
+        return narrative
+            .components(separatedBy: CharacterSet.newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { !$0.isEmpty }
+    }
+
+    // MARK: - API wiring (unchanged)
 
     func beginNoteEdit(_ n: VisitNote) {
         let sd = n.structured_data

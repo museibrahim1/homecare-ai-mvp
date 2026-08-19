@@ -96,18 +96,18 @@ struct ClientsView: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(spacing: 14) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
+        VStack(spacing: 12) {
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text("Clients")
-                        .font(.system(size: 28, weight: .heavy))
-                        .foregroundColor(.palmText)
-                        .tracking(-0.6)
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(.palmInk)
+                        .tracking(-1.36)
 
                     if !clients.isEmpty {
                         Text("\(clients.count) total · \(activeCount) active")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.palmSecondary)
+                            .foregroundColor(.palmSage)
                     }
                 }
 
@@ -115,29 +115,24 @@ struct ClientsView: View {
 
                 Button { showAddClient = true } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.white)
-                        .frame(width: 40, height: 40)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.palmPrimary, Color.palmTeal600],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            )
-                        )
+                        .frame(width: 44, height: 44)
+                        .background(Color.palmPrimary)
                         .clipShape(Circle())
-                        .shadow(color: Color.palmPrimary.opacity(0.4), radius: 6, y: 3)
+                        .shadow(color: Color.palmPrimary.opacity(0.28), radius: 10, y: 4)
                 }
                 .accessibilityLabel("Add new client")
             }
 
-            HStack(spacing: 9) {
+            HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.palmSecondary)
+                    .foregroundColor(.palmHint)
 
                 TextField("Search clients", text: $searchText)
                     .font(.system(size: 15))
-                    .foregroundColor(.palmText)
+                    .foregroundColor(.palmInk)
                     .autocorrectionDisabled()
                     .accessibilityLabel("Search clients")
 
@@ -145,25 +140,25 @@ struct ClientsView: View {
                     Button { searchText = "" } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 15))
-                            .foregroundColor(.palmSecondary.opacity(0.6))
+                            .foregroundColor(.palmHint)
                     }
                     .accessibilityLabel("Clear search")
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .palmGlassCard(radius: 22, fillOpacity: 0.7)
+            .frame(height: 48)
+            .palmGlassCard(radius: 16, fillOpacity: 0.66)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 14)
+        .padding(.horizontal, 24)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
     }
 
     // MARK: - List
 
     private var clientList: some View {
         ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 10) {
+            LazyVStack(spacing: 12) {
                 ForEach(filteredClients) { client in
                     NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
                         ClientCard(client: client)
@@ -185,7 +180,7 @@ struct ClientsView: View {
                     .padding(.top, 60)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 24)
             .padding(.top, 4)
             .padding(.bottom, 110)
         }
@@ -311,40 +306,51 @@ struct ClientCard: View {
         }
     }
 
-    /// Only render the pink care-level pill for known, short values. AI can
+    /// Only render the care-level pill for known, short values. AI can
     /// emit long placeholder strings like "Pending — Cannot Determine…" in
-    /// `care_level`; those must not become a wrapping pink badge.
+    /// `care_level`; those must not become a wrapping badge.
     private var careLevelLabel: String? {
         guard let raw = client.care_level?.trimmingCharacters(in: .whitespacesAndNewlines),
               !raw.isEmpty else { return nil }
         switch raw.uppercased() {
         case "LOW": return "Low"
-        case "MODERATE", "MEDIUM": return "Medium"
-        case "HIGH": return "High"
+        case "MODERATE", "MEDIUM": return "Moderate"
+        case "HIGH": return "High risk"
         default: return nil
         }
     }
 
-    var body: some View {
-        HStack(spacing: 13) {
-            ClientAvatar(name: client.full_name, size: 48)
+    /// Paper risk pill colors: High → danger, Moderate → warning, Low → success.
+    private var careLevelColor: Color {
+        switch (client.care_level ?? "").uppercased() {
+        case "HIGH": return Color(red: 220 / 255, green: 38 / 255, blue: 38 / 255)
+        case "MODERATE", "MEDIUM": return .palmOrange
+        case "LOW": return .palmGreen
+        default: return .palmSecondary
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 7) {
+    var body: some View {
+        HStack(spacing: 12) {
+            ClientAvatar(name: client.full_name, size: 46)
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 8) {
                     Text(client.full_name)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.palmText)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.palmInk)
+                        .tracking(-0.32)
                         .lineLimit(1)
                         .layoutPriority(1)
 
                     if let careLevel = careLevelLabel {
                         Text(careLevel)
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(.palmPink)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.palmPink.opacity(0.12))
-                            .cornerRadius(5)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(careLevelColor)
+                            .padding(.horizontal, 8)
+                            .frame(height: 20)
+                            .background(careLevelColor.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             .fixedSize()
                     }
 
@@ -353,39 +359,31 @@ struct ClientCard: View {
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
                     Text(diagnosis.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(.system(size: 12.5))
-                        .foregroundColor(.palmSecondary)
+                        .font(.system(size: 13))
+                        .foregroundColor(.palmGlassMuted)
                         .lineLimit(1)
                 }
 
-                HStack(spacing: 10) {
-                    HStack(spacing: 4) {
-                        Circle().fill(statusColor).frame(width: 6, height: 6)
-                        Text(statusLabel)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(statusColor)
-                    }
+                HStack(spacing: 7) {
+                    Circle().fill(statusColor).frame(width: 6, height: 6)
+                    Text(statusLabel)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.palmSage)
                     if let phone = client.phone, !phone.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "phone.fill")
-                                .font(.system(size: 9))
-                            Text(phone.palmFormattedPhone)
-                                .font(.system(size: 11, weight: .medium))
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                        }
-                        .foregroundColor(.palmSecondary)
+                        Circle().fill(Color.palmChevron).frame(width: 3, height: 3)
+                        Text(phone.palmFormattedPhone)
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmHint)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                     }
                     if let city = client.city, !city.isEmpty {
-                        HStack(spacing: 3) {
-                            Image(systemName: "mappin")
-                                .font(.system(size: 9))
-                            Text(city)
-                                .font(.system(size: 11))
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                        }
-                        .foregroundColor(.palmSecondary)
+                        Circle().fill(Color.palmChevron).frame(width: 3, height: 3)
+                        Text(city)
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmHint)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                     }
                 }
             }
@@ -394,10 +392,10 @@ struct ClientCard: View {
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.palmSecondary.opacity(0.4))
+                .foregroundColor(.palmChevron)
         }
-        .padding(16)
-        .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.62)
+        .padding(14)
+        .palmGlassCard(radius: 24, fillOpacity: 0.58)
     }
 }
 

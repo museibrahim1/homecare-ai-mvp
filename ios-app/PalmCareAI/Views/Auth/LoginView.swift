@@ -173,14 +173,7 @@ struct LoginView: View {
             }
             .accessibilityLabel(showPassword ? "Hide password" : "Show password")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color.white.opacity(0.85))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(focusedField == .password ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
-        )
+        .palmGlassField(focused: focusedField == .password)
     }
 
     private func iosField(
@@ -208,14 +201,7 @@ struct LoginView: View {
                 .submitLabel(submitLabel)
                 .focused($focusedField, equals: focus)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color.white.opacity(0.85))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(focusedField == focus ? Color.palmPrimary.opacity(0.55) : Color.palmBorder.opacity(0.8), lineWidth: 1)
-        )
+        .palmGlassField(focused: focusedField == focus)
     }
 
     private var signInButton: some View {

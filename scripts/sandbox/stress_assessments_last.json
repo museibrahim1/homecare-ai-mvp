@@ -1,0 +1,78 @@
+{
+  "api": "https://api-production-a0a2.up.railway.app",
+  "n": 2,
+  "live_ok": 2,
+  "live_total": 2,
+  "storm": {
+    "requests": 16,
+    "errors": 0,
+    "codes": {
+      "200": 16
+    },
+    "p50_ms": 683,
+    "p95_ms": 688,
+    "max_ms": 689
+  },
+  "assessments_ok": 2,
+  "assessments_total": 2,
+  "artifacts_ok": 2,
+  "elapsed_sec": 93.9,
+  "polls": [
+    {
+      "visit_id": "d7968474-f060-439a-b0c1-2bbd4a5f551d",
+      "ok": true,
+      "polls": 28,
+      "sec": 84.9,
+      "summary": "full_pipeline completed",
+      "visit_status": "pending_review"
+    },
+    {
+      "visit_id": "6fbf39a8-3203-43d2-bbf3-aa1b08e953d8",
+      "ok": true,
+      "polls": 30,
+      "sec": 91.1,
+      "summary": "full_pipeline completed",
+      "visit_status": "pending_review"
+    }
+  ],
+  "artifacts": [
+    {
+      "visit_id": "d7968474-f060-439a-b0c1-2bbd4a5f551d",
+      "billables": {
+        "ok": true,
+        "status": 200,
+        "count": 3
+      },
+      "note": {
+        "ok": true,
+        "status": 200,
+        "id": "6a91f8e6-be88-48f7-88c6-7668093e5334"
+      },
+      "contract": {
+        "ok": true,
+        "status": 200,
+        "id": "068a69c9-f311-45b8-97ed-e472e6dff5ff"
+      },
+      "ok": true
+    },
+    {
+      "visit_id": "6fbf39a8-3203-43d2-bbf3-aa1b08e953d8",
+      "billables": {
+        "ok": true,
+        "status": 200,
+        "count": 3
+      },
+      "note": {
+        "ok": true,
+        "status": 200,
+        "id": "1997a94d-f953-4863-8cd6-877f88f14ad3"
+      },
+      "contract": {
+        "ok": true,
+        "status": 200,
+        "id": "24fe7a68-d34e-48b5-ae89-3a784e1cb37b"
+      },
+      "ok": true
+    }
+  ]
+}

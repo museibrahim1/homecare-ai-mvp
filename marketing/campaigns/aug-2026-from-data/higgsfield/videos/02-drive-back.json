@@ -1,0 +1,36 @@
+[
+  {
+    "id": "87c418a8-ced6-44a6-a10a-bf4dd2bcb4db",
+    "status": "completed",
+    "display_name": "Seedance 2.0 Mini",
+    "job_set_type": "seedance_2_0_mini",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022640_87c418a8-ced6-44a6-a10a-bf4dd2bcb4db.mp4",
+    "created_at": 1786674400.494565,
+    "params": {
+      "width": 720,
+      "height": 1280,
+      "prompt": "Gentle handheld motion inside a car at dusk. Driver hands rest on the wheel, papers on passenger seat stay in frame, sun flares softly through windshield, subtle camera drift, photorealistic, no text overlays.",
+      "genre": "auto",
+      "medias": [
+        {
+          "data": {
+            "id": "3cb9bdad-e928-4ab9-8774-2f7158407c72",
+            "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/3cb9bdad-e928-4ab9-8774-2f7158407c72_resize.jpg",
+            "type": "media_input"
+          },
+          "role": "start_image"
+        }
+      ],
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "generate_audio": false,
+      "multi_shots": false,
+      "multi_shot_mode": "custom",
+      "multi_prompt": [],
+      "speedramp": "auto",
+      "reference_elements": [],
+      "prompt_language": "en"
+    }
+  }
+]

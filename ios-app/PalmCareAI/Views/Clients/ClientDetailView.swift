@@ -13,6 +13,12 @@ struct ClientDetailView: View {
         visits.filter { $0.client_id == client.id }
     }
 
+    /// Newest client visit first — used for the "Open visit" link on the
+    /// Latest Assessment card and for ordering the Visits list.
+    var clientVisitsNewestFirst: [Visit] {
+        clientVisits.sorted { $0.created_at > $1.created_at }
+    }
+
     var statusColor: Color {
         switch client.displayStatus.lowercased() {
         case "active": return .palmGreen
@@ -23,28 +29,56 @@ struct ClientDetailView: View {
         }
     }
 
+    /// Only a small, known status word becomes a badge. AI/import data can
+    /// leave long placeholder strings in `status`.
+    var statusLabel: String? {
+        let raw = client.displayStatus.trimmingCharacters(in: .whitespacesAndNewlines)
+        switch raw.lowercased() {
+        case "active": return "Active"
+        case "inactive": return "Inactive"
+        case "discharged": return "Discharged"
+        case "pending": return "Pending"
+        default: return nil
+        }
+    }
+
+    /// Mirror `ClientsView` — only render a care-level badge for known, short
+    /// values (Low / Medium / High). Long AI placeholders are dropped.
+    var careLevelLabel: String? {
+        guard let raw = client.care_level?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else { return nil }
+        switch raw.uppercased() {
+        case "LOW": return "Low"
+        case "MODERATE", "MEDIUM": return "Moderate"
+        case "HIGH": return "High risk"
+        default: return nil
+        }
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
-                profileCard
+            VStack(spacing: 10) {
+                heroCard
 
                 if hasContactInfo { contactSection }
                 if hasEmergencyInfo { emergencySection }
-                if hasMedicalInfo { medicalSection }
-                if hasCareInfo { careSection }
-                if hasInsuranceInfo { insuranceSection }
-                if hasSchedulingInfo { schedulingSection }
+                medicalSection
+                latestAssessmentSection
+                careSection
+                insuranceSection
+                schedulingSection
                 if hasNotes { notesSection }
 
                 visitsSection
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 10)
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
             .padding(.bottom, 120)
         }
         .background(PalmGlassBackground())
         .navigationTitle(client.full_name)
         .navigationBarTitleDisplayMode(.inline)
+        .palmTransparentNavBar()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -53,6 +87,8 @@ struct ClientDetailView: View {
                     Image(systemName: "pencil")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.palmPrimary)
+                        .frame(width: 34, height: 34)
+                        .background(Circle().fill(Color.palmPrimary.opacity(0.12)))
                 }
                 .accessibilityLabel("Edit client")
             }
@@ -70,71 +106,58 @@ struct ClientDetailView: View {
 
     var hasContactInfo: Bool {
         [client.phone, client.phone_secondary, client.email, client.address]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+            .contains { cleaned($0) != nil }
     }
 
     var hasEmergencyInfo: Bool {
-        [client.emergency_contact_name, client.emergency_contact_2_name]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+        cleaned(client.emergency_contact_name) != nil || cleaned(client.emergency_contact_2_name) != nil
     }
 
+    /// Medical facts only — deliberately excludes `medical_notes` (the raw
+    /// assessment transcript is surfaced separately as Latest Assessment).
     var hasMedicalInfo: Bool {
-        [client.primary_diagnosis, client.secondary_diagnoses, client.medications,
-         client.allergies, client.physician_name, client.mobility_status, client.cognitive_status, client.medical_notes]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+        [client.primary_diagnosis, client.allergies, client.medications,
+         client.mobility_status, client.cognitive_status, client.physician_name]
+            .contains { cleaned($0) != nil }
     }
 
     var hasCareInfo: Bool {
-        [client.care_level, client.living_situation, client.care_plan, client.special_requirements]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+        careLevelLabel != nil || cleaned(client.living_situation) != nil || cleaned(client.care_plan) != nil
     }
 
     var hasInsuranceInfo: Bool {
         [client.insurance_provider, client.insurance_id, client.medicaid_id, client.medicare_id, client.billing_address]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+            .contains { cleaned($0) != nil }
     }
 
     var hasSchedulingInfo: Bool {
-        [client.preferred_days, client.preferred_times, client.intake_date, client.discharge_date,
-         client.external_id, client.external_source]
-            .compactMap { $0 }.contains { !$0.isEmpty }
+        [client.preferred_days, client.preferred_times, client.intake_date, client.discharge_date, client.external_id]
+            .contains { cleaned($0) != nil }
     }
 
     var hasNotes: Bool {
-        if let n = client.notes, !n.isEmpty { return true }
-        return false
+        cleaned(client.notes) != nil
     }
-
 }
 
-// MARK: - Reusable Detail Section Card
+// MARK: - Reusable eyebrow glass section (Pipeline Glass)
 
 struct DetailSection<Content: View>: View {
     let title: String
-    var icon: String = ""
-    var iconColor: Color = .palmSecondary
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 6) {
-                if !icon.isEmpty {
-                    Image(systemName: icon)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(iconColor)
-                        .accessibilityHidden(true)
-                }
-                Text(title)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.palmSecondary)
-            }
-            .padding(.leading, 4)
-            .padding(.bottom, 8)
+        VStack(alignment: .leading, spacing: 8) {
+            PalmSectionEyebrow(text: title)
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
 
             VStack(spacing: 0) {
                 content
             }
-            .palmGlassCard(radius: 18)
+            .padding(.bottom, 6)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .palmGlassCard(radius: 24, fillOpacity: 0.54)
     }
 }

@@ -1,0 +1,58 @@
+{
+  "file": "/Users/musaibrahim/Downloads/Simulated Interview Demonstration of Patient and her Husband.mp3",
+  "name": "Ms. Smith (interview v3)",
+  "visit_id": "0b6e52b3-2d26-4b28-a5d2-16fd23ee3bfb",
+  "client_id": "1ba12a01-ded2-494b-b7d3-6555cb3dc9dc",
+  "elapsed_sec": 81.4,
+  "polls": 15,
+  "success": false,
+  "last": "full_pipeline failed: None",
+  "ran_at": "2026-08-15T03:30:19.812699+00:00",
+  "transcript_http": 200,
+  "segment_count": 246,
+  "speakers": {
+    "SPEAKER_1": 54,
+    "SPEAKER_0": 145,
+    "SPEAKER_2": 47
+  },
+  "word_count": 2914,
+  "transcript_excerpt": "[SPEAKER_1] Hello, I'm Doctor. Drosman. Hi, Doctor. Drosman. Mr. Smith. Ms. Smith?\n[SPEAKER_0] Davis. Nice\n[SPEAKER_0] to meet you. Well,\n[SPEAKER_0] how can I help you? Am I supposed to not know you, by the way?\n[SPEAKER_0] Out of role. Am I not supposed to know that? Okay. How\n[SPEAKER_0] can I help you?\n[SPEAKER_2] Ahead, Ellen, what's going on?\n[SPEAKER_1] Well,\n[SPEAKER_1] I've been to a lot of doctors, Doctor. Drosman, and\n[SPEAKER_1] nobody has been able to help me. I have really severe pain.\n[SPEAKER_1] It's been going on for a very long time, and I just hope that something can be done. I also have diarrhea.\n[SPEAKER_1] You know, have to go to the bathroom all the time. It's creating all sorts of problems,\n[SPEAKER_2] you know, for me, for why Yeah. And for, you know, the rest of us too because, you know, nobody's able to do anything about this for her. And so it's just over and over again she's always complaining,\n[SPEAKER_2] and we have a lot of things going on, our kids,\n[SPEAKER_2] special needs, you know, it's just a mess. We need some help.\n[SPEAKER_1] He's right. We do need help. And I\n[SPEAKER_1] tried a lot of medicines. I really don't know what to do anymore.\n[SPEAKER_1] So, I hope you can help me out.\n[SPEAKER_0] Okay.\n[SPEAKER_0] I have to make a decision now.\n[SPEAKER_0] All right. So, I'm in a situation where\n[SPEAKER_0] I've already gauged the fact that this is an environment, a family environment\n[SPEAKER_0] where she's taking a rather\n[SPEAKER_0] passive position.\n[SPEAKER_0] Hands are like this, sitting like this,\n[SPEAKER_0] lips are somewhat tightened,\n[SPEAKER_0] which could be another\n[SPEAKER_0] emotional message.\n[SPEAKER_0] He's got his arms crossed.\n[SPEAKER_0] He shows anger, some level of disdain.\n[SPEAKER_0] So, I'm going to have to figure out how am I going to deal with this.\n[SPEAKER_0] Okay.\n[SPEAKER_0] Okay.\n[SPEAKER_0] So, okay. So I mean, sounds like this is affecting both of you. Must be hard for both of you, would imagine.\n[SPEAKER_2] Yeah.\n[SPEAKER_2] Yeah, it is. Because I mean, you know, she can't do hardly anything around the house.\n[SPEAKER_2] And,\n[SPEAKER_2] you know, she just she just I don't know. She just it's like,\n[SPEAKER_2] get we need some help,\n[SPEAKER_2] and I just can't understand why medicine can't take care of this problem. I mean, what's the big deal? She's got diarrhea. She's got some other stuff. Just give her some medicine and take care of it, you know, so we can get on with our life. We",
+  "transcript_tail": "e time, we have to at least identify the problems and find the proper context. So, my recommendation would be to do counseling,\n[SPEAKER_0] both marital and\n[SPEAKER_0] decide about individual.\n[SPEAKER_0] But right now, it might be more to get an idea about the relationship because that's what came up first.\n[SPEAKER_0] So,\n[SPEAKER_0] I'm wondering if we can continue to work on your management. I'm also wondering if\n[SPEAKER_0] you can begin to explore how you can get back to where you were. And I have a\n[SPEAKER_0] colleague who's a counselor,\n[SPEAKER_0] and I wonder if you'd be willing to talk with them and see how we can get both of your interests understood\n[SPEAKER_2] in a way that you could come to a good conclusion. Both of us at the same time? Well,\n[SPEAKER_0] yeah. In other words,\n[SPEAKER_0] this is family counseling or something? This would be counseling. I think, yeah, this is a situation where neither of you are feeling I'm feeling\n[SPEAKER_0] that neither of you are feeling properly heard or understood.\n[SPEAKER_0] And that would be the first step for both of you to have your time to talk about that in the presence of the other person.\n[SPEAKER_2] What do you think?\n[SPEAKER_1] Will you go?\n[SPEAKER_2] Yeah, we can work out somebody to take care of the kids, yeah. I'll\n[SPEAKER_0] take care of the kids.\n[SPEAKER_0] Give them a hand.\n[SPEAKER_0] Should we take a minute or two of it? Do\n[SPEAKER_0] do you know the story that we filmed them ten years ago? Yeah.",
+  "billables_http": 200,
+  "billable_count": 2,
+  "billables": [
+    {
+      "category": "Homemaking",
+      "description": "Kitchen cleaning",
+      "minutes": null
+    },
+    {
+      "category": "Companionship",
+      "description": "Social interaction",
+      "minutes": null
+    }
+  ],
+  "note_http": 200,
+  "note_id": "b5a27e0f-b7b6-4e7f-a5fb-09d5c867c23f",
+  "note_narrative": "This recording does not constitute a home care visit, home care intake, or training session with an embedded home care intake. It is a clinical communication skills training or role-play demonstration set in a physician's office. A physician (Dr. Drosman/SPEAKER_0) conducts a simulated patient interview with a couple presenting for GI complaints, periodically breaking from role to coach an audience on interviewing technique, body language, and psychosocial dynamics. No home care services were delivered, discussed, or planned. No caregiver-client relationship is established. This recording is out of scope for home care documentation and no home care SOAP note can be generated.",
+  "note_structured_keys": [
+    "plan",
+    "objective",
+    "assessment",
+    "subjective",
+    "visit_info",
+    "client_mood",
+    "vital_signs",
+    "next_visit_plan",
+    "tasks_performed",
+    "cognitive_status",
+    "safety_observations",
+    "medications_discussed"
+  ],
+  "contract_http": 404,
+  "contract_id": null,
+  "contract_title": null,
+  "contract_weekly_hours": null,
+  "contract_hourly_rate": null,
+  "contract_services": null
+}

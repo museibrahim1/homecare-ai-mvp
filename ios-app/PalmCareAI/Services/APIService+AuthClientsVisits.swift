@@ -201,6 +201,10 @@ extension APIService {
         return clients
     }
 
+    func fetchClient(id: String) async throws -> Client {
+        try await request("GET", path: "/clients/\(id)")
+    }
+
     func createClient(body: [String: Any]) async throws -> Client {
         let client: Client = try await request("POST", path: "/clients", body: body)
         invalidateClients()

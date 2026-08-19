@@ -1,0 +1,102 @@
+{
+  "file": "/Users/musaibrahim/Downloads/Home Care Business Client Intake Role Play.mp3",
+  "name": "Sharon (intake v3)",
+  "visit_id": "47144613-ac07-4159-91ba-60cf7e6d032a",
+  "client_id": "8d9dfa6a-3e81-4ed2-bd5a-3863c4cc0df6",
+  "elapsed_sec": 142.5,
+  "polls": 26,
+  "success": true,
+  "last": "full_pipeline completed",
+  "ran_at": "2026-08-15T03:28:46.942502+00:00",
+  "transcript_http": 200,
+  "segment_count": 238,
+  "speakers": {
+    "SPEAKER_0": 157,
+    "SPEAKER_1": 21,
+    "SPEAKER_2": 60
+  },
+  "word_count": 5678,
+  "transcript_excerpt": "[SPEAKER_0] Hello, guys. This is coach Michelle coming to you live from\n[SPEAKER_1] Heavenly healing hand.\n[SPEAKER_1] Where are we? Where are Where we? Where are\n[SPEAKER_0] Guys, look. This is a special, special, special opportunity.\n[SPEAKER_0] So many of you that are not my clients, this is where you,\n[SPEAKER_0] lack. Right? A lot of you don't know what to do or how to do it when you go into the client's home. So Sharon has gracefully\n[SPEAKER_0] beginnings. Say what I've decided to do with her permission is actually record this. So this is her very first time. You guys seen Sharon two weeks ago, and she did fabulous during the home bit the phone\n[SPEAKER_0] call role play. So what we've decided to do is just go live.\n[SPEAKER_0] No script. Just go live so you guys could see and then hear my critique as well, and maybe this will bless you guys in your business. So again,\n[SPEAKER_0] I wanna give a super shout out. You guys give some love to Sharon for allowing us in her home.\n[SPEAKER_0] This is her private session, and she agreed that you guys could be a part of this to bless those of you that may not be in a position to hire me, those of you that are not in a position to really know what it is you should be doing at this particular moment. So hopefully this will help you guys. So here we go. And we just set the camera up here, so we don't know if it's in a perfect spot. So we're gonna actually stand up instead of sitting down to try to give you guys as much info behind the scene as possible.\n[SPEAKER_0] Here we go.\n[SPEAKER_0] Okay.\n[SPEAKER_0] Who is it? My name is Sharon McKenzie with Heavenly Healing Hands. Oh, hi. Hello. Come on in. Hi. And your name? I'm Michelle. So very nice to meet you. Thank you. Thank you for coming over. You're welcome. Thanks for I love it. And thank you for the invite. Wonderful. So come on over here. Absolutely. And we can sit here. The service is for my mom like I mentioned to you online\n[SPEAKER_0] Okay. During our phone call. However, she's upstairs. I'll get her in a moment. Awesome. So\n[SPEAKER_2] what do we need to do? Well, thank you very much again for the invite and I just wanted to really do a meet and greet and thank you for inviting me into your home.\n[SPEAKER_2] And so basically I'm just coming out to give you a little bit more information about my company what we have to offer\n[SPEAKER_2] and and hopefully we will just get ready to get started. When would you like for us to start? I hope very soon.\n[SPEAK",
+  "transcript_tail": "e you got something from this. If you have any questions, jot them down. We'll see them later. They're giving you some hearts. Oh, thank you so much. How you feel? How you feel? I feel great. Actually, I'm I'm ready. I'm ready now. But just being being having her here with me doing the one on one,\n[SPEAKER_2] I am ecstatic.\n[SPEAKER_2] I am getting ready to ball. I I'm not gonna have the time of my life doing what I do, but I love what I'm doing so that's important. So I'm just excited because now I all of the things that I was feeling the anxiety of of just not carrying on with the business, it's like now I have all the tools to succeed. I have all the tools of feeling the confident that I needed to be able to go out there and do what I do. So I'm happy. I mean, it was worth the investment.\n[SPEAKER_1] That's why I got to get that check.\n[SPEAKER_1] It helps with this investment,\n[SPEAKER_1] but but yeah. But I thank her so much. She's beautiful. Her heart is Spent that check and got it right back. Yeah. There's some there's a rap talk. I heard that somewhere. Spit that check and got it right back.\n[SPEAKER_1] Spit that check and got it right back. So\n[SPEAKER_2] I'm ready. I'm excited, but thank you guys for giving me the accolades. I really appreciate it. Thank you so much. Alright.\n[SPEAKER_0] See you guys. Love you. Take care. Have a super fantastic weekend. Be safe. God bless. Enjoy your family over the holiday weekend. Love you guys. Love you guys. Take care. Bye. Bye.",
+  "billables_http": 200,
+  "billable_count": 5,
+  "billables": [
+    {
+      "category": "Companionship",
+      "description": "Companionship: 1 tasks identified",
+      "minutes": null
+    },
+    {
+      "category": "Transportation",
+      "description": "Transportation: 2 tasks identified",
+      "minutes": null
+    },
+    {
+      "category": "Nutrition",
+      "description": "Nutrition: 1 tasks identified",
+      "minutes": null
+    },
+    {
+      "category": "Homemaking",
+      "description": "Homemaking: 1 tasks identified",
+      "minutes": null
+    },
+    {
+      "category": "Supervision",
+      "description": "Supervision: 1 tasks identified",
+      "minutes": null
+    }
+  ],
+  "note_http": 200,
+  "note_id": "71435ace-61dc-4936-8387-55a622056eb0",
+  "note_narrative": "This recording is a training session facilitated by coach Michelle in which home care business trainee Sharon McKenzie conducted a live, unscripted role-play of a home care intake/meet-and-greet for an online coaching audience. No actual home care visit occurred and no care was delivered to any real client. The role-play depicted an intake scenario in which a prospective client family sought companionship, transportation, and light meal assistance for an elderly mother ('Miss King') living in the home with her adult daughter. Within the role-play, the care recipient is described as an independent senior managing her own personal care and medications, experiencing social isolation following the death of her husband six months prior, and diagnosed with diabetes and hypertension. The family declined personal care and medication management services. Discussed services include companionship, transportation (with mileage charges), and meal preparation assistance. The agency representative (Sharon, in role) reviewed the service agreement process, caregiver screening procedures, bonding and insurance, scheduling (Monday\u2013Friday, 8:30 AM\u20137:00 PM), same-caregiver consistency with backup coverage, RN comprehensive assessment, care plan development, and bi-weekly billing with deposit. This note documents the role-play intake scenario only. Coach Michelle's business training commentary directed at the live audience is not reflected in the clinical documentation.",
+  "note_structured_keys": [
+    "plan",
+    "objective",
+    "assessment",
+    "subjective",
+    "visit_info",
+    "client_mood",
+    "vital_signs",
+    "next_visit_plan",
+    "tasks_performed",
+    "cognitive_status",
+    "safety_observations",
+    "medications_discussed"
+  ],
+  "contract_http": 200,
+  "contract_id": "b5473baa-3254-4f5d-a820-00a93fea1b2d",
+  "contract_title": "Home Care Service Agreement - Sharon (intake v3)",
+  "contract_weekly_hours": "52.50",
+  "contract_hourly_rate": "18.00",
+  "contract_services": [
+    {
+      "name": "Companion Care",
+      "evidence": "\"she really needs some companion. You know, her husband died about six months ago and she's just kinda lonely... I really want someone to be there with her that provide the companionship\"",
+      "priority": "High",
+      "frequency": "Monday through Friday, 8:30 AM to 7:00 PM",
+      "description": "Primary service requested \u2014 companionship, socialization, and emotional support for senior woman who is lonely following husband's death six months ago"
+    },
+    {
+      "name": "Transportation/Escort",
+      "evidence": "\"Take her to the hair salon, nail salon, pick up her groceries. You know, just let her get out in the community\"",
+      "priority": "High",
+      "frequency": "As needed within Monday\u2013Friday schedule",
+      "description": "Escort and transportation to hair salon, nail salon, grocery store, and community outings; mileage to be charged separately"
+    },
+    {
+      "name": "Meal Preparation",
+      "evidence": "\"my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her but she wants to make sure the caregiver can help her cook\"",
+      "priority": "Medium",
+      "frequency": "Daily within Monday\u2013Friday schedule",
+      "description": "Assist client with cooking \u2014 client does not want caregiver to cook for her independently but wants help cooking alongside her; diabetic diet considerations apply"
+    },
+    {
+      "name": "Light Housekeeping",
+      "evidence": "\"she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light breakfast, she goes and she cleans up behind herself\"",
+      "priority": "Low",
+      "frequency": "Daily within Monday\u2013Friday schedule",
+      "description": "Light tidying of areas related to client's needs \u2014 bathroom, kitchen clean-up after meals; not full maid service"
+    }
+  ]
+}

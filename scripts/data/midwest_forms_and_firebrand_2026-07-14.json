@@ -1,0 +1,57 @@
+{
+  "forms": {
+    "Abundant": "skipped_by_user",
+    "Redbud": {
+      "status": "submitted",
+      "url": "https://redbud.vc/pitch",
+      "success": "https://redbud.vc/success"
+    },
+    "Overlooked": {
+      "status": "form_dead",
+      "note": "Airtable shrxICQtjx7CUcVyR no longer available; site redirects to LinkedIn"
+    },
+    "Keyhorse": {
+      "status": "closed",
+      "reopens": "2026-08-10",
+      "url": "https://www.keyhorse.vc/apply"
+    },
+    "Firebrand": {
+      "status": "no_public_form_emailed_partners",
+      "emails": [
+        "john@firebrandvc.com",
+        "chris@firebrandvc.com",
+        "claire@firebrandvc.com"
+      ]
+    },
+    "Sprint1": {
+      "status": "google_doc_application",
+      "note": "Apply links to a Google Doc template, not a web form",
+      "url": "https://docs.google.com/document/d/1-x7ENfj9e-jSGleFG6IMOuVUyCoWuIUpc_-aEC9UMrc/edit"
+    },
+    "FortySix": {
+      "status": "domain_parked",
+      "note": "fortysixcapital.com redirects to HugeDomains parking page"
+    },
+    "Quilt": {"status": "site_unreachable"},
+    "Atento": {"status": "no_public_apply_form"},
+    "Vitalize": {"status": "no_public_apply_form"},
+    "Upheaval": {"status": "contact_page_only_no_form"}
+  },
+  "emails": [
+    {
+      "email": "john@firebrandvc.com",
+      "id": "78dd41e0-c829-4287-bd97-77279a5319c7",
+      "ok": true
+    },
+    {
+      "email": "chris@firebrandvc.com",
+      "id": "f0c7eda3-ea41-45b8-ae1f-65f60359aaef",
+      "ok": true
+    },
+    {
+      "email": "claire@firebrandvc.com",
+      "id": "e7d4c685-01e9-4499-b9f1-515ed53bb1c5",
+      "ok": true
+    }
+  ]
+}

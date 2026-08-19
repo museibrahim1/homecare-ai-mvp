@@ -9,11 +9,13 @@ import json
 import re
 import logging
 from typing import Optional, List, Any
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException, Request, status, File, Form, UploadFile
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import visible_user_ids
 from app.models.user import User
 from app.models.agency_settings import AgencySettings
 
@@ -142,16 +144,38 @@ class ExtractedInfo(BaseModel):
 
 def get_or_create_settings(db: Session, user_id) -> AgencySettings:
     """Get or create agency settings for the current user (data isolation)."""
-    settings = db.query(AgencySettings).filter(
-        AgencySettings.user_id == user_id
-    ).first()
-    
-    if not settings:
-        settings = AgencySettings(user_id=user_id, settings_key=f"user_{user_id}")
-        db.add(settings)
-        db.commit()
-        db.refresh(settings)
-    
+    if not isinstance(user_id, UUID):
+        try:
+            user_id = UUID(str(user_id))
+        except (TypeError, ValueError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid user_id",
+            )
+
+    owner_ids = [user_id]
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        owner_ids = visible_user_ids(db, user)
+
+    settings_rows = (
+        db.query(AgencySettings)
+        .filter(AgencySettings.user_id.in_(owner_ids))
+        .all()
+    )
+    named = [
+        row for row in settings_rows
+        if (row.name or "").strip() and row.name != "Home Care Services Agency"
+    ]
+    if named:
+        return named[0]
+    if settings_rows:
+        return settings_rows[0]
+
+    settings = AgencySettings(user_id=user_id, settings_key=f"user_{user_id}")
+    db.add(settings)
+    db.commit()
+    db.refresh(settings)
     return settings
 
 
@@ -234,6 +258,19 @@ async def update_agency_settings(
         docs = update_data['documents']
         if docs is not None:
             docs_list = [d.model_dump() if hasattr(d, 'model_dump') else d for d in docs]
+            # Bytes in JSON blow past API body limits. Keep file content only
+            # for Word templates the contract generator needs.
+            max_template_chars = 12_000_000
+            for doc in docs_list:
+                if not isinstance(doc, dict):
+                    continue
+                if doc.get('category') != 'contract_template':
+                    doc['content'] = ''
+                elif len(doc.get('content') or '') > max_template_chars:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail="Contract template is too large. Use a Word file under 8MB.",
+                    )
             update_data['documents'] = json.dumps(docs_list)
             
             # Also update legacy contract_template fields if a contract template is present
@@ -265,35 +302,104 @@ async def update_agency_settings(
     return _settings_to_response(settings)
 
 
+async def _run_extract(content: str, document_type: str) -> ExtractedInfo:
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
+
+    extracted = ExtractedInfo()
+    if anthropic_key:
+        extracted = await _extract_with_claude(content, document_type, anthropic_key)
+    elif openai_key:
+        extracted = await _extract_with_openai(content, document_type, openai_key)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Company lookup is not configured. Fill the fields manually.",
+        )
+
+    if not any(
+        getattr(extracted, field)
+        for field in ExtractedInfo.model_fields
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Could not read company information from that file. Try a letterhead, invoice, or contract with your address on it.",
+        )
+    return extracted
+
+
 @router.post("/extract-info", response_model=ExtractedInfo)
 async def extract_company_info(
     request: ExtractInfoRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Extract company information from an uploaded document using AI.
-    Supports letterheads, policy documents, contracts, etc.
-    """
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    
-    if not anthropic_key:
-        logger.warning("No ANTHROPIC_API_KEY found for document extraction")
+    """Extract company information from a base64 document (small files / tests)."""
+    return await _run_extract(request.content, request.document_type)
+
+
+@router.post("/extract-info/file", response_model=ExtractedInfo)
+async def extract_company_info_file(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    file: UploadFile = File(...),
+    document_type: str = Form("letterhead"),
+):
+    """Extract company information from an uploaded file. Prefer this over JSON base64."""
+    import base64
+
+    raw = await file.read()
+    if not raw:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="That file was empty.",
+        )
+    if len(raw) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File must be under 10MB.",
+        )
+    mime = file.content_type or "application/octet-stream"
+    content = f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
+    return await _run_extract(content, document_type)
+
+
+def _parse_extracted_json(response_text: str) -> ExtractedInfo:
+    """Parse a model reply into ExtractedInfo. Nested JSON is allowed."""
+    if not response_text:
         return ExtractedInfo()
-    
-    return await _extract_with_claude(request.content, request.document_type, anthropic_key)
+    text = response_text.strip()
+    if "```" in text:
+        fenced = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
+        if fenced:
+            text = fenced.group(1).strip()
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if not match:
+            return ExtractedInfo()
+        try:
+            data = json.loads(match.group())
+        except json.JSONDecodeError:
+            return ExtractedInfo()
+    if not isinstance(data, dict):
+        return ExtractedInfo()
+    allowed = set(ExtractedInfo.model_fields)
+    return ExtractedInfo(**{k: v for k, v in data.items() if v not in (None, "", []) and k in allowed})
 
 
 async def _extract_with_claude(content: str, doc_type: str, api_key: str) -> ExtractedInfo:
-    """Extract company info using Claude."""
+    """Extract company info using Claude from decoded document text or images."""
     try:
         import anthropic
-        
-        client = anthropic.Anthropic(api_key=api_key)
-        
-        # Prepare prompt based on document type
+
+        client = anthropic.Anthropic(api_key=api_key, timeout=60.0)
+        text_content, mime_type = _extract_text_from_document(content)
+        logger.info("Extracted %s chars from %s", len(text_content or ""), mime_type)
+
         system_prompt = """You are an expert at extracting business information from documents.
-        
+
 Extract the following information if present:
 - Company/Agency name
 - Street address
@@ -328,41 +434,52 @@ Return ONLY a JSON object with these fields (use null for missing fields):
     "terms_and_conditions": "..."
 }"""
 
-        # For base64 content, we'll describe it
-        user_prompt = f"""This is a {doc_type} document (base64 encoded). 
-        
-Please analyze the document content and extract any company/business information you can find.
-Look for:
-- Letterhead information
-- Contact details
-- Business identifiers
-- Policy text (if applicable)
-
-Document content (first 5000 chars of base64): {content[:5000]}
-
-Extract and return the JSON object with company information."""
+        user_content: list | str
+        if "image" in (mime_type or "").lower():
+            raw_b64 = content
+            media_type = mime_type or "image/png"
+            if content.startswith("data:"):
+                header, raw_b64 = content.split(",", 1)
+                if ":" in header:
+                    media_type = header.split(":")[1].split(";")[0] or media_type
+            if media_type not in ("image/png", "image/jpeg", "image/gif", "image/webp"):
+                media_type = "image/png"
+            user_content = [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": media_type,
+                        "data": raw_b64,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": f"Extract company/business information from this {doc_type} image. Return only JSON.",
+                },
+            ]
+        else:
+            snippet = (text_content or "").strip()[:8000]
+            if len(snippet) < 8:
+                logger.warning("Document text too short to extract company info")
+                return ExtractedInfo()
+            user_content = (
+                f"This is a {doc_type} document.\n\n"
+                f"{snippet}\n\n"
+                "Extract and return the JSON object with company information."
+            )
 
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-sonnet-4-6",
             max_tokens=2000,
             system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[{"role": "user", "content": user_content}],
             temperature=0,
         )
-        
-        # Parse response
-        response_text = response.content[0].text
-        
-        # Try to extract JSON from response
-        json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)
-        if json_match:
-            data = json.loads(json_match.group())
-            return ExtractedInfo(**{k: v for k, v in data.items() if v is not None})
-        
-        return ExtractedInfo()
-        
+        return _parse_extracted_json(response.content[0].text)
+
     except Exception as e:
-        logger.error(f"Claude extraction failed: {e}")
+        logger.error("Claude extraction failed: %s", e)
         return ExtractedInfo()
 
 
@@ -569,14 +686,17 @@ async def get_public_agency_settings(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    """Get agency settings (internal - for worker access). Requires X-Internal-Key header."""
+    """Get agency settings for a specific user (internal worker). Requires X-Internal-Key."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
     provided_key = request.headers.get("X-Internal-Key", "")
     if not expected_key or provided_key != expected_key:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing internal API key")
-    
-    # For internal worker access, get the first available settings
-    settings = db.query(AgencySettings).first()
-    if not settings:
-        raise HTTPException(status_code=404, detail="No agency settings found")
+
+    user_id = request.query_params.get("user_id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="user_id is required",
+        )
+    settings = get_or_create_settings(db, user_id)
     return _settings_to_response(settings)

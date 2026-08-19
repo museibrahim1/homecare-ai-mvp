@@ -4,15 +4,33 @@ struct VisitDetailView: View {
     @EnvironmentObject var api: APIService
     let visitId: String
     var clientName: String?
+    /// Index into `fullTabs` (legacy). Prefer resolving via `visibleTabs` after load.
     var initialTab: Int = 0
+
+    struct TabDef: Identifiable, Equatable {
+        let id: String
+        let title: String
+        let icon: String
+    }
+
+    /// Fixed catalog. `visibleTabs` drops Billables when the visit has none.
+    static let fullTabs: [TabDef] = [
+        TabDef(id: "overview", title: "Overview", icon: "chart.bar.fill"),
+        TabDef(id: "transcript", title: "Transcript", icon: "text.quote"),
+        TabDef(id: "billables", title: "Billables", icon: "dollarsign.circle.fill"),
+        TabDef(id: "notes", title: "Notes", icon: "note.text"),
+        TabDef(id: "care_plan", title: "Care Plan", icon: "list.clipboard.fill"),
+        TabDef(id: "contract", title: "Contract", icon: "doc.text.fill"),
+    ]
 
     @State var visit: Visit?
     @State var transcript: VisitTranscriptResponse?
     @State var billables: VisitBillablesResponse?
     @State var note: VisitNote?
     @State var contract: VisitContract?
+    @State var carePlanText: String?
 
-    @State var tabFetchFailed: Set<Int> = []
+    @State var tabFetchFailed: Set<String> = []
 
     @State var isLoading = true
     @State var activeTab = 0
@@ -52,7 +70,36 @@ struct VisitDetailView: View {
     @State var didRunAutomationTabCycle = false
     #endif
 
-    let tabs = ["Overview", "Transcript", "Billables", "Notes", "Contract"]
+    /// Tabs shown for this visit. Billables drops out once billing finished with zero items.
+    var visibleTabs: [TabDef] {
+        Self.fullTabs.filter { $0.id != "billables" || shouldShowBillablesTab }
+    }
+
+    /// True when this assessment has billable line items, or billing is still
+    /// in flight / failed (so the user can watch or retry). False when billing
+    /// completed with an empty list — contract rates do not require billables.
+    var shouldShowBillablesTab: Bool {
+        if !(billables?.items ?? []).isEmpty { return true }
+        guard let v = visit else { return true }
+        let state = pipelineStepState(v, step: "billing")
+        if state.isProcessing || state.isFailed || state.isStuck { return true }
+        if state.isComplete {
+            if let count = billingItemCountFromPipeline(v) { return count > 0 }
+            if billables != nil { return false }
+            return false
+        }
+        return true
+    }
+
+    var hasBillableItems: Bool {
+        !(billables?.items ?? []).isEmpty
+    }
+
+    var activeTabId: String {
+        let tabs = visibleTabs
+        guard tabs.indices.contains(activeTab) else { return "overview" }
+        return tabs[activeTab].id
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -62,6 +109,7 @@ struct VisitDetailView: View {
         .background(PalmGlassBackground())
         .navigationTitle(clientName ?? "Assessment")
         .navigationBarTitleDisplayMode(.inline)
+        .palmTransparentNavBar()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -80,6 +128,11 @@ struct VisitDetailView: View {
                     }
                     .disabled(note == nil)
                     .accessibilityLabel("Export notes as PDF")
+                    Button { Task { await exportFile(type: "care-plan.pdf") } } label: {
+                        Label("Export Care Plan (PDF)", systemImage: "list.clipboard")
+                    }
+                    .disabled(!hasCarePlanContent)
+                    .accessibilityLabel("Export care plan as PDF")
                     Button { Task { await exportFile(type: "contract.pdf") } } label: {
                         Label("Export Contract (PDF)", systemImage: "doc.fill")
                     }
@@ -88,7 +141,7 @@ struct VisitDetailView: View {
                     Button { Task { await exportFile(type: "timesheet.csv") } } label: {
                         Label("Export Timesheet (CSV)", systemImage: "tablecells")
                     }
-                    .disabled(visit == nil)
+                    .disabled(!hasBillableItems)
                     .accessibilityLabel("Export timesheet as CSV")
                     Divider()
                     Button(role: .destructive) { Task { await restartAssessment() } } label: {
@@ -110,26 +163,49 @@ struct VisitDetailView: View {
         .palmErrorAlert(message: $actionError, isPresented: $showActionError)
         .task {
             PostHogService.shared.capture("visit_detail_opened")
-            if initialTab != 0 { activeTab = initialTab }
             await loadVisit()
+            applyInitialTab()
             await pollPipelineUntilComplete()
         }
         .onChange(of: activeTab) { _ in
             PostHogService.shared.capture("visit_detail_tab_viewed", properties: [
                 "tab_index": activeTab,
-                "tab_name": tabs[activeTab],
+                "tab_name": activeTabId,
             ])
             Task { await loadTabDataIfNeeded() }
         }
+        .onChange(of: hasBillableItems) { _ in
+            clampActiveTabToVisible()
+        }
+        .onChange(of: shouldShowBillablesTab) { _ in
+            clampActiveTabToVisible()
+        }
         #if DEBUG
         .task {
-            guard ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") else { return }
+            if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
+                guard !didRunAutomationTabCycle else { return }
+                didRunAutomationTabCycle = true
+                for tabId in ["transcript", "billables", "notes", "care_plan", "contract", "overview"] {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    await MainActor.run { selectTab(id: tabId) }
+                }
+                return
+            }
+            guard ProcessInfo.processInfo.arguments.contains("MARKETING_FULL_PIPELINE") else { return }
             guard !didRunAutomationTabCycle else { return }
             didRunAutomationTabCycle = true
-            for tabIndex in [1, 2, 3, 4, 0] {
-                try? await Task.sleep(nanoseconds: 1_500_000_000)
-                await MainActor.run { activeTab = tabIndex }
+            // Stay on overview while the processing banner fills in.
+            for _ in 0..<40 {
+                if !isPipelineProcessing, contract != nil { break }
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
             }
+            // Walk the finished packet, ending on Contract.
+            for tabId in ["transcript", "notes", "care_plan", "contract"] {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                await MainActor.run { selectTab(id: tabId) }
+            }
+            // Linger on Contract for the marketing end card.
+            try? await Task.sleep(nanoseconds: 8_000_000_000)
         }
         #endif
     }
@@ -141,15 +217,15 @@ struct VisitDetailView: View {
     var tabBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                ForEach(Array(visibleTabs.enumerated()), id: \.element.id) { index, tab in
                     let isActive = activeTab == index
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) { activeTab = index }
                     } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: tabIcon(index))
+                            Image(systemName: tab.icon)
                                 .font(.system(size: 11, weight: .semibold))
-                            Text(tab)
+                            Text(tab.title)
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .foregroundColor(isActive ? .white : .palmSecondary)
@@ -175,7 +251,7 @@ struct VisitDetailView: View {
                             }
                         }
                     }
-                    .accessibilityLabel("\(tab) tab")
+                    .accessibilityLabel("\(tab.title) tab")
                     .accessibilityAddTraits(isActive ? .isSelected : [])
                 }
             }
@@ -187,44 +263,34 @@ struct VisitDetailView: View {
     // MARK: - Screen Header (Pipeline Glass eyebrow + title)
 
     var screenTitle: String {
-        switch activeTab {
-        case 0: return "Overview"
-        case 1: return "Transcript"
-        case 2: return "Billables"
-        case 3: return "Notes"
-        case 4: return "Contract"
-        default: return "Assessment"
-        }
+        visibleTabs.indices.contains(activeTab) ? visibleTabs[activeTab].title : "Assessment"
     }
 
-    /// Client-name eyebrow + large screen title, matching the Paper Pipeline
-    /// Glass header on each document screen.
+    /// Client-name eyebrow + large screen title, matching Paper Pipeline Glass
+    /// (e.g. "Eleanor" / "Care Plan" — sentence case muted, 34pt bold title).
     var screenHeader: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            if let name = clientName ?? visit?.client?.full_name, !name.isEmpty {
-                Text(name.uppercased())
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundColor(.palmPrimary)
+        let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255)
+        let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255)
+        let firstName: String = {
+            let full = clientName ?? visit?.client?.full_name ?? ""
+            return full.split(separator: " ").first.map(String.init) ?? full
+        }()
+
+        return VStack(alignment: .leading, spacing: 4) {
+            if !firstName.isEmpty {
+                Text(firstName)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(muted)
                     .lineLimit(1)
             }
             Text(screenTitle)
-                .font(.system(size: 26, weight: .heavy))
-                .foregroundColor(.palmText)
-                .tracking(-0.4)
+                .font(.system(size: 34, weight: .bold))
+                .foregroundColor(ink)
+                .tracking(-1.4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    func tabIcon(_ index: Int) -> String {
-        switch index {
-        case 0: return "chart.bar.fill"
-        case 1: return "text.quote"
-        case 2: return "dollarsign.circle.fill"
-        case 3: return "note.text"
-        case 4: return "doc.text.fill"
-        default: return "circle"
-        }
+        .padding(.top, 4)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Tab Content
@@ -238,59 +304,49 @@ struct VisitDetailView: View {
                     errorView(error)
                 } else {
                     screenHeader
-                    if isPipelineProcessing || hasFailedPipelineStep || hasStuckPipelineStep {
-                        processingBanner
-                    }
-                    switch activeTab {
-                    case 0: overviewTab
-                    case 1: transcriptTab
-                    case 2: billablesTab
-                    case 3: notesTab
-                    case 4: contractTab
+                    // Pipeline progress lives on Record → Processing (Paper),
+                    // and on Overview → Documents. Do not repeat an "X of N
+                    // ready" banner on Transcript / Notes / Contract tabs.
+                    switch activeTabId {
+                    case "overview": overviewTab
+                    case "transcript": transcriptTab
+                    case "billables": billablesTab
+                    case "notes": notesTab
+                    case "care_plan": carePlanTab
+                    case "contract": contractTab
                     default: EmptyView()
                     }
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 24)
             .padding(.vertical, 16)
             .padding(.bottom, 80)
         }
     }
 
-    /// Shown while the AI pipeline is still running so the user understands
-    /// that empty tabs are filling in (not broken).
-    var processingBanner: some View {
-        let ready = documentReadyCount
-        let stuck = hasStuckPipelineStep
-        return HStack(spacing: 10) {
-            if stuck {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.palmOrange)
-            } else {
-                ProgressView()
-                    .scaleEffect(0.8)
-                    .tint(.palmPrimary)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(stuck
-                     ? "Processing is taking longer than usual"
-                     : "\(ready) of 4 ready")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.palmText)
-                Text(stuck
-                     ? "Retry the stuck step below. You do not need to restart the whole visit."
-                     : "Transcript, billables, notes, and contract fill in as each step finishes.")
-                    .font(.system(size: 11))
-                    .foregroundColor(.palmSecondary)
-            }
-            Spacer()
+    func selectTab(id: String) {
+        if let idx = visibleTabs.firstIndex(where: { $0.id == id }) {
+            activeTab = idx
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background((stuck ? Color.palmOrange : Color.palmPrimary).opacity(0.08))
-        .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke((stuck ? Color.palmOrange : Color.palmPrimary).opacity(0.2), lineWidth: 1))
+    }
+
+    func applyInitialTab() {
+        guard initialTab != 0, initialTab < Self.fullTabs.count else { return }
+        selectTab(id: Self.fullTabs[initialTab].id)
+    }
+
+    func clampActiveTabToVisible() {
+        if activeTab >= visibleTabs.count {
+            activeTab = max(0, visibleTabs.count - 1)
+        }
+    }
+
+    func billingItemCountFromPipeline(_ v: Visit) -> Int? {
+        guard let ps = v.pipeline_state,
+              let step = ps["billing"]?.value as? [String: Any] else { return nil }
+        if let count = step["item_count"] as? Int { return count }
+        if let count = step["item_count"] as? Double { return Int(count) }
+        return nil
     }
 
 }

@@ -20,6 +20,20 @@ struct AddClientSheet: View {
     @State private var medicareId = ""
     @State private var insuranceProvider = ""
 
+    @State private var allergies = ""
+    @State private var medications = ""
+    @State private var mobilityStatus = ""
+    @State private var cognitiveStatus = ""
+    @State private var physicianName = ""
+    @State private var physicianPhone = ""
+    @State private var livingSituation = ""
+    @State private var carePlan = ""
+    @State private var preferredDays = ""
+    @State private var preferredTimes = ""
+    @State private var emergencyName = ""
+    @State private var emergencyPhone = ""
+    @State private var emergencyRelationship = ""
+
     @State private var isLoading = false
     @State private var errorMessage: String?
 
@@ -75,6 +89,31 @@ struct AddClientSheet: View {
                                 prioritySection
                                 insuranceSection
                                 specialtySection
+                            }
+
+                            sectionCard(title: "Medical", icon: "stethoscope") {
+                                inputField("Allergies", text: $allergies, placeholder: "Penicillin, latex…", icon: "exclamationmark.triangle.fill")
+                                inputField("Medications", text: $medications, placeholder: "Current medications", icon: "pills.fill")
+                                inputField("Mobility", text: $mobilityStatus, placeholder: "Independent, walker, wheelchair…", icon: "figure.walk")
+                                inputField("Cognitive", text: $cognitiveStatus, placeholder: "Alert, mild impairment…", icon: "brain.head.profile.fill")
+                                inputField("Physician", text: $physicianName, placeholder: "Dr. Name", icon: "cross.case.fill")
+                                inputField("Physician phone", text: $physicianPhone, placeholder: "+1 555 000 0000", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
+                            }
+
+                            sectionCard(title: "Living & Care Plan", icon: "house.fill") {
+                                inputField("Living situation", text: $livingSituation, placeholder: "Lives alone, with family…", icon: "house")
+                                multilineField("Care plan", text: $carePlan, placeholder: "Goals and care instructions")
+                            }
+
+                            sectionCard(title: "Scheduling", icon: "calendar") {
+                                inputField("Preferred days", text: $preferredDays, placeholder: "Mon, Wed, Fri", icon: "calendar")
+                                inputField("Preferred times", text: $preferredTimes, placeholder: "Morning, 9–11am", icon: "clock.fill")
+                            }
+
+                            sectionCard(title: "Emergency Contact", icon: "person.crop.circle.badge.exclamationmark") {
+                                inputField("Name", text: $emergencyName, placeholder: "Contact name", icon: "person.fill", contentType: .name)
+                                inputField("Phone", text: $emergencyPhone, placeholder: "+1 555 000 0000", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
+                                inputField("Relationship", text: $emergencyRelationship, placeholder: "Spouse, daughter…", icon: "heart.fill")
                             }
 
                             sectionCard(title: "Referral Notes", icon: "note.text") {
@@ -358,6 +397,23 @@ struct AddClientSheet: View {
 
     // MARK: - Notes
 
+    private func multilineField(_ label: String, text: Binding<String>, placeholder: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.palmText)
+            TextField(placeholder, text: text, axis: .vertical)
+                .font(.system(size: 15))
+                .foregroundColor(.palmText)
+                .lineLimit(3...6)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 13)
+                .background(Color.palmFieldBg)
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        }
+    }
+
     private var notesField: some View {
         TextField("Referral source, special requirements...", text: $notes, axis: .vertical)
             .font(.system(size: 15))
@@ -419,6 +475,19 @@ struct AddClientSheet: View {
         medicaidId = c.medicaid_id ?? ""
         medicareId = c.medicare_id ?? ""
         insuranceProvider = c.insurance_provider ?? ""
+        allergies = c.allergies ?? ""
+        medications = c.medications ?? ""
+        mobilityStatus = c.mobility_status ?? ""
+        cognitiveStatus = c.cognitive_status ?? ""
+        physicianName = c.physician_name ?? ""
+        physicianPhone = c.physician_phone ?? ""
+        livingSituation = c.living_situation ?? ""
+        carePlan = c.care_plan ?? ""
+        preferredDays = c.preferred_days ?? ""
+        preferredTimes = c.preferred_times ?? ""
+        emergencyName = c.emergency_contact_name ?? ""
+        emergencyPhone = c.emergency_contact_phone ?? ""
+        emergencyRelationship = c.emergency_contact_relationship ?? ""
 
         if !(c.medicaid_id ?? "").isEmpty { insuranceType = "medicaid" }
         else if !(c.medicare_id ?? "").isEmpty { insuranceType = "medicare" }
@@ -427,17 +496,30 @@ struct AddClientSheet: View {
 
     private func buildBody() -> [String: Any] {
         var body: [String: Any] = ["full_name": fullName.trimmingCharacters(in: .whitespaces)]
+        let isEditing = editingClient != nil
 
         let fields: [(String, String)] = [
             ("email", email), ("phone", phone), ("address", address),
             ("care_level", careLevel), ("primary_diagnosis", primaryDiagnosis),
             ("notes", notes), ("medicaid_id", medicaidId), ("medicare_id", medicareId),
             ("insurance_provider", insuranceProvider),
+            ("allergies", allergies), ("medications", medications),
+            ("mobility_status", mobilityStatus), ("cognitive_status", cognitiveStatus),
+            ("physician_name", physicianName), ("physician_phone", physicianPhone),
+            ("living_situation", livingSituation), ("care_plan", carePlan),
+            ("preferred_days", preferredDays), ("preferred_times", preferredTimes),
+            ("emergency_contact_name", emergencyName),
+            ("emergency_contact_phone", emergencyPhone),
+            ("emergency_contact_relationship", emergencyRelationship),
         ]
 
         for (key, value) in fields {
-            let trimmed = value.trimmingCharacters(in: .whitespaces)
-            if !trimmed.isEmpty { body[key] = trimmed }
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            if isEditing {
+                body[key] = trimmed
+            } else if !trimmed.isEmpty {
+                body[key] = trimmed
+            }
         }
 
         return body
@@ -480,13 +562,6 @@ extension View {
     func formFieldStyle() -> some View {
         self
             .font(.system(size: 14))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.palmBorder, lineWidth: 1)
-            )
+            .palmGlassField()
     }
 }

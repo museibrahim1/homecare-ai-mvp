@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -21,7 +22,7 @@ async def get_diarization(
     """Get the diarization turns for a visit (data isolation enforced)."""
     visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
         Visit.id == visit_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")

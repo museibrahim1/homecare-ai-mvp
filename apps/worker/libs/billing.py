@@ -254,6 +254,7 @@ def consolidate_blocks(blocks: List[BillableBlock], min_gap_ms: int = 120000) ->
 
 def analyze_transcript_with_claude(
     segments: List[Dict[str, Any]],
+    conversation_kind: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Use Claude to analyze transcript and extract ALL billable services comprehensively.
@@ -292,7 +293,11 @@ def analyze_transcript_with_claude(
     from libs.pipeline_efficiency import trim_transcript_for_llm
     full_text = trim_transcript_for_llm(full_text, max_chars=50000)
     
+    from libs.pipeline_efficiency import assessment_mode_instructions
+    kind_block = assessment_mode_instructions(conversation_kind)
+    
     prompt = f"""Analyze this recording for IN-HOME CARE services a home care agency would actually provide.
+{kind_block}
 
 Extract only tasks the client or family asked a caregiver to do, or clearly cannot do at home without help.
 
@@ -305,7 +310,7 @@ Do NOT extract:
 - SUPERVISION unless the transcript clearly says the person cannot be left alone, needs supervision, or needs safety monitoring. Do not invent supervision from coaching, training, or general presence.
 
 If this is a coaching/role-play with an embedded intake, extract from the person who would receive care (often a parent), not the coach.
-If this is a medical interview with no home-care request, return [] unless someone clearly cannot manage meals, housekeeping, or personal care at home.
+If the family says she cannot manage around the house or they need help at home, extract homemaker, companion, respite, or meal help. Do not return [] in that case.
 
 TRANSCRIPT:
 {full_text}
@@ -387,9 +392,23 @@ def generate_billables_from_transcript(
     is_recommendation = kind != "home_care_visit"
 
     # Use Claude to extract all services. None = Claude unavailable; [] = no home-care needs.
-    claude_services = analyze_transcript_with_claude(segments) if use_llm else None
+    claude_services = analyze_transcript_with_claude(segments, conversation_kind=kind) if use_llm else None
     llm_succeeded = claude_services is not None
     claude_services = filter_grounded_claude_services(claude_services or [], transcript_text)
+    if not claude_services and kind != "out_of_scope":
+        from libs.contract_facts import grounded_home_need_billables
+        fallback = filter_grounded_claude_services(
+            grounded_home_need_billables(transcript_text),
+            transcript_text,
+        )
+        if fallback:
+            logger.info(
+                "Using grounded home-need billables count=%s kind=%s",
+                len(fallback),
+                kind,
+            )
+            claude_services = fallback
+            llm_succeeded = True
     
     # Also run rules-based detection as backup (only used if Claude failed)
     segment_services: Dict[str, List[Dict]] = {}

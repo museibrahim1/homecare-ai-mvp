@@ -1,0 +1,13 @@
+file Home Care Business Client Intake Role Play.mp3 bytes=19262716
+logged in demo-screenshots@palmtai.com
+client 26221694-9ec3-45d4-a4d9-cd366e32bd3d visit 71f08912-5b8f-4beb-a632-8dee53b5d559
+upload 201 11177ms {"id":"4879d34b-b5c1-4e01-a93d-979f4b9e7d52","visit_id":"71f08912-5b8f-4beb-a632-8dee53b5d559","s3_key":"visits/71f08912-5b8f-4beb-a632-8dee53b5d559/audio/Home Care Business Client Intake Role Play.mp3","original_filename":"Home Care Busine
+  poll 1 12.1s kind=None transcription=processing billing=pending note=pending contract=pending
+  poll 6 40.0s kind=training_with_embedded_intake transcription=completed billing=completed note=pending contract=processing
+  poll 10 62.0s kind=training_with_embedded_intake full_pipeline completed
+pipeline ok after 62.0s polls=10 full_pipeline completed
+speakers {'SPEAKER_0': 157, 'SPEAKER_1': 21, 'SPEAKER_2': 60} segments=238 words=5678
+kind=training_with_embedded_intake timings_ms={'note': None, 'billing': 13724, 'classify': 1784, 'contract': 27821, 'transcription': 6249}
+billables 5 ['Companionship', 'Transportation', 'Nutrition', 'Homemaking', 'Supervision']
+note_id e507026e-32f7-44af-a595-0b214a9d9cc9 contract_id 36f11170-a355-4863-8a91-60019e7e4966 hours=52.50
+wrote /Users/musaibrahim/Desktop/AI Voice Contracter/scripts/sandbox/assessment-runs/Home_Care_Business_Client_Intake_Role_Play.json

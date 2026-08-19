@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, s
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users, visible_user_ids
 from app.models.user import User
 from app.models.contract_template import ContractTemplate
 from app.services.ocr_template_scanner import (
@@ -192,7 +193,7 @@ async def preview_template_with_data(
 
     contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
         Contract.id == contract_id,
-        Client.created_by == current_user.id,
+        owned_by_visible_users(db, current_user),
     ).first()
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -213,7 +214,7 @@ async def preview_template_with_data(
         ).order_by(ContractTemplate.version.desc()).first()
 
     agency_settings = db.query(AgencySettings).filter(
-        AgencySettings.user_id == current_user.id,
+        AgencySettings.user_id.in_(visible_user_ids(db, current_user)),
     ).first()
 
     placeholders = get_template_placeholders(client, contract, agency_settings)

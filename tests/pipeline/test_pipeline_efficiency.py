@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "worker"))
 
 from libs.pipeline_efficiency import (
+    assessment_mode_instructions,
     empty_out_of_scope_assessment,
     heuristic_conversation_kind,
     trim_transcript_for_llm,
@@ -34,12 +35,28 @@ class TestHeuristicKind:
         )
         assert heuristic_conversation_kind(text) == "out_of_scope"
 
+    def test_home_care_with_doctor_mention_is_not_out_of_scope(self):
+        text = (
+            "The doctor said she needs help at home. A caregiver will provide "
+            "companionship Monday through Friday at twenty an hour. "
+            "This is a home care intake and the service agreement is ready."
+        )
+        assert heuristic_conversation_kind(text) != "out_of_scope"
+
     def test_intake_role_play_training(self):
         text = (
             "This is coach Michelle coming to you live. Role play with my clients. "
             "Give a shout out. She needs companionship and home care Monday through Friday "
             "at eighteen an hour. Service agreement and intake paperwork today."
         )
+        assert heuristic_conversation_kind(text) == "training_with_embedded_intake"
+
+    def test_simulated_patient_interview_with_home_need_is_assessment(self):
+        text = (
+            "Hello, I'm Doctor Drossman. Out of role. She can't do hardly anything "
+            "around the house. We need some help. The kids have special needs."
+        )
+        assert heuristic_conversation_kind(text) != "out_of_scope"
         assert heuristic_conversation_kind(text) == "training_with_embedded_intake"
 
 
@@ -51,3 +68,13 @@ class TestEmptyOutOfScope:
         assert data["services_identified"] == []
         assert data["quoted_hourly_rate"] is None
         assert data["eicna_assessment"]["care_need_level"] == "LOW"
+
+
+class TestAssessmentModeInstructions:
+    def test_in_scope_forbids_empty_clinic_skip(self):
+        text = assessment_mode_instructions("training_with_embedded_intake")
+        assert "Do not relabel as out_of_scope" in text
+        assert "around the house" in text
+
+    def test_out_of_scope_has_no_override(self):
+        assert assessment_mode_instructions("out_of_scope") == ""

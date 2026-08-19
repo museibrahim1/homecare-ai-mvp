@@ -1,0 +1,44 @@
+{
+  "id": "4b7e49a0-d171-4532-89b1-c9f3258ceb47",
+  "visit_id": "e6ffc833-43e7-4fa5-9579-ec1587ac223a",
+  "structured_data": {
+    "plan": "No home care plan applicable. This session should be filed as a business training record, not a clinical visit note. If an actual home care visit occurs with a real client, a separate and accurate visit note should be completed at that time based on actual services rendered.",
+    "objective": "No home care tasks were performed. The transcript documents a live-streamed coaching demonstration of a mock intake consultation, including discussion of: service agreements, caregiver screening processes, scheduling (Monday-Friday 8:30 AM - 7:00 PM), pricing ($18/hour), transportation with mileage charges, light housekeeping scope, bonding and insurance, RN comprehensive assessment scheduling, care plan development, billing practices, and paperwork completion. A mock client ('mom') briefly participated in the role play scenario.",
+    "assessment": "This is NOT a home care visit note. No clinical or personal care services were rendered. This session is a business coaching and training demonstration. Generating a clinical visit note from this transcript would be inaccurate and potentially fraudulent documentation. The content is appropriate for business training records only.",
+    "subjective": "This transcript does not represent an actual home care visit with a client. This is a business training/coaching role play session conducted by Coach Michelle with a home care agency owner named Sharon McKenzie (Heavenly Healing Hands) for the purpose of demonstrating how to conduct an initial client intake and meet-and-greet. No actual home care services were delivered to any client during this session.",
+    "visit_info": {
+      "date": "2026-08-15",
+      "client_name": "Sharon (intake role play)",
+      "caregiver_name": "Maria Santos",
+      "scheduled_duration": "Unknown"
+    },
+    "client_mood": "Not applicable - no actual client visit occurred",
+    "vital_signs": {
+      "pulse": "Not taken - no actual visit occurred",
+      "blood_sugar": "Not taken - no actual visit occurred",
+      "temperature": "Not taken - no actual visit occurred",
+      "blood_pressure": "Not taken - no actual visit occurred"
+    },
+    "next_visit_plan": "Not applicable - no actual home care visit occurred. The role play referenced a mock RN assessment on Saturday and care services beginning Tuesday, but these are fictional training scenario elements only.",
+    "tasks_performed": [
+      {
+        "task": "NOT APPLICABLE",
+        "details": "No home care tasks were performed. This was a business coaching role play and live training demonstration, not a home care visit.",
+        "client_response": "No actual client received services.",
+        "duration_minutes": 0
+      }
+    ],
+    "cognitive_status": "Not applicable - no actual client visit occurred",
+    "safety_observations": "Not applicable - no actual client visit occurred",
+    "medications_discussed": [
+      "Diabetes medication (referenced in role play scenario - not an actual client)",
+      "Hypertension/blood pressure medication (referenced in role play scenario - not an actual client)"
+    ]
+  },
+  "narrative": "IMPORTANT DOCUMENTATION NOTICE: This transcript does not contain content from an actual home care visit and a legitimate clinical visit note cannot be generated from this material. The recording is a live-streamed business coaching session in which Coach Michelle demonstrates to her audience how a home care agency owner (Sharon McKenzie of Heavenly Healing Hands) should conduct an initial client intake and meet-and-greet consultation. The session covers business operations topics including service agreements, caregiver vetting, scheduling, pricing, billing, RN assessments, and care plan development. A mock elderly client ('mom') briefly participated in the role play. No actual home care services - including personal care, companion care, homemaking, medication reminders, mobility assistance, or health monitoring - were delivered to any real client during this session. Generating and filing a clinical home care visit note based on this transcript would constitute inaccurate and potentially fraudulent documentation. This content is appropriate only for business training and professional development records.",
+  "is_approved": false,
+  "approved_by_id": null,
+  "version": "1.0",
+  "created_at": "2026-08-15T02:39:41.812706Z",
+  "updated_at": "2026-08-15T02:39:41.812708Z"
+}

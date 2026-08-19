@@ -1,12 +1,12 @@
-import base64
-import logging
 from typing import List
 from uuid import UUID
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.client import Client
 from app.models.contract import Contract
@@ -29,7 +29,7 @@ async def get_visit_contract(
     # Join visit -> client and verify ownership
     visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
         Visit.id == visit_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
@@ -60,7 +60,7 @@ async def update_visit_contract(
     # Join visit -> client and verify ownership
     visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
         Visit.id == visit_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
@@ -93,7 +93,7 @@ async def list_contracts(
     """List contracts for clients owned by the current user (data isolation)."""
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).subquery()
     
     contracts = db.query(Contract).filter(
@@ -112,7 +112,7 @@ async def create_contract(
     # Verify client exists AND belongs to current user
     client = db.query(Client).filter(
         Client.id == contract_in.client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
@@ -140,7 +140,7 @@ async def sync_contract_to_client(
     # Join contract -> client and verify ownership
     contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
         Contract.id == contract_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
@@ -203,7 +203,7 @@ async def get_client_contracts(
     # Verify client exists AND belongs to current user
     client = db.query(Client).filter(
         Client.id == client_id,
-        Client.created_by == current_user.id
+        owned_by_visible_users(db, current_user)
     ).first()
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
@@ -222,19 +222,12 @@ async def export_contract_with_template(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Export a contract as a filled DOCX using an OCR-scanned template.
-    Uses the template's field mapping to populate all detected fields
-    from the contract/client/agency data in the database.
-    """
-    from app.models.contract_template import ContractTemplate
-    from app.models.agency_settings import AgencySettings
-    from app.services.document_generation import get_template_placeholders, fill_docx_template
+    """Export a contract as DOCX using the built-in PALM Paper template."""
+    from app.services.document_generation import generate_contract_docx
 
-    # Verify contract ownership
     contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
         Contract.id == contract_id,
-        Client.created_by == current_user.id,
+        owned_by_visible_users(db, current_user),
     ).first()
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -243,46 +236,7 @@ async def export_contract_with_template(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Get the template — either specified or the user's active template
-    if template_id:
-        template = db.query(ContractTemplate).filter(
-            ContractTemplate.id == template_id,
-            ContractTemplate.owner_id == current_user.id,
-        ).first()
-    else:
-        template = db.query(ContractTemplate).filter(
-            ContractTemplate.owner_id == current_user.id,
-            ContractTemplate.is_active == True,
-        ).order_by(ContractTemplate.version.desc()).first()
-
-    if not template:
-        raise HTTPException(status_code=404, detail="No contract template found. Upload one in Templates.")
-
-    if not template.file_url:
-        raise HTTPException(status_code=400, detail="Template has no file stored")
-
-    # Decode the stored template file
-    if template.file_url.startswith("data:"):
-        _, encoded = template.file_url.split(",", 1)
-        template_bytes = base64.b64decode(encoded)
-    else:
-        raise HTTPException(status_code=400, detail="Template file format not supported")
-
-    # Get agency settings
-    agency_settings = db.query(AgencySettings).filter(
-        AgencySettings.user_id == current_user.id,
-    ).first()
-
-    # Build placeholders from contract + client + agency data
-    placeholders = get_template_placeholders(client, contract, agency_settings)
-
-    # Fill the template
-    try:
-        filled_docx = fill_docx_template(template_bytes, placeholders)
-    except Exception as e:
-        logger.error(f"Template fill failed: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate contract from template")
-
+    filled_docx = generate_contract_docx(client, contract)
     safe_name = (client.full_name or "contract").replace(" ", "_")
     filename = f"{safe_name}_Service_Agreement.docx"
 

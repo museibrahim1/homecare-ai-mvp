@@ -1,0 +1,56 @@
+{
+  "ready_for": "Thursday demo",
+  "account": "demo-screenshots@palmtai.com",
+  "agency": "Sunrise Home Care",
+  "clients": [
+    "Robert Calloway",
+    "Harold Jensen",
+    "Eleanor Whitfield",
+    "Rosa Delgado",
+    "Margaret Okafor"
+  ],
+  "visits": [
+    {
+      "client": "Margaret Okafor",
+      "visit_id": "ff305203-5497-4961-a095-2100e896bdd6",
+      "billables": 4,
+      "weekly_hours": "16.00",
+      "hourly_rate": "24.00",
+      "frequency": "16 hours per week (stated in assessment)"
+    },
+    {
+      "client": "Robert Calloway",
+      "visit_id": "9d189480-4b7a-435b-8a61-7a156da238e1",
+      "billables": 4,
+      "weekly_hours": "25.00",
+      "hourly_rate": "26.00",
+      "frequency": "25 hours per week (stated in assessment)"
+    },
+    {
+      "client": "Rosa Delgado",
+      "visit_id": "34c29388-cf5f-487f-80b9-89cd0456bad8",
+      "billables": 4,
+      "weekly_hours": "20.00",
+      "hourly_rate": "28.00",
+      "frequency": "20 hours per week (stated in assessment)"
+    },
+    {
+      "client": "Harold Jensen",
+      "visit_id": "6a6c98cb-6647-40b9-b375-52aeae7a5b09",
+      "billables": 4,
+      "weekly_hours": "28.00",
+      "hourly_rate": "26.00",
+      "frequency": "28 hours per week (stated in assessment)"
+    },
+    {
+      "client": "Eleanor Whitfield",
+      "visit_id": "1bc4c044-3523-4246-bbd4-71eff621fd32",
+      "billables": 4,
+      "weekly_hours": "52.50",
+      "hourly_rate": "18.00",
+      "frequency": "52.5 hours per week (stated in assessment)"
+    }
+  ],
+  "hero": "Eleanor Whitfield \u2014 open Contract tab for 52.5 hrs/wk @ $18 spoken schedule",
+  "marketing_recording": "marketing/screen-recordings/assessment-run-*.mp4 + Desktop/PalmCare Documents"
+}

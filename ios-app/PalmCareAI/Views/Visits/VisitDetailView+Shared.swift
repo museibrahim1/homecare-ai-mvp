@@ -56,7 +56,7 @@ extension VisitDetailView {
         .padding(.horizontal, 20)
     }
 
-    func tabErrorState(tab: Int) -> some View {
+    func tabErrorState(tab: String) -> some View {
         VStack(spacing: 12) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 32))
@@ -117,19 +117,28 @@ extension VisitDetailView {
         var canRetry: Bool { isFailed || isStuck }
     }
 
-    /// Deliverable docs counted in "X of 4 ready".
-    static let documentPipelineSteps = ["transcription", "billing", "note", "contract"]
+    /// Deliverable docs counted in "X of N ready".
+    /// `care_plan` mirrors the contract pipeline step (written together).
+    /// Billables are omitted when this visit finished billing with zero items.
+    var documentPipelineSteps: [String] {
+        var steps = ["transcription"]
+        if shouldShowBillablesTab { steps.append("billing") }
+        steps.append(contentsOf: ["note", "care_plan", "contract"])
+        return steps
+    }
+
+    var documentExpectedCount: Int { documentPipelineSteps.count }
 
     var documentReadyCount: Int {
         guard let v = visit else { return 0 }
-        return Self.documentPipelineSteps.reduce(0) { count, step in
+        return documentPipelineSteps.reduce(0) { count, step in
             count + (pipelineStepState(v, step: step).isComplete ? 1 : 0)
         }
     }
 
     var hasStuckPipelineStep: Bool {
         guard let v = visit else { return false }
-        return Self.documentPipelineSteps.contains { pipelineStepState(v, step: $0).isStuck }
+        return documentPipelineSteps.contains { pipelineStepState(v, step: $0).isStuck }
     }
 
     var hasFailedPipelineStep: Bool {
@@ -139,8 +148,9 @@ extension VisitDetailView {
     }
 
     func pipelineStepState(_ v: Visit, step: String) -> PipelineStepState {
+        let resolvedStep = step == "care_plan" ? "contract" : step
         guard let ps = v.pipeline_state,
-              let stepData = ps[step]?.value as? [String: Any],
+              let stepData = ps[resolvedStep]?.value as? [String: Any],
               let status = stepData["status"] as? String else {
             return PipelineStepState(
                 isComplete: false,
@@ -217,6 +227,7 @@ extension VisitDetailView {
         case "diarization": return "Retry speakers"
         case "billing": return "Retry billables"
         case "note": return "Retry notes"
+        case "care_plan": return "Retry care plan"
         case "contract": return "Retry contract"
         default: return "Retry step"
         }
@@ -224,13 +235,14 @@ extension VisitDetailView {
 
     /// Empty tab content that offers per-doc retry when that step failed or stuck.
     func documentEmptyState(step: String, icon: String, title: String, waitingMessage: String) -> some View {
+        let retryStep = step == "care_plan" ? "contract" : step
         let state = visit.map { pipelineStepState($0, step: step) }
         if let state, state.isFailed {
             return AnyView(pipelineRecoveryState(
                 icon: "exclamationmark.triangle.fill",
                 title: "\(title) failed",
                 message: state.errorMessage ?? "This document did not finish. Retry just this step. You do not need to restart the visit.",
-                step: step,
+                step: retryStep,
                 iconColor: .red
             ))
         }
@@ -239,7 +251,7 @@ extension VisitDetailView {
                 icon: "clock.badge.exclamationmark",
                 title: "\(title) is stuck",
                 message: "This step has been running for more than 5 minutes. Retry it without restarting the whole visit.",
-                step: step,
+                step: retryStep,
                 iconColor: .palmOrange
             ))
         }
@@ -247,7 +259,7 @@ extension VisitDetailView {
             return AnyView(emptyState(
                 icon: icon,
                 title: title,
-                message: "Still processing. \(documentReadyCount) of 4 documents are ready."
+                message: "Still writing this document. It will show up here when it is ready. Live progress is on the Palm It processing screen."
             ))
         }
         return AnyView(emptyState(icon: icon, title: title, message: waitingMessage))

@@ -7,10 +7,11 @@ private struct ClientGroup: Identifiable {
     let id: String          // client_id or "unknown"
     let name: String
     let contracts: [DocumentItem]
+    let carePlans: [DocumentItem]
     let notes: [DocumentItem]
     let audio: [DocumentItem]
 
-    var totalCount: Int { contracts.count + notes.count + audio.count }
+    var totalCount: Int { contracts.count + carePlans.count + notes.count + audio.count }
 }
 
 struct ContractsView: View {
@@ -27,15 +28,31 @@ struct ContractsView: View {
     @State private var expandedClients: Set<String> = []
     // OCR template upload is handled on the backend
 
-    private let filters = ["All", "Contract", "Note", "Audio"]
+    private let filters = ["All", "Contract", "Care Plan", "Note", "Audio"]
+
+    private func documentTypeKey(_ filter: String) -> String? {
+        switch filter {
+        case "All": return nil
+        case "Care Plan": return "care_plan"
+        default: return filter.lowercased()
+        }
+    }
+
+    private func filterLabel(_ filter: String) -> String {
+        switch filter {
+        case "All": return "All"
+        case "Care Plan": return "Care Plans"
+        default: return "\(filter)s"
+        }
+    }
 
     // Group documents by client
     private var clientGroups: [ClientGroup] {
         let filtered: [DocumentItem]
-        if selectedFilter == "All" {
-            filtered = documents
+        if let typeKey = documentTypeKey(selectedFilter) {
+            filtered = documents.filter { ($0.type ?? "").lowercased() == typeKey }
         } else {
-            filtered = documents.filter { ($0.type ?? "").lowercased() == selectedFilter.lowercased() }
+            filtered = documents
         }
 
         let searched: [DocumentItem]
@@ -64,6 +81,7 @@ struct ContractsView: View {
                 id: key,
                 name: val.name,
                 contracts: val.docs.filter { ($0.type ?? "").lowercased() == "contract" },
+                carePlans: val.docs.filter { ($0.type ?? "").lowercased() == "care_plan" },
                 notes: val.docs.filter { ($0.type ?? "").lowercased() == "note" },
                 audio: val.docs.filter { ($0.type ?? "").lowercased() == "audio" }
             )
@@ -121,7 +139,7 @@ struct ContractsView: View {
                 ForEach(filters, id: \.self) { filter in
                     let isSelected = selectedFilter == filter
                     Button { withAnimation(.easeInOut(duration: 0.2)) { selectedFilter = filter } } label: {
-                        Text(filter == "All" ? "All" : "\(filter)s")
+                        Text(filterLabel(filter))
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(isSelected ? .white : .palmText)
                             .padding(.horizontal, 16)
@@ -210,7 +228,7 @@ struct ContractsView: View {
                 .foregroundColor(.palmText)
             Text(isFiltering
                  ? "Try a different search or filter."
-                 : "Contracts and documents from completed assessments will appear here.")
+                 : "Contracts, care plans, notes, and recordings from completed assessments will appear here.")
                 .font(.system(size: 13))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
@@ -351,6 +369,13 @@ private struct ClientSection: View {
                                 }
                                 .foregroundColor(.palmPrimary)
                             }
+                            if !group.carePlans.isEmpty {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "list.clipboard.fill").font(.system(size: 9))
+                                    Text("\(group.carePlans.count)")
+                                }
+                                .foregroundColor(.palmTeal600)
+                            }
                             if !group.notes.isEmpty {
                                 HStack(spacing: 3) {
                                     Image(systemName: "note.text").font(.system(size: 9))
@@ -398,6 +423,9 @@ private struct ClientSection: View {
                 VStack(spacing: 0) {
                     if !group.contracts.isEmpty {
                         docSection(title: "Contracts", icon: "doc.text.fill", color: .palmPrimary, docs: group.contracts)
+                    }
+                    if !group.carePlans.isEmpty {
+                        docSection(title: "Care Plans", icon: "list.clipboard.fill", color: .palmTeal600, docs: group.carePlans)
                     }
                     if !group.notes.isEmpty {
                         docSection(title: "Assessment Notes", icon: "note.text", color: .blue, docs: group.notes)

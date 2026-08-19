@@ -74,8 +74,26 @@ struct AssessmentsListView: View {
             }
         }
         .background(PalmGlassBackground())
-        .navigationTitle("Assessments")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .palmTransparentNavBar()
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 0) {
+                    Text("Assessments")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.palmText)
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(destination: RecordView().environmentObject(api)) {
+                    Text("New Assessment")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.palmPrimary)
+                }
+                .accessibilityLabel("New Assessment")
+            }
+        }
         .searchable(text: $searchText, prompt: "Search by client name...")
         .refreshable { await loadVisits(forceRefresh: true) }
         .task { await loadVisits() }

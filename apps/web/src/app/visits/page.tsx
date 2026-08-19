@@ -99,6 +99,7 @@ export default function VisitsPage() {
       const response = await fetch(`${API_BASE}/visits/${visitId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       
       if (response.ok || response.status === 204 || response.status === 404) {

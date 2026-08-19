@@ -1,0 +1,27 @@
+file Home Care Business Client Intake Role Play.mp3 bytes=19262716
+logged in demo-screenshots@palmtai.com
+client 33acd430-5c01-4432-8c4c-5aa89d4b7737 visit c4151f16-0c8c-4794-8bbd-16f854ebe42a
+upload 201 8912ms {"id":"c5c2392e-7b9a-4883-afa6-abd3221285ce","visit_id":"c4151f16-0c8c-4794-8bbd-16f854ebe42a","s3_key":"visits/c4151f16-0c8c-4794-8bbd-16f854ebe42a/audio/Home Care Business Client Intake Role Play.mp3","original_filename":"Home Care Busine
+  poll 1 9.0s kind=None transcription=processing billing=pending note=pending contract=pending
+  poll 6 34.6s kind=training_with_embedded_intake transcription=completed billing=completed note=processing contract=processing
+  poll 12 65.3s kind=training_with_embedded_intake transcription=completed billing=completed note=completed contract=processing
+  poll 13 70.4s kind=training_with_embedded_intake full_pipeline completed
+pipeline ok after 70.4s polls=13 full_pipeline completed
+speakers {'SPEAKER_0': 156, 'SPEAKER_1': 21, 'SPEAKER_2': 60} segments=237 words=5675
+kind=training_with_embedded_intake timings_ms={'note': 41367, 'billing': 10759, 'classify': 2282, 'contract': 39947, 'transcription': 7780}
+billables 4 ['Companionship', 'Transportation', 'Nutrition', 'Homemaking']
+  billable Companionship min=None flagged=False reason=Recommended from assessment (not timed visit work)
+    Companionship for grieving/lonely senior [Monday through Friday, 8:30 AM to 7:00 PM]: "she really needs some companion. You know, her husban
+  billable Transportation min=None flagged=False reason=Recommended from assessment (not timed visit work)
+    Transportation to hair salon and nail salon [As needed]: "Take her to the hair salon, nail salon, pick up her groceries. You know, just let 
+  billable Nutrition min=None flagged=False reason=Recommended from assessment (not timed visit work)
+    Meal preparation assistance (helping client cook) [As needed]: "my mom wanted to make sure that the caregiver knows how to cook, you know, t
+  billable Homemaking min=None flagged=False reason=Recommended from assessment (not timed visit work)
+    Light housekeeping in client's areas [Monday through Friday, 8:30 AM to 7:00 PM]: "she tidies up all of the areas of your mother needs. So b
+note_id a0d8ff83-d751-4996-9390-16378e4ce2e9 contract_id 31a46b72-f449-4cce-9695-5e82d4bc3d70 hours=52.50
+contract declined_section=True per_service_schedule=True
+  service Companion Care | freq=Monday through Friday, 8:30 AM to 7:00 PM
+  service Transportation / Errands | freq=Monday through Friday as needed
+  service Meal Preparation Assistance | freq=Daily
+  service Light Housekeeping | freq=Daily
+wrote /Users/musaibrahim/Desktop/AI Voice Contracter/scripts/sandbox/assessment-runs/Home_Care_Business_Client_Intake_Role_Play.json

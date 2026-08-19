@@ -14,6 +14,7 @@ import csv
 import io
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import owned_caregivers
 from app.models.user import User
 from app.models.caregiver import Caregiver
 from app.schemas.caregiver import (
@@ -37,7 +38,7 @@ async def list_caregivers(
 ):
     """List caregivers (data isolation enforced)."""
     # Only show caregivers created by current user
-    query = db.query(Caregiver).filter(Caregiver.created_by == current_user.id)
+    query = db.query(Caregiver).filter(owned_caregivers(db, current_user))
     
     if status:
         query = query.filter(Caregiver.status == status)
@@ -84,7 +85,7 @@ async def get_expiring_certifications(
 
     cutoff = date.today() + timedelta(days=days)
     caregivers = db.query(Caregiver).filter(
-        Caregiver.created_by == current_user.id,
+        owned_caregivers(db, current_user),
         Caregiver.status == "active",
     ).all()
 
@@ -126,7 +127,7 @@ async def get_caregiver(
     """Get a specific caregiver (data isolation enforced)."""
     caregiver = db.query(Caregiver).filter(
         Caregiver.id == caregiver_id,
-        Caregiver.created_by == current_user.id
+        owned_caregivers(db, current_user)
     ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
@@ -143,7 +144,7 @@ async def update_caregiver(
     """Update a caregiver (data isolation enforced)."""
     caregiver = db.query(Caregiver).filter(
         Caregiver.id == caregiver_id,
-        Caregiver.created_by == current_user.id
+        owned_caregivers(db, current_user)
     ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
@@ -166,7 +167,7 @@ async def delete_caregiver(
     """Delete a caregiver (data isolation enforced)."""
     caregiver = db.query(Caregiver).filter(
         Caregiver.id == caregiver_id,
-        Caregiver.created_by == current_user.id
+        owned_caregivers(db, current_user)
     ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
@@ -191,7 +192,7 @@ async def match_caregivers(
     """
     query = db.query(Caregiver).filter(
         Caregiver.status == 'active',
-        Caregiver.created_by == current_user.id
+        owned_caregivers(db, current_user)
     )
     
     # Filter by care level capability
@@ -305,7 +306,7 @@ async def import_caregivers_from_csv(
             if row.get('email'):
                 existing = db.query(Caregiver).filter(
                     Caregiver.email == row['email'],
-                    Caregiver.created_by == current_user.id
+                    owned_caregivers(db, current_user)
                 ).first()
                 if existing:
                     errors.append(f"Caregiver with email {row['email']} already exists")
@@ -359,7 +360,7 @@ async def import_caregivers_bulk(
             if cg_data.email:
                 existing = db.query(Caregiver).filter(
                     Caregiver.email == cg_data.email,
-                    Caregiver.created_by == current_user.id
+                    owned_caregivers(db, current_user)
                 ).first()
                 if existing:
                     errors.append(f"Caregiver with email {cg_data.email} already exists")

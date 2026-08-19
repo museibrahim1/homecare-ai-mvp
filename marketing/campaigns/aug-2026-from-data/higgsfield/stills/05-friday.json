@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cb27dd60-912a-4316-90be-cb63a1bb246a",
+    "status": "completed",
+    "display_name": "GPT Image 2",
+    "job_set_type": "gpt_image_2",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_022341_cb27dd60-912a-4316-90be-cb63a1bb246a.png",
+    "created_at": 1786674221.629818,
+    "params": {
+      "width": 1520,
+      "height": 2688,
+      "prompt": "Photorealistic Friday afternoon office scene, home care coordinator closing a laptop and standing up ready to leave, clock on wall showing 5:00, warm late-day light, relieved authentic expression, no text overlays, documentary style, vertical 9:16 framing.",
+      "medias": [],
+      "aspect_ratio": "9:16",
+      "quality": "high",
+      "resolution": "2k",
+      "model": "videotape-alpha",
+      "remove_bg": false,
+      "reference_elements": []
+    }
+  }
+]

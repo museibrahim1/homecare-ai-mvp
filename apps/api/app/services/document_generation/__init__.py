@@ -26,6 +26,7 @@ from .pdf_render import (
     get_custom_styles,
     generate_contract_pdf,
     generate_note_pdf,
+    generate_care_plan_pdf,
 )
 from .docx_render import (
     generate_note_docx,
@@ -40,6 +41,7 @@ __all__ = [
     "get_custom_styles",
     "generate_contract_pdf",
     "generate_note_pdf",
+    "generate_care_plan_pdf",
     "generate_note_docx",
     "generate_contract_docx",
 ]

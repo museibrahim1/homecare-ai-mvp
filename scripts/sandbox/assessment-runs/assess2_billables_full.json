@@ -1,0 +1,329 @@
+[
+  {
+    "category": "Companionship",
+    "description": "Companionship: 4 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Emotional support for client (wife)",
+        "text": "I don't think he sometimes understands how bad it is for me.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Emotional support for caregiver spouse",
+        "text": "I just feel like I don't I don't have a helper. You know? I don't have anybody to, you know, help me with my problems.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Social engagement and preventing isolation",
+        "text": "I just want to be in bed. I don't want to talk to anybody.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Support for client during time children are away",
+        "text": "When the kids are with him, that's the best time for me.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  {
+    "category": "Other Services",
+    "description": "Other Services: 12 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Marital/couples counseling and therapy",
+        "text": "My recommendation would be to do counseling, both marital and decide about individual.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Individual counseling/therapy for client",
+        "text": "My recommendation would be to do counseling, both marital and decide about individual.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Family counseling to address relational dynamics",
+        "text": "This would be counseling. I think, yeah, this is a situation where neither of you are feeling I'm feeling that neither of you are feeling properly heard or understood.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Social services and financial assistance coordination",
+        "text": "We're having to depend on some social service help for that, and it's embarrassing.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Intimate relationship support and sexual health counseling",
+        "text": "It's been very difficult to be intimate because, you know, I'm always in the bathroom. Sometimes I can't even, I don't know, it's just interfering with everything.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Stress management support",
+        "text": "In the bathroom all the time, getting very stressed, can't do my work, can't take care of kids, you know, my husband gets upset.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Caregiver burnout support for spouse",
+        "text": "I just feel like I'm shut out to I just have to defend for myself. It's tough, you know.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Vocational support and return-to-work planning",
+        "text": "I'm out of work, and all I do all day long is basically I have to run to the bathroom all the time. I can't be with my kids and I certainly can't work, which is a problem.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Financial counseling and budget assistance",
+        "text": "I don't really have any extra money because she can't work, and I mean, you know, it's financially tight.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Care coordination and referral management across multiple providers",
+        "text": "I've been to a lot of doctors, Doctor. Drosman, and nobody has been able to help me.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Patient education about IBS diagnosis and self-management",
+        "text": "What does that mean to you? I don't know. It means I have pain and I have diarrhea and nobody knows how to help me, that's what it means.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Special needs child educational support coordination",
+        "text": "He's just he's very slow, and, you know, we have to do a lot of things for him, and he he gets special attention at school.",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Medical Care",
+    "description": "Medical Care: 9 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Pain management for severe chronic pain",
+        "text": "I've been to a lot of doctors, Doctor. Drosman, and nobody has been able to help me. I have really severe pain. It's been going on for a very long time",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Diarrhea management and treatment",
+        "text": "Also have diarrhea. You know, I have to go to the bathroom all the time.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Irritable Bowel Syndrome (IBS) symptom management",
+        "text": "I can see from the records that you've had a really full diagnosis, you have irritable bowel syndrome, and it sounds like what we really need to do is focus on the management",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Cramping and abdominal pain management",
+        "text": "There's cramping and there's pain and I can spend up to half an hour in the bathroom.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Toileting assistance and management due to frequent urgent bathroom needs",
+        "text": "I have to run to the bathroom all the time. I can spend up to half an hour in the bathroom.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "GI specialist ongoing follow-up care",
+        "text": "I'd rather hold back on any diagnostic studies right now because from the evidence and the symptoms I've read about, I think we need to focus on management.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Depression screening and mental health assessment",
+        "text": "Sleeping, not wanting to get up in the morning. Basically, what I want to do is sleep, sleep it out. I just want to be in bed.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Review and coordination of prior diagnostic workup results",
+        "text": "I had a lot of tests, Doctor. Drosman. I had two colonoscopies. I had the endoscopy when they looked in the mouth, blood tests, x rays, I had it all.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Undisclosed medical or physical symptoms assessment",
+        "text": "There's some other, you know, kind of embarrassing things that I can't really talk about, but they make things worse.",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Medication Management",
+    "description": "Medication Management: 2 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Medication review and management for GI symptoms",
+        "text": "I tried a lot of medicines. I really don't know what to do anymore. So, I hope you can help me out.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "New medication prescription for diarrhea",
+        "text": "You've got to help me with the diarrhea somehow. Is there any medicine that you know what I've tried before? You saw my records. Is there anything you can give me?",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "category": "Homemaking",
+    "description": "Homemaking: 2 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "General household tasks and chores",
+        "text": "She can't do hardly anything around the house.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Dish washing and kitchen cleanup",
+        "text": "If I start doing something, you know, wash the dishes or try to do something, here I am again going to the bathroom.",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Nutrition",
+    "description": "Nutrition: 2 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Meal planning and cooking",
+        "text": "He never cooks. I can't eat anyway, so I don't know what to cook anymore.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Nutritional support and dietary management",
+        "text": "I can't eat anyway, so I don't know what to cook anymore.",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "category": "Supervision",
+    "description": "Supervision: 4 tasks identified",
+    "flag": false,
+    "flag_reason": null,
+    "evidence": [
+      {
+        "task": "Childcare assistance for special needs child",
+        "text": "We have a lot of things going on, our kids, special needs, you know, it's just a mess. We need some help.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Care and supervision of special needs child",
+        "text": "He's just he's very slow, and, you know, we have to do a lot of things for him, and he he gets special attention at school.",
+        "priority": "HIGH"
+      },
+      {
+        "task": "Childcare during medical and counseling appointments",
+        "text": "We can work out somebody to take care of the kids, yeah.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Daytime supervision and check-ins due to client spending extended time in bed",
+        "text": "Some days, I'm just in bed all day long.",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Personal Care",
+    "description": "Toileting assistance",
+    "flag": true,
+    "flag_reason": "Detected by rules only - verify needed",
+    "evidence": [
+      {
+        "text": "You know, I have to go to the bathroom all the time. It's creating all sorts of problems,",
+        "end_ms": 62780,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 59180,
+        "segment_id": "abae103e-5915-4be3-82e9-73ea16e5f52f"
+      },
+      {
+        "text": "basically I have to run to the bathroom all the time.",
+        "end_ms": 195055,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 193215,
+        "segment_id": "b5b78720-8024-416e-95dd-82cc7ffdb016"
+      },
+      {
+        "text": "If I start doing something, you know, wash the dishes or try to do something,",
+        "end_ms": 199900,
+        "matched": "wash",
+        "speaker": "SPEAKER_1",
+        "start_ms": 196300,
+        "segment_id": "672d0537-fd81-4b8d-af77-eced177200ba"
+      },
+      {
+        "text": "here I am again going to the bathroom.",
+        "end_ms": 201820,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 200140,
+        "segment_id": "155eec47-fa9b-4778-91ca-3f1042127788"
+      },
+      {
+        "text": "And there's cramping and there's pain and I can spend up to half an hour in the bathroom.",
+        "end_ms": 206780,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 202459,
+        "segment_id": "90829306-0d0c-4081-8c1c-c3226a2a0117"
+      },
+      {
+        "text": "In the bathroom all the time, getting very stressed,",
+        "end_ms": 238090,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 234890,
+        "segment_id": "b63687a3-4efe-4dd2-97d9-18787df3b0e9"
+      },
+      {
+        "text": "special needs kid and and then she can't she's in the bathroom for thirty minutes, forty minutes sometimes and",
+        "end_ms": 293889,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_2",
+        "start_ms": 288370,
+        "segment_id": "5949417d-a7b3-4893-90aa-611cae75c3f7"
+      },
+      {
+        "text": "I won't go to the bathroom for, you know, few hours if I'm asleep.",
+        "end_ms": 690605,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 687565,
+        "segment_id": "484291e1-30ab-41c9-a41f-3b9968928d93"
+      },
+      {
+        "text": "Well, it's been very difficult to be intimate because, you know, I'm always in the bathroom.",
+        "end_ms": 830725,
+        "matched": "bathroom",
+        "speaker": "SPEAKER_1",
+        "start_ms": 826165,
+        "segment_id": "e92e53f3-bfe6-4633-887c-6a002d4cbf43"
+      }
+    ]
+  },
+  {
+    "category": "Mobility",
+    "description": "Transfer/positioning assistance",
+    "flag": true,
+    "flag_reason": "Detected by rules only - verify needed",
+    "evidence": [
+      {
+        "text": "Hands are like this, sitting like this,",
+        "end_ms": 111274,
+        "matched": "sitting",
+        "speaker": "SPEAKER_0",
+        "start_ms": 109435,
+        "segment_id": "7352235f-43dd-45db-88d0-2ed177da5ce8"
+      }
+    ]
+  }
+]

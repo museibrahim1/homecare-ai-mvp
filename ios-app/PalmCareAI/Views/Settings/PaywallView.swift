@@ -1,17 +1,20 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: one auto-renewable plan (PalmCare AI, $199/month,
-/// everything included) purchased through Apple In-App Purchase, with a
-/// 14 day free trial through an Apple introductory offer.
+/// Subscription paywall: one auto-renewable plan with a 14-day Apple trial.
+/// Tapping the CTA runs StoreKit `product.purchase()`, which presents the
+/// native App Store payment sheet (same system UI as Zoom / other IAP apps).
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
-    /// When true the paywall is a hard gate: no "Done", no swipe-to-dismiss.
-    /// It only closes after a purchase or restore that grants an entitlement.
+    /// When true (assessment gate): no "Done". User can still tap "Not now"
+    /// to cancel the recording attempt and keep browsing.
     var isRequired: Bool = false
+
+    /// Soft prompts (launch / sign-in) can always dismiss.
+    var allowsNotNow: Bool = true
 
     @State private var selectedProductID: String = "com.palmcareai.app.starter.monthly"
     @State private var showSuccess = false
@@ -24,7 +27,6 @@ struct PaywallView: View {
         let hasTrial: Bool
     }
 
-    /// The single plan. Everything is included for one flat price.
     private let planInfo = PlanInfo(
         assessments: "Unlimited AI assessments",
         team: "Unlimited team members",
@@ -43,7 +45,7 @@ struct PaywallView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
+                VStack(spacing: 22) {
                     header
 
                     if store.isLoadingProducts {
@@ -60,20 +62,29 @@ struct PaywallView: View {
                         footerLinks
                     }
                 }
-                .padding(.horizontal, 18)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
                 .padding(.bottom, 40)
             }
             .background(PalmGlassBackground())
-            .navigationTitle("Plan")
+            .navigationTitle("PalmCare AI")
             .navigationBarTitleDisplayMode(.inline)
-            .interactiveDismissDisabled(isRequired)
+            .palmTransparentNavBar()
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .interactiveDismissDisabled(isRequired && !allowsNotNow)
             .toolbar {
-                // When the paywall is a hard gate there is no escape hatch —
-                // the only way out is starting the Apple trial or restoring an
-                // existing subscription.
                 if !isRequired {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Done") { dismiss() }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+                    }
+                } else if allowsNotNow {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Not now") { dismiss() }
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.palmSecondary)
                     }
                 }
             }
@@ -84,7 +95,7 @@ struct PaywallView: View {
                 }
             }
             .alert("You're all set", isPresented: $showSuccess) {
-                Button("OK") { dismissIfAllowed() }
+                Button("OK") { dismiss() }
             } message: {
                 Text("Your subscription is active. Every feature is unlocked.")
             }
@@ -92,7 +103,11 @@ struct PaywallView: View {
                 get: { restoreMessage != nil },
                 set: { if !$0 { restoreMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { dismissIfAllowed() }
+                Button("OK", role: .cancel) {
+                    if store.hasPaidAccess(email: api.cachedUserEmail) {
+                        dismiss()
+                    }
+                }
             } message: {
                 Text(restoreMessage ?? "")
             }
@@ -107,33 +122,25 @@ struct PaywallView: View {
         }
     }
 
-    // MARK: - Dismiss
-
-    /// A non-required paywall can always be closed. A required (hard-gate)
-    /// paywall closes only once the user actually holds an active entitlement.
-    private func dismissIfAllowed() {
-        if !isRequired || store.hasActiveEntitlement {
-            dismiss()
-        }
-    }
-
     // MARK: - Sections
 
     private var header: some View {
-        VStack(spacing: 8) {
-            PalmOrbLogo(size: 64, animated: false)
-                .padding(.top, 8)
+        VStack(spacing: 10) {
+            PalmOrbLogo(size: 72, animated: false)
 
             Text("One plan. Everything included.")
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 22, weight: .heavy))
                 .foregroundColor(.palmText)
+                .tracking(-0.3)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
 
             Text("Record the visit. PALM writes the notes, billables, and the state-compliant service agreement.")
-                .font(.system(size: 13))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -154,29 +161,29 @@ struct PaywallView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                     .background(Color.palmPrimary)
-                    .cornerRadius(12)
+                    .clipShape(Capsule())
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
     }
 
     private func planCard(_ product: Product) -> some View {
         let isSelected = selectedProductID == product.id
         let isOwned = store.purchasedProductIDs.contains(product.id)
-        // Only show the trial pill when Apple actually has the intro offer
-        // configured for this product.
         let hasTrialOffer = planInfo.hasTrial && product.subscription?.introductoryOffer != nil
 
         return Button {
             selectedProductID = product.id
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
                             Text("PalmCare AI")
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.system(size: 17, weight: .bold))
                                 .foregroundColor(.palmText)
+                                .lineLimit(1)
                             if isOwned {
                                 Text("CURRENT")
                                     .font(.system(size: 9, weight: .heavy))
@@ -190,50 +197,56 @@ struct PaywallView: View {
                         Text("\(planInfo.assessments) · \(planInfo.team)")
                             .font(.system(size: 12))
                             .foregroundColor(.palmSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                         if hasTrialOffer {
                             Text("14 day free trial")
                                 .font(.system(size: 10, weight: .heavy))
-                                .foregroundColor(.palmGreen)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 3)
-                                .background(Color.palmGreen.opacity(0.12))
+                                .foregroundColor(.palmPrimary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.palmPrimary.opacity(0.12))
                                 .cornerRadius(6)
                                 .padding(.top, 2)
                         }
                     }
 
-                    Spacer()
+                    Spacer(minLength: 8)
 
-                    VStack(alignment: .trailing, spacing: 0) {
+                    VStack(alignment: .trailing, spacing: 2) {
                         Text(product.displayPrice)
-                            .font(.system(size: 18, weight: .heavy))
+                            .font(.system(size: 20, weight: .heavy))
                             .foregroundColor(.palmText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                         Text("per month")
-                            .font(.system(size: 10))
+                            .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.palmSecondary)
                     }
+                    .layoutPriority(1)
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(planInfo.highlights, id: \.self) { line in
-                        HStack(spacing: 8) {
+                        HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.palmGreen)
+                                .font(.system(size: 14))
+                                .foregroundColor(.palmPrimary)
+                                .frame(width: 18, alignment: .center)
                             Text(line)
-                                .font(.system(size: 12))
+                                .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.palmText)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
                 .padding(.top, 2)
             }
-            .padding(14)
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .cornerRadius(14)
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .palmGlassCard(radius: 22, fillOpacity: 0.72)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color.palmPrimary : Color.palmBorder, lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(isSelected ? Color.palmPrimary : Color.palmGlassBorder, lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)
@@ -246,10 +259,11 @@ struct PaywallView: View {
                 planInfo.hasTrial && product.subscription?.introductoryOffer != nil
             } ?? false
 
-        return VStack(spacing: 10) {
+        return VStack(spacing: 12) {
             Button {
                 guard let product = store.products.first(where: { $0.id == selectedProductID }) else { return }
                 Task {
+                    // Presents Apple's native App Store subscription sheet.
                     if await store.purchase(product) {
                         showSuccess = true
                     }
@@ -266,12 +280,12 @@ struct PaywallView: View {
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
+                .frame(height: 54)
                 .background(
-                    LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600],
-                                   startPoint: .leading, endPoint: .trailing)
+                    Capsule(style: .continuous)
+                        .fill(Color.palmPrimary)
                 )
-                .cornerRadius(14)
+                .shadow(color: PalmGlass.tealShadow, radius: 14, y: 6)
             }
             .disabled(store.purchaseInFlight || store.purchasedProductIDs.contains(selectedProductID))
             .accessibilityLabel(selectedHasTrial ? "Start 14 day free trial" : "Subscribe to the plan")
@@ -280,11 +294,12 @@ struct PaywallView: View {
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
     private var footerLinks: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Button {
                 Task {
                     let restored = await store.restorePurchases()
@@ -294,7 +309,7 @@ struct PaywallView: View {
                 }
             } label: {
                 Text("Restore Purchases")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.palmPrimary)
             }
             .accessibilityLabel("Restore previous purchases")
@@ -303,7 +318,7 @@ struct PaywallView: View {
                 Link("Terms of Use", destination: URL(string: "https://palmcareai.com/terms")!)
                 Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/privacy")!)
             }
-            .font(.system(size: 11))
+            .font(.system(size: 12, weight: .medium))
             .foregroundColor(.palmSecondary)
         }
         .padding(.top, 4)

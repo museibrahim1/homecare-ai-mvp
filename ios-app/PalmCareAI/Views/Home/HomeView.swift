@@ -28,36 +28,36 @@ struct HomeView: View {
     var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .bottom) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(greeting)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.palmSecondary)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.palmSage)
 
                             Text(firstName)
-                                .font(.system(size: 32, weight: .heavy))
-                                .foregroundColor(.palmText)
-                                .tracking(-0.8)
+                                .font(.system(size: 34, weight: .bold))
+                                .foregroundColor(.palmInk)
+                                .tracking(-1.36)
                         }
 
                         Spacer()
 
                         Button { onNavigateToRecord?() } label: {
                             Image(systemName: "plus")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.palmText)
-                                .frame(width: 40, height: 40)
+                                .font(.system(size: 20, weight: .regular))
+                                .foregroundColor(.palmInk)
+                                .frame(width: 44, height: 44)
                                 .background(
                                     Circle()
-                                        .fill(Color.white.opacity(0.72))
-                                        .overlay(Circle().stroke(Color.palmGlassBorder, lineWidth: 1))
+                                        .fill(Color.white.opacity(0.62))
+                                        .overlay(Circle().stroke(Color.white.opacity(0.90), lineWidth: 1))
                                 )
                                 .shadow(color: PalmGlass.shadow, radius: 10, y: 4)
                         }
                         .accessibilityLabel("Start new recording")
                     }
                     .padding(.horizontal, 24)
-                    .padding(.top, 14)
+                    .padding(.top, 8)
                     .padding(.bottom, 18)
 
                     HStack(spacing: 8) {
@@ -79,19 +79,16 @@ struct HomeView: View {
 
                     Button { onNavigateToRecord?() } label: {
                         HStack(spacing: 14) {
-                            Image(systemName: "waveform")
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.95))
-                                .frame(width: 36)
+                            PalmWaveformBars(color: .white)
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Palm It Now")
-                                    .font(.system(size: 17, weight: .heavy))
+                                    .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.white)
-                                    .tracking(-0.3)
+                                    .tracking(-0.32)
 
                                 Text(palmItSubtitle)
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(.system(size: 12, weight: .medium))
                                     .foregroundColor(.white.opacity(0.78))
                                     .lineLimit(1)
                             }
@@ -104,28 +101,11 @@ struct HomeView: View {
                             RoundedRectangle(cornerRadius: 28, style: .continuous)
                                 .fill(Color.palmPrimary)
                         )
-                        .shadow(color: PalmGlass.tealShadow, radius: 14, y: 10)
+                        .shadow(color: Color(red: 13/255, green: 148/255, blue: 136/255).opacity(0.28), radius: 14, y: 10)
                     }
                     .accessibilityLabel("Palm It Now")
                     .padding(.horizontal, 24)
                     .padding(.bottom, 16)
-
-                    HStack {
-                        Text("Your Queue")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.palmSecondary)
-
-                        Spacer()
-
-                        NavigationLink(destination: AssessmentsListView().environmentObject(api)) {
-                            Text("See all")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.palmPrimary)
-                        }
-                        .accessibilityLabel("See all visits")
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 10)
 
                     if isLoading {
                         HStack {
@@ -135,82 +115,16 @@ struct HomeView: View {
                         }
                     } else if loadError != nil {
                         errorView
-                    } else if queueIsEmpty {
+                    } else if attentionVisits.isEmpty {
                         EmptyStateCard(
                             icon: "checkmark.circle",
                             title: "Nothing waiting on you",
-                            subtitle: "Palm It to start a visit, or check See all for past assessments."
+                            subtitle: "Palm It to start a visit."
                         )
                         .padding(.horizontal, 24)
                     } else {
-                        VStack(alignment: .leading, spacing: 16) {
-                            if !session.pendingUploads.isEmpty {
-                                queueSection(
-                                    title: "Failed upload",
-                                    subtitle: "Audio is still on this iPhone",
-                                    tint: .red
-                                ) {
-                                    ForEach(session.pendingUploads) { item in
-                                        Button {
-                                            onNavigateToRecord?()
-                                        } label: {
-                                            queueRow(
-                                                title: item.clientName ?? "Saved recording",
-                                                detail: item.lastError ?? "Waiting for a signal",
-                                                badge: "Retry",
-                                                badgeColor: .red
-                                            )
-                                        }
-                                        .buttonStyle(.plain)
-                                        .accessibilityLabel("Retry upload for \(item.clientName ?? "saved recording")")
-                                    }
-                                }
-                            }
-
-                            queueVisitSection(
-                                title: "Needs review",
-                                tint: .palmOrange,
-                                visits: needsReviewVisits,
-                                badge: "Review"
-                            )
-                            queueVisitSection(
-                                title: "Failed processing",
-                                tint: .red,
-                                visits: failedProcessingVisits,
-                                badge: "Fix"
-                            )
-                            queueVisitSection(
-                                title: "Still processing",
-                                tint: .palmBlue,
-                                visits: processingVisits,
-                                badge: "Live"
-                            )
-                            queueVisitSection(
-                                title: "Awaiting signature",
-                                tint: .palmPurple,
-                                visits: awaitingSignatureVisits,
-                                badge: "Sent"
-                            )
-                            queueVisitSection(
-                                title: "Bounced",
-                                tint: .red,
-                                visits: bouncedSendVisits,
-                                badge: "Bounce"
-                            )
-                            queueVisitSection(
-                                title: "Ready to send",
-                                tint: .palmPrimary,
-                                visits: readyToSendVisits,
-                                badge: "Send"
-                            )
-                            queueVisitSection(
-                                title: "Follow up tomorrow",
-                                tint: .palmPurple,
-                                visits: followUpTomorrowVisits,
-                                badge: "Tomorrow"
-                            )
-                        }
-                        .padding(.horizontal, 24)
+                        reviewCard
+                            .padding(.horizontal, 24)
                     }
 
                     Spacer().frame(height: 100)
@@ -240,25 +154,32 @@ struct HomeView: View {
         return "Tap to record a visit"
     }
 
-    private var queueIsEmpty: Bool {
-        session.pendingUploads.isEmpty
-            && needsReviewVisits.isEmpty
-            && failedProcessingVisits.isEmpty
-            && processingVisits.isEmpty
-            && awaitingSignatureVisits.isEmpty
-            && bouncedSendVisits.isEmpty
-            && readyToSendVisits.isEmpty
-            && followUpTomorrowVisits.isEmpty
+    /// Every visit that still needs the caregiver, in priority order and
+    /// de-duplicated. Paper Home shows these as one "Needs review" card.
+    private var attentionVisits: [Visit] {
+        var seen = Set<Visit.ID>()
+        var out: [Visit] = []
+        let ordered = needsReviewVisits
+            + failedProcessingVisits
+            + processingVisits
+            + awaitingSignatureVisits
+            + bouncedSendVisits
+            + readyToSendVisits
+            + followUpTomorrowVisits
+        for visit in ordered where seen.insert(visit.id).inserted {
+            out.append(visit)
+        }
+        return out
     }
 
-    private var queueActionCount: Int {
-        session.pendingUploads.count
-            + needsReviewVisits.count
-            + failedProcessingVisits.count
-            + awaitingSignatureVisits.count
-            + bouncedSendVisits.count
-            + readyToSendVisits.count
-            + followUpTomorrowVisits.count
+    private var attentionTitle: String {
+        if !needsReviewVisits.isEmpty { return "Needs review" }
+        if !failedProcessingVisits.isEmpty || !bouncedSendVisits.isEmpty { return "Needs attention" }
+        if !processingVisits.isEmpty { return "In progress" }
+        if !awaitingSignatureVisits.isEmpty { return "Awaiting signature" }
+        if !readyToSendVisits.isEmpty { return "Ready to send" }
+        if !followUpTomorrowVisits.isEmpty { return "Coming up" }
+        return "Recent"
     }
 
     private var needsReviewVisits: [Visit] {
@@ -318,119 +239,123 @@ struct HomeView: View {
         }
     }
 
-    private func queueVisitSection(
-        title: String,
-        tint: Color,
-        visits: [Visit],
-        badge: String
-    ) -> some View {
-        Group {
-            if !visits.isEmpty {
-                queueSection(title: title, subtitle: nil, tint: tint) {
-                    ForEach(visits.prefix(5)) { visit in
-                        NavigationLink(destination:
-                            VisitDetailView(
-                                visitId: visit.id,
-                                clientName: visit.client?.full_name
-                            ).environmentObject(api)
-                        ) {
-                            queueRow(
-                                title: visit.client?.full_name ?? "Client",
-                                detail: formattedQueueDate(visit),
-                                badge: badge,
-                                badgeColor: tint
-                            )
-                        }
-                        .accessibilityLabel("\(title): \(visit.client?.full_name ?? "Client")")
-                        .buttonStyle(.plain)
-                    }
+    // MARK: - Needs review card (Paper App Glass · Home 4AT-0)
+
+    private var reviewCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(attentionTitle)
+                .font(.system(size: 12, weight: .medium))
+                .tracking(0.48)
+                .foregroundColor(.palmSlateLabel)
+
+            ForEach(Array(attentionVisits.prefix(6).enumerated()), id: \.element.id) { index, visit in
+                if index > 0 {
+                    Rectangle()
+                        .fill(Color.palmHint.opacity(0.14))
+                        .frame(height: 1)
                 }
+                NavigationLink(destination:
+                    VisitDetailView(
+                        visitId: visit.id,
+                        clientName: visit.client?.full_name
+                    ).environmentObject(api)
+                ) {
+                    reviewRow(visit: visit)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(attentionTitle): \(visit.client?.full_name ?? "Client")")
             }
         }
+        .padding(16)
+        .palmGlassCard(radius: 28, fillOpacity: 0.58)
     }
 
-    private func queueSection<Content: View>(
-        title: String,
-        subtitle: String?,
-        tint: Color,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.palmSecondary)
-            VStack(spacing: 0) {
-                content()
-            }
-            .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.58, padding: 4)
-            .overlay(alignment: .leading) {
-                Capsule()
-                    .fill(tint)
-                    .frame(width: 3)
-                    .padding(.vertical, 14)
-                    .padding(.leading, 10)
-            }
-            if let subtitle {
-                Text(subtitle)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.palmSecondary)
-            }
-        }
-    }
+    private func reviewRow(visit: Visit) -> some View {
+        let name = visit.client?.full_name ?? "Client"
+        let initials = name.split(separator: " ").prefix(2).map { String($0.prefix(1)) }.joined().uppercased()
+        let tint = rowTint(visit)
+        let age = relativeAge(visit)
+        return HStack(spacing: 12) {
+            Capsule(style: .continuous)
+                .fill(tint)
+                .frame(width: 4, height: 40)
 
-    private func queueRow(title: String, detail: String, badge: String, badgeColor: Color) -> some View {
-        HStack(spacing: 12) {
-            let initials = title.split(separator: " ").prefix(2).map { String($0.prefix(1)) }.joined().uppercased()
             Circle()
-                .fill(Color.palmPrimary.opacity(0.12))
-                .frame(width: 40, height: 40)
+                .fill(tint.opacity(0.14))
+                .frame(width: 44, height: 44)
                 .overlay(
                     Text(initials.isEmpty ? "?" : initials)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.palmPrimary)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(tint)
                 )
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.palmText)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmInkSlate)
+                    .tracking(-0.3)
                     .lineLimit(1)
-                Text(detail)
-                    .font(.system(size: 12))
-                    .foregroundColor(.palmSecondary)
+                Text(rowStatus(visit))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmSlateLabel)
                     .lineLimit(1)
             }
-            Spacer(minLength: 4)
-            Text(badge)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(badgeColor)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(badgeColor.opacity(0.12))
-                .clipShape(Capsule())
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.palmSecondary.opacity(0.45))
+
+            Spacer(minLength: 8)
+
+            HStack(spacing: 10) {
+                if !age.isEmpty {
+                    Text(age)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(tint == .palmPrimary ? .palmTeal600 : tint)
+                        .padding(.horizontal, 10)
+                        .frame(height: 24)
+                        .background(
+                            tint.opacity(0.10),
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmHint)
+            }
         }
-        .padding(.leading, 14)
-        .padding(.trailing, 12)
-        .padding(.vertical, 12)
     }
 
-    private func formattedQueueDate(_ visit: Visit) -> String {
-        if let scheduled = visit.scheduled_start, let date = parseISO8601(scheduled) {
-            let display = DateFormatter()
-            display.dateStyle = .medium
-            display.timeStyle = .short
-            return "Scheduled \(display.string(from: date))"
+    private func rowTint(_ visit: Visit) -> Color {
+        let id = visit.id
+        if needsReviewVisits.contains(where: { $0.id == id }) { return .palmPrimary }
+        if failedProcessingVisits.contains(where: { $0.id == id })
+            || bouncedSendVisits.contains(where: { $0.id == id }) {
+            return Color(red: 220 / 255, green: 38 / 255, blue: 38 / 255)
         }
-        if let date = parseISO8601(visit.created_at) {
-            let display = DateFormatter()
-            display.dateStyle = .medium
-            display.timeStyle = .short
-            return display.string(from: date)
-        }
+        if processingVisits.contains(where: { $0.id == id }) { return .palmBlue }
+        if awaitingSignatureVisits.contains(where: { $0.id == id }) { return .palmPurple }
+        if readyToSendVisits.contains(where: { $0.id == id }) { return .palmPrimary }
+        if followUpTomorrowVisits.contains(where: { $0.id == id }) { return .palmPurple }
+        return .palmPrimary
+    }
+
+    private func rowStatus(_ visit: Visit) -> String {
+        let id = visit.id
+        if needsReviewVisits.contains(where: { $0.id == id }) { return "Ready to review" }
+        if failedProcessingVisits.contains(where: { $0.id == id }) { return "Processing failed" }
+        if bouncedSendVisits.contains(where: { $0.id == id }) { return "Delivery bounced" }
+        if processingVisits.contains(where: { $0.id == id }) { return "Still processing" }
+        if awaitingSignatureVisits.contains(where: { $0.id == id }) { return "Awaiting signature" }
+        if readyToSendVisits.contains(where: { $0.id == id }) { return "Ready to send" }
+        if followUpTomorrowVisits.contains(where: { $0.id == id }) { return "Due tomorrow" }
         return visit.displayStatus
+    }
+
+    /// Compact age badge (e.g. "28h", "3d") from the visit's created date.
+    private func relativeAge(_ visit: Visit) -> String {
+        guard let date = parseISO8601(visit.created_at) else { return "" }
+        let secs = Date().timeIntervalSince(date)
+        if secs < 3600 { return "\(max(1, Int(secs / 60)))m" }
+        if secs < 86_400 { return "\(Int(secs / 3600))h" }
+        if secs < 604_800 { return "\(Int(secs / 86_400))d" }
+        return "\(Int(secs / 604_800))w"
     }
 
     private static func visitHasFailedStep(_ visit: Visit) -> Bool {
@@ -537,16 +462,18 @@ struct HomeStatCard: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.palmSecondary)
+                .tracking(0.48)
+                .foregroundColor(.palmSlateLabel)
             Text(value)
-                .font(.system(size: 28, weight: .heavy))
-                .foregroundColor(.palmText)
-                .tracking(-0.6)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(.palmInkSlate)
+                .tracking(-0.84)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 88)
         .padding(.vertical, 16)
         .padding(.horizontal, 14)
-        .palmGlassCard(radius: PalmGlass.chipRadius, fillOpacity: 0.62)
+        .palmGlassCard(radius: 24, fillOpacity: 0.62)
         .accessibilityLabel("\(label): \(value)")
     }
 }
@@ -616,10 +543,7 @@ struct VisitRow: View {
         }
         .padding(.horizontal, 13)
         .padding(.vertical, 11)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .palmGlassCard(radius: 18, fillOpacity: 0.62)
     }
 
     private func formattedDate(_ isoString: String) -> String {
@@ -660,8 +584,7 @@ struct EmptyStateCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(14)
+        .palmGlassCard(radius: PalmGlass.cardRadius, fillOpacity: 0.58)
     }
 }
 

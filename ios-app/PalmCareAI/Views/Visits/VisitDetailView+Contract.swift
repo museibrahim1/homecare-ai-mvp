@@ -9,22 +9,44 @@ extension VisitDetailView {
         VStack(spacing: 0) {
             if let c = contract {
                 VStack(spacing: 0) {
-                    contractHeader(c)
-                        .padding(.bottom, 14)
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            contractHeader(c)
+                                .padding(.bottom, 14)
 
-                    currentStyleBadge
-                        .padding(.bottom, 10)
+                            currentStyleBadge
+                                .padding(.bottom, 10)
 
-                    contractRateCards(c)
-                        .padding(.bottom, 14)
-                    contractServicesSection(c)
-                    contractScheduleSection(c)
-                    contractDocumentSection(c)
+                            contractRateCards(c)
+                                .padding(.bottom, 14)
+                            contractServicesSection(c)
+                            contractScheduleSection(c)
+                            contractDocumentSection(c)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 18)
+                        .padding(.bottom, 12)
+                    }
+
+                    Button { showEmailSheet = true } label: {
+                        Text("Send agreement")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(Color.palmPrimary)
+                            )
+                            .shadow(color: PalmGlass.tealShadow, radius: 14, y: 8)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                    .accessibilityLabel("Send agreement")
                 }
-                .padding(18)
-                .palmGlassCard()
-            } else if tabFetchFailed.contains(4) {
-                tabErrorState(tab: 4)
+                .palmGlassCard(radius: 28, fillOpacity: 0.96)
+            } else if tabFetchFailed.contains("contract") {
+                tabErrorState(tab: "contract")
             } else {
                 documentEmptyState(
                     step: "contract",
@@ -368,7 +390,7 @@ extension VisitDetailView {
                                 }
                             }
                             .padding(isMinimal ? 8 : 12)
-                            .background(isMinimal ? Color.clear : Color(UIColor.tertiarySystemGroupedBackground))
+                            .background(isMinimal ? Color.clear : Color.white.opacity(0.4))
                             .cornerRadius(isClassic ? 4 : 10)
 
                             if isMinimal {
@@ -378,7 +400,7 @@ extension VisitDetailView {
                     }
                 }
                 .padding(14)
-                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
                 .cornerRadius(sectionRadius)
                 .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
                 .overlay(
@@ -452,7 +474,7 @@ extension VisitDetailView {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(isMinimal ? Color.clear : Color(UIColor.tertiarySystemGroupedBackground))
+                            .background(isMinimal ? Color.clear : Color.white.opacity(0.4))
                             .cornerRadius(isClassic ? 4 : 8)
                         }
                     }
@@ -466,7 +488,7 @@ extension VisitDetailView {
                     }
                 }
                 .padding(14)
-                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
                 .cornerRadius(sectionRadius)
                 .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
                 .overlay(
@@ -524,31 +546,11 @@ extension VisitDetailView {
                             .foregroundColor(.palmSecondary)
                             .lineLimit(4)
                     }
-
-                    Button { showEmailSheet = true } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "paperplane.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Email Full Agreement")
-                                .font(.system(size: 15, weight: .bold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                        .background(
-                            LinearGradient(colors: currentStyle.previewColors,
-                                           startPoint: .leading, endPoint: .trailing)
-                        )
-                        .cornerRadius(isClassic ? 4 : 12)
-                        .shadow(color: accent.opacity(0.3), radius: 6, y: 3)
-                    }
-                    .padding(.top, 4)
-                    .accessibilityLabel("Email the full service agreement")
                 }
                 .padding(14)
-                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
                 .cornerRadius(sectionRadius)
-                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
+                .shadow(color: isMinimal ? .clear : PalmGlass.shadow, radius: 8, y: 4)
                 .overlay(
                     RoundedRectangle(cornerRadius: sectionRadius)
                         .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)

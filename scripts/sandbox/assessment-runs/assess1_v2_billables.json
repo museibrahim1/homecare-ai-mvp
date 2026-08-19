@@ -1,0 +1,162 @@
+[
+  {
+    "category": "Companionship",
+    "desc": "Companionship: 1 tasks identified",
+    "flagged": false,
+    "evidence": [
+      {
+        "task": "Companionship for elderly mother",
+        "text": "she really needs some companion. You know, her husband died about six months ago and she's just kinda lonely. Right? And so I really want someone to be there with her that provide the companionship.",
+        "priority": "HIGH"
+      }
+    ]
+  },
+  {
+    "category": "Transportation",
+    "desc": "Transportation: 2 tasks identified",
+    "flagged": false,
+    "evidence": [
+      {
+        "task": "Transportation to hair salon and nail salon",
+        "text": "Take her to the hair salon, nail salon, pick up her groceries. You know, just let her get out in the community.",
+        "priority": "MEDIUM"
+      },
+      {
+        "task": "Grocery shopping transportation",
+        "text": "she was like oh well can they take me to the grocery store because then that, you know, will free you up some. So will you guys be able or the caregiver take my mom to the grocery store?",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Nutrition",
+    "desc": "Nutrition: 1 tasks identified",
+    "flagged": false,
+    "evidence": [
+      {
+        "task": "Meal preparation assistance",
+        "text": "my mom wanted to make sure that the caregiver knows how to cook, you know, to help her. She doesn't want the caregiver to cook for her but she wants to make sure the caregiver can help her cook",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "category": "Homemaking",
+    "desc": "Homemaking: 1 tasks identified",
+    "flagged": false,
+    "evidence": [
+      {
+        "task": "Light housekeeping in areas related to client's needs",
+        "text": "she tidies up all of the areas of your mother needs. So basically her bed or if she fix her like a little light breakfast she goes and she cleans up behind herself.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  {
+    "category": "Medication Management",
+    "desc": "Medication reminder/assistance",
+    "flagged": true,
+    "evidence": [
+      {
+        "text": "have a conversation to make sure the medication and all the things that is required to be able to provide care for her. Just to make sure that",
+        "end_ms": 208820,
+        "matched": "medication",
+        "speaker": "SPEAKER_2",
+        "start_ms": 200465,
+        "segment_id": "47aea169-622a-496c-a25f-f2d91eaab529"
+      },
+      {
+        "text": "Yes. Okay. Very well. And does your mother also we've never went over is she allergic to something or any allergies or anything like that or what medication is she on? Or Mhmm. Is she on any kind of medicine or have allergies at all? Or She does. She's a diabetic. Okay. And",
+        "end_ms": 906360,
+        "matched": "medication",
+        "speaker": "SPEAKER_2",
+        "start_ms": 891195,
+        "segment_id": "6f02706e-9e1e-411e-ab8c-43b50facb073"
+      }
+    ]
+  },
+  {
+    "category": "Supervision",
+    "desc": "Safety monitoring",
+    "flagged": true,
+    "evidence": [
+      {
+        "text": "or anything like that. So we kinda like get the background check on",
+        "end_ms": 367135,
+        "matched": "check on",
+        "speaker": "SPEAKER_2",
+        "start_ms": 363855,
+        "segment_id": "ae69166f-9fc4-4ca2-98e5-f37a74dd59d0"
+      },
+      {
+        "text": "and whatever you would like for us to do. What do you think about $18 an hour? Is that what do you think? Do you feel comfortable with that? Or Well, if Michelle's gonna pay, you know, look look, she got a beautiful house. She hit you. Do whatever. I'm I'm just don't want nobody coming here telling ",
+        "end_ms": 633270,
+        "matched": "safe",
+        "speaker": "SPEAKER_2",
+        "start_ms": 609195,
+        "segment_id": "9e1eabef-4772-4752-891b-40cce0611cd8"
+      }
+    ]
+  },
+  {
+    "category": "Personal Care",
+    "desc": "Grooming assistance",
+    "flagged": true,
+    "evidence": [
+      {
+        "text": "Take her to the hair salon, nail salon,",
+        "end_ms": 704030,
+        "matched": "hair",
+        "speaker": "SPEAKER_0",
+        "start_ms": 701710,
+        "segment_id": "7c1b5708-46f0-49cd-ac65-36d898038058"
+      }
+    ]
+  },
+  {
+    "category": "Personal Care",
+    "desc": "Bathing/showering assistance",
+    "flagged": true,
+    "evidence": [
+      {
+        "text": "pick up her groceries. You know, just let her get out in the community. Mhmm. She can do everything. I know, mom. You can bathe yourself. She's like, I don't want anybody bathing me.",
+        "end_ms": 712910,
+        "matched": "bathing",
+        "speaker": "SPEAKER_0",
+        "start_ms": 704270,
+        "segment_id": "39b9d025-cb6a-441f-bce1-8364216a12a0"
+      },
+      {
+        "text": "I can wash myself.",
+        "end_ms": 715295,
+        "matched": "wash",
+        "speaker": "SPEAKER_2",
+        "start_ms": 713615,
+        "segment_id": "8f77e211-2b5d-4545-96ab-68b5fe5fa2ca"
+      }
+    ]
+  },
+  {
+    "category": "Health Monitoring",
+    "desc": "Vital signs monitoring",
+    "flagged": true,
+    "evidence": [
+      {
+        "text": "high blood pressure. She suffers with that, so hypertension.",
+        "end_ms": 912515,
+        "matched": "blood pressure",
+        "speaker": "SPEAKER_0",
+        "start_ms": 909154,
+        "segment_id": "d258ecf7-7b70-4eac-98dc-7343219e3ded"
+      },
+      {
+        "text": "And also to make sure to write down all the different medications that your mother is on. Also to take her temperature, do things like that. Like an evaluation just like when you go to the doctor, basically, that's what the nurse is gonna be doing, taking your blood pressure,",
+        "end_ms": 1104914,
+        "matched": "blood pressure",
+        "speaker": "SPEAKER_2",
+        "start_ms": 1091380,
+        "segment_id": "76f09e26-af6f-4549-9629-2126ecefccdd"
+      }
+    ]
+  }
+]

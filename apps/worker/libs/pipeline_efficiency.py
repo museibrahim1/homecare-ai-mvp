@@ -17,6 +17,29 @@ VALID_KINDS = {
     "out_of_scope",
 }
 
+IN_SCOPE_KINDS = {
+    "home_care_intake",
+    "home_care_visit",
+    "training_with_embedded_intake",
+}
+
+
+def assessment_mode_instructions(kind: Optional[str]) -> str:
+    """Hard constraint so extractors do not empty a classified assessment."""
+    k = (kind or "").strip()
+    if k not in IN_SCOPE_KINDS:
+        return ""
+    return (
+        f"The pipeline already classified this recording as {k}. "
+        "Extract the in-home care needs from the conversation. "
+        "If a family member says the patient cannot manage around the house, "
+        "cannot do housework, or that they need help, that is a home-care assessment. "
+        "Valid services include homemaker, companion, respite, meals, and personal care "
+        "when those needs are spoken. Write aide-facing care_plan_goals from those needs. "
+        "Do not return empty services or empty care_plan_goals because a doctor is present "
+        "or this is a role-play. Do not relabel as out_of_scope."
+    )
+
 
 def trim_transcript_for_llm(text: str, max_chars: int = 50000) -> str:
     """Keep head and tail so long coaching intros still fit context cheaply."""
@@ -44,7 +67,6 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
         for p in (
             r"\bdr\.?\s",
             r"\bdoctor\b",
-            r"\bout of role\b",
             r"\bdiarrhea\b",
             r"\bcounseling\b",
             r"\birritable bowel\b",
@@ -63,6 +85,12 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
             r"\bmonday through friday\b",
             r"\bservice agreement\b",
             r"\bintake\b",
+            r"around the house",
+            r"we need (some )?help",
+            r"can'?t do hardly anything",
+            r"\bhousework\b",
+            r"\bhousehold\b",
+            r"\bspecial needs\b",
         )
         if re.search(p, sample)
     )
@@ -72,6 +100,7 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
             r"\bcoach\b",
             r"\brole play\b",
             r"\brole-play\b",
+            r"\bout of role\b",
             r"\bcoming to you live\b",
             r"\bshout out\b",
             r"\bmy clients\b",
@@ -79,9 +108,13 @@ def heuristic_conversation_kind(text: str) -> Optional[str]:
         if re.search(p, sample)
     )
 
-    if clinic_hits >= 2 and home_hits <= 1:
-        return "out_of_scope"
-    if clinic_hits >= 3 and home_hits <= 2 and training_hits == 0:
+    # Family describing in-home functional need is an assessment even if a
+    # doctor is in the room or the audio is a simulated interview.
+    if home_hits >= 2:
+        if training_hits >= 1:
+            return "training_with_embedded_intake"
+        return "home_care_intake"
+    if clinic_hits >= 3 and home_hits == 0:
         return "out_of_scope"
     if training_hits >= 2 and home_hits >= 2:
         return "training_with_embedded_intake"
@@ -120,7 +153,11 @@ def classify_recording(transcript_text: str) -> str:
                 "Classify a recording for a home care agency app. "
                 "Return ONLY JSON: {\"conversation_kind\": \"...\"}. "
                 "Kinds: home_care_intake, home_care_visit, "
-                "training_with_embedded_intake, out_of_scope."
+                "training_with_embedded_intake, out_of_scope. "
+                "A simulated patient or family interview that describes "
+                "inability to manage at home, housework, or needing help "
+                "is home_care_intake or training_with_embedded_intake. "
+                "Use out_of_scope only when there is no in-home functional need."
             ),
             messages=[{"role": "user", "content": sample}],
         )

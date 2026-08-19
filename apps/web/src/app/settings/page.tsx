@@ -82,7 +82,7 @@ export default function SettingsPage() {
   
   // Document upload state
   const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('contract_template');
+  const [selectedCategory, setSelectedCategory] = useState<string>('policy');
 
   // MFA state
   const [mfaStep, setMfaStep] = useState<'idle' | 'setup' | 'verify'>('idle');
@@ -117,6 +117,7 @@ export default function SettingsPage() {
   
   const logoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const extractInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     try {
@@ -185,6 +186,7 @@ export default function SettingsPage() {
     try {
       const res = await fetch(`${API_BASE}/agency`, {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
@@ -295,7 +297,7 @@ export default function SettingsPage() {
       
       // Try to extract company info from logo/letterhead
       if (file.type.includes('image')) {
-        await extractCompanyInfo(base64, 'letterhead');
+        await extractCompanyInfoFromFile(file, 'letterhead');
       }
     };
     reader.readAsDataURL(file);
@@ -310,28 +312,21 @@ export default function SettingsPage() {
       return;
     }
     
-    // Validate contract templates must be DOCX files
-    if (selectedCategory === 'contract_template') {
-      const isDocx = file.name.toLowerCase().endsWith('.docx') || 
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      if (!isDocx) {
-        setError('Contract templates must be .docx files (Microsoft Word format). Please upload a DOCX file, not a PDF, image, or other file type.');
-        return;
-      }
-    }
-    
     setUploadingDoc(true);
     
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
+      const keepContent = false;
       
       const newDoc: UploadedDocument = {
         id: Date.now().toString(),
         name: file.name,
         type: file.type,
         category: selectedCategory as any,
-        content: base64,
+        // Full files in JSON blow past API body limits. Keep bytes only for
+        // Word templates that the contract generator actually needs.
+        content: keepContent ? base64 : '',
         uploaded_at: new Date().toISOString(),
       };
       
@@ -342,7 +337,8 @@ export default function SettingsPage() {
         documents: updatedDocs,
       }));
       
-      // Auto-save documents to API
+      await extractCompanyInfoFromFile(file, selectedCategory);
+
       try {
         const res = await fetch(`${API_BASE}/agency`, {
           method: 'PUT',
@@ -356,12 +352,13 @@ export default function SettingsPage() {
         if (res.ok) {
           setSaved(true);
           setTimeout(() => setSaved(false), 2000);
+        } else {
+          const data = await res.json().catch(() => ({}));
+          setError(typeof data.detail === 'string' ? data.detail : 'Document saved on this screen but not to the server. Try a smaller file.');
         }
       } catch (err) {
+        setError('Could not save the document. Check your connection and try again.');
       }
-      
-      // Extract company info from document
-      await extractCompanyInfo(base64, selectedCategory);
       
       setUploadingDoc(false);
     };
@@ -370,6 +367,105 @@ export default function SettingsPage() {
     // Reset file input
     if (docInputRef.current) {
       docInputRef.current.value = '';
+    }
+  };
+
+  const applyExtractedInfo = (extracted: Record<string, string | null>, persist: boolean) => {
+    const filled = Object.values(extracted).some((v) => typeof v === 'string' && v.trim());
+    if (!filled) {
+      setExtractionMessage('Could not extract info. Fill the fields manually.');
+      setTimeout(() => setExtractionMessage(null), 4000);
+      return;
+    }
+
+    setAgency(prev => {
+      const next = {
+        ...prev,
+        name: extracted.name || prev.name,
+        address: extracted.address || prev.address,
+        city: extracted.city || prev.city,
+        state: extracted.state || prev.state,
+        zip_code: extracted.zip_code || prev.zip_code,
+        phone: extracted.phone || prev.phone,
+        email: extracted.email || prev.email,
+        website: extracted.website || prev.website,
+        license_number: extracted.license_number || prev.license_number,
+        npi_number: extracted.npi_number || prev.npi_number,
+        contact_person: extracted.contact_person || prev.contact_person,
+        contact_title: extracted.contact_title || prev.contact_title,
+        cancellation_policy: extracted.cancellation_policy || prev.cancellation_policy,
+        terms_and_conditions: extracted.terms_and_conditions || prev.terms_and_conditions,
+      };
+      if (persist) {
+        void persistAgency(next);
+      }
+      return next;
+    });
+
+    setExtractionMessage('Company information extracted and filled.');
+    setTimeout(() => setExtractionMessage(null), 3000);
+  };
+
+  const persistAgency = async (payload: AgencySettings) => {
+    const res = await fetch(`${API_BASE}/agency`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  const extractCompanyInfoFromFile = async (file: File, docType: string) => {
+    setExtracting(true);
+    setExtractionMessage('AI is analyzing document for company information...');
+
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('document_type', docType);
+      const res = await fetch(`${API_BASE}/agency/extract-info/file`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: form,
+      });
+
+      if (res.ok) {
+        const extracted = await res.json();
+        applyExtractedInfo(extracted, true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const detail = typeof data.detail === 'string' ? data.detail : 'Could not extract info. Fill the fields manually.';
+        setExtractionMessage(detail);
+        setTimeout(() => setExtractionMessage(null), 4000);
+      }
+    } catch (err) {
+      setExtractionMessage('Could not extract info. Check your connection and try again.');
+      setTimeout(() => setExtractionMessage(null), 4000);
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const handleExtractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File must be under 10MB');
+      return;
+    }
+    await extractCompanyInfoFromFile(file, 'letterhead');
+    if (extractInputRef.current) {
+      extractInputRef.current.value = '';
     }
   };
 
@@ -384,36 +480,18 @@ export default function SettingsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ content, document_type: docType }),
       });
       
       if (res.ok) {
         const extracted = await res.json();
-        
-        // Only update fields that were extracted and are currently empty
-        setAgency(prev => ({
-          ...prev,
-          name: extracted.name || prev.name,
-          address: extracted.address || prev.address,
-          city: extracted.city || prev.city,
-          state: extracted.state || prev.state,
-          zip_code: extracted.zip_code || prev.zip_code,
-          phone: extracted.phone || prev.phone,
-          email: extracted.email || prev.email,
-          website: extracted.website || prev.website,
-          license_number: extracted.license_number || prev.license_number,
-          npi_number: extracted.npi_number || prev.npi_number,
-          contact_person: extracted.contact_person || prev.contact_person,
-          contact_title: extracted.contact_title || prev.contact_title,
-          cancellation_policy: extracted.cancellation_policy || prev.cancellation_policy,
-          terms_and_conditions: extracted.terms_and_conditions || prev.terms_and_conditions,
-        }));
-        
-        setExtractionMessage('✓ Company information extracted and auto-filled!');
-        setTimeout(() => setExtractionMessage(null), 3000);
+        applyExtractedInfo(extracted, false);
       } else {
-        setExtractionMessage('Could not extract info - please fill manually');
-        setTimeout(() => setExtractionMessage(null), 3000);
+        const data = await res.json().catch(() => ({}));
+        const detail = typeof data.detail === 'string' ? data.detail : 'Could not extract info. Fill the fields manually.';
+        setExtractionMessage(detail);
+        setTimeout(() => setExtractionMessage(null), 4000);
       }
     } catch (err) {
       setExtractionMessage(null);
@@ -443,6 +521,7 @@ export default function SettingsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify(agency),
       });
       
@@ -654,17 +733,19 @@ export default function SettingsPage() {
                     </p>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => docInputRef.current?.click()}
+                        onClick={() => extractInputRef.current?.click()}
                         className="btn-primary text-sm flex items-center gap-2"
+                        disabled={extracting}
+                        type="button"
                       >
-                        <Upload className="w-4 h-4" />
+                        {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                         Upload Document to Extract
                       </button>
                       <input
-                        ref={docInputRef}
+                        ref={extractInputRef}
                         type="file"
                         accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                        onChange={handleDocumentUpload}
+                        onChange={handleExtractUpload}
                         className="hidden"
                       />
                     </div>
@@ -1093,8 +1174,7 @@ export default function SettingsPage() {
                   Upload Documents
                 </h2>
                 <p className="text-slate-600 text-sm mb-4">
-                  Upload your policies, procedures, contract templates, and other business documents. 
-                  AI will extract relevant information to auto-fill forms.
+                  Upload your policies, procedures, and other business documents.
                 </p>
                 
                 {/* Category Selection */}
@@ -1160,7 +1240,7 @@ export default function SettingsPage() {
                   <div className="text-center py-8">
                     <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500">No documents uploaded yet</p>
-                    <p className="text-slate-400 text-sm">Upload policies, procedures, and templates above</p>
+                    <p className="text-slate-400 text-sm">Upload policies and procedures above</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
