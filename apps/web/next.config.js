@@ -1,3 +1,5 @@
+const { PROXY_MAX_BODY } = require('./upload-limits.cjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -14,7 +16,8 @@ const nextConfig = {
     // buffers the body and truncates past the limit, which surfaces as a 500
     // from the backend on incomplete multipart payloads.
     // Do not also set middlewareClientMaxBodySize — Next throws if both are set.
-    proxyClientMaxBodySize: '200mb',
+    // Shared with upload-limits.cjs + CI assert-upload-proxy-limit.cjs.
+    proxyClientMaxBodySize: PROXY_MAX_BODY,
   },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,

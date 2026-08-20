@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause, Clock, RotateCcw, ChevronRight, Zap, Timer } from 'lucide-react';
 import { api } from '@/lib/api';
+import { AUDIO_UPLOAD_MAX_BYTES, AUDIO_UPLOAD_MAX_LABEL } from '@/lib/uploadLimits';
 
 interface AudioUploaderProps {
   visitId: string;
@@ -252,8 +253,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   }, []);
 
   const handleFileSelect = (file: File) => {
-    if (file.size > 100 * 1024 * 1024) {
-      setError('File too large. Max 100MB.');
+    if (file.size > AUDIO_UPLOAD_MAX_BYTES) {
+      setError(`File too large. Max ${AUDIO_UPLOAD_MAX_LABEL}.`);
       setState('error');
       return;
     }

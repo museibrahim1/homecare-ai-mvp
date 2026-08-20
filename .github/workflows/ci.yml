@@ -110,6 +110,12 @@ jobs:
         working-directory: apps/web
         run: npm ci
 
+      # Guards the Next.js /api rewrite body buffer. Default is 10MB; real
+      # assessment MP3s exceed that and used to 500 only through the web app.
+      - name: Assert upload proxy body limit
+        working-directory: apps/web
+        run: npm run check:upload-limits
+
       - name: Type check
         working-directory: apps/web
         run: npm run build

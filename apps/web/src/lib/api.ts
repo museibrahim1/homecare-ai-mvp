@@ -519,14 +519,25 @@ class ApiClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
-        throw new Error(error.detail || 'Upload failed');
+        let detail = error.detail || 'Upload failed';
+        if (typeof detail !== 'string') {
+          detail = Array.isArray(detail)
+            ? detail.map((e: { msg?: string }) => e.msg || JSON.stringify(e)).join(', ')
+            : 'Upload failed';
+        }
+        if (response.status >= 500) {
+          throw new Error(
+            'Upload failed on the server. If this keeps happening with a large file, try a shorter recording or contact support.'
+          );
+        }
+        throw new Error(detail);
       }
 
       return response.json();
     } catch (err: any) {
       clearTimeout(timeout);
       if (err.name === 'AbortError') {
-        throw new Error('Upload timed out. The file may be too large — please try a shorter recording.');
+        throw new Error('Upload timed out. The file may be too large. Try a shorter recording.');
       }
       throw err;
     }
