@@ -10,6 +10,11 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    // Default is 10MB. Assessment MP3s routinely exceed that; the /api rewrite
+    // buffers the body and truncates past the limit, which surfaces as a 500
+    // from the backend on incomplete multipart payloads.
+    proxyClientMaxBodySize: '200mb',
+    middlewareClientMaxBodySize: '200mb',
   },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
