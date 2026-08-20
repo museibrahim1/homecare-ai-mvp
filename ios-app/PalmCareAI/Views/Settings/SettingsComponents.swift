@@ -9,9 +9,9 @@ struct SettingsSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(title.uppercased())
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .tracking(0.7)
-                .foregroundColor(.palmSecondary)
+                .foregroundColor(.palmSage)
                 .padding(.leading, 6)
                 .padding(.bottom, 10)
 

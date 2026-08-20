@@ -16,6 +16,11 @@ struct EmailContractSheet: View {
     var hourlyRate: Double?
     var stateName: String?
     var agencyName: String?
+    /// Real packet statuses for the Included checklist (Paper Send).
+    var carePlanStatus: String = "Ready"
+    var billablesStatus: String = "Ready"
+    var notesStatus: String = "Ready"
+    var contractStatus: String = "Ready"
 
     @State private var recipientEmail = ""
     @State private var recipientName = ""
@@ -104,7 +109,7 @@ struct EmailContractSheet: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.palmSecondary)
                     .frame(width: 30, height: 30)
-                    .background(Color.palmFieldBg)
+                    .background(Color.white.opacity(0.85))
                     .clipShape(Circle())
             }
             .accessibilityLabel("Close")
@@ -154,7 +159,7 @@ struct EmailContractSheet: View {
                             .lineLimit(3...6)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 13)
-                            .background(Color.palmFieldBg)
+                            .background(Color.white.opacity(0.85))
                             .cornerRadius(12)
                             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
                     }
@@ -212,8 +217,13 @@ struct EmailContractSheet: View {
     /// Billables subtitle uses whatever packet context we were handed.
     private var billablesSubtitle: String {
         var bits: [String] = []
-        if let hours = weeklyHours { bits.append("\(Int(hours))h") }
-        bits.append("weekly")
+        if let hours = weeklyHours { bits.append("\(Int(hours.rounded()))h") }
+        if let hours = weeklyHours, let rate = hourlyRate {
+            let weekly = hours * rate
+            bits.append("$\(Int(weekly.rounded()))/wk")
+        } else {
+            bits.append("weekly")
+        }
         return bits.joined(separator: " · ")
     }
 
@@ -230,10 +240,10 @@ struct EmailContractSheet: View {
                     .tracking(0.5)
             }
 
-            includedRow(icon: "list.clipboard.fill", title: "Care plan", subtitle: "From the visit", status: "Approved")
-            includedRow(icon: "dollarsign.circle.fill", title: "Billables", subtitle: billablesSubtitle, status: "Ready")
-            includedRow(icon: "note.text", title: "SOAP visit note", subtitle: "Clinical documentation", status: "Ready")
-            includedRow(icon: "doc.text.fill", title: packetAgreementTitle, subtitle: contractTitle ?? "Home Care Service Agreement", status: "Ready")
+            includedRow(icon: "list.clipboard.fill", title: "Care plan", subtitle: "From the visit", status: carePlanStatus)
+            includedRow(icon: "dollarsign.circle.fill", title: "Billables", subtitle: billablesSubtitle, status: billablesStatus)
+            includedRow(icon: "note.text", title: "SOAP visit note", subtitle: "Clinical documentation", status: notesStatus)
+            includedRow(icon: "doc.text.fill", title: packetAgreementTitle, subtitle: contractTitle ?? "Home Care Service Agreement", status: contractStatus)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -241,7 +251,10 @@ struct EmailContractSheet: View {
     }
 
     private func includedRow(icon: String, title: String, subtitle: String, status: String) -> some View {
-        HStack(spacing: 12) {
+        let approved = status.localizedCaseInsensitiveContains("approved")
+        let ready = status.localizedCaseInsensitiveContains("ready")
+        let tint: Color = approved ? .palmGreen : (ready ? .palmPrimary : .palmSecondary)
+        return HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.palmPrimary)
@@ -262,12 +275,12 @@ struct EmailContractSheet: View {
             Text(status.uppercased())
                 .font(.system(size: 10, weight: .bold))
                 .tracking(0.5)
-                .foregroundColor(status == "Approved" ? .palmGreen : .palmPrimary)
+                .foregroundColor(tint)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
                 .background(
                     Capsule(style: .continuous)
-                        .fill((status == "Approved" ? Color.palmGreen : Color.palmPrimary).opacity(0.12))
+                        .fill(tint.opacity(0.12))
                 )
         }
     }
@@ -425,7 +438,7 @@ struct EmailContractSheet: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color.palmFieldBg)
+            .background(Color.white.opacity(0.85))
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
         }

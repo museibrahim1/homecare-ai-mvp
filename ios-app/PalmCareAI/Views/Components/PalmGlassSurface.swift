@@ -88,12 +88,12 @@ struct PalmGlassBackground: View {
             Circle()
                 .fill(Color.palmGlowTeal.opacity(0.45))
                 .frame(width: 280, height: 280)
-                .blur(radius: 2)
+                .blur(radius: 80)
                 .offset(x: 110, y: -220)
             Circle()
                 .fill(Color.palmGlowMint.opacity(0.7))
                 .frame(width: 180, height: 180)
-                .blur(radius: 1)
+                .blur(radius: 72)
                 .offset(x: -130, y: 260)
         }
     }

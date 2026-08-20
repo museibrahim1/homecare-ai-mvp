@@ -205,7 +205,7 @@ struct AddClientSheet: View {
 
     private var submitBar: some View {
         VStack(spacing: 0) {
-            Rectangle().fill(Color.palmBorder.opacity(0.6)).frame(height: 1)
+            Rectangle().fill(Color.palmGlassBorder.opacity(0.6)).frame(height: 1)
             submitButton
                 .padding(.horizontal, 18)
                 .padding(.top, 12)
@@ -236,11 +236,11 @@ struct AddClientSheet: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color.palmFieldBg)
+            .background(Color.white.opacity(0.85))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(fullName.isEmpty ? Color.palmBorder : Color.palmPrimary.opacity(0.5), lineWidth: 1)
+                    .stroke(fullName.isEmpty ? Color.palmGlassBorder : Color.palmPrimary.opacity(0.5), lineWidth: 1)
             )
         }
     }
@@ -270,9 +270,9 @@ struct AddClientSheet: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color.palmFieldBg)
+            .background(Color.white.opacity(0.85))
             .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
         }
     }
 
@@ -301,11 +301,11 @@ struct AddClientSheet: View {
                         .foregroundColor(careLevel == value ? color : .palmSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
-                        .background(careLevel == value ? color.opacity(0.1) : Color.palmFieldBg)
+                        .background(careLevel == value ? color.opacity(0.1) : Color.white.opacity(0.85))
                         .cornerRadius(10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(careLevel == value ? color.opacity(0.4) : Color.palmBorder, lineWidth: 1)
+                                .stroke(careLevel == value ? color.opacity(0.4) : Color.palmGlassBorder, lineWidth: 1)
                         )
                     }
                     .accessibilityLabel("\(label) priority\(careLevel == value ? ", selected" : "")")
@@ -334,11 +334,11 @@ struct AddClientSheet: View {
                             .foregroundColor(insuranceType == value ? .palmPrimary : .palmSecondary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 9)
-                            .background(insuranceType == value ? Color.palmPrimary.opacity(0.1) : Color.palmFieldBg)
+                            .background(insuranceType == value ? Color.palmPrimary.opacity(0.1) : Color.white.opacity(0.85))
                             .cornerRadius(10)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(insuranceType == value ? Color.palmPrimary.opacity(0.4) : Color.palmBorder, lineWidth: 1)
+                                    .stroke(insuranceType == value ? Color.palmPrimary.opacity(0.4) : Color.palmGlassBorder, lineWidth: 1)
                             )
                     }
                     .accessibilityLabel("\(label) insurance\(insuranceType == value ? ", selected" : "")")
@@ -384,9 +384,9 @@ struct AddClientSheet: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 13)
-                .background(Color.palmFieldBg)
+                .background(Color.white.opacity(0.85))
                 .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
             }
             .accessibilityLabel("Care specialty, \(specialtyOptions.first(where: { $0.0 == primaryDiagnosis })?.1 ?? "none selected")")
         }
@@ -405,9 +405,9 @@ struct AddClientSheet: View {
                 .lineLimit(3...6)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 13)
-                .background(Color.palmFieldBg)
+                .background(Color.white.opacity(0.85))
                 .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
         }
     }
 
@@ -418,9 +418,9 @@ struct AddClientSheet: View {
             .lineLimit(3...5)
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color.palmFieldBg)
+            .background(Color.white.opacity(0.85))
             .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
     }
 
     // MARK: - Submit

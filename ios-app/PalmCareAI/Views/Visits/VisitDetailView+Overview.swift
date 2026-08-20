@@ -146,13 +146,11 @@ extension VisitDetailView {
     }
 
     func pipelineCard(_ v: Visit) -> some View {
-        // Deliverable documents shown in the Processing checklist —
-        // one row each, so the count matches the visible items ("X of N").
+        // Paper Processing / Pipeline Glass: Care plan → Billables → Notes → Contract.
         var docSteps: [(String, String, String)] = [
-            ("transcription", "Transcript", "text.quote"),
+            ("care_plan", "Care Plan", "list.clipboard.fill"),
             ("billing", "Billables", "dollarsign.circle.fill"),
             ("note", "Notes", "note.text"),
-            ("care_plan", "Care Plan", "list.clipboard.fill"),
             ("contract", "Contract", "doc.text.fill"),
         ]
         if !shouldShowBillablesTab {

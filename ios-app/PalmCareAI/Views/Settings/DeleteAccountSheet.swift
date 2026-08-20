@@ -125,7 +125,7 @@ struct DeleteAccountSheet: View {
                         .textContentType(.password)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 11)
-                        .background(Color.palmFieldBg)
+                        .background(Color.white.opacity(0.85))
                         .cornerRadius(10)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                 }
@@ -142,7 +142,7 @@ struct DeleteAccountSheet: View {
                         .autocorrectionDisabled()
                         .padding(.horizontal, 12)
                         .padding(.vertical, 11)
-                        .background(Color.palmFieldBg)
+                        .background(Color.white.opacity(0.85))
                         .cornerRadius(10)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                 }
@@ -158,7 +158,7 @@ struct DeleteAccountSheet: View {
                     .textInputAutocapitalization(.characters)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 11)
-                    .background(Color.palmFieldBg)
+                    .background(Color.white.opacity(0.85))
                     .cornerRadius(10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)

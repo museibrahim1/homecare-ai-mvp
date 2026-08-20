@@ -648,6 +648,8 @@ struct RecordView: View {
     }
 
     /// Map live pipeline rows into the four Paper Processing docs.
+    /// Care plan is written with the contract server-side, so fall back to the
+    /// contract step when no standalone care-plan row exists (same as VisitDetail).
     private var processingDocSteps: [PalmPipelineProcessingCard.Step] {
         let aliases: [(String, [String])] = [
             ("Care plan", ["care plan", "care_plan"]),
@@ -657,9 +659,14 @@ struct RecordView: View {
         ]
         var mapped: [PalmPipelineProcessingCard.Step] = []
         for (title, keys) in aliases {
-            let match = pipelineSteps.first { step, _ in
+            var match = pipelineSteps.first { step, _ in
                 let lower = step.lowercased()
                 return keys.contains { lower.contains($0) }
+            }
+            if title == "Care plan", match == nil {
+                match = pipelineSteps.first { step, _ in
+                    step.lowercased().contains("contract")
+                }
             }
             let status = palmProcessingStatus(match?.1)
             mapped.append(.init(id: title, title: title, status: status))

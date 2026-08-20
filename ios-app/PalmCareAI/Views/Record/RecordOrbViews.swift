@@ -32,19 +32,19 @@ struct VoiceOrb: View {
             }
 
             OrbShape(phase: morphPhase, audioLevel: normalizedLevel)
-                .fill(
-                    AngularGradient(
-                        colors: isActive
-                            ? [Color.palmPrimary, Color.palmAccent, Color.palmPurple, Color.palmPrimaryLight, Color.palmPrimary]
-                            : [Color.palmPrimary.opacity(0.7), Color.palmAccent.opacity(0.5), Color.palmPrimaryDark.opacity(0.6), Color.palmPrimary.opacity(0.7)],
-                        center: .center
-                    )
-                )
+                .fill(PalmBrandOrb.fill)
                 .frame(width: coreSize, height: coreSize)
                 .shadow(color: Color.palmPrimary.opacity(isActive ? 0.55 : 0.28), radius: isActive ? 18 * scale : 10 * scale, y: 0)
                 .overlay(
                     OrbShape(phase: morphPhase, audioLevel: normalizedLevel)
-                        .fill(RadialGradient(colors: [.white.opacity(0.25), .clear], center: .topLeading, startRadius: 0, endRadius: coreSize * 0.55))
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.28), .clear],
+                                center: UnitPoint(x: 0.3, y: 0.25),
+                                startRadius: 0,
+                                endRadius: coreSize * 0.55
+                            )
+                        )
                         .frame(width: coreSize, height: coreSize)
                 )
 
@@ -57,8 +57,8 @@ struct VoiceOrb: View {
                     }
                 }
             } else {
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 40 * scale))
+                Image(systemName: "mic")
+                    .font(.system(size: 40 * scale, weight: .medium))
                     .foregroundColor(.white)
             }
         }
@@ -121,9 +121,15 @@ struct OrbRing: View {
 
     private var ringColors: [Color] {
         switch ringIndex {
-        case 0: return [Color.palmPrimary, Color.palmAccent, Color.palmPurple, Color.palmPrimary]
-        case 1: return [Color.palmAccent, Color.palmPurple, Color.palmPrimaryLight, Color.palmAccent]
-        default: return [Color.palmPurple, Color.palmPrimary, Color.palmAccent, Color.palmPurple]
+        case 0:
+            return [
+                Color(red: 139 / 255, green: 92 / 255, blue: 246 / 255).opacity(0.22),
+                Color(red: 139 / 255, green: 92 / 255, blue: 246 / 255).opacity(0.08),
+            ]
+        case 1:
+            return [Color.palmPrimaryLight.opacity(0.45), Color.palmPrimaryLight.opacity(0.15)]
+        default:
+            return [Color.palmPrimary.opacity(0.55), Color.palmPrimary.opacity(0.2)]
         }
     }
 }

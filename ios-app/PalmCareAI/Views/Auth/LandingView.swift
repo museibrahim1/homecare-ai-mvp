@@ -16,26 +16,15 @@ struct LandingOrb: View {
             }
 
             LandingOrbShape(phase: morphPhase)
-                .fill(
-                    AngularGradient(
-                        colors: [
-                            Color.palmPrimary,
-                            Color.palmAccent,
-                            Color(red: 139/255, green: 92/255, blue: 246/255),
-                            Color.palmPrimaryLight,
-                            Color.palmPrimary,
-                        ],
-                        center: .center
-                    )
-                )
+                .fill(PalmBrandOrb.fill)
                 .frame(width: 120, height: 120)
                 .shadow(color: Color.palmPrimary.opacity(0.4 + glowPulse * 0.2), radius: 25 + glowPulse * 10, y: 0)
                 .overlay(
                     LandingOrbShape(phase: morphPhase)
                         .fill(
                             RadialGradient(
-                                colors: [.white.opacity(0.2), .clear],
-                                center: .topLeading,
+                                colors: [.white.opacity(0.28), .clear],
+                                center: UnitPoint(x: 0.3, y: 0.25),
                                 startRadius: 0,
                                 endRadius: 70
                             )
@@ -43,10 +32,9 @@ struct LandingOrb: View {
                         .frame(width: 120, height: 120)
                 )
 
-            Image(systemName: "mic.fill")
+            Image(systemName: "mic")
                 .font(.system(size: 32, weight: .medium))
                 .foregroundColor(.white)
-                .shadow(color: .white.opacity(0.3), radius: 4)
         }
         .onAppear {
             withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
@@ -119,10 +107,17 @@ struct LandingOrbRing: View {
     }
 
     private var ringColors: [Color] {
+        // Paper Brand Orb: outermost ring is a faint purple; inner rings stay teal/mint.
         switch ringIndex {
-        case 0: return [Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary]
-        case 1: return [Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimaryLight, Color.palmAccent]
-        default: return [Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255)]
+        case 0:
+            return [
+                Color(red: 139 / 255, green: 92 / 255, blue: 246 / 255).opacity(0.22),
+                Color(red: 139 / 255, green: 92 / 255, blue: 246 / 255).opacity(0.08),
+            ]
+        case 1:
+            return [Color.palmPrimaryLight.opacity(0.45), Color.palmPrimaryLight.opacity(0.15)]
+        default:
+            return [Color.palmPrimary.opacity(0.55), Color.palmPrimary.opacity(0.2)]
         }
     }
 }

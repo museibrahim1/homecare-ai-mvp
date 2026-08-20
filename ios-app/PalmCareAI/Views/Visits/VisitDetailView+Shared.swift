@@ -117,13 +117,14 @@ extension VisitDetailView {
         var canRetry: Bool { isFailed || isStuck }
     }
 
-    /// Deliverable docs counted in "X of N ready".
+    /// Deliverable docs counted in "X of N ready" — Paper Processing order:
+    /// Care plan → Billables → Notes → Contract. Transcript is not a deliverable.
     /// `care_plan` mirrors the contract pipeline step (written together).
     /// Billables are omitted when this visit finished billing with zero items.
     var documentPipelineSteps: [String] {
-        var steps = ["transcription"]
+        var steps = ["care_plan"]
         if shouldShowBillablesTab { steps.append("billing") }
-        steps.append(contentsOf: ["note", "care_plan", "contract"])
+        steps.append(contentsOf: ["note", "contract"])
         return steps
     }
 

@@ -119,55 +119,51 @@ struct SettingsView: View {
     // MARK: - Profile Header
 
     private var profileHeader: some View {
-        VStack(spacing: 14) {
-            let initials = (user?.full_name ?? "U")
-                .split(separator: " ")
-                .map { String($0.prefix(1)) }
-                .joined()
-                .uppercased()
+        Button { showEditProfile = true } label: {
+            HStack(spacing: 14) {
+                let initials = (user?.full_name ?? "U")
+                    .split(separator: " ")
+                    .map { String($0.prefix(1)) }
+                    .joined()
+                    .uppercased()
 
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.palmPrimary, Color.palmAccent],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.palmPrimary, Color.palmTeal600],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .frame(width: 72, height: 72)
-                .overlay(
-                    Text(initials)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-                )
-                .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 4)
+                    .frame(width: 56, height: 56)
+                    .overlay(
+                        Text(initials)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                    )
 
-            VStack(spacing: 4) {
-                Text(user?.full_name ?? "Loading...")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.palmText)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(user?.full_name ?? "Loading...")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.palmInk)
+                        .lineLimit(1)
+                    Text(user?.email ?? "")
+                        .font(.system(size: 13))
+                        .foregroundColor(.palmGlassMuted)
+                        .lineLimit(1)
+                }
 
-                Text(user?.email ?? "")
-                    .font(.system(size: 13))
-                    .foregroundColor(.palmSecondary)
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmChevron)
             }
-
-            Button {
-                showEditProfile = true
-            } label: {
-                Text("Edit profile")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.palmPrimary)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
-                    .background(Color.palmPrimary.opacity(0.1))
-                    .cornerRadius(16)
-            }
-            .accessibilityLabel("Edit profile")
+            .padding(16)
+            .palmGlassCard(radius: 22, fillOpacity: 0.72)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .palmGlassCard(radius: 22, fillOpacity: 0.72)
+        .buttonStyle(.plain)
+        .accessibilityLabel("Edit profile")
     }
 
     // MARK: - Preferences

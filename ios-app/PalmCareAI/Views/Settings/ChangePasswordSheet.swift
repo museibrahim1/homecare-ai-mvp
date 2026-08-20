@@ -103,7 +103,7 @@ struct ChangePasswordSheet: View {
             .font(.system(size: 14))
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color.palmFieldBg)
+            .background(Color.white.opacity(0.85))
             .cornerRadius(10)
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
     }

@@ -836,7 +836,7 @@ private struct ClientSection: View {
                         .foregroundColor(.palmText)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.palmFieldBg)
+                        .background(Color.white.opacity(0.85))
                         .cornerRadius(8)
 
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")

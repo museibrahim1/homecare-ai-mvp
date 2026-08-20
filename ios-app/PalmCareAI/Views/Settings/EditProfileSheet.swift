@@ -73,7 +73,7 @@ struct EditProfileSheet: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.palmFieldBg)
+                            .background(Color.white.opacity(0.85))
                             .cornerRadius(8)
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
                         }
@@ -95,7 +95,7 @@ struct EditProfileSheet: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.palmFieldBg)
+                            .background(Color.white.opacity(0.85))
                             .cornerRadius(8)
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
                         }
@@ -116,7 +116,7 @@ struct EditProfileSheet: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.palmFieldBg.opacity(0.5))
+                            .background(Color.white.opacity(0.85).opacity(0.5))
                             .cornerRadius(8)
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder.opacity(0.5), lineWidth: 1.5))
                         }

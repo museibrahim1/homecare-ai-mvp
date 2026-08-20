@@ -99,7 +99,7 @@ struct ClientPickerSheet: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.palmSecondary)
                     .frame(width: 30, height: 30)
-                    .background(Color.palmFieldBg)
+                    .background(Color.white.opacity(0.85))
                     .clipShape(Circle())
             }
             .accessibilityLabel("Close")

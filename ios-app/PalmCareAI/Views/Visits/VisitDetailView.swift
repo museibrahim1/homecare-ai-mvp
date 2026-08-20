@@ -94,6 +94,17 @@ struct VisitDetailView: View {
         !(billables?.items ?? []).isEmpty
     }
 
+    /// Status label for the Send packet Included checklist.
+    var sendBillablesStatus: String {
+        let items = billables?.items ?? []
+        guard !items.isEmpty else { return "Pending" }
+        let actionable = items.filter { !($0.is_flagged == true && !$0.isRecommendation) }
+        guard !actionable.isEmpty else { return "Pending" }
+        if actionable.allSatisfy({ $0.is_approved == true }) { return "Approved" }
+        if actionable.contains(where: { $0.is_approved == true }) { return "Partial" }
+        return "Ready"
+    }
+
     var activeTabId: String {
         let tabs = visibleTabs
         guard tabs.indices.contains(activeTab) else { return "overview" }
@@ -165,7 +176,11 @@ struct VisitDetailView: View {
                 stateName: contractStateName?.capitalized,
                 agencyName: contract.map { contractProvider($0).name }.flatMap {
                     $0.lowercased() == "home care agency" ? nil : $0
-                }
+                },
+                carePlanStatus: hasCarePlanContent ? "Approved" : "Pending",
+                billablesStatus: sendBillablesStatus,
+                notesStatus: note != nil ? "Ready" : "Pending",
+                contractStatus: contract != nil ? "Ready" : "Pending"
             )
             .environmentObject(api)
         }
