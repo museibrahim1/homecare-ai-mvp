@@ -7,8 +7,10 @@ extension VisitDetailView {
         VStack(spacing: 16) {
             if let v = visit {
                 statusCard(v)
+                // Paper Pipeline Glass uses the Documents checklist only.
+                // The old 2-column Transcript/Billables/Notes tiles showed
+                // bare "—" / "0 items" on incomplete packets and cluttered demos.
                 pipelineCard(v)
-                quickStatsGrid
             }
         }
     }
@@ -288,85 +290,6 @@ extension VisitDetailView {
         } else {
             PalmPipelinePill(text: "Next", color: .palmSecondary)
         }
-    }
-
-    var quickStatsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            statCard(
-                icon: "text.quote",
-                label: "Transcript",
-                value: transcript?.word_count.map { "\($0) words" } ?? "—",
-                color: .palmPrimary,
-                tapAction: { selectTab(id: "transcript") }
-            )
-            if shouldShowBillablesTab {
-                statCard(
-                    icon: "dollarsign.circle.fill",
-                    label: "Billables",
-                    value: billables?.items.map { "\($0.count) items" } ?? "—",
-                    color: .palmGreen,
-                    tapAction: { selectTab(id: "billables") }
-                )
-            }
-            statCard(
-                icon: "note.text",
-                label: "Notes",
-                value: note != nil ? "SOAP Ready" : "—",
-                color: .palmBlue,
-                tapAction: { selectTab(id: "notes") }
-            )
-            statCard(
-                icon: "list.clipboard.fill",
-                label: "Care Plan",
-                value: hasCarePlanContent ? "Ready" : "—",
-                color: .palmTeal600,
-                tapAction: { selectTab(id: "care_plan") }
-            )
-            statCard(
-                icon: "doc.text.fill",
-                label: "Contract",
-                value: contractStatValue,
-                color: .palmPurple,
-                tapAction: { selectTab(id: "contract") }
-            )
-        }
-    }
-
-    /// Contract titles like "Home Care Service Agreement" ellipsize badly in
-    /// the small stat card. Fall back to a short, safe label when the real
-    /// title is too long for two lines to read cleanly.
-    var contractStatValue: String {
-        guard let title = contract?.title?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !title.isEmpty else { return "—" }
-        return title.count > 28 ? "Service agreement" : title
-    }
-
-    func statCard(icon: String, label: String, value: String, color: Color, tapAction: @escaping () -> Void) -> some View {
-        Button(action: tapAction) {
-            VStack(alignment: .leading, spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(color)
-                    .frame(width: 36, height: 36)
-                    .background(color.opacity(0.1))
-                    .cornerRadius(10)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(label)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.palmSecondary)
-                    Text(value)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.palmText)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.85)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .palmGlassCard(radius: 18)
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Transcript Tab

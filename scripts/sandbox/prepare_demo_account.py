@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Prepare demo-screenshots@palmtai.com for a live demo.
+"""Prepare demo-screenshots@palmtai.com for a live demo and accuracy check.
 
 1) Delete sandbox/test clients (keeps showcase names)
-2) Upload hero assessment audio onto Eleanor Whitfield
-3) Upload second assessment onto Harold Jensen
-4) Import short spoken-schedule transcripts + process for Rosa, Robert, Margaret
+2) Ensure showcase clients exist, including Patricia Martinez
+3) Upload the two real assessment MP3s onto every showcase client
+   (no fake short transcripts)
 
 Does not print secrets.
 
@@ -41,6 +41,7 @@ KEEP_NAMES = {
     "Rosa Delgado",
     "Robert Calloway",
     "Margaret Okafor",
+    "Patricia Martinez",
 }
 
 INTAKE_MP3 = Path(
@@ -302,6 +303,28 @@ def delete_old_showcase_visits(
     return removed
 
 
+def ensure_clients(
+    session: requests.Session, headers: dict, by_name: dict[str, dict]
+) -> list[str]:
+    """Create any missing showcase clients so accuracy runs can attach MP3s."""
+    created: list[str] = []
+    for name in sorted(KEEP_NAMES):
+        if name in by_name:
+            continue
+        print(f"create showcase client {name!r}", flush=True)
+        if DRY:
+            created.append(name)
+            by_name[name] = {"id": "dry-run", "full_name": name}
+            continue
+        r = session.post(f"{API}/clients", headers=headers, json={"full_name": name}, timeout=30)
+        print(f"  -> {r.status_code}", flush=True)
+        r.raise_for_status()
+        body = r.json()
+        by_name[name] = body
+        created.append(name)
+    return created
+
+
 def main() -> int:
     session = requests.Session()
     token = login(session)
@@ -322,12 +345,7 @@ def main() -> int:
         report["deleted_clients"] = []
 
     by_name = {c["full_name"]: c for c in clients}
-    missing = sorted(KEEP_NAMES - set(by_name))
-    if missing:
-        print(f"ERROR missing showcase clients: {missing}", flush=True)
-        report["error"] = f"missing {missing}"
-        OUT.write_text(json.dumps(report, indent=2))
-        return 1
+    report["created_clients"] = ensure_clients(session, headers, by_name)
 
     if not SKIP_UPLOAD:
         report["deleted_showcase_visits"] = delete_old_showcase_visits(session, headers, by_name)
@@ -339,15 +357,29 @@ def main() -> int:
             print(f"missing interview mp3 {INTERVIEW_MP3}", flush=True)
             return 1
 
-        # Accuracy test: every showcase client gets a REAL recorded assessment
-        # from one of the two production MP3s (no fake short transcripts).
-        mp3_assignments = [
-            ("Eleanor Whitfield", INTAKE_MP3),
-            ("Harold Jensen", INTERVIEW_MP3),
-            ("Rosa Delgado", INTAKE_MP3),
-            ("Robert Calloway", INTERVIEW_MP3),
-            ("Margaret Okafor", INTAKE_MP3),
-        ]
+        # Demo-ready packets: the interview MP3 often yields empty billables /
+        # care plans (out-of-scope clinic talk). For live demos, every showcase
+        # client gets the intake role-play so Overview / Care Plan / Contract
+        # look fully filled. Set PREPARE_DEMO_MIXED=1 to restore intake+interview.
+        mixed = os.environ.get("PREPARE_DEMO_MIXED", "").strip() in {"1", "true", "yes"}
+        if mixed:
+            mp3_assignments = [
+                ("Eleanor Whitfield", INTAKE_MP3),
+                ("Harold Jensen", INTERVIEW_MP3),
+                ("Rosa Delgado", INTAKE_MP3),
+                ("Robert Calloway", INTERVIEW_MP3),
+                ("Margaret Okafor", INTAKE_MP3),
+                ("Patricia Martinez", INTAKE_MP3),
+            ]
+        else:
+            mp3_assignments = [
+                ("Eleanor Whitfield", INTAKE_MP3),
+                ("Harold Jensen", INTAKE_MP3),
+                ("Rosa Delgado", INTAKE_MP3),
+                ("Robert Calloway", INTAKE_MP3),
+                ("Margaret Okafor", INTAKE_MP3),
+                ("Patricia Martinez", INTAKE_MP3),
+            ]
         runs = []
         for name, path in mp3_assignments:
             runs.append(

@@ -1,35 +1,334 @@
 {
-  "ran_at": "2026-08-16T18:05:45.405998+00:00",
+  "ran_at": "2026-08-20T07:07:07.024244+00:00",
   "api": "https://api-production-a0a2.up.railway.app",
   "dry_run": false,
-  "before_client_count": 24,
-  "deleted_clients": [
-    "Intake Role Play v8",
-    "Prod check 1 022919",
-    "Mrs. Johnson (fixture assessment)",
-    "Intake Role Play v9",
-    "Ms. Smith (interview v4)",
-    "GI Interview v10",
-    "Intake Role Play v5",
-    "Sharon (intake role play)",
-    "GI Interview v5",
-    "Ms. Smith (simulated interview)",
-    "Intake Role Play v6",
-    "Sharon (intake v2 fixed)",
-    "GI Interview v6",
-    "Intake Role Play v10",
-    "Sharon (intake v3)",
-    "Ms. Smith (interview v3)",
-    "GI Interview v7",
-    "Prod check 0 022919",
-    "Intake Role Play v7"
+  "before_client_count": 6,
+  "deleted_clients": [],
+  "created_clients": [],
+  "deleted_showcase_visits": [
+    "e648f661-1ec8-41c6-beb3-d6d52b9c29cf",
+    "1d430f3d-2b81-4d16-a0c9-dc279a0a9310",
+    "e366a179-1f62-4252-90c6-34d1effd2d71",
+    "eefbd677-4367-4b45-805c-39e4d0fee6bf",
+    "8d96962b-e71f-4019-8d17-87adbc8b9395",
+    "1e7eb164-d3a5-4cbb-be56-5af10ba0f21c",
+    "e205b4b0-013d-450e-beff-a32ad88ac144",
+    "af778380-93d5-4093-956c-d594df5b16be",
+    "ac7df50c-248a-4664-9815-21ab4ee8d24b",
+    "da7d9b07-d930-4df9-8705-231d0e4036f7",
+    "dc4aafca-318f-442c-9b81-c6614c14d820",
+    "fd9a6b49-860c-4ffc-90d5-5150aab41093"
   ],
-  "after_client_count": 5,
+  "runs": [
+    {
+      "visit_id": "d1094ff4-2dfc-403b-8053-f6865183b7e5",
+      "label": "Eleanor Whitfield",
+      "success": true,
+      "elapsed_sec": 69.8,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "d1094ff4-2dfc-403b-8053-f6865183b7e5",
+        "billable_count": 4,
+        "contract_http": 200,
+        "weekly_hours": "52.50",
+        "hourly_rate": "18.00",
+        "frequency": "52.5 hours per week (stated in assessment)",
+        "service_hour_rows": 1,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client's continued independence and community engagement through consistent companionship and transportation services.",
+            "Maintain a safe and tidy home environment in client's areas of use.",
+            "Monitor and report any observed changes in client's health status (related to diabetes or hypertension) to the supervising nurse and family."
+          ],
+          "short_term": [
+            "Provide daily companionship Monday through Friday 8:30 AM\u20137:00 PM to reduce loneliness following the death of client's husband.",
+            "Transport client to grocery store, hair salon, nail salon, and other community destinations as requested.",
+            "Assist client in the kitchen during meal preparation per client's direction; client retains control of cooking.",
+            "Tidy client's bedroom and clean up kitchen/common areas used by client after meals."
+          ],
+          "maintenance": [
+            "Maintain consistent Monday\u2013Friday schedule to provide reliable respite for daughter during work hours.",
+            "Preserve client's autonomy and dignity by following client's instructions and preferences at all times.",
+            "Adhere to care plan established by RN following Saturday comprehensive assessment."
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Provide daily companionship Monday through Friday 8:30 AM\u20137:00 PM to reduce loneliness following the death of client's h",
+          "Transport client to grocery store, hair salon, nail salon, and other community destinations as requested.",
+          "Assist client in the kitchen during meal preparation per client's direction; client retains control of cooking.",
+          "Tidy client's bedroom and clean up kitchen/common areas used by client after meals.",
+          "Support client's continued independence and community engagement through consistent companionship and transportation ser",
+          "Maintain a safe and tidy home environment in client's areas of use.",
+          "Monitor and report any observed changes in client's health status (related to diabetes or hypertension) to the supervisi",
+          "Maintain consistent Monday\u2013Friday schedule to provide reliable respite for daughter during work hours."
+        ],
+        "note_http": 200
+      },
+      "client": "Eleanor Whitfield",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "visit_id": "b4f37cc1-5efb-4da1-821a-96c793eeb95e",
+      "label": "Harold Jensen",
+      "success": true,
+      "elapsed_sec": 59.2,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "b4f37cc1-5efb-4da1-821a-96c793eeb95e",
+        "billable_count": 5,
+        "contract_http": 200,
+        "weekly_hours": "0.00",
+        "hourly_rate": "0.00",
+        "frequency": "",
+        "service_hour_rows": 0,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client in maintaining a safe and functional home environment as symptoms are managed medically",
+            "Reduce caregiver burnout by ensuring consistent aide presence so spouse can attend to work and personal needs"
+          ],
+          "short_term": [
+            "Assist client with light housekeeping tasks (dishes, tidying) that she is unable to complete due to frequent bathroom urgency and fatigue",
+            "Provide companionship during daytime hours to reduce social isolation and support emotional well-being",
+            "Provide respite to caregiver spouse to relieve caregiver burden while he is at work or managing the special needs child"
+          ],
+          "maintenance": [
+            "Monitor client's activity tolerance and ability to participate in household routines as medical management progresses",
+            "Encourage and support client engagement with daily activities within her functional capacity"
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Assist client with light housekeeping tasks (dishes, tidying) that she is unable to complete due to frequent bathroom ur",
+          "Provide companionship during daytime hours to reduce social isolation and support emotional well-being",
+          "Provide respite to caregiver spouse to relieve caregiver burden while he is at work or managing the special needs child",
+          "Support client in maintaining a safe and functional home environment as symptoms are managed medically",
+          "Reduce caregiver burnout by ensuring consistent aide presence so spouse can attend to work and personal needs",
+          "Monitor client's activity tolerance and ability to participate in household routines as medical management progresses",
+          "Encourage and support client engagement with daily activities within her functional capacity"
+        ],
+        "note_http": 200
+      },
+      "client": "Harold Jensen",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "visit_id": "9350fd59-85ed-45dd-9854-360d365dbe22",
+      "label": "Rosa Delgado",
+      "success": true,
+      "elapsed_sec": 59.1,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "9350fd59-85ed-45dd-9854-360d365dbe22",
+        "billable_count": 5,
+        "contract_http": 200,
+        "weekly_hours": "52.50",
+        "hourly_rate": "18.00",
+        "frequency": "52.5 hours per week (stated in assessment)",
+        "service_hour_rows": 1,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client's continued community engagement and quality of life",
+            "Maintain client's independence in ADLs while providing a safe, supportive presence",
+            "Monitor and report any changes in client's physical or emotional well-being to agency and family"
+          ],
+          "short_term": [
+            "Provide daily companionship to reduce social isolation following spousal bereavement",
+            "Transport client to hair salon, nail salon, grocery store, and community destinations Monday\u2013Friday",
+            "Assist client with cooking preparation per her direction while respecting her independence",
+            "Perform light tidying of client's living areas and clean up after meal preparation"
+          ],
+          "maintenance": [
+            "Consistent Monday\u2013Friday 8:30 AM\u20137:00 PM schedule with same caregiver for continuity",
+            "Ongoing awareness of diabetic and hypertension status; report concerns to family and agency promptly"
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Provide daily companionship to reduce social isolation following spousal bereavement",
+          "Transport client to hair salon, nail salon, grocery store, and community destinations Monday\u2013Friday",
+          "Assist client with cooking preparation per her direction while respecting her independence",
+          "Perform light tidying of client's living areas and clean up after meal preparation",
+          "Support client's continued community engagement and quality of life",
+          "Maintain client's independence in ADLs while providing a safe, supportive presence",
+          "Monitor and report any changes in client's physical or emotional well-being to agency and family",
+          "Consistent Monday\u2013Friday 8:30 AM\u20137:00 PM schedule with same caregiver for continuity"
+        ],
+        "note_http": 200
+      },
+      "client": "Rosa Delgado",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "visit_id": "c2ccc2f2-9def-4a45-ad71-9cc8ab817f3e",
+      "label": "Robert Calloway",
+      "success": true,
+      "elapsed_sec": 59.2,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "c2ccc2f2-9def-4a45-ad71-9cc8ab817f3e",
+        "billable_count": 4,
+        "contract_http": 200,
+        "weekly_hours": "52.50",
+        "hourly_rate": "18.00",
+        "frequency": "52.5 hours per week (stated in assessment)",
+        "service_hour_rows": 1,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client's continued community engagement and social well-being through consistent companionship and regular outings.",
+            "Maintain client's independence in ADLs, self-care, and medication management by providing assistance only where requested.",
+            "Ensure a safe, consistent care environment Monday through Friday so the daughter can work without interruption."
+          ],
+          "short_term": [
+            "Provide daily companionship to reduce loneliness following the death of client's husband six months ago.",
+            "Transport client to hair salon, nail salon, grocery store, and other community destinations Monday through Friday as requested.",
+            "Assist client with cooking preparation while respecting her independence and preference to participate in meal preparation herself.",
+            "Perform light tidying of client's personal areas and clean up after meal preparation each visit."
+          ],
+          "maintenance": [
+            "Monitor and report any observable changes in client's physical condition (e.g., signs of low blood sugar, elevated blood pressure symptoms such as dizziness or headache) to the supervising nurse and family.",
+            "Maintain a consistent daily routine aligned with client's preferences and the RN-completed care plan kept in the home.",
+            "Preserve client's dignity and autonomy by following her direction on all tasks and refraining from performing any care she has not requested."
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Provide daily companionship to reduce loneliness following the death of client's husband six months ago.",
+          "Transport client to hair salon, nail salon, grocery store, and other community destinations Monday through Friday as req",
+          "Assist client with cooking preparation while respecting her independence and preference to participate in meal preparati",
+          "Perform light tidying of client's personal areas and clean up after meal preparation each visit.",
+          "Support client's continued community engagement and social well-being through consistent companionship and regular outin",
+          "Maintain client's independence in ADLs, self-care, and medication management by providing assistance only where requeste",
+          "Ensure a safe, consistent care environment Monday through Friday so the daughter can work without interruption.",
+          "Monitor and report any observable changes in client's physical condition (e.g., signs of low blood sugar, elevated blood"
+        ],
+        "note_http": 200
+      },
+      "client": "Robert Calloway",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "visit_id": "a6ac6edb-d840-4348-92fb-953fe36a017e",
+      "label": "Margaret Okafor",
+      "success": true,
+      "elapsed_sec": 59.3,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "a6ac6edb-d840-4348-92fb-953fe36a017e",
+        "billable_count": 4,
+        "contract_http": 200,
+        "weekly_hours": "52.50",
+        "hourly_rate": "18.00",
+        "frequency": "52.5 hours per week (stated in assessment)",
+        "service_hour_rows": 1,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client's community engagement and social well-being on an ongoing basis",
+            "Maintain consistent caregiver relationship to build trust and comfort for client"
+          ],
+          "short_term": [
+            "Provide daily companionship to reduce loneliness following loss of spouse six months ago",
+            "Transport client to hair salon, nail salon, grocery store, and community destinations Monday\u2013Friday",
+            "Assist client with cooking and meal preparation while respecting her independence in the kitchen",
+            "Perform light housekeeping in client's areas of use and clean up after meal preparation"
+          ],
+          "maintenance": [
+            "Monitor and report any changes in client's condition related to diabetes or hypertension to agency supervisor",
+            "Adhere to RN-developed care plan / service plan kept in the home"
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Provide daily companionship to reduce loneliness following loss of spouse six months ago",
+          "Transport client to hair salon, nail salon, grocery store, and community destinations Monday\u2013Friday",
+          "Assist client with cooking and meal preparation while respecting her independence in the kitchen",
+          "Perform light housekeeping in client's areas of use and clean up after meal preparation",
+          "Support client's community engagement and social well-being on an ongoing basis",
+          "Maintain consistent caregiver relationship to build trust and comfort for client",
+          "Monitor and report any changes in client's condition related to diabetes or hypertension to agency supervisor",
+          "Adhere to RN-developed care plan / service plan kept in the home"
+        ],
+        "note_http": 200
+      },
+      "client": "Margaret Okafor",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "visit_id": "8468abf5-1755-491d-8005-2aad61290487",
+      "label": "Patricia Martinez",
+      "success": true,
+      "elapsed_sec": 59.2,
+      "last": "note+contract ready",
+      "summary": {
+        "visit_id": "8468abf5-1755-491d-8005-2aad61290487",
+        "billable_count": 4,
+        "contract_http": 200,
+        "weekly_hours": "52.50",
+        "hourly_rate": "18.00",
+        "frequency": "52.5 hours per week (stated in assessment)",
+        "service_hour_rows": 1,
+        "care_plan_goals": {
+          "long_term": [
+            "Support client's continued independence in ADLs (bathing, dressing, medication self-administration) while providing a safe, supervised environment.",
+            "Maintain client's community engagement and quality of life through regular outings.",
+            "Monitor and report any changes in client's physical condition (blood sugar symptoms, blood pressure concerns) to the supervising nurse."
+          ],
+          "short_term": [
+            "Provide daily companionship to reduce social isolation following spouse's bereavement.",
+            "Escort and transport client to hair salon, nail salon, grocery store, and other community destinations.",
+            "Assist client in the kitchen during meal preparation per her direction without taking over cooking.",
+            "Tidy client's bedroom and clean up kitchen/common areas used by client after meals."
+          ],
+          "maintenance": [
+            "Maintain consistent Monday\u2013Friday 8:30 AM\u20137:00 PM schedule to support daughter's work-from-home routine.",
+            "Preserve client's autonomy and dignity by following her preferences and instructions rather than directing her care.",
+            "Ensure continuity of care through consistent caregiver assignment and documented backup plan."
+          ]
+        },
+        "care_plan_goal_preview": [
+          "Provide daily companionship to reduce social isolation following spouse's bereavement.",
+          "Escort and transport client to hair salon, nail salon, grocery store, and other community destinations.",
+          "Assist client in the kitchen during meal preparation per her direction without taking over cooking.",
+          "Tidy client's bedroom and clean up kitchen/common areas used by client after meals.",
+          "Support client's continued independence in ADLs (bathing, dressing, medication self-administration) while providing a sa",
+          "Maintain client's community engagement and quality of life through regular outings.",
+          "Monitor and report any changes in client's physical condition (blood sugar symptoms, blood pressure concerns) to the sup",
+          "Maintain consistent Monday\u2013Friday 8:30 AM\u20137:00 PM schedule to support daughter's work-from-home routine."
+        ],
+        "note_http": 200
+      },
+      "client": "Patricia Martinez",
+      "file": "/Users/musaibrahim/Desktop/AI Voice Contracter/Home Care Business Client Intake Role Play copy.mp3"
+    }
+  ],
+  "mp3_assignments": [
+    {
+      "client": "Eleanor Whitfield",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "client": "Harold Jensen",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "client": "Rosa Delgado",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "client": "Robert Calloway",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "client": "Margaret Okafor",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    },
+    {
+      "client": "Patricia Martinez",
+      "file": "Home Care Business Client Intake Role Play copy.mp3"
+    }
+  ],
+  "after_client_count": 6,
   "showcase_clients": [
+    "Patricia Martinez",
+    "Rosa Delgado",
     "Margaret Okafor",
     "Eleanor Whitfield",
-    "Harold Jensen",
-    "Rosa Delgado",
-    "Robert Calloway"
+    "Robert Calloway",
+    "Harold Jensen"
   ]
 }

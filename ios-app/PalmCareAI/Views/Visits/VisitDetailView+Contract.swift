@@ -10,40 +10,41 @@ extension VisitDetailView {
     var contractTab: some View {
         VStack(spacing: 0) {
             if let c = contract {
-                VStack(spacing: 0) {
-                    ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 0) {
-                            contractCardHeader(c)
-
-                            if isEditingContract {
-                                contractEditForm(c)
-                                    .padding(.top, 14)
-                            } else {
-                                contractReadingBody(c)
-                                    .padding(.top, 14)
-                            }
-                        }
-                        .padding(.horizontal, 18)
+                VStack(alignment: .leading, spacing: 0) {
+                    contractCardHeader(c)
+                        .padding(.horizontal, isEditingContract ? 16 : 18)
                         .padding(.top, 18)
-                        .padding(.bottom, 14)
-                    }
 
-                    Button { showEmailSheet = true } label: {
-                        Text("Send agreement")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(
-                                Capsule(style: .continuous)
-                                    .fill(Color.palmPrimary)
-                            )
-                            .shadow(color: PalmGlass.tealShadow, radius: 14, y: 8)
+                    Group {
+                        if isEditingContract {
+                            contractEditForm(c)
+                        } else {
+                            contractReadingBody(c)
+                        }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-                    .accessibilityLabel("Send agreement")
+                    .padding(.horizontal, isEditingContract ? 16 : 18)
+                    .padding(.top, 14)
+                    .padding(.bottom, isEditingContract ? 16 : 14)
+
+                    if !isEditingContract {
+                        Button { showEmailSheet = true } label: {
+                            Text("Send agreement")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(
+                                    Capsule(style: .continuous)
+                                        .fill(Color.palmPrimary)
+                                )
+                                .shadow(color: PalmGlass.tealShadow, radius: 14, y: 8)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+                        .accessibilityLabel("Send agreement")
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .palmGlassCard(radius: 28, fillOpacity: 0.96)
             } else if tabFetchFailed.contains("contract") {
                 tabErrorState(tab: "contract")
@@ -56,6 +57,7 @@ extension VisitDetailView {
                 )
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Card header (eyebrow + serif title + discreet menu)
@@ -222,63 +224,76 @@ extension VisitDetailView {
     // MARK: - Edit form (preserves existing edit/save)
 
     private func contractEditForm(_ c: VisitContract) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Hourly rate")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.palmSecondary)
                 TextField("28", text: $editContractRate)
                     .keyboardType(.decimalPad)
-                    .font(.system(size: 13, weight: .semibold))
-                    .padding(8)
-                    .background(Color.white.opacity(0.75))
-                    .cornerRadius(8)
+                    .font(.system(size: 16, weight: .semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white.opacity(0.85))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Weekly hours")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.palmSecondary)
                 TextField("12", text: $editContractHours)
                     .keyboardType(.decimalPad)
-                    .font(.system(size: 13, weight: .semibold))
-                    .padding(8)
-                    .background(Color.white.opacity(0.75))
-                    .cornerRadius(8)
+                    .font(.system(size: 16, weight: .semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white.opacity(0.85))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
             }
 
-            Text("Terms")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.palmSecondary)
-            TextField("Terms and conditions", text: $editContractTerms, axis: .vertical)
-                .font(.system(size: 13))
-                .lineLimit(4...12)
-                .padding(10)
-                .background(Color.white.opacity(0.75))
-                .cornerRadius(8)
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Terms")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+                TextField("Terms and conditions", text: $editContractTerms, axis: .vertical)
+                    .font(.system(size: 15))
+                    .lineSpacing(4)
+                    .lineLimit(8...40)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white.opacity(0.85))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGlassBorder, lineWidth: 1))
+            }
 
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Button {
                     Task { await saveContractEdits() }
                 } label: {
                     HStack(spacing: 6) {
-                        if isSavingContract { ProgressView().scaleEffect(0.6).tint(.palmPrimary) }
-                        Text("Save changes").font(.system(size: 13, weight: .semibold))
+                        if isSavingContract { ProgressView().scaleEffect(0.7).tint(.white) }
+                        Text("Save changes").font(.system(size: 15, weight: .semibold))
                     }
-                    .foregroundColor(.palmPrimary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.palmPrimary.opacity(0.1))
-                    .cornerRadius(10)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(Capsule(style: .continuous).fill(Color.palmPrimary))
                 }
                 .disabled(isSavingContract)
 
                 Button("Cancel") { isEditingContract = false }
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.palmSecondary)
-
-                Spacer()
+                    .frame(height: 48)
+                    .padding(.horizontal, 8)
             }
-            .padding(.top, 2)
+            .padding(.top, 4)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Derived content
@@ -539,13 +554,49 @@ extension VisitDetailView {
 
         // Terms (only if we have no structured sections at all, keep body useful)
         if out.isEmpty, let terms = (c.terms_and_conditions ?? c.content)?.trimmingCharacters(in: .whitespacesAndNewlines), !terms.isEmpty {
-            out.append(ContractReadingSection(label: "Terms", body: terms))
+            out.append(ContractReadingSection(label: "Terms", body: Self.sanitizeContractPlainText(terms)))
         }
 
         return out
     }
 
     // MARK: - Shared bits
+
+    /// Strip ASCII banner lines and severity tags from stored contract bodies.
+    static func sanitizeContractPlainText(_ text: String) -> String {
+        let severity = try? NSRegularExpression(
+            pattern: #"\s*\(Severity:\s*[^)]+\)"#,
+            options: .caseInsensitive
+        )
+        var lines: [String] = []
+        var blankRun = 0
+        for raw in text.components(separatedBy: .newlines) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            let equalsBanner = !trimmed.isEmpty
+                && trimmed.count >= 4
+                && trimmed.allSatisfy({ $0 == "=" || $0 == " " })
+            let dashBanner = !trimmed.isEmpty
+                && trimmed.count >= 8
+                && trimmed.allSatisfy({ $0 == "-" || $0 == " " })
+            if equalsBanner || dashBanner { continue }
+
+            var line = raw
+            if let severity {
+                let range = NSRange(line.startIndex..<line.endIndex, in: line)
+                line = severity.stringByReplacingMatches(in: line, options: [], range: range, withTemplate: "")
+            }
+            line = line.trimmingCharacters(in: .whitespaces)
+
+            if line.isEmpty {
+                blankRun += 1
+                if blankRun <= 1 { lines.append("") }
+                continue
+            }
+            blankRun = 0
+            lines.append(line)
+        }
+        return lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     /// Teal section eyebrow matching Paper (#0D9488, 11px, tracking ~0.08em).
     private func contractSectionLabel(_ text: String) -> some View {
@@ -571,7 +622,8 @@ extension VisitDetailView {
 
     func beginContractEdit(_ c: VisitContract) {
         editContractTitle = c.title ?? ""
-        editContractTerms = c.terms_and_conditions ?? c.content ?? ""
+        let rawTerms = c.terms_and_conditions ?? c.content ?? ""
+        editContractTerms = Self.sanitizeContractPlainText(rawTerms)
         editContractRate = c.hourly_rate.map { String(Int($0)) } ?? ""
         editContractHours = c.weekly_hours.map { String(Int($0)) } ?? ""
         isEditingContract = true
@@ -585,7 +637,7 @@ extension VisitDetailView {
             let updated = try await api.updateVisitContract(
                 visitId: visitId,
                 title: editContractTitle,
-                termsAndConditions: editContractTerms,
+                termsAndConditions: Self.sanitizeContractPlainText(editContractTerms),
                 hourlyRate: Double(editContractRate),
                 weeklyHours: Double(editContractHours)
             )
