@@ -1,6 +1,5 @@
 from typing import List
 from uuid import UUID
-import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -11,8 +10,6 @@ from app.models.user import User
 from app.models.client import Client
 from app.models.contract import Contract
 from app.schemas.contract import ContractCreate, ContractUpdate, ContractResponse
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

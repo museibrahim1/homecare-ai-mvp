@@ -21,58 +21,13 @@ enum ContractLayoutType: String {
 
 let builtInContractStyles: [ContractStyle] = [
     ContractStyle(
-        id: "professional",
-        name: "Professional",
-        description: "Clean corporate layout with structured sections and formal headers",
-        icon: "building.2.fill",
-        previewColors: [Color(hex: "1A5276"), Color(hex: "2E86C1")],
-        accentColor: Color(hex: "1A5276"),
-        layoutType: .professional
-    ),
-    ContractStyle(
         id: "modern",
-        name: "Modern Care",
-        description: "Contemporary design with color accents and rounded cards",
+        name: "PALM",
+        description: "PalmCare service agreement from the Paper design",
         icon: "sparkles",
         previewColors: [Color.palmPrimary, Color.palmTeal600],
         accentColor: Color.palmPrimary,
         layoutType: .modern
-    ),
-    ContractStyle(
-        id: "classic",
-        name: "Classic Legal",
-        description: "Traditional legal document style with serif typography",
-        icon: "scroll.fill",
-        previewColors: [Color(hex: "2C3E50"), Color(hex: "34495E")],
-        accentColor: Color(hex: "2C3E50"),
-        layoutType: .classic
-    ),
-    ContractStyle(
-        id: "minimal",
-        name: "Minimal",
-        description: "Simple and clean with lots of whitespace and subtle lines",
-        icon: "square.split.2x1.fill",
-        previewColors: [Color(hex: "7F8C8D"), Color(hex: "95A5A6")],
-        accentColor: Color(hex: "7F8C8D"),
-        layoutType: .minimal
-    ),
-    ContractStyle(
-        id: "clinical",
-        name: "Clinical",
-        description: "Healthcare-focused with medical iconography and structured data",
-        icon: "cross.case.fill",
-        previewColors: [Color(hex: "27AE60"), Color(hex: "2ECC71")],
-        accentColor: Color(hex: "27AE60"),
-        layoutType: .clinical
-    ),
-    ContractStyle(
-        id: "elegant",
-        name: "Elegant",
-        description: "Premium feel with gradient accents and refined typography",
-        icon: "crown.fill",
-        previewColors: [Color(hex: "8E44AD"), Color(hex: "9B59B6")],
-        accentColor: Color(hex: "8E44AD"),
-        layoutType: .elegant
     ),
 ]
 

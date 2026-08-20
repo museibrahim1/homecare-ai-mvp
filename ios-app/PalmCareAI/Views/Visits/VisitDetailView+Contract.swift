@@ -134,19 +134,6 @@ extension VisitDetailView {
                         .background(accent.opacity(0.1))
                         .cornerRadius(8)
                     }
-                    Button { showStylePicker = true } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "paintbrush.fill")
-                                .font(.system(size: 12))
-                            Text("Style")
-                                .font(.system(size: 12, weight: .semibold))
-                        }
-                        .foregroundColor(accent)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(accent.opacity(0.1))
-                        .cornerRadius(8)
-                    }
                     Menu {
                         Button { showEmailSheet = true } label: {
                             Label("Email Agreement", systemImage: "paperplane.fill")
@@ -209,9 +196,6 @@ extension VisitDetailView {
                 Rectangle().fill(accent).frame(height: 1).padding(.top, 10)
             }
         }
-        .sheet(isPresented: $showStylePicker) {
-            ContractStylesView(selectedStyleId: $selectedContractStyle, contractTitle: c.title)
-        }
     }
 
     var currentStyleBadge: some View {
@@ -219,17 +203,10 @@ extension VisitDetailView {
             Image(systemName: currentStyle.icon)
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(currentStyle.accentColor)
-            Text("Using \(currentStyle.name) style")
+            Text("PALM service agreement")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.palmSecondary)
             Spacer()
-            Button {
-                showStylePicker = true
-            } label: {
-                Text("Change")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(currentStyle.accentColor)
-            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

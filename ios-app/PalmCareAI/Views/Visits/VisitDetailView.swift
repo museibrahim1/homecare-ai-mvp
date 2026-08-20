@@ -62,7 +62,6 @@ struct VisitDetailView: View {
     @State var isSavingContract = false
     @State var showFullContract = false
     @State var selectedContractStyle = "modern"
-    @State var showStylePicker = false
     @State var showEmailSheet = false
     /// Pipeline step key currently being re-queued (bill / note / contract / …).
     @State var retryingPipelineStep: String?

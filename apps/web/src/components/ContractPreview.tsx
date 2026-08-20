@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import DOMPurify from 'dompurify';
 import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download, Mail, Send, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { UploadedDocument, AgencySettings, ContractPreviewProps } from './ContractPreview.types';
@@ -20,19 +19,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   // Editable contract data
   const [editData, setEditData] = useState<any>({});
   
-  // Document type: proposal first, then service agreement, or template preview
-  const [documentType, setDocumentType] = useState<'proposal' | 'agreement' | 'template'>('proposal');
-
-  // OCR template preview data
-  const [templatePreview, setTemplatePreview] = useState<{
-    has_template: boolean;
-    template_name?: string;
-    template_version?: number;
-    file_type?: string;
-    fields?: { field_id: string; label: string; section: string; type: string; required: boolean; value: string; is_mapped: boolean }[];
-    document_html?: string;
-  } | null>(null);
-  const [templateLoading, setTemplateLoading] = useState(false);
+  const [documentType, setDocumentType] = useState<'proposal' | 'agreement'>('agreement');
 
   // DOCX download state
   const [downloading, setDownloading] = useState(false);
@@ -96,93 +83,6 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     };
     loadAgencySettings();
   }, [token]);
-
-  // Load OCR template preview OR build preview from agency template
-  useEffect(() => {
-    const loadTemplatePreview = async () => {
-      if (!contract?.id || !token) return;
-      setTemplateLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/contract-templates/preview/${contract.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setTemplatePreview(data);
-          if (data.has_template) {
-            setDocumentType('template');
-          }
-        }
-      } catch {
-        // template preview is optional
-      } finally {
-        setTemplateLoading(false);
-      }
-    };
-    loadTemplatePreview();
-  }, [contract?.id, token]);
-
-  // Fallback: build preview from agency template when no OCR template exists
-  useEffect(() => {
-    if (templateLoading) return;
-    if (templatePreview?.has_template) return;
-
-    const hasLegacyDoc = agency.documents?.some((d: any) => d.category === 'contract_template' && d.content);
-    const hasAgencyTemplate = !!(agency.contract_template_name || agency.contract_template || hasLegacyDoc);
-    if (hasAgencyTemplate && contract) {
-      const schedule = contract.schedule || {};
-      const services = contract.services || [];
-      const clientProfile = schedule.client_profile || {};
-      const hourlyRate = parseFloat(contract.hourly_rate || 0);
-      const weeklyHours = parseFloat(contract.weekly_hours || 0);
-      const days = Array.isArray(schedule.preferred_days)
-        ? schedule.preferred_days.map((d: any) => (typeof d === 'string' ? d : d.day)).filter(Boolean).join(', ')
-        : '';
-
-      const fields = [
-        { field_id: 'agency_name', label: 'Agency Name', section: 'agency_info', type: 'text', required: true, value: agency.name || '', is_mapped: true },
-        { field_id: 'agency_address', label: 'Agency Address', section: 'agency_info', type: 'text', required: false, value: agency.address || '', is_mapped: true },
-        { field_id: 'agency_city', label: 'Agency City', section: 'agency_info', type: 'text', required: false, value: agency.city || '', is_mapped: true },
-        { field_id: 'agency_state', label: 'Agency State', section: 'agency_info', type: 'text', required: false, value: agency.state || '', is_mapped: true },
-        { field_id: 'agency_zip', label: 'Agency ZIP', section: 'agency_info', type: 'text', required: false, value: agency.zip_code || '', is_mapped: true },
-        { field_id: 'agency_phone', label: 'Agency Phone', section: 'agency_info', type: 'phone', required: false, value: agency.phone || '', is_mapped: true },
-        { field_id: 'agency_email', label: 'Agency Email', section: 'agency_info', type: 'email', required: false, value: agency.email || '', is_mapped: true },
-        { field_id: 'client_name', label: 'Client Name', section: 'client_info', type: 'text', required: true, value: client?.full_name || '', is_mapped: true },
-        { field_id: 'client_address', label: 'Client Address', section: 'client_info', type: 'text', required: false, value: client?.address || '', is_mapped: true },
-        { field_id: 'client_phone', label: 'Client Phone', section: 'client_info', type: 'phone', required: false, value: client?.phone || '', is_mapped: true },
-        { field_id: 'client_email', label: 'Client Email', section: 'client_info', type: 'email', required: false, value: client?.email || '', is_mapped: true },
-        { field_id: 'emergency_contact', label: 'Emergency Contact', section: 'client_info', type: 'text', required: false, value: client?.emergency_contact_name || '', is_mapped: true },
-        { field_id: 'emergency_phone', label: 'Emergency Phone', section: 'client_info', type: 'phone', required: false, value: client?.emergency_contact_phone || '', is_mapped: true },
-        { field_id: 'care_level', label: 'Care Need Level', section: 'assessment', type: 'text', required: true, value: schedule.care_need_level || '', is_mapped: true },
-        { field_id: 'primary_diagnosis', label: 'Primary Diagnosis', section: 'assessment', type: 'text', required: false, value: clientProfile.primary_diagnosis || '', is_mapped: true },
-        { field_id: 'mobility_status', label: 'Mobility Status', section: 'assessment', type: 'text', required: false, value: clientProfile.mobility_status || '', is_mapped: true },
-        { field_id: 'cognitive_status', label: 'Cognitive Status', section: 'assessment', type: 'text', required: false, value: clientProfile.cognitive_status || '', is_mapped: true },
-        { field_id: 'services_list', label: 'Services', section: 'services', type: 'list', required: true, value: services.map((s: any) => typeof s === 'string' ? s : s.name).filter(Boolean).join(', ') || '', is_mapped: true },
-        { field_id: 'schedule_days', label: 'Days of Service', section: 'schedule', type: 'text', required: false, value: days, is_mapped: true },
-        { field_id: 'weekly_hours', label: 'Hours per Week', section: 'schedule', type: 'number', required: false, value: weeklyHours ? String(weeklyHours) : '', is_mapped: true },
-        { field_id: 'hourly_rate', label: 'Hourly Rate', section: 'rates', type: 'currency', required: true, value: hourlyRate ? `$${hourlyRate.toFixed(2)}` : '', is_mapped: true },
-        { field_id: 'weekly_cost', label: 'Weekly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours).toFixed(2)}` : '', is_mapped: true },
-        { field_id: 'monthly_cost', label: 'Monthly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours * 4.33).toFixed(2)}` : '', is_mapped: true },
-        { field_id: 'admin_fee', label: 'Administrative Fee', section: 'rates', type: 'currency', required: false, value: '$25', is_mapped: true },
-        { field_id: 'deposit', label: 'Deposit', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours).toFixed(2)}` : '', is_mapped: true },
-        { field_id: 'special_requirements', label: 'Special Requirements', section: 'requirements', type: 'text', required: false, value: '', is_mapped: true },
-        { field_id: 'safety_concerns', label: 'Safety Considerations', section: 'requirements', type: 'text', required: false, value: '', is_mapped: true },
-        { field_id: 'cancellation_policy', label: 'Cancellation Policy', section: 'policies', type: 'text', required: false, value: 'Either party may terminate this agreement with 30 days written notice.', is_mapped: true },
-        { field_id: 'terms_and_conditions', label: 'Terms & Conditions', section: 'policies', type: 'text', required: false, value: '', is_mapped: true },
-        { field_id: 'policies_and_procedures', label: 'Policies & Procedures', section: 'policies', type: 'text', required: false, value: '', is_mapped: true },
-      ];
-
-      const legacyDoc = agency.documents?.find((d: any) => d.category === 'contract_template' && d.content);
-      setTemplatePreview({
-        has_template: true,
-        template_name: agency.contract_template_name || legacyDoc?.name || 'Uploaded Template',
-        template_version: 1,
-        file_type: agency.contract_template_type || 'docx',
-        fields,
-      });
-      setDocumentType('template');
-    }
-  }, [templateLoading, templatePreview?.has_template, agency, contract, client]);
 
   // Initialize edit data when contract changes
   useEffect(() => {
@@ -798,18 +698,6 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
       {/* Document Type Selector */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 bg-white flex-shrink-0">
-        {templatePreview?.has_template && (
-          <button
-            onClick={() => setDocumentType('template')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              documentType === 'template'
-                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
-            }`}
-          >
-            {templatePreview.template_name || 'My Template'}
-          </button>
-        )}
         <button
           onClick={() => setDocumentType('proposal')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -831,7 +719,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           Service Agreement
         </button>
         <span className="text-slate-400 text-xs ml-2 hidden sm:inline">
-          {documentType === 'template' ? 'Preview of your uploaded template' : documentType === 'proposal' ? 'Send first to present care options' : 'Formal contract for signatures'}
+          {documentType === 'proposal' ? 'Send first to present care options' : 'PALM service agreement for signatures'}
         </span>
       </div>
 
@@ -849,111 +737,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
-          {documentType === 'template' && templatePreview?.has_template ? (
-          /* ===== OCR TEMPLATE PREVIEW ===== */
-          <div className="contract-document">
-            {/* Template header bar */}
-            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-              <div>
-                <span className="text-sm font-semibold text-gray-700">
-                  {templatePreview.template_name}
-                </span>
-                <span className="text-xs text-gray-400 ml-2">v{templatePreview.template_version}</span>
-              </div>
-              <div className="text-xs text-gray-500">
-                {templatePreview.fields?.filter(f => f.value).length || 0}/{templatePreview.fields?.length || 0} fields populated
-                {(templatePreview.fields?.filter(f => !f.is_mapped).length || 0) > 0 && (
-                  <span className="text-amber-500 ml-2">
-                    ({templatePreview.fields?.filter(f => !f.is_mapped).length} unmapped)
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Full document preview — rendered from actual DOCX */}
-            {templatePreview.document_html ? (
-              <div
-                className="p-8 text-gray-800"
-                style={{ fontFamily: 'Calibri, Arial, sans-serif', lineHeight: 1.6 }}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(templatePreview.document_html) }}
-              />
-            ) : (
-              /* Fallback: structured field table if HTML not available */
-              <div className="p-8 text-gray-800">
-                <h2 className="text-center text-xl font-bold pb-3 mb-2 border-b-2" style={{ color: agency.primary_color, borderColor: agency.primary_color }}>
-                  CLIENT SERVICE CONTRACT
-                </h2>
-                <p className="text-center text-gray-500 italic mb-8">
-                  Prepared for: <strong className="text-gray-800">{data.client_name}</strong> &mdash; {data.effective_date}
-                </p>
-
-                {(() => {
-                  const fields = templatePreview.fields || [];
-                  const sections = Array.from(new Set(fields.map(f => f.section)));
-                  const sectionLabels: Record<string, string> = {
-                    client_info: 'Client Information',
-                    agency_info: 'Agency Information',
-                    assessment: 'Care Assessment',
-                    services: 'Services',
-                    schedule: 'Schedule',
-                    rates: 'Rates & Fees',
-                    billing: 'Billing',
-                    contract: 'Contract Terms',
-                    requirements: 'Special Requirements & Safety',
-                    policies: 'Policies & Procedures',
-                    terms: 'Terms & Conditions',
-                    signatures: 'Signatures',
-                  };
-                  return sections.map((section) => {
-                    const sectionFields = fields.filter(f => f.section === section);
-                    return (
-                      <div key={section} className="mb-6">
-                        <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
-                          {(sectionLabels[section] || section.replace(/_/g, ' ')).toUpperCase()}
-                        </h3>
-                        <table className="w-full border-collapse mb-2">
-                          <tbody>
-                            {sectionFields.map((field) => (
-                              <tr key={field.field_id} className="border-b border-gray-100">
-                                <td className="py-2 px-3 text-sm font-medium text-gray-700 w-2/5 bg-gray-50">
-                                  {field.label}
-                                  {field.required && <span className="text-red-500 ml-1">*</span>}
-                                </td>
-                                <td className="py-2 px-3 text-sm">
-                                  {field.value ? (
-                                    <span className="text-gray-900">{field.value}</span>
-                                  ) : field.is_mapped ? (
-                                    <span className="text-amber-500 italic">No data in database</span>
-                                  ) : (
-                                    <span className="text-red-600 italic">Unmapped field</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-1 w-6">
-                                  {field.value ? (
-                                    <span className="text-green-500 text-xs" title="Populated">&#10003;</span>
-                                  ) : field.is_mapped ? (
-                                    <span className="text-amber-600 text-xs" title="Mapped but empty">&#9888;</span>
-                                  ) : (
-                                    <span className="text-red-600 text-xs" title="Not mapped">&#10007;</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
-              {data.agency_name} | {data.agency_phone} | {data.agency_email}
-            </div>
-          </div>
-          ) : documentType === 'agreement' ? (
+          {documentType === 'agreement' ? (
           <div className="contract-document">
             {/* Header */}
             <div 

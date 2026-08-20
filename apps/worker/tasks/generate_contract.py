@@ -256,76 +256,15 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
                 if weekly_hours > 0:
                     logger.info(f"Using total_hours_per_week: {weekly_hours}")
         
-        # If still no hours, calculate from services using consolidated categories
-        if weekly_hours == 0 and services:
-            # Track which consolidated categories we've already counted
-            counted_categories = set()
-            
-            logger.info(f"Calculating hours from {len(services)} services (consolidated):")
-            for svc in services:
-                svc_name = (svc.get("name") or "").lower() if isinstance(svc, dict) else str(svc or "").lower()
-                
-                # Map to consolidated category
-                category = None
-                svc_hours = 0
-                
-                # Personal care consolidation
-                if any(word in svc_name for word in ["bath", "dress", "groom", "hygiene", "personal care"]):
-                    category = "personal_care"
-                    svc_hours = 8
-                # Toileting
-                elif any(word in svc_name for word in ["toilet", "incontinence", "catheter"]):
-                    category = "toileting"
-                    svc_hours = 6
-                # Meal services consolidation
-                elif any(word in svc_name for word in ["meal", "food", "cook", "feed", "nutrition"]):
-                    category = "meals"
-                    svc_hours = 12
-                # Medication
-                elif "medication" in svc_name or "med" in svc_name:
-                    category = "medication"
-                    svc_hours = 4
-                # Homemaker consolidation
-                elif any(word in svc_name for word in ["homemaker", "housekeep", "laundry", "clean", "errand"]):
-                    category = "homemaker"
-                    svc_hours = 6
-                # Companion
-                elif "companion" in svc_name:
-                    category = "companion"
-                    svc_hours = 10
-                # Supervision/Safety
-                elif any(word in svc_name for word in ["supervision", "safety", "monitor", "dementia"]):
-                    category = "supervision"
-                    svc_hours = 15
-                # Mobility
-                elif any(word in svc_name for word in ["mobility", "transfer", "walk", "exercise"]):
-                    category = "mobility"
-                    svc_hours = 5
-                # Transportation
-                elif "transport" in svc_name:
-                    category = "transportation"
-                    svc_hours = 4
-                # Respite
-                elif "respite" in svc_name:
-                    category = "respite"
-                    svc_hours = 12
-                # Skilled nursing
-                elif any(word in svc_name for word in ["nursing", "wound", "skilled"]):
-                    category = "nursing"
-                    svc_hours = 5
-                else:
-                    category = svc_name
-                    svc_hours = 4
-                
-                # Only count each consolidated category once
-                if category not in counted_categories:
-                    counted_categories.add(category)
-                    weekly_hours += svc_hours
-                    logger.info(f"  - {category}: {svc_hours} hrs/week")
-                else:
-                    logger.info(f"  - {svc_name}: (already counted under {category})")
-            
-            logger.info(f"Total from services: {weekly_hours} hrs/week")
+        # If still no hours, do not invent category defaults. Hours only count
+        # when the transcript stated a schedule.
+        if not stated_hours:
+            if weekly_hours:
+                logger.info(
+                    "Dropping unstated weekly hours %s; transcript had no schedule",
+                    weekly_hours,
+                )
+            weekly_hours = 0.0
         
         # =====================================================================
         # RATE DETERMINATION
@@ -365,16 +304,11 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
             weekly_hours = 0.0
             rate_type = "Out of scope"
             logger.info("Out of scope: forcing $0 rate and 0 hours")
-        elif assessment_data.get("home_need_fallback") and not quoted_rate and not stated_hours:
+        elif not quoted_rate and not stated_hours:
             hourly_rate = 0.0
             weekly_hours = 0.0
             rate_type = "No rate or schedule spoken"
-            logger.info("Home-need fallback without spoken rate/hours: keeping $0")
-        elif not services and not quoted_rate and not stated_hours:
-            hourly_rate = 0.0
-            weekly_hours = 0.0
-            rate_type = "No home-care services identified"
-            logger.info("No grounded services: forcing $0 rate and 0 hours")
+            logger.info("No spoken rate/hours: keeping $0")
         elif is_medicaid:
             logger.info(f"Applying MEDICAID rates for client_id={client.id}")
             

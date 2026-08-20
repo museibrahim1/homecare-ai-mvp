@@ -31,7 +31,7 @@ def get_custom_styles():
         fontSize=18,
         alignment=TA_CENTER,
         spaceAfter=6,
-        textColor=colors.HexColor('#1a365d'),
+        textColor=colors.HexColor('#0D9488'),
         fontName='Helvetica-Bold'
     ))
     
@@ -42,7 +42,7 @@ def get_custom_styles():
         fontSize=12,
         spaceBefore=16,
         spaceAfter=8,
-        textColor=colors.HexColor('#2c5282'),
+        textColor=colors.HexColor('#115E59'),
         fontName='Helvetica-Bold',
         borderPadding=4,
     ))
@@ -124,7 +124,8 @@ def generate_contract_pdf(client: Any, contract: Any) -> bytes:
     schedule = contract.schedule or {}
     services = contract.services or []
     
-    # === HEADER ===
+    # === HEADER (PALM Paper template) ===
+    story.append(Paragraph("PALM", styles['SmallText']))
     story.append(Paragraph("HOME CARE SERVICE AGREEMENT", styles['ContractTitle']))
     story.append(Paragraph(f"Effective Date: {date.today().strftime('%B %d, %Y')}", styles['SmallText']))
     story.append(Spacer(1, 12))
