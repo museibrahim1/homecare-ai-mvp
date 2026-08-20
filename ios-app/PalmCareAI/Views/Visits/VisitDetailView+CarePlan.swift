@@ -208,6 +208,7 @@ extension VisitDetailView {
             ("short_term", "Personal Care"),
             ("long_term", "Maintenance"),
             ("maintenance", "Support"),
+            ("maintenance_goals", "Support"),
         ]
         var out: [PaperCarePlanGoal] = []
         for (key, category) in mapping {
@@ -258,6 +259,7 @@ extension VisitDetailView {
             ("short_term", "Short-term goals", "flag.fill", .palmBlue),
             ("long_term", "Long-term goals", "flag.2.crossed.fill", .palmPurple),
             ("maintenance", "Maintenance goals", "arrow.triangle.2.circlepath", .palmGreen),
+            ("maintenance_goals", "Maintenance goals", "arrow.triangle.2.circlepath", .palmGreen),
         ]
 
         return mapping.compactMap { key, title, icon, color in

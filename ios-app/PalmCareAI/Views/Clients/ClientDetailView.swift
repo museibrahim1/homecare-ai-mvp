@@ -76,7 +76,7 @@ struct ClientDetailView: View {
             .padding(.bottom, 120)
         }
         .background(PalmGlassBackground())
-        .navigationTitle(client.full_name)
+        .navigationTitle("Client profile")
         .navigationBarTitleDisplayMode(.inline)
         .palmTransparentNavBar()
         .toolbar {
@@ -84,11 +84,9 @@ struct ClientDetailView: View {
                 Button {
                     showEditSheet = true
                 } label: {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 14, weight: .semibold))
+                    Text("Edit")
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.palmPrimary)
-                        .frame(width: 34, height: 34)
-                        .background(Circle().fill(Color.palmPrimary.opacity(0.12)))
                 }
                 .accessibilityLabel("Edit client")
             }

@@ -10,6 +10,12 @@ struct EmailContractSheet: View {
     let visitId: String
     var clientName: String?
     var contractTitle: String?
+    /// Optional packet context (Paper Send). Passed from VisitDetailView when
+    /// available so the sheet can show the "included" checklist + snapshot.
+    var weeklyHours: Double?
+    var hourlyRate: Double?
+    var stateName: String?
+    var agencyName: String?
 
     @State private var recipientEmail = ""
     @State private var recipientName = ""
@@ -116,7 +122,13 @@ struct EmailContractSheet: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
-                    attachmentCard
+                    introLine
+
+                    includedCard
+
+                    if let snapshot = agreementSnapshot {
+                        snapshotCard(snapshot)
+                    }
 
                     fromCard
 
@@ -166,26 +178,136 @@ struct EmailContractSheet: View {
         }
     }
 
-    private var attachmentCard: some View {
+    // MARK: - Paper Send: intro, included checklist, snapshot
+
+    private var clientDisplayName: String {
+        clientName ?? "your client"
+    }
+
+    private var stateAgreementLabel: String {
+        if let state = stateName, !state.isEmpty {
+            return "\(state) service agreement"
+        }
+        return "service agreement"
+    }
+
+    /// Title-cased variant for the checklist row (e.g. "Florida service agreement").
+    private var packetAgreementTitle: String {
+        if let state = stateName, !state.isEmpty {
+            return "\(state) service agreement"
+        }
+        return "Service agreement"
+    }
+
+    private var introLine: some View {
+        Text("Care plan, billables, visit note, and \(stateAgreementLabel.lowercased()) for \(clientDisplayName).")
+            .font(.system(size: 14))
+            .foregroundColor(.palmSecondary)
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+    }
+
+    /// Billables subtitle uses whatever packet context we were handed.
+    private var billablesSubtitle: String {
+        var bits: [String] = []
+        if let hours = weeklyHours { bits.append("\(Int(hours))h") }
+        bits.append("weekly")
+        return bits.joined(separator: " · ")
+    }
+
+    private var includedCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 7) {
+                Image(systemName: "checklist")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
+                Text("Included")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmText)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+
+            includedRow(icon: "list.clipboard.fill", title: "Care plan", subtitle: "From the visit", status: "Approved")
+            includedRow(icon: "dollarsign.circle.fill", title: "Billables", subtitle: billablesSubtitle, status: "Ready")
+            includedRow(icon: "note.text", title: "SOAP visit note", subtitle: "Clinical documentation", status: "Ready")
+            includedRow(icon: "doc.text.fill", title: packetAgreementTitle, subtitle: contractTitle ?? "Home Care Service Agreement", status: "Ready")
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .palmGlassCard(radius: 20)
+    }
+
+    private func includedRow(icon: String, title: String, subtitle: String, status: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: "doc.richtext.fill")
-                .font(.system(size: 20, weight: .semibold))
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.palmPrimary)
-                .frame(width: 44, height: 44)
+                .frame(width: 34, height: 34)
                 .background(Color.palmPrimary.opacity(0.1))
-                .cornerRadius(11)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(contractTitle ?? "Home Care Service Agreement")
+                .cornerRadius(9)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.palmText)
-                    .lineLimit(2)
-                Text("PDF attachment\(clientName.map { " · \($0)" } ?? "")")
+                    .lineLimit(1)
+                Text(subtitle)
                     .font(.system(size: 12))
                     .foregroundColor(.palmSecondary)
+                    .lineLimit(1)
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
+            Text(status.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .tracking(0.5)
+                .foregroundColor(status == "Approved" ? .palmGreen : .palmPrimary)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill((status == "Approved" ? Color.palmGreen : Color.palmPrimary).opacity(0.12))
+                )
         }
-        .padding(14)
+    }
+
+    /// Free-text snapshot of the agreement's rate + hours, when we have them.
+    private var agreementSnapshot: String? {
+        var sentences: [String] = []
+        if let hours = weeklyHours, let rate = hourlyRate {
+            let weekly = hours * rate
+            sentences.append("\(Int(hours)) hours per week at $\(String(format: "%.0f", rate))/hour, about $\(String(format: "%.0f", weekly)) per week.")
+        } else if let rate = hourlyRate {
+            sentences.append("Billed at $\(String(format: "%.0f", rate)) per hour.")
+        } else if let hours = weeklyHours {
+            sentences.append("\(Int(hours)) hours of care per week.")
+        }
+        if let agency = agencyName, !agency.isEmpty {
+            sentences.append("Provided by \(agency).")
+        }
+        return sentences.isEmpty ? nil : sentences.joined(separator: " ")
+    }
+
+    private func snapshotCard(_ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 7) {
+                Image(systemName: "doc.plaintext")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
+                Text("Agreement Snapshot")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmText)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+            Text(text)
+                .font(.system(size: 14))
+                .foregroundColor(.palmText)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .palmGlassCard(radius: 20)
     }
@@ -331,7 +453,7 @@ struct EmailContractSheet: View {
                         Image(systemName: "paperplane.fill")
                             .font(.system(size: 14, weight: .bold))
                     }
-                    Text(isSending ? "Sending…" : "Send Agreement")
+                    Text(isSending ? "Sending…" : "Send to family")
                         .font(.system(size: 16, weight: .bold))
                 }
                 .foregroundColor(.white)

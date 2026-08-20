@@ -84,7 +84,7 @@ struct SocialOnboardingView: View {
                     .font(.system(size: 28, weight: .heavy))
                     .foregroundColor(.palmText)
                     .tracking(-0.4)
-                Text("Name, phone, and business address so contracts can list the right provider.")
+                Text("Name, phone, and business address so contracts list the right provider.")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.palmSecondary)
                     .multilineTextAlignment(.center)

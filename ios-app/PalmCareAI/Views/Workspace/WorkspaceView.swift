@@ -5,6 +5,7 @@ import SwiftUI
 struct WorkspaceView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedSection = 0
+    @State private var documentsReadyCount = 0
 
     private let sections = ["Calendar", "Documents"]
     private let sectionIcons = ["calendar", "doc.text.fill"]
@@ -19,16 +20,29 @@ struct WorkspaceView: View {
                     CalendarView()
                         .tag(0)
 
-                    ContractsView()
+                    ContractsView(onCountChange: { documentsReadyCount = $0 })
                         .tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
             }
             .background(PalmGlassBackground())
-            .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
             .palmTransparentNavBar()
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 1) {
+                        Text("Workspace")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.palmText)
+                        if selectedSection == 1 && documentsReadyCount > 0 {
+                            Text("\(documentsReadyCount) document\(documentsReadyCount == 1 ? "" : "s") ready")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.palmSecondary)
+                        }
+                    }
+                }
+            }
         }
     }
 

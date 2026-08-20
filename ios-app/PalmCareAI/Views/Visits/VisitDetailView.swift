@@ -156,8 +156,18 @@ struct VisitDetailView: View {
             }
         }
         .sheet(isPresented: $showEmailSheet) {
-            EmailContractSheet(visitId: visitId, clientName: clientName, contractTitle: contract?.title)
-                .environmentObject(api)
+            EmailContractSheet(
+                visitId: visitId,
+                clientName: clientName ?? visit?.client?.full_name,
+                contractTitle: contract?.title,
+                weeklyHours: contract?.weekly_hours,
+                hourlyRate: contract?.hourly_rate,
+                stateName: contractStateName?.capitalized,
+                agencyName: contract.map { contractProvider($0).name }.flatMap {
+                    $0.lowercased() == "home care agency" ? nil : $0
+                }
+            )
+            .environmentObject(api)
         }
         .palmErrorAlert(message: $actionError, isPresented: $showActionError)
         .task {

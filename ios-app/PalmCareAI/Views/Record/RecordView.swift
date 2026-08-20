@@ -538,19 +538,41 @@ struct RecordView: View {
 
     // MARK: - Orb stage (idle + recording)
 
+    /// Trailing glass "+" button matching HomeView — opens the client picker
+    /// (which can also add a new client) from any Record header.
+    private var headerAddButton: some View {
+        Button { showClientPicker = true } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 20, weight: .regular))
+                .foregroundColor(Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255))
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(Color.white.opacity(0.62))
+                        .overlay(Circle().stroke(Color.white.opacity(0.90), lineWidth: 1))
+                )
+                .shadow(color: PalmGlass.shadow, radius: 10, y: 4)
+        }
+        .accessibilityLabel("Select or add client")
+    }
+
     private var idleLayout: some View {
         let ink = Color(red: 16 / 255, green: 33 / 255, blue: 31 / 255) // #10211F
         let muted = Color(red: 75 / 255, green: 107 / 255, blue: 102 / 255) // #4B6B66
 
         return VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Ready")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(muted)
-                Text("Palm It")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(ink)
-                    .tracking(-1.4)
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Ready")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(muted)
+                    Text("Palm It")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(ink)
+                        .tracking(-1.4)
+                }
+                Spacer(minLength: 12)
+                headerAddButton
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 24)
@@ -585,6 +607,7 @@ struct RecordView: View {
                         .foregroundColor(ink)
                 }
                 Spacer(minLength: 12)
+                headerAddButton
             }
             .padding(.horizontal, 24)
             .padding(.top, 8)
@@ -609,9 +632,15 @@ struct RecordView: View {
     }
 
     private var processingSubtitle: String {
-        // Keep the Paper Processing hero line stable. Step-level status
-        // already shows in the checklist rows below.
-        "Care plan, billables, notes, and the contract."
+        // Name the client's state when we know it, matching the Paper Processing
+        // hero line. Step-level status still shows in the checklist rows below.
+        if let code = selectedClient?.state?.trimmingCharacters(in: .whitespaces), !code.isEmpty {
+            let name = code.count == 2
+                ? (VisitDetailView.usStateNames[code.uppercased()] ?? code.uppercased())
+                : code
+            return "Care plan, billables, notes, and the \(name) contract."
+        }
+        return "Care plan, billables, notes, and the contract."
     }
 
     private var processingReadyCount: Int {
@@ -662,14 +691,18 @@ struct RecordView: View {
         let hasTranscript = !transcriptBlocks.isEmpty || !liveFullTranscript.isEmpty
 
         return VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Live")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(muted)
-                Text("Recording")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(ink)
-                    .tracking(-1.4)
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Live")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(muted)
+                    Text("Recording")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(ink)
+                        .tracking(-1.4)
+                }
+                Spacer(minLength: 12)
+                headerAddButton
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 24)

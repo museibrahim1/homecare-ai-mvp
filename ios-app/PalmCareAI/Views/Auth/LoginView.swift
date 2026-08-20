@@ -71,7 +71,7 @@ struct LoginView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
-            PalmOrbLogo(size: 72, animated: true)
+            PalmOrbLogo(size: 120, animated: true)
 
             VStack(spacing: 6) {
                 Text("Welcome back")

@@ -189,7 +189,7 @@ struct LandingView: View {
                             .frame(height: geo.size.height * 0.18)
 
                         LandingOrb()
-                            .frame(width: 220, height: 220)
+                            .frame(width: 280, height: 280)
                             .accessibilityHidden(true)
 
                         Spacer()
@@ -208,11 +208,16 @@ struct LandingView: View {
                             .foregroundColor(Color.palmPrimaryLight)
                             .padding(.bottom, 10)
 
-                        (Text("Palm ").foregroundColor(.white)
-                            + Text("It.").foregroundColor(Color.palmPrimary))
-                            .font(.system(size: 44, weight: .black))
-                            .tracking(-1.4)
-                            .padding(.bottom, 12)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Palm")
+                                .foregroundColor(.white)
+                            Text("It.")
+                                .foregroundColor(Color.palmPrimaryLight)
+                                .italic()
+                        }
+                        .font(.system(size: 48, weight: .heavy))
+                        .tracking(-1.6)
+                        .padding(.bottom, 12)
 
                         Text("Record the visit. PALM writes the care plan, billables, notes, and the contract.")
                             .font(.system(size: 16, weight: .medium))

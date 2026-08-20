@@ -42,7 +42,7 @@ struct AddClientSheet: View {
     // Matches the backend's documented care_level values (LOW/MODERATE/HIGH).
     private let priorityOptions: [(String, String, Color)] = [
         ("LOW", "Low", .palmGreen),
-        ("MODERATE", "Medium", .palmOrange),
+        ("MODERATE", "Moderate", .palmOrange),
         ("HIGH", "High", Color(red: 239/255, green: 68/255, blue: 68/255)),
     ]
 
@@ -148,20 +148,17 @@ struct AddClientSheet: View {
 
     private var sheetHeader: some View {
         HStack {
-            Text(isEditing ? "Edit Client" : "Add New Client")
+            Text(isEditing ? "Edit Client" : "New client")
                 .font(.system(size: 19, weight: .heavy))
                 .foregroundColor(.palmText)
                 .tracking(-0.4)
             Spacer()
             Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.palmSecondary)
-                    .frame(width: 30, height: 30)
-                    .background(Color.palmFieldBg)
-                    .clipShape(Circle())
+                Text("Cancel")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
             }
-            .accessibilityLabel("Close")
+            .accessibilityLabel("Cancel")
         }
         .padding(.horizontal, 18)
         .padding(.top, 14)
@@ -437,7 +434,7 @@ struct AddClientSheet: View {
                     Image(systemName: isEditing ? "checkmark" : "plus")
                         .font(.system(size: 13, weight: .bold))
                 }
-                Text(isLoading ? "Saving..." : (isEditing ? "Save Changes" : "Add Client"))
+                Text(isLoading ? "Saving..." : (isEditing ? "Save Changes" : "Add client"))
                     .font(.system(size: 16, weight: .bold))
             }
             .foregroundColor(.white)

@@ -169,7 +169,7 @@ extension ClientDetailView {
     // MARK: - Emergency
 
     var emergencySection: some View {
-        DetailSection(title: "Emergency") {
+        DetailSection(title: "Emergency contact") {
             let primaryName = cleaned(client.emergency_contact_name)
             let usePrimary = primaryName != nil
             let name = usePrimary ? primaryName! : (cleaned(client.emergency_contact_2_name) ?? "")
@@ -182,15 +182,37 @@ extension ClientDetailView {
 
             let subParts = [relationship, phone?.palmFormattedPhone].compactMap { $0 }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.palmInk)
-                    .fixedSize(horizontal: false, vertical: true)
-                if !subParts.isEmpty {
-                    Text(subParts.joined(separator: " · "))
-                        .font(.system(size: 12))
-                        .foregroundColor(.palmHint)
+            HStack(spacing: 12) {
+                ClientAvatar(name: name.isEmpty ? "?" : name, size: 40)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(name)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.palmInk)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !subParts.isEmpty {
+                        Text(subParts.joined(separator: " · "))
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmHint)
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                if let phone {
+                    Button {
+                        let dialable = phone.filter { $0.isNumber || $0 == "+" }
+                        if !dialable.isEmpty, let url = URL(string: "tel:\(dialable)") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 38, height: 38)
+                            .background(Circle().fill(Color.palmPrimary))
+                    }
+                    .accessibilityLabel("Call emergency contact")
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -101,13 +101,13 @@ struct RegisterView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
-            PalmOrbLogo(size: 72, animated: true)
+            PalmOrbLogo(size: 112, animated: true)
             VStack(spacing: 6) {
                 Text("Create your agency")
                     .font(.system(size: 28, weight: .heavy))
                     .foregroundColor(.palmText)
                     .tracking(-0.4)
-                Text("Name, email, password. You are in.")
+                Text("Name, email, password. Start documenting visits the same day.")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.palmSecondary)
             }
@@ -209,7 +209,7 @@ struct RegisterView: View {
     private var agencyField: some View {
         roundedField(
             icon: "building.2",
-            placeholder: "Agency name (optional)",
+            placeholder: "Optional for now",
             text: $agencyName,
             keyboard: .default,
             contentType: .organizationName,

@@ -5,27 +5,27 @@ extension VisitDetailView {
         builtInContractStyles.first { $0.id == selectedContractStyle } ?? builtInContractStyles[1]
     }
 
+    // MARK: - Contract Tab (Paper Pipeline Glass → Contract 3GX-0)
+
     var contractTab: some View {
         VStack(spacing: 0) {
             if let c = contract {
                 VStack(spacing: 0) {
                     ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            contractHeader(c)
-                                .padding(.bottom, 14)
+                        VStack(alignment: .leading, spacing: 0) {
+                            contractCardHeader(c)
 
-                            currentStyleBadge
-                                .padding(.bottom, 10)
-
-                            contractRateCards(c)
-                                .padding(.bottom, 14)
-                            contractServicesSection(c)
-                            contractScheduleSection(c)
-                            contractDocumentSection(c)
+                            if isEditingContract {
+                                contractEditForm(c)
+                                    .padding(.top, 14)
+                            } else {
+                                contractReadingBody(c)
+                                    .padding(.top, 14)
+                            }
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 18)
                         .padding(.top, 18)
-                        .padding(.bottom, 12)
+                        .padding(.bottom, 14)
                     }
 
                     Button { showEmailSheet = true } label: {
@@ -58,520 +58,501 @@ extension VisitDetailView {
         }
     }
 
-    func contractHeader(_ c: VisitContract) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isElegant = layout == .elegant
-        let isProfessional = layout == .professional
-        let titleFont: Font = isClassic ? .system(size: 18, weight: .bold, design: .serif) : (isElegant ? .system(size: 18, weight: .heavy) : .system(size: 17, weight: .bold))
+    // MARK: - Card header (eyebrow + serif title + discreet menu)
 
-        return VStack(spacing: 0) {
-            if isProfessional || layout == .clinical {
-                Rectangle()
-                    .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
-                    .frame(height: 4)
-                    .cornerRadius(2)
-                    .padding(.bottom, 12)
-            }
-
-            if isElegant {
-                Rectangle()
-                    .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
-                    .frame(width: 50, height: 2)
-                    .padding(.bottom, 8)
-            }
-
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    if isEditingContract {
-                        TextField("Agreement title", text: $editContractTitle)
-                            .font(titleFont)
-                            .foregroundColor(.palmText)
-                    } else {
-                        Text(c.title ?? "Service Agreement")
-                            .font(titleFont)
-                            .foregroundColor(isElegant || isProfessional ? accent : .palmText)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.8)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    if let status = c.status, !isEditingContract {
-                        PalmStatusChip(text: status.capitalized, tone: status == "active" ? .success : .warning)
-                    }
-                }
-                Spacer()
-
-                if isEditingContract {
-                    Button {
-                        Task { await saveContractEdits() }
-                    } label: {
-                        HStack(spacing: 4) {
-                            if isSavingContract { ProgressView().scaleEffect(0.6).tint(accent) }
-                            Text("Save").font(.system(size: 12, weight: .semibold))
-                        }
-                        .foregroundColor(accent)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(accent.opacity(0.1))
-                        .cornerRadius(8)
-                    }
-                    .disabled(isSavingContract)
-                    Button("Cancel") { isEditingContract = false }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.palmSecondary)
-                } else {
-                    Button { beginContractEdit(c) } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 12))
-                            Text("Edit")
-                                .font(.system(size: 12, weight: .semibold))
-                        }
-                        .foregroundColor(accent)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(accent.opacity(0.1))
-                        .cornerRadius(8)
-                    }
-                    Menu {
-                        Button { showEmailSheet = true } label: {
-                            Label("Email Agreement", systemImage: "paperplane.fill")
-                        }
-                        Divider()
-                        Button { Task { await exportFile(type: "contract.pdf") } } label: {
-                            Label("Download PDF", systemImage: "arrow.down.doc.fill")
-                        }
-                        Button { Task { await exportFile(type: "contract.docx") } } label: {
-                            Label("Download DOCX", systemImage: "doc.fill")
-                        }
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(accent)
-                            .frame(width: 36, height: 36)
-                            .background(accent.opacity(0.08))
-                            .cornerRadius(isClassic ? 4 : 10)
-                    }
+    private func contractCardHeader(_ c: VisitContract) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                contractSectionLabel(contractEyebrowText)
+                Spacer(minLength: 8)
+                if !isEditingContract {
+                    contractHeaderMenu(c)
                 }
             }
 
             if isEditingContract {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text("Hourly rate")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmSecondary)
-                        TextField("28", text: $editContractRate)
-                            .keyboardType(.decimalPad)
-                            .font(.system(size: 13, weight: .semibold))
-                            .padding(8)
-                            .background(Color.white.opacity(0.75))
-                            .cornerRadius(8)
-                        Text("Weekly hours")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmSecondary)
-                        TextField("12", text: $editContractHours)
-                            .keyboardType(.decimalPad)
-                            .font(.system(size: 13, weight: .semibold))
-                            .padding(8)
-                            .background(Color.white.opacity(0.75))
-                            .cornerRadius(8)
-                    }
-                    Text("Terms")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.palmSecondary)
-                    TextField("Terms and conditions", text: $editContractTerms, axis: .vertical)
+                TextField("Agreement title", text: $editContractTitle)
+                    .font(.system(size: 22, weight: .semibold, design: .serif))
+                    .foregroundColor(.palmText)
+            } else {
+                Text(contractDisplayTitle(c))
+                    .font(.system(size: 22, weight: .semibold, design: .serif))
+                    .foregroundColor(.palmText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !isEditingContract {
+                Text(contractEffectiveLine(c))
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let status = c.status {
+                    PalmStatusChip(text: status.capitalized, tone: status == "active" ? .success : .warning)
+                        .padding(.top, 2)
+                }
+            }
+        }
+    }
+
+    private func contractHeaderMenu(_ c: VisitContract) -> some View {
+        Menu {
+            Button { beginContractEdit(c) } label: {
+                Label("Edit Agreement", systemImage: "pencil")
+            }
+            Button { showEmailSheet = true } label: {
+                Label("Email Agreement", systemImage: "paperplane.fill")
+            }
+            Divider()
+            Button { Task { await exportFile(type: "contract.pdf") } } label: {
+                Label("Download PDF", systemImage: "arrow.down.doc.fill")
+            }
+            Button { Task { await exportFile(type: "contract.docx") } } label: {
+                Label("Download DOCX", systemImage: "doc.fill")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.palmPrimary)
+                .frame(width: 32, height: 32)
+                .background(Circle().fill(Color.palmPrimary.opacity(0.08)))
+        }
+        .accessibilityLabel("Agreement options")
+    }
+
+    // MARK: - Reading body (Paper: PARTIES, numbered sections, SIGNATURES)
+
+    private func contractReadingBody(_ c: VisitContract) -> some View {
+        VStack(alignment: .leading, spacing: 22) {
+            contractPartiesSection(c)
+
+            ForEach(Array(contractSections(c).enumerated()), id: \.offset) { _, section in
+                VStack(alignment: .leading, spacing: 8) {
+                    contractSectionLabel(section.label)
+                    Text(section.body)
                         .font(.system(size: 13))
-                        .lineLimit(4...12)
-                        .padding(10)
-                        .background(Color.white.opacity(0.75))
-                        .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
+                        .foregroundColor(.palmText)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.top, 10)
             }
 
-            if isClassic {
-                Rectangle().fill(accent).frame(height: 1).padding(.top, 10)
-            }
+            contractSignaturesSection
         }
     }
 
-    var currentStyleBadge: some View {
-        HStack(spacing: 6) {
-            Image(systemName: currentStyle.icon)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(currentStyle.accentColor)
-            Text("PALM service agreement")
-                .font(.system(size: 11, weight: .medium))
+    private func contractPartiesSection(_ c: VisitContract) -> some View {
+        let provider = contractProvider(c)
+        return VStack(alignment: .leading, spacing: 14) {
+            contractSectionLabel("Parties")
+
+            contractPartyBlock(
+                role: "Provider",
+                name: provider.name,
+                lines: [provider.address, provider.phone, provider.license].compactMap { $0 }
+            )
+
+            Rectangle()
+                .fill(Color.palmText.opacity(0.08))
+                .frame(height: 1)
+
+            contractPartyBlock(
+                role: "Client",
+                name: contractClientName,
+                lines: contractClientLines
+            )
+        }
+    }
+
+    private func contractPartyBlock(role: String, name: String, lines: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(role.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .tracking(0.6)
                 .foregroundColor(.palmSecondary)
-            Spacer()
+            Text(name)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.palmText)
+                .fixedSize(horizontal: false, vertical: true)
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                Text(line)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(currentStyle.accentColor.opacity(0.04))
-        .cornerRadius(8)
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(currentStyle.accentColor.opacity(0.1), lineWidth: 1))
     }
 
-    func contractRateCards(_ c: VisitContract) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isMinimal = layout == .minimal
-        let isElegant = layout == .elegant
-        let radius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
-        let valueFont: Font = isClassic ? .system(size: 20, weight: .bold, design: .serif) : (isElegant ? .system(size: 22, weight: .heavy) : .system(size: 20, weight: .bold))
+    private var contractSignaturesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            contractSectionLabel("Signatures")
 
-        return HStack(spacing: isMinimal ? 1 : 10) {
-            if let rate = c.hourly_rate {
-                VStack(spacing: 4) {
-                    Text("$\(String(format: "%.2f", rate))")
-                        .font(valueFont)
-                        .foregroundColor(accent)
-                    Text("per hour")
-                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
-                        .foregroundColor(.palmSecondary)
+            Text("By signing below, both parties agree to the services, schedule, rates, and terms described in this agreement.")
+                .font(.system(size: 13))
+                .foregroundColor(.palmText)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            contractSignatureLine(
+                label: "Client or authorized representative",
+                hint: "Signature and date"
+            )
+            contractSignatureLine(
+                label: "Agency representative",
+                hint: "Signature, printed name, and title"
+            )
+        }
+    }
+
+    private func contractSignatureLine(label: String, hint: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Rectangle()
+                .fill(Color.palmText.opacity(0.28))
+                .frame(height: 1)
+                .padding(.top, 18)
+            Text(label)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.palmText)
+            Text(hint)
+                .font(.system(size: 11))
+                .foregroundColor(.palmSecondary)
+        }
+    }
+
+    // MARK: - Edit form (preserves existing edit/save)
+
+    private func contractEditForm(_ c: VisitContract) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Hourly rate")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+                TextField("28", text: $editContractRate)
+                    .keyboardType(.decimalPad)
+                    .font(.system(size: 13, weight: .semibold))
+                    .padding(8)
+                    .background(Color.white.opacity(0.75))
+                    .cornerRadius(8)
+                Text("Weekly hours")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+                TextField("12", text: $editContractHours)
+                    .keyboardType(.decimalPad)
+                    .font(.system(size: 13, weight: .semibold))
+                    .padding(8)
+                    .background(Color.white.opacity(0.75))
+                    .cornerRadius(8)
+            }
+
+            Text("Terms")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.palmSecondary)
+            TextField("Terms and conditions", text: $editContractTerms, axis: .vertical)
+                .font(.system(size: 13))
+                .lineLimit(4...12)
+                .padding(10)
+                .background(Color.white.opacity(0.75))
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmGlassBorder, lineWidth: 1))
+
+            HStack(spacing: 10) {
+                Button {
+                    Task { await saveContractEdits() }
+                } label: {
+                    HStack(spacing: 6) {
+                        if isSavingContract { ProgressView().scaleEffect(0.6).tint(.palmPrimary) }
+                        Text("Save changes").font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundColor(.palmPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.palmPrimary.opacity(0.1))
+                    .cornerRadius(10)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isMinimal ? Color.clear : accent.opacity(0.06))
-                .cornerRadius(radius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: radius)
-                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.15), lineWidth: isMinimal ? 0.5 : 1)
-                )
+                .disabled(isSavingContract)
+
+                Button("Cancel") { isEditingContract = false }
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmSecondary)
+
+                Spacer()
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    // MARK: - Derived content
+
+    private func contractDisplayTitle(_ c: VisitContract) -> String {
+        let title = (c.title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        // Prefer the Paper serif title; only keep a bespoke title if the agency
+        // renamed it to something other than the generic default.
+        if title.isEmpty || title.lowercased().contains("service agreement") {
+            return "Home Care Service Agreement"
+        }
+        return title
+    }
+
+    var contractEyebrowText: String {
+        if let state = contractStateName {
+            return "\(state) · Private Pay"
+        }
+        return "Private Pay"
+    }
+
+    /// Full uppercase state name from the client's two-letter code (e.g. "FL" → "FLORIDA").
+    var contractStateName: String? {
+        let raw = (visit?.client?.state ?? "").trimmingCharacters(in: .whitespaces)
+        guard !raw.isEmpty else { return nil }
+        if raw.count == 2, let name = Self.usStateNames[raw.uppercased()] {
+            return name.uppercased()
+        }
+        return raw.uppercased()
+    }
+
+    var contractClientName: String {
+        visit?.client?.full_name ?? clientName ?? "Client"
+    }
+
+    /// Client address + emergency contact lines for the PARTIES block.
+    var contractClientLines: [String] {
+        var lines: [String] = []
+        if let client = visit?.client {
+            let cityLine = [client.city, client.state, client.zip_code]
+                .compactMap { $0?.trimmingCharacters(in: .whitespaces) }
+                .filter { !$0.isEmpty }
+                .joined(separator: ", ")
+            let address = [client.address?.trimmingCharacters(in: .whitespaces), cityLine.isEmpty ? nil : cityLine]
+                .compactMap { $0 }
+                .filter { !$0.isEmpty }
+                .joined(separator: ", ")
+            if !address.isEmpty { lines.append(address) }
+            if let phone = client.phone, !phone.isEmpty {
+                lines.append(phone.palmFormattedPhone)
+            }
+            if let ec = client.emergency_contact_name, !ec.isEmpty {
+                var emergency = "Emergency: \(ec)"
+                if let ecPhone = client.emergency_contact_phone, !ecPhone.isEmpty {
+                    emergency += " · \(ecPhone.palmFormattedPhone)"
+                }
+                lines.append(emergency)
+            }
+        }
+        return lines
+    }
+
+    private func contractEffectiveLine(_ c: VisitContract) -> String {
+        let date = contractEffectiveDate(c)
+        let provider = contractProvider(c)
+        let agency = provider.name.trimmingCharacters(in: .whitespaces)
+        if !agency.isEmpty, agency.lowercased() != "home care services agency" {
+            return "Effective \(date). \(agency) and \(contractClientName)."
+        }
+        return "Effective \(date). Prepared for \(contractClientName)."
+    }
+
+    private func contractEffectiveDate(_ c: VisitContract) -> String {
+        // Prefer the contract's own start date, then the effective line inside
+        // the generated body, then the created timestamp, then today.
+        if let start = c.start_date, let formatted = formatContractDate(start) {
+            return formatted
+        }
+        if let content = c.content,
+           let range = content.range(of: "entered into on ") {
+            let after = content[range.upperBound...]
+            let line = after.prefix(while: { $0 != "\n" }).trimmingCharacters(in: .whitespaces)
+            if !line.isEmpty { return line }
+        }
+        if let created = c.created_at, let formatted = formatContractDate(created) {
+            return formatted
+        }
+        return Date().formatted(.dateTime.month(.wide).day().year())
+    }
+
+    private func formatContractDate(_ raw: String) -> String? {
+        let dayOnly = DateFormatter()
+        dayOnly.dateFormat = "yyyy-MM-dd"
+        dayOnly.locale = Locale(identifier: "en_US_POSIX")
+        if let d = dayOnly.date(from: String(raw.prefix(10))) {
+            return d.formatted(.dateTime.month(.wide).day().year())
+        }
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = iso.date(from: raw) {
+            return d.formatted(.dateTime.month(.wide).day().year())
+        }
+        iso.formatOptions = [.withInternetDateTime]
+        if let d = iso.date(from: raw) {
+            return d.formatted(.dateTime.month(.wide).day().year())
+        }
+        return nil
+    }
+
+    struct ContractProvider {
+        let name: String
+        let address: String?
+        let phone: String?
+        let license: String?
+    }
+
+    /// Parses the Provider block from the generated agreement text. Falls back
+    /// to a neutral label when the body has no structured provider info.
+    func contractProvider(_ c: VisitContract) -> ContractProvider {
+        var name: String?
+        var address: String?
+        var phone: String?
+        var license: String?
+
+        if let content = c.content {
+            var inProvider = false
+            for rawLine in content.components(separatedBy: "\n") {
+                let line = rawLine.trimmingCharacters(in: .whitespaces)
+                if line.hasPrefix("Service Provider:") {
+                    name = String(line.dropFirst("Service Provider:".count)).trimmingCharacters(in: .whitespaces)
+                    inProvider = true
+                    continue
+                }
+                if line == "AND" || line.hasPrefix("Client:") { inProvider = false }
+                guard inProvider else { continue }
+                if line.hasPrefix("Address:") {
+                    let v = String(line.dropFirst("Address:".count)).trimmingCharacters(in: .whitespaces)
+                    if !v.isEmpty { address = v }
+                } else if line.hasPrefix("Phone:") {
+                    let v = String(line.dropFirst("Phone:".count)).trimmingCharacters(in: .whitespaces)
+                    if !v.isEmpty { phone = v }
+                } else if line.hasPrefix("License") {
+                    license = line
+                }
+            }
+        }
+
+        return ContractProvider(
+            name: (name?.isEmpty == false ? name! : "Home care agency"),
+            address: address,
+            phone: phone.map { "Phone: \($0)" },
+            license: license
+        )
+    }
+
+    struct ContractReadingSection {
+        let label: String
+        let body: String
+    }
+
+    /// Numbered sections from the agreement body (SERVICES, SCHEDULE, RATES,
+    /// CANCELLATION, …). Falls back to synthesized sections from the structured
+    /// services / schedule / rate fields when the body isn't parseable.
+    func contractSections(_ c: VisitContract) -> [ContractReadingSection] {
+        if let content = c.content, !content.isEmpty {
+            let parsed = parseNumberedSections(content)
+            if !parsed.isEmpty { return parsed }
+        }
+        return fallbackContractSections(c)
+    }
+
+    private func parseNumberedSections(_ content: String) -> [ContractReadingSection] {
+        var sections: [ContractReadingSection] = []
+        var currentLabel: String?
+        var body: [String] = []
+
+        func flush() {
+            guard let label = currentLabel else { return }
+            let text = body.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !text.isEmpty {
+                sections.append(ContractReadingSection(label: label, body: text))
+            }
+        }
+
+        for rawLine in content.components(separatedBy: "\n") {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("====") || line.hasPrefix("----") { continue }
+            // Match "1. SERVICES TO BE PROVIDED" or "1A. SERVICES NOT INCLUDED".
+            if line.range(of: #"^\d+[A-Z]?\.\s+[A-Z]"#, options: .regularExpression) != nil {
+                flush()
+                currentLabel = line
+                    .replacingOccurrences(of: #"^\d+[A-Z]?\.\s+"#, with: "", options: .regularExpression)
+                    .capitalized
+                body = []
+            } else if currentLabel != nil {
+                body.append(rawLine)
+            }
+        }
+        flush()
+        return sections
+    }
+
+    private func fallbackContractSections(_ c: VisitContract) -> [ContractReadingSection] {
+        var out: [ContractReadingSection] = []
+
+        // Services
+        if let services = c.services, !services.isEmpty {
+            let lines = services.compactMap { item -> String? in
+                guard let dict = item.value as? [String: Any] else { return nil }
+                let name = dict["name"] as? String ?? dict["service"] as? String ?? "Service"
+                let freq = (dict["frequency"] as? String).map { " — \($0)" } ?? ""
+                let desc = (dict["description"] as? String).map { ": \($0)" } ?? ""
+                return "• \(name)\(desc)\(freq)"
+            }
+            if !lines.isEmpty {
+                out.append(ContractReadingSection(label: "Services", body: lines.joined(separator: "\n")))
+            }
+        }
+
+        // Schedule
+        if let sched = c.schedule, !sched.isEmpty {
+            var lines: [String] = []
+            if let freq = sched["frequency"]?.value as? String, !freq.isEmpty {
+                lines.append("Frequency: \(freq)")
             }
             if let hours = c.weekly_hours {
-                VStack(spacing: 4) {
-                    Text("\(String(format: "%.0f", hours))h")
-                        .font(valueFont)
-                        .foregroundColor(accent.opacity(0.75))
-                    Text("per week")
-                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
-                        .foregroundColor(.palmSecondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isMinimal ? Color.clear : accent.opacity(0.04))
-                .cornerRadius(radius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: radius)
-                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.12), lineWidth: isMinimal ? 0.5 : 1)
-                )
+                lines.append("Hours per week: \(String(format: "%.0f", hours))")
             }
-            if let rate = c.hourly_rate, let hours = c.weekly_hours {
-                VStack(spacing: 4) {
-                    Text("$\(String(format: "%.0f", rate * hours))")
-                        .font(valueFont)
-                        .foregroundColor(accent)
-                    Text("per week")
-                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
-                        .foregroundColor(.palmSecondary)
+            if let hoursList = sched["service_hours"]?.value as? [[String: Any]] {
+                for sh in hoursList {
+                    let svc = sh["service"] as? String ?? "Service"
+                    let hrs = sh["hours_per_week"] as? Int ?? (sh["hours_per_week"] as? Double).map { Int($0) } ?? 0
+                    lines.append("• \(svc): \(hrs) hrs/wk")
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isMinimal ? Color.clear : accent.opacity(0.06))
-                .cornerRadius(radius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: radius)
-                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.15), lineWidth: isMinimal ? 0.5 : 1)
-                )
+            }
+            if !lines.isEmpty {
+                out.append(ContractReadingSection(label: "Schedule", body: lines.joined(separator: "\n")))
             }
         }
+
+        // Rates
+        var rateLines: [String] = []
+        if let rate = c.hourly_rate {
+            rateLines.append("Hourly rate: $\(String(format: "%.2f", rate))")
+        }
+        if let rate = c.hourly_rate, let hours = c.weekly_hours {
+            rateLines.append("Estimated weekly cost: $\(String(format: "%.2f", rate * hours))")
+            rateLines.append("Estimated monthly cost: $\(String(format: "%.2f", rate * hours * 4.33))")
+        }
+        if !rateLines.isEmpty {
+            out.append(ContractReadingSection(label: "Rates", body: rateLines.joined(separator: "\n")))
+        }
+
+        // Cancellation
+        if let policy = c.cancellation_policy?.trimmingCharacters(in: .whitespacesAndNewlines), !policy.isEmpty {
+            out.append(ContractReadingSection(label: "Cancellation", body: policy))
+        }
+
+        // Terms (only if we have no structured sections at all, keep body useful)
+        if out.isEmpty, let terms = (c.terms_and_conditions ?? c.content)?.trimmingCharacters(in: .whitespacesAndNewlines), !terms.isEmpty {
+            out.append(ContractReadingSection(label: "Terms", body: terms))
+        }
+
+        return out
     }
 
-    func contractServicesSection(_ c: VisitContract) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isMinimal = layout == .minimal
-        let isElegant = layout == .elegant
-        let isProfessional = layout == .professional
-        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
-        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
+    // MARK: - Shared bits
 
-        return Group {
-            if let services = c.services, !services.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    if isProfessional || layout == .clinical {
-                        Rectangle().fill(accent).frame(height: 3).cornerRadius(1.5)
-                    }
-
-                    HStack(spacing: 6) {
-                        if !isMinimal {
-                            Image(systemName: layout == .clinical ? "cross.case.fill" : "list.clipboard.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(accent)
-                        }
-                        Text("Services")
-                            .font(headingFont)
-                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
-                        Spacer()
-                        Text("\(services.count) services")
-                            .font(.system(size: 12, design: isClassic ? .serif : .default))
-                            .foregroundColor(.palmSecondary)
-                    }
-
-                    if isMinimal {
-                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
-                    }
-
-                    ForEach(Array(services.enumerated()), id: \.offset) { _, svc in
-                        if let dict = svc.value as? [String: Any] {
-                            let name = dict["name"] as? String ?? "Service"
-                            let desc = dict["description"] as? String ?? ""
-                            let freq = dict["frequency"] as? String
-                            let priority = dict["priority"] as? String
-
-                            HStack(alignment: .top, spacing: 10) {
-                                if !isMinimal {
-                                    Image(systemName: serviceIcon(for: name))
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(accent)
-                                        .frame(width: 28, height: 28)
-                                        .background(accent.opacity(0.08))
-                                        .cornerRadius(isClassic ? 4 : 7)
-                                }
-
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack {
-                                        Text(name)
-                                            .font(.system(size: 13, weight: .semibold, design: isClassic ? .serif : .default))
-                                            .foregroundColor(.palmText)
-                                        Spacer()
-                                        if let p = priority {
-                                            Text(p)
-                                                .font(.system(size: 10, weight: .bold))
-                                                .foregroundColor(p == "High" ? .red : (p == "Medium" ? .palmOrange : .palmSecondary))
-                                                .padding(.horizontal, 6)
-                                                .padding(.vertical, 2)
-                                                .background((p == "High" ? Color.red : (p == "Medium" ? Color.palmOrange : Color.palmSecondary)).opacity(0.08))
-                                                .cornerRadius(isClassic ? 2 : 4)
-                                        }
-                                    }
-                                    if !desc.isEmpty {
-                                        Text(desc)
-                                            .font(.system(size: 12, design: isClassic ? .serif : .default))
-                                            .foregroundColor(.palmSecondary)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                    if let f = freq {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "clock").font(.system(size: 10))
-                                            Text(f).font(.system(size: 11, weight: .medium))
-                                        }
-                                        .foregroundColor(accent.opacity(0.8))
-                                    }
-                                }
-                            }
-                            .padding(isMinimal ? 8 : 12)
-                            .background(isMinimal ? Color.clear : Color.white.opacity(0.4))
-                            .cornerRadius(isClassic ? 4 : 10)
-
-                            if isMinimal {
-                                Rectangle().fill(Color.gray.opacity(0.08)).frame(height: 0.5)
-                            }
-                        }
-                    }
-                }
-                .padding(14)
-                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
-                .cornerRadius(sectionRadius)
-                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
-                .overlay(
-                    RoundedRectangle(cornerRadius: sectionRadius)
-                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
-                )
-                .padding(.bottom, 14)
-            }
-        }
-    }
-
-    func contractScheduleSection(_ c: VisitContract) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isMinimal = layout == .minimal
-        let isElegant = layout == .elegant
-        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
-        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
-
-        return Group {
-            if let sched = c.schedule, !sched.isEmpty {
-                let freq = (sched["frequency"]?.value as? String) ?? ""
-                let serviceHours = sched["service_hours"]?.value as? [[String: Any]]
-                let rationale = sched["rationale"]?.value as? String
-
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 6) {
-                        if !isMinimal {
-                            Image(systemName: "calendar.badge.clock")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(accent)
-                        }
-                        Text("Schedule")
-                            .font(headingFont)
-                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
-                    }
-
-                    if isMinimal {
-                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
-                    }
-
-                    if !freq.isEmpty {
-                        HStack(spacing: 8) {
-                            Image(systemName: "repeat").font(.system(size: 12)).foregroundColor(accent)
-                            Text("Frequency: \(freq)")
-                                .font(.system(size: 13, weight: .medium, design: isClassic ? .serif : .default))
-                                .foregroundColor(.palmText)
-                        }
-                    }
-
-                    if let hours = serviceHours, !hours.isEmpty {
-                        ForEach(Array(hours.enumerated()), id: \.offset) { _, sh in
-                            let svc = sh["service"] as? String ?? "Service"
-                            let hrs = sh["hours_per_week"] as? Int ?? (sh["hours_per_week"] as? Double).map { Int($0) } ?? 0
-                            let level = sh["need_level"] as? String ?? ""
-
-                            HStack {
-                                Text(svc)
-                                    .font(.system(size: 12, weight: .medium, design: isClassic ? .serif : .default))
-                                    .foregroundColor(.palmText)
-                                Spacer()
-                                if !level.isEmpty {
-                                    Text(level.capitalized)
-                                        .font(.system(size: 10, weight: .semibold))
-                                        .foregroundColor(.palmSecondary)
-                                }
-                                Text("\(hrs) hrs/wk")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(accent)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(isMinimal ? Color.clear : Color.white.opacity(0.4))
-                            .cornerRadius(isClassic ? 4 : 8)
-                        }
-                    }
-
-                    if let r = rationale, !r.isEmpty {
-                        Text(r)
-                            .font(.system(size: 12, design: isClassic ? .serif : .default))
-                            .foregroundColor(.palmSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 4)
-                    }
-                }
-                .padding(14)
-                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
-                .cornerRadius(sectionRadius)
-                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
-                .overlay(
-                    RoundedRectangle(cornerRadius: sectionRadius)
-                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
-                )
-                .padding(.bottom, 14)
-            }
-        }
-    }
-
-    func contractDocumentSection(_ c: VisitContract) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isMinimal = layout == .minimal
-        let isElegant = layout == .elegant
-        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
-        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
-
-        return Group {
-            if let content = c.content, !content.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 6) {
-                        if !isMinimal {
-                            Image(systemName: "doc.text.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(accent.opacity(0.6))
-                        }
-                        Text("Full Agreement")
-                            .font(headingFont)
-                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
-                        Spacer()
-                        Button { showFullContract.toggle() } label: {
-                            HStack(spacing: 4) {
-                                Text(showFullContract ? "Collapse" : "View")
-                                    .font(.system(size: 12, weight: .medium))
-                                Image(systemName: showFullContract ? "chevron.up" : "chevron.down")
-                                    .font(.system(size: 10, weight: .bold))
-                            }
-                            .foregroundColor(accent)
-                        }
-                    }
-
-                    if isMinimal {
-                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
-                    }
-
-                    if showFullContract {
-                        contractFormattedContent(content)
-                    } else {
-                        let preview = String(content.prefix(200)).trimmingCharacters(in: .whitespacesAndNewlines)
-                        Text(content.count > 200 ? preview + "..." : preview)
-                            .font(.system(size: 12, design: isClassic ? .serif : .default))
-                            .foregroundColor(.palmSecondary)
-                            .lineLimit(4)
-                    }
-                }
-                .padding(14)
-                .background(isMinimal ? Color.clear : Color.white.opacity(0.55))
-                .cornerRadius(sectionRadius)
-                .shadow(color: isMinimal ? .clear : PalmGlass.shadow, radius: 8, y: 4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: sectionRadius)
-                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
-                )
-            }
-        }
-    }
-
-    func contractFormattedContent(_ content: String) -> some View {
-        let accent = currentStyle.accentColor
-        let layout = currentStyle.layoutType
-        let isClassic = layout == .classic
-        let isElegant = layout == .elegant
-        let sections = parseContractSections(content)
-
-        return VStack(alignment: .leading, spacing: 16) {
-            ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
-                VStack(alignment: .leading, spacing: 6) {
-                    if !section.heading.isEmpty {
-                        if isElegant {
-                            Text(section.heading)
-                                .font(.system(size: 14, weight: .heavy))
-                                .foregroundColor(accent)
-                                .padding(.bottom, 2)
-                            Rectangle()
-                                .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
-                                .frame(height: 1.5)
-                                .frame(maxWidth: 80)
-                        } else {
-                            Text(section.heading)
-                                .font(.system(size: 14, weight: .bold, design: isClassic ? .serif : .default))
-                                .foregroundColor(accent)
-                                .padding(.bottom, 2)
-                            Divider()
-                        }
-                    }
-                    Text(section.body)
-                        .font(.system(size: 12, design: isClassic ? .serif : .default))
-                        .foregroundColor(.palmText)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(isClassic ? 4 : 3)
-                }
-            }
-        }
+    /// Teal section eyebrow matching Paper (#0D9488, 11px, tracking ~0.08em).
+    private func contractSectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .tracking(0.88)
+            .foregroundColor(.palmPrimary)
     }
 
     func serviceIcon(for name: String) -> String {
@@ -586,59 +567,6 @@ extension VisitDetailView {
         if lower.contains("safety") { return "shield.checkered" }
         if lower.contains("mobility") { return "figure.walk" }
         return "cross.case.fill"
-    }
-
-    struct ContractSection {
-        let heading: String
-        let body: String
-    }
-
-    func parseContractSections(_ content: String) -> [ContractSection] {
-        let lines = content.components(separatedBy: "\n")
-        var sections: [ContractSection] = []
-        var currentHeading = ""
-        var currentBody: [String] = []
-
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("====") || trimmed.hasPrefix("----") { continue }
-            let isSectionHeader = !trimmed.isEmpty &&
-                (trimmed == trimmed.uppercased() && trimmed.count > 3 && trimmed.rangeOfCharacter(from: .letters) != nil) ||
-                trimmed.range(of: #"^\d+\.\s+[A-Z]"#, options: .regularExpression) != nil
-
-            if isSectionHeader {
-                if !currentHeading.isEmpty || !currentBody.isEmpty {
-                    let bodyText = currentBody.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !bodyText.isEmpty || !currentHeading.isEmpty {
-                        sections.append(ContractSection(heading: currentHeading, body: bodyText))
-                    }
-                }
-                currentHeading = trimmed.replacingOccurrences(of: #"^\d+\.\s+"#, with: "", options: .regularExpression)
-                    .capitalized
-                currentBody = []
-            } else {
-                currentBody.append(line)
-            }
-        }
-        if !currentHeading.isEmpty || !currentBody.isEmpty {
-            let bodyText = currentBody.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-            if !bodyText.isEmpty { sections.append(ContractSection(heading: currentHeading, body: bodyText)) }
-        }
-        return sections
-    }
-
-    func miniStat(label: String, value: String, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(color)
-            Text(label)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(.palmSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .palmGlassCard(radius: 18)
     }
 
     func beginContractEdit(_ c: VisitContract) {
@@ -673,4 +601,20 @@ extension VisitDetailView {
             }
         }
     }
+
+    static let usStateNames: [String: String] = [
+        "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+        "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+        "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
+        "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+        "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+        "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
+        "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
+        "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
+        "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+        "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+        "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
+        "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
+        "WI": "Wisconsin", "WY": "Wyoming", "DC": "District of Columbia"
+    ]
 }
