@@ -672,7 +672,7 @@ export default function DocumentsPage() {
                           unassigned ? 'bg-slate-100 text-slate-500' : 'bg-[#0D94881A] text-primary-700'
                         }`}
                       >
-                        {clientInitials(clientName)}
+                        {unassigned ? <User className="w-5 h-5" /> : clientInitials(clientName)}
                       </div>
                       <div className="grow min-w-0 flex flex-col gap-0.5">
                         <span className="text-[16px] leading-tight font-semibold text-[#10211F] truncate">
