@@ -167,8 +167,9 @@ export default function GlassRail() {
         />
       )}
 
-      {/* Sticky must live on the flex-flow wrapper, not only the inner aside */}
-      <div className="hidden md:block sticky top-0 h-screen shrink-0 self-start z-20">
+      {/* Fixed rail: html/body overflow-x:hidden breaks position:sticky */}
+      <div className="hidden md:block w-[240px] shrink-0" aria-hidden="true" />
+      <div className="hidden md:block fixed top-0 left-0 h-screen z-20">
         {rail}
       </div>
 
