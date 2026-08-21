@@ -38,6 +38,7 @@ export default function NewVisitPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [audioProcessing, setAudioProcessing] = useState(false);
   
   // Form state
   const [selectedClient, setSelectedClient] = useState<string>('');
@@ -371,8 +372,10 @@ export default function NewVisitPage() {
                 visitId={createdVisit.id}
                 token={token!}
                 onUploadComplete={handleUploadComplete}
+                onProcessingChange={setAudioProcessing}
               />
               
+              {!audioProcessing && (
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setStep('source')}
@@ -388,6 +391,7 @@ export default function NewVisitPage() {
                   Skip for now
                 </button>
               </div>
+              )}
             </div>
           )}
 

@@ -20,11 +20,14 @@ import {
   Trash2,
   FileSpreadsheet,
   UserPlus,
-  Check
+  Check,
+  CalendarClock
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import { api } from '@/lib/api';
+import { api, bearerHeaders } from '@/lib/api';
+import { upsertFollowUp, removeFollowUp } from '@/lib/followUpSync';
 import ClientModal from '@/components/ClientModal';
+import FollowUpNoteModal, { FollowUpClient } from '@/components/FollowUpNoteModal';
 import PalmAgent from '@/components/PalmAgent';
 import GlassShell from '@/components/GlassShell';
 import GlassTabs from '@/components/GlassTabs';
@@ -54,6 +57,7 @@ export default function ClientsPage() {
   const { token, isReady } = useRequireAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'clients' | 'leads' | 'assessments' | 'care'>('clients');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
@@ -61,6 +65,7 @@ export default function ClientsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [followUpClient, setFollowUpClient] = useState<FollowUpClient | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const [csvImporting, setCsvImporting] = useState(false);
@@ -111,10 +116,12 @@ export default function ClientsPage() {
   const loadClients = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const data = await api.getClients(token!);
-      setClients(data);
-    } catch {
-      // Failed to load clients — empty list will be shown
+      setClients(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setClients([]);
+      setLoadError(err instanceof Error ? err.message : 'Failed to load clients');
     } finally {
       setLoading(false);
     }
@@ -139,8 +146,9 @@ export default function ClientsPage() {
       method: clientData.id ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        ...bearerHeaders(token),
       },
+      credentials: 'include',
       body: JSON.stringify(clientData),
     });
 
@@ -157,8 +165,9 @@ export default function ClientsPage() {
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          ...bearerHeaders(token),
         },
+        credentials: 'include',
       }
     );
 
@@ -213,7 +222,8 @@ export default function ClientsPage() {
         try {
           const res = await fetch(`${API_BASE}/clients`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json', ...bearerHeaders(token) },
+            credentials: 'include',
             body: JSON.stringify(clientData),
           });
           if (res.ok) success++; else failed++;
@@ -314,8 +324,9 @@ export default function ClientsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...bearerHeaders(token),
         },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
       if (response.ok) {
@@ -323,11 +334,37 @@ export default function ClientsPage() {
         setClients(prev => prev.map(c => 
           c.id === clientId ? { ...c, status: newStatus } : c
         ));
+        // Keep Calendar in sync: entering follow-up adds a calendar follow-up,
+        // leaving it clears the one we created.
+        const moved = clients.find(c => c.id === clientId);
+        if (moved) {
+          if (newStatus === 'follow_up') {
+            upsertFollowUp({
+              clientId,
+              clientName: moved.full_name,
+              note: moved.follow_up_note || '',
+              date: moved.follow_up_at ? moved.follow_up_at.slice(0, 10) : undefined,
+              token,
+            });
+          } else {
+            removeFollowUp(clientId, { token });
+          }
+        }
       }
     } catch {
       // Failed to move client — reload to restore correct state
       loadClients();
     }
+  };
+
+  const handleOpenFollowUp = (client: Client) => {
+    setFollowUpClient({
+      id: client.id,
+      full_name: client.full_name,
+      status: client.status,
+      follow_up_note: client.follow_up_note,
+      follow_up_at: client.follow_up_at,
+    });
   };
 
   // Stats
@@ -463,10 +500,21 @@ export default function ClientsPage() {
                 className={`glass-pill ${insuranceFilter === pill.key ? 'glass-pill-active' : ''}`}
               >
                 {pill.label}
-                <span className="ml-1.5 text-[11px] opacity-70">{pill.count}</span>
+                <span className="ml-1.5 text-[11px] opacity-70">
+                  {loading ? '…' : pill.count}
+                </span>
               </button>
             ))}
           </div>
+
+          {loadError && (
+            <div className="glass-panel px-4 py-3 flex flex-wrap items-center justify-between gap-3 border border-red-200/80 bg-red-50/70">
+              <p className="text-sm text-red-700">{loadError}. Check your connection and try again.</p>
+              <button type="button" onClick={loadClients} className="glass-btn-primary h-9 text-sm">
+                Retry
+              </button>
+            </div>
+          )}
 
           {/* Paper glass toolbar: section tabs + search */}
           <div className="glass-toolbar flex-wrap py-2 sm:py-0">
@@ -517,6 +565,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -539,6 +588,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -561,6 +611,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -583,6 +634,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -605,6 +657,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -626,6 +679,7 @@ export default function ClientsPage() {
                         client={client} 
                         onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
+                        onFollowUp={() => handleOpenFollowUp(client)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
@@ -749,6 +803,17 @@ export default function ClientsPage() {
                                     {client.primary_diagnosis}
                                   </span>
                                 )}
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleOpenFollowUp(client); }}
+                                  className={`p-1 rounded transition-colors ${
+                                    (client.follow_up_note || client.follow_up_at)
+                                      ? 'text-primary-500 bg-primary-50'
+                                      : 'text-slate-400 hover:text-primary-500 hover:bg-primary-50'
+                                  }`}
+                                  title={(client.follow_up_note || client.follow_up_at) ? 'Edit follow-up' : 'Add follow-up'}
+                                >
+                                  <CalendarClock className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -866,6 +931,15 @@ export default function ClientsPage() {
         isOpen={quickAddOpen}
         onClose={() => setQuickAddOpen(false)}
         onSave={handleSaveClient}
+      />
+
+      {/* Follow-up note + Calendar sync */}
+      <FollowUpNoteModal
+        isOpen={!!followUpClient}
+        onClose={() => setFollowUpClient(null)}
+        client={followUpClient}
+        token={token}
+        onSaved={loadClients}
       />
 
       <input

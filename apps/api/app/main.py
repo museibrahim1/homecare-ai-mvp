@@ -547,6 +547,25 @@ async def seed_database():
         logger.warning(f"executive_title migration: {e}")
         db.rollback()
 
+    # Add client follow-up columns (drives Calendar follow-up sync)
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "clients" in inspector.get_table_names():
+            client_cols = {c["name"] for c in inspector.get_columns("clients")}
+            client_new = {
+                "follow_up_note": "TEXT",
+                "follow_up_at": "TIMESTAMP WITH TIME ZONE",
+            }
+            for col_name, col_type in client_new.items():
+                if col_name not in client_cols:
+                    db.execute(sa_text(f'ALTER TABLE clients ADD COLUMN "{col_name}" {col_type}'))
+                    logger.info(f"Added column clients.{col_name}")
+            db.commit()
+    except Exception as e:
+        logger.warning(f"clients follow-up migration: {e}")
+        db.rollback()
+
     # Add calling_states column (territory assignments)
     try:
         from sqlalchemy import text as sa_text, inspect as sa_inspect

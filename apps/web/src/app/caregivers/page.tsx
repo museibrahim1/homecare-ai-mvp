@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Users, Plus, Search, Phone, ChevronRight, ChevronLeft,
-  MapPin, Star, Clock, Upload, AlertCircle, MessagesSquare
+  MapPin, Star, Clock, Upload, AlertCircle, MessagesSquare, UserPlus, X, Loader2, Mail
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import GlassShell from '@/components/GlassShell';
@@ -39,6 +39,15 @@ interface Caregiver {
   status?: string;
   notes?: string;
   background_check_status?: string;
+}
+
+interface StaffMember {
+  id: string;
+  full_name: string;
+  email: string;
+  role: string;
+  phone?: string | null;
+  is_active: boolean;
 }
 
 interface ExpiringCert {
@@ -85,26 +94,85 @@ export default function CaregiversPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [expiringCerts, setExpiringCerts] = useState<ExpiringCert[]>([]);
-  const [activeTab, setActiveTab] = useState<'members' | 'chat'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'staff' | 'chat'>('members');
   const pageSize = 25;
+
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [canInvite, setCanInvite] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'user' | 'caregiver'>('user');
+  const [inviting, setInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
       loadCaregivers();
       loadExpiringCerts();
+      loadStaff();
     }
   }, [token]);
+
+  const loadStaff = async () => {
+    if (!token) return;
+    setStaffLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/business/team`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStaff(Array.isArray(data.members) ? data.members : []);
+        setCanInvite(data.limits?.can_invite !== false);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setStaffLoading(false);
+    }
+  };
+
+  const handleInvite = async () => {
+    if (!token || !inviteEmail.trim() || !inviteName.trim()) return;
+    setInviting(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+    try {
+      const res = await fetch(
+        `${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(inviteEmail.trim())}&full_name=${encodeURIComponent(inviteName.trim())}&role=${inviteRole}`,
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` }, credentials: 'include' }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || 'Failed to send invitation');
+      setInviteSuccess(
+        data.temp_password
+          ? `Invite sent to ${inviteEmail}. Temporary password: ${data.temp_password}`
+          : `Invite sent to ${inviteEmail}.`
+      );
+      setInviteName('');
+      setInviteEmail('');
+      await loadStaff();
+    } catch (err: unknown) {
+      setInviteError(err instanceof Error ? err.message : 'Failed to send invitation');
+    } finally {
+      setInviting(false);
+    }
+  };
 
   // Read the active tab from the URL so ?tab=chat deep links (and the retired
   // /team-chat redirect) land on the chat surface
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab === 'chat' || tab === 'members') setActiveTab(tab);
+    if (tab === 'chat' || tab === 'members' || tab === 'staff') setActiveTab(tab);
   }, []);
 
   const handleTabChange = (key: string) => {
-    const tab = key === 'chat' ? 'chat' : 'members';
+    const tab = key === 'chat' || key === 'staff' ? key : 'members';
     setActiveTab(tab);
     const params = new URLSearchParams(window.location.search);
     params.set('tab', tab);
@@ -217,15 +285,30 @@ export default function CaregiversPage() {
         activeTab === 'members' ? (
           <>
             <button
+              type="button"
               onClick={() => router.push('/integrations')}
               className="inline-flex items-center gap-2 h-11 px-[18px] rounded-xl bg-white/70 hover:bg-white text-[#4B6B66] hover:text-[#10211F] border border-white text-sm font-medium transition-colors"
             >
               <Upload className="w-5 h-5" />Import
             </button>
-            <button onClick={handleAddNew} className="glass-btn-primary">
+            <button type="button" onClick={handleAddNew} className="glass-btn-primary">
               <Plus className="w-5 h-5" />Add Caregiver
             </button>
           </>
+        ) : activeTab === 'staff' ? (
+          <button
+            type="button"
+            onClick={() => {
+              setInviteError(null);
+              setInviteSuccess(null);
+              setShowInviteModal(true);
+            }}
+            className="glass-btn-primary"
+            disabled={!canInvite}
+            title={canInvite ? undefined : 'Plan seat limit reached. Upgrade in Settings.'}
+          >
+            <UserPlus className="w-5 h-5" />Invite teammate
+          </button>
         ) : undefined
       }
     >
@@ -234,7 +317,8 @@ export default function CaregiversPage() {
           <div className="mb-6">
             <GlassTabs
               tabs={[
-                { key: 'members', label: 'Members', icon: Users },
+                { key: 'members', label: 'Caregivers', icon: Users },
+                { key: 'staff', label: 'Staff', icon: UserPlus },
                 { key: 'chat', label: 'Chat', icon: MessagesSquare },
               ]}
               active={activeTab}
@@ -244,13 +328,74 @@ export default function CaregiversPage() {
 
           {activeTab === 'chat' ? (
             <TeamChatPanel />
+          ) : activeTab === 'staff' ? (
+          <>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+              <p className="text-red-600 text-sm flex-1">{error}</p>
+              <button type="button" onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            </div>
+          )}
+          <div className="glass-card p-6 mb-6">
+            <h2 className="text-lg font-semibold text-[#10211F] mb-1">Office staff</h2>
+            <p className="text-sm text-[#64748B] mb-5">
+              Invite coordinators and office teammates. They can sign in and use Team Chat.
+            </p>
+            {staffLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+              </div>
+            ) : staff.length === 0 ? (
+              <div className="text-center py-10">
+                <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <p className="text-[#10211F] font-medium">No staff accounts yet</p>
+                <p className="text-sm text-[#64748B] mt-1 mb-4">Invite a teammate to get started</p>
+                <button type="button" onClick={() => setShowInviteModal(true)} className="glass-btn-primary mx-auto" disabled={!canInvite}>
+                  <UserPlus className="w-4 h-4" />Invite teammate
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#10211F12]">
+                {staff.map((m) => (
+                  <div key={m.id} className="py-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-primary-500/15 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-primary-600">
+                          {m.full_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-[#10211F] truncate">{m.full_name}</p>
+                        <p className="text-sm text-[#64748B] truncate flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 shrink-0" />
+                          {m.email}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/80 text-[#4B6B66] border border-[#FFFFFFE0] capitalize">
+                        {m.role === 'user' ? 'Coordinator' : m.role}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                        m.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {m.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
           ) : (
           <>
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
               <p className="text-red-600 text-sm flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+              <button type="button" onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
             </div>
           )}
 
@@ -471,6 +616,75 @@ export default function CaregiversPage() {
         onSave={handleSaveCaregiver}
         onDelete={handleDeleteCaregiver}
       />
+
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#10211F]/40 backdrop-blur-sm" onClick={() => !inviting && setShowInviteModal(false)} />
+          <div className="relative glass-card w-full max-w-md !rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFFFFFE0]">
+              <h2 className="text-base font-semibold text-[#10211F]">Invite teammate</h2>
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(false)}
+                className="p-1.5 text-slate-500 hover:text-[#10211F] rounded-lg"
+                disabled={inviting}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              <p className="text-sm text-[#64748B]">
+                They get an account under your agency and can use Team Chat.
+              </p>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-semibold text-[#4B6B66]">Full name</span>
+                <input
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  className="glass-input"
+                  placeholder="Jordan Lee"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-semibold text-[#4B6B66]">Email</span>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="glass-input"
+                  placeholder="jordan@agency.com"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-semibold text-[#4B6B66]">Role</span>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as 'user' | 'caregiver')}
+                  className="glass-input"
+                >
+                  <option value="user">Coordinator</option>
+                  <option value="caregiver">Caregiver (login)</option>
+                </select>
+              </label>
+              {inviteError && (
+                <div className="p-3 rounded-xl bg-red-50 text-red-700 text-sm">{inviteError}</div>
+              )}
+              {inviteSuccess && (
+                <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 text-sm break-all">{inviteSuccess}</div>
+              )}
+              <button
+                type="button"
+                onClick={handleInvite}
+                disabled={inviting || !inviteName.trim() || !inviteEmail.trim()}
+                className="glass-btn-primary w-full disabled:opacity-50"
+              >
+                {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                {inviting ? 'Sending…' : 'Send invite'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

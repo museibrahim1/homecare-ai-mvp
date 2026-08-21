@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { CalendarClock, ChevronRight, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { Client } from './types';
 import { STATUS_CONFIG, CARE_SPECIALTY_OPTIONS, PRIORITY_OPTIONS } from './constants';
 
@@ -294,8 +294,9 @@ export function QuickAddModal({
 }
 
 // Avatar component with initials or image
-export function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+export function ClientAvatar({ name, size = 'md' }: { name?: string | null; size?: 'sm' | 'md' | 'lg' }) {
+  const safeName = (name || '').trim() || '?';
+  const initials = safeName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
   const colors = [
     'bg-blue-500',
     'bg-purple-500',
@@ -304,7 +305,7 @@ export function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' 
     'bg-indigo-500',
     'bg-teal-500',
   ];
-  const colorIndex = name.charCodeAt(0) % colors.length;
+  const colorIndex = safeName.charCodeAt(0) % colors.length;
   
   const sizeClasses = {
     sm: 'w-8 h-8 text-xs',
@@ -383,15 +384,18 @@ export function ClientRow({
   client, 
   onClick,
   onDelete,
+  onFollowUp,
   isConfirmingDelete = false
 }: { 
   client: Client; 
   onClick: () => void;
   onDelete: (e: React.MouseEvent) => void;
+  onFollowUp?: (e: React.MouseEvent) => void;
   isConfirmingDelete?: boolean;
 }) {
   const status = client.status || 'active';
   const bar = ROW_BAR[status] || ROW_BAR.active;
+  const hasFollowUp = !!(client.follow_up_note || client.follow_up_at);
   const insuranceLabel = client.medicaid_id
     ? 'Medicaid'
     : client.medicare_id
@@ -427,7 +431,21 @@ export function ClientRow({
       <div className="grow min-w-0 text-[13px] font-medium leading-4 text-[#4B6B66] truncate">
         {client.primary_diagnosis || 'General Care'}
       </div>
-      
+
+      {onFollowUp && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onFollowUp(e); }}
+          className={`shrink-0 p-1.5 rounded-lg transition-all ${
+            hasFollowUp
+              ? 'text-primary-500 bg-primary-50'
+              : 'text-slate-400 hover:text-primary-500 hover:bg-primary-50 opacity-0 group-hover:opacity-100'
+          }`}
+          title={hasFollowUp ? 'Edit follow-up' : 'Add follow-up'}
+        >
+          <CalendarClock className="w-4 h-4" />
+        </button>
+      )}
+
       {isConfirmingDelete ? (
         <button
           onClick={onDelete}

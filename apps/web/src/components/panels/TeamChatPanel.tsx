@@ -61,9 +61,13 @@ export default function TeamChatPanel() {
   useEffect(() => {
     const fetchTeamRoster = async () => {
       if (!token) return;
-      try {
-        const response = await fetch(`${API_URL}/admin/team/roster`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (response.ok) {
+      // Prefer the business-scoped roster (agency teammates in the same company);
+      // fall back to the platform-admin roster for internal admin accounts.
+      const endpoints = [`${API_URL}/auth/business/team/roster`, `${API_URL}/admin/team/roster`];
+      for (const url of endpoints) {
+        try {
+          const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+          if (!response.ok) continue;
           const roster = await response.json();
           const mapped = (roster || []).map((m: any) => ({
             id: m.id,
@@ -73,10 +77,13 @@ export default function TeamChatPanel() {
             email: m.email,
             executive_title: m.executive_title,
           }));
-          if (mapped.length > 0) setTeamMembers(mapped);
+          if (mapped.length > 0) {
+            setTeamMembers(mapped);
+            return;
+          }
+        } catch (error) {
+          console.error('Failed to fetch team roster:', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch team roster:', error);
       }
     };
     fetchTeamRoster();

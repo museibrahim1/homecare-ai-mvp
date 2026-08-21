@@ -63,6 +63,10 @@ class ClientBase(BaseModel):
     
     # Notes
     notes: Optional[str] = None
+
+    # Follow-up (syncs to Calendar)
+    follow_up_note: Optional[str] = None
+    follow_up_at: Optional[datetime] = None
     
     # External Integration
     external_id: Optional[str] = None
@@ -116,6 +120,8 @@ class ClientUpdate(BaseModel):
     intake_date: Optional[date] = None
     discharge_date: Optional[date] = None
     notes: Optional[str] = None
+    follow_up_note: Optional[str] = None
+    follow_up_at: Optional[datetime] = None
 
 
 class ClientResponse(ClientBase):

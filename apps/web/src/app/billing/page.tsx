@@ -12,6 +12,7 @@ import {
   Users,
   Apple,
   Smartphone,
+  Download,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import GlassShell from '@/components/GlassShell';
@@ -53,6 +54,7 @@ interface InvoiceData {
   invoice_date: string | null;
   paid_at: string | null;
   description: string | null;
+  download_url: string | null;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -71,6 +73,7 @@ export default function BillingPage() {
   const [seats, setSeats] = useState<SeatData | null>(null);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
@@ -107,6 +110,30 @@ export default function BillingPage() {
   useEffect(() => {
     if (isReady && token) fetchBilling();
   }, [isReady, token, fetchBilling]);
+
+  const downloadInvoice = useCallback(async (inv: InvoiceData) => {
+    if (!token || !inv.download_url) return;
+    setDownloadingId(inv.id);
+    try {
+      const res = await fetch(`${API_BASE}${inv.download_url}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${inv.invoice_number || 'invoice'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // non-fatal: leave the row as-is if the download fails
+    } finally {
+      setDownloadingId(null);
+    }
+  }, [token]);
 
   const formatDate = (iso: string | null) => {
     if (!iso) return '—';
@@ -324,6 +351,22 @@ export default function BillingPage() {
                     <div className="shrink-0 w-[90px] text-right text-[15px] font-semibold text-[#10211F]">
                       ${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </div>
+                    {inv.download_url && (
+                      <button
+                        onClick={() => downloadInvoice(inv)}
+                        disabled={downloadingId === inv.id}
+                        title="Download PDF"
+                        aria-label="Download invoice PDF"
+                        className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-[13px] font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors disabled:opacity-50"
+                      >
+                        {downloadingId === inv.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                        <span className="hidden sm:inline">PDF</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}

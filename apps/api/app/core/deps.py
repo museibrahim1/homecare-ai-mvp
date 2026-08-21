@@ -37,8 +37,11 @@ async def get_current_user(
     """
     payload = None
     candidates = []
-    if credentials and credentials.credentials:
-        candidates.append(credentials.credentials)
+    header = credentials.credentials if credentials and credentials.credentials else None
+    # The web app may send Authorization: Bearer cookie-session as a
+    # placeholder after refresh. Skip it so the real httpOnly cookie wins.
+    if header and header != "cookie-session":
+        candidates.append(header)
     cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
     if cookie_token:
         candidates.append(cookie_token)

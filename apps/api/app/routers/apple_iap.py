@@ -190,6 +190,72 @@ class AppleVerifyResponse(BaseModel):
 
 
 # =============================================================================
+# INVOICE HELPERS
+# =============================================================================
+
+def _price_from_transaction(decoded: dict) -> Optional[float]:
+    """Extract the charged price from a StoreKit transaction, if present.
+
+    StoreKit 2 encodes ``price`` as an integer in milliunits of the currency
+    (e.g. 199000 == 199.00). Returns None when the field is absent so callers
+    can fall back to the configured plan price.
+    """
+    raw = decoded.get("price")
+    if isinstance(raw, (int, float)) and raw > 0:
+        return round(float(raw) / 1000.0, 2)
+    return None
+
+
+def _maybe_create_invoice(
+    db: Session,
+    *,
+    subscription: Subscription,
+    plan: Optional[Plan],
+    decoded: dict,
+    billing_cycle: str,
+    period_end: Optional[datetime],
+    transaction_id: str,
+) -> None:
+    """Best-effort creation of a paid PalmCare invoice for an Apple charge."""
+    try:
+        from app.services.billing_invoices import create_apple_invoice
+
+        # Prefer the actual amount Apple charged; fall back to the plan price.
+        amount = _price_from_transaction(decoded)
+        if amount is None and plan is not None:
+            if billing_cycle == "annual" and plan.annual_price:
+                amount = float(plan.annual_price)
+            elif plan.monthly_price:
+                amount = float(plan.monthly_price)
+        if amount is None:
+            return
+
+        currency = (decoded.get("currency") or "USD") or "USD"
+
+        purchase_ms = decoded.get("purchaseDate") or decoded.get("purchase_date")
+        period_start: Optional[datetime] = None
+        if isinstance(purchase_ms, (int, float)) and purchase_ms > 0:
+            period_start = datetime.fromtimestamp(purchase_ms / 1000, tz=timezone.utc)
+        else:
+            period_start = datetime.now(timezone.utc)
+
+        create_apple_invoice(
+            db,
+            subscription=subscription,
+            plan=plan,
+            amount=amount,
+            currency=str(currency).upper(),
+            billing_cycle=billing_cycle,
+            period_start=period_start,
+            period_end=period_end,
+            transaction_id=transaction_id,
+            paid_at=period_start,
+        )
+    except Exception:  # pragma: no cover - invoice must never break purchase
+        logger.exception("Failed to create Apple invoice for %s", transaction_id)
+
+
+# =============================================================================
 # ENDPOINTS
 # =============================================================================
 
@@ -288,6 +354,21 @@ async def verify_apple_transaction(
     db.commit()
     db.refresh(sub)
 
+    # Mint a PalmCare-branded invoice/receipt for the charge. Apple issues its
+    # own receipt; this gives the agency a clean document for their books. It's
+    # idempotent (keyed on the transaction id) and best-effort, so a failure
+    # here never blocks the purchase.
+    if sub.status == SubscriptionStatus.ACTIVE and transaction_id:
+        _maybe_create_invoice(
+            db,
+            subscription=sub,
+            plan=plan,
+            decoded=decoded,
+            billing_cycle=sub.billing_cycle or "monthly",
+            period_end=expires_at,
+            transaction_id=transaction_id,
+        )
+
     return AppleVerifyResponse(
         success=sub.status in (SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL),
         plan_tier=plan_tier.value,
@@ -366,4 +447,60 @@ async def app_store_server_notifications(
 
     sub.updated_at = datetime.now(timezone.utc)
     db.commit()
+    db.refresh(sub)
+
+    # On a real renewal charge, mint an invoice for the new billing period.
+    # Best-effort: pull the nested transaction info out of the V2 notification
+    # so we can key the invoice on the renewal's transaction id.
+    if notification_type in {"DID_RENEW", "OFFER_REDEEMED"}:
+        _maybe_create_renewal_invoice(db, decoded, sub)
+
     return {"received": True}
+
+
+def _decode_nested_transaction(decoded: dict) -> Optional[dict]:
+    """Pull the nested StoreKit transaction out of a V2 notification payload."""
+    data = decoded.get("data") or decoded.get("summary") or {}
+    signed_txn = None
+    if isinstance(data, dict):
+        signed_txn = data.get("signedTransactionInfo") or data.get("signed_transaction_info")
+    if not signed_txn:
+        return None
+    try:
+        return _verify_signed_transaction(signed_txn)
+    except Exception:
+        try:
+            return _permissive_jws_decode(signed_txn)
+        except Exception:
+            return None
+
+
+def _maybe_create_renewal_invoice(db: Session, decoded: dict, sub: Subscription) -> None:
+    """Best-effort renewal invoice from an App Store Server Notification."""
+    try:
+        txn = _decode_nested_transaction(decoded)
+        if not txn:
+            return
+        transaction_id = str(txn.get("transactionId") or txn.get("transaction_id") or "")
+        if not transaction_id:
+            return
+
+        plan: Optional[Plan] = db.query(Plan).filter(Plan.id == sub.plan_id).first()
+        billing_cycle = sub.billing_cycle or "monthly"
+
+        expires_ms = txn.get("expiresDate") or txn.get("expires_date") or 0
+        period_end: Optional[datetime] = None
+        if isinstance(expires_ms, (int, float)) and expires_ms > 0:
+            period_end = datetime.fromtimestamp(expires_ms / 1000, tz=timezone.utc)
+
+        _maybe_create_invoice(
+            db,
+            subscription=sub,
+            plan=plan,
+            decoded=txn,
+            billing_cycle=billing_cycle,
+            period_end=period_end,
+            transaction_id=transaction_id,
+        )
+    except Exception:  # pragma: no cover
+        logger.exception("Failed to create renewal invoice")

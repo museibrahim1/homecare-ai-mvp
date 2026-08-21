@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import GlassShell from '@/components/GlassShell';
-import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical, Users } from 'lucide-react';
+import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical, Users, CalendarClock } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import GlassTabs from '@/components/GlassTabs';
 import LeadsPanel from '@/components/panels/LeadsPanel';
+import FollowUpNoteModal, { FollowUpClient } from '@/components/FollowUpNoteModal';
+import { upsertFollowUp, removeFollowUp } from '@/lib/followUpSync';
 
 type Deal = {
   id: string;
@@ -21,6 +23,8 @@ type Deal = {
   clientId: string;
   hasContract: boolean;
   visitId?: string;
+  followUpNote?: string | null;
+  followUpAt?: string | null;
 };
 
 const stages = [
@@ -39,6 +43,7 @@ export default function PipelinePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [followUpClient, setFollowUpClient] = useState<FollowUpClient | null>(null);
   const [newDeal, setNewDeal] = useState({ name: '', email: '', phone: '', value: '', stage: 'intake', notes: '' });
   const [activeTab, setActiveTab] = useState<'deals' | 'leads'>('deals');
 
@@ -167,6 +172,8 @@ export default function PipelinePage() {
           clientId: client.id,
           hasContract,
           visitId: latestVisit?.id,
+          followUpNote: client.follow_up_note ?? null,
+          followUpAt: client.follow_up_at ?? null,
         };
       });
       
@@ -211,13 +218,36 @@ export default function PipelinePage() {
       await api.updateClient(token, deal.clientId, {
         status: newStage,
       });
-      
+
+      // Keep Calendar in sync with the follow-up stage.
+      if (newStage === 'follow_up') {
+        upsertFollowUp({
+          clientId: deal.clientId,
+          clientName: deal.name,
+          note: deal.followUpNote || '',
+          date: deal.followUpAt ? deal.followUpAt.slice(0, 10) : undefined,
+          token,
+        });
+      } else if (deal.stage === 'follow_up') {
+        removeFollowUp(deal.clientId, { token });
+      }
+
       // Reload pipeline data
       await loadPipelineData();
       setShowDetailModal(false);
     } catch (error) {
       console.error('Failed to update stage:', error);
     }
+  };
+
+  const handleOpenFollowUp = (deal: Deal) => {
+    setFollowUpClient({
+      id: deal.clientId,
+      full_name: deal.name,
+      status: deal.stage,
+      follow_up_note: deal.followUpNote,
+      follow_up_at: deal.followUpAt,
+    });
   };
 
   const handleDealClick = (deal: Deal) => {
@@ -408,6 +438,17 @@ export default function PipelinePage() {
                       
                       {/* Quick Stage Move Buttons */}
                       <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200/70">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleOpenFollowUp(deal); }}
+                          className={`shrink-0 px-2 py-1.5 text-xs rounded transition-colors ${
+                            (deal.followUpNote || deal.followUpAt)
+                              ? 'bg-primary-50 text-primary-500'
+                              : 'bg-slate-100 text-slate-500 hover:text-primary-500'
+                          }`}
+                          title={(deal.followUpNote || deal.followUpAt) ? 'Edit follow-up' : 'Add follow-up'}
+                        >
+                          <CalendarClock className="w-3.5 h-3.5" />
+                        </button>
                         {prevStage && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, prevStage.id); }}
@@ -599,6 +640,15 @@ export default function PipelinePage() {
             </div>
           </div>
         )}
+
+        {/* Follow-up note + Calendar sync */}
+        <FollowUpNoteModal
+          isOpen={!!followUpClient}
+          onClose={() => setFollowUpClient(null)}
+          client={followUpClient}
+          token={token}
+          onSaved={loadPipelineData}
+        />
     </GlassShell>
   );
 }

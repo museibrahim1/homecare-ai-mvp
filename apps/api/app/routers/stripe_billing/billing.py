@@ -1,6 +1,8 @@
 import logging
+from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
@@ -103,7 +105,40 @@ async def get_my_invoices(
                 "paid_at": inv.paid_at.isoformat() if inv.paid_at else None,
                 "description": inv.description,
                 "stripe_invoice_id": inv.stripe_invoice_id,
+                # Every invoice can be rendered as a PDF (stored or regenerated).
+                "download_url": f"/billing/invoices/{inv.id}/pdf",
             }
             for inv in invoices
         ]
     }
+
+
+@router.get("/invoices/{invoice_id}/pdf")
+async def download_invoice_pdf(
+    invoice_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download a single invoice as a PDF (data isolation enforced)."""
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email
+    ).first()
+    if not business_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
+
+    invoice = db.query(Invoice).filter(
+        Invoice.id == invoice_id,
+        Invoice.business_id == business_user.business_id,
+    ).first()
+    if not invoice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
+
+    from app.services.billing_invoices import get_invoice_pdf_bytes
+
+    pdf_bytes = get_invoice_pdf_bytes(db, invoice)
+    filename = f"{invoice.invoice_number or 'invoice'}.pdf".replace(" ", "_")
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )

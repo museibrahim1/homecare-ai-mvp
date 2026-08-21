@@ -32,6 +32,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
+import { bearerHeaders } from '@/lib/api';
 import { stripSeparators } from '@/lib/formatText';
 import GlassRail from '@/components/GlassRail';
 import GlassTabs from '@/components/GlassTabs';
@@ -361,17 +362,28 @@ export default function ClientDetailPage() {
       setLoading(true);
       setError('');
 
+      const headers = bearerHeaders(token);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
       const [clientRes, visitsRes, contractsRes] = await Promise.all([
         fetch(`${API_BASE}/clients/${clientId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
         }),
         fetch(`${API_BASE}/visits?client_id=${clientId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
         }).catch(() => null),
         fetch(`${API_BASE}/visits/clients/${clientId}/contracts`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
         }).catch(() => null),
       ]);
+      clearTimeout(timeout);
 
       if (!clientRes.ok) throw new Error('Client not found');
 
@@ -388,7 +400,11 @@ export default function ClientDetailPage() {
         setContracts(Array.isArray(contractsData) ? contractsData : []);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load client');
+      const message =
+        err?.name === 'AbortError'
+          ? 'Loading timed out. Please try again.'
+          : err.message || 'Failed to load client';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -418,8 +434,9 @@ export default function ClientDetailPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...bearerHeaders(token),
         },
+        credentials: 'include',
         body: JSON.stringify(editData),
       });
       if (!response.ok) throw new Error('Failed to save');
@@ -442,7 +459,8 @@ export default function ClientDetailPage() {
     try {
       const response = await fetch(`${API_BASE}/clients/${client.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', ...bearerHeaders(token) },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
       if (response.ok) {
@@ -462,7 +480,8 @@ export default function ClientDetailPage() {
     try {
       const response = await fetch(`${API_BASE}/clients/${client.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
+        credentials: 'include',
       });
       if (response.ok) {
         router.push('/clients');

@@ -15,7 +15,7 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     PageBreak, HRFlowable
 )
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
 
 logger = logging.getLogger(__name__)
 
@@ -545,6 +545,290 @@ def html_escape(text: str) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
+
+
+# =============================================================================
+# SUBSCRIPTION INVOICE / RECEIPT
+# =============================================================================
+
+# Vendor (seller) details for PalmCare subscription invoices. These describe
+# Palm Technologies, the company that sells the subscription, not the customer
+# agency. Overridable via env so legal details can be updated without a deploy.
+def _vendor_details() -> dict:
+    import os
+
+    return {
+        "company": os.getenv("PALM_COMPANY_NAME", "Palm Technologies"),
+        "product_owner": os.getenv("PALM_LEGAL_NAME", "Palm Technologies LLC"),
+        "address_line1": os.getenv("PALM_COMPANY_ADDRESS1", ""),
+        "address_line2": os.getenv("PALM_COMPANY_ADDRESS2", ""),
+        "email": os.getenv("PALM_SUPPORT_EMAIL", "support@palmtai.com"),
+        "website": os.getenv("PALM_WEBSITE", "palmcareai.com"),
+        # Only rendered when actually set. Never invent a tax ID.
+        "ein": os.getenv("PALM_COMPANY_EIN", ""),
+    }
+
+
+def _fmt_money(amount: float, currency: str = "USD") -> str:
+    return f"${amount:,.2f} {currency}".strip()
+
+
+def _fmt_date(value: Any) -> str:
+    if value is None:
+        return ""
+    try:
+        return value.strftime("%B %d, %Y")
+    except AttributeError:
+        return str(value)
+
+
+def generate_invoice_pdf(invoice: Dict[str, Any]) -> bytes:
+    """
+    Generate a clean, professional subscription invoice / receipt PDF.
+
+    One document serves as both invoice and receipt: because PalmCare
+    subscriptions are charged by Apple through In-App Purchase, the PDF is
+    marked "Paid via App Store" so it can never be mistaken for a second,
+    separate charge.
+
+    Expected keys in ``invoice``:
+      invoice_number, invoice_date, status, amount, currency,
+      plan_name, billing_cycle, period_start, period_end,
+      customer_business, customer_name, customer_email, customer_address,
+      billed_via, paid_at
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=0.75 * inch,
+        leftMargin=0.75 * inch,
+        topMargin=0.7 * inch,
+        bottomMargin=0.7 * inch,
+        title=f"Invoice {invoice.get('invoice_number', '')}",
+    )
+
+    teal = colors.HexColor("#0d9488")
+    ink = colors.HexColor("#10211F")
+    muted = colors.HexColor("#4B6B66")
+    line = colors.HexColor("#e2e8f0")
+
+    styles = getSampleStyleSheet()
+
+    def _style(name, **kw):
+        if name in styles.byName:
+            for k, v in kw.items():
+                setattr(styles[name], k, v)
+            return styles[name]
+        styles.add(ParagraphStyle(name=name, parent=styles["Normal"], **kw))
+        return styles[name]
+
+    s_brand = _style("InvBrand", fontName="Helvetica-Bold", fontSize=20,
+                     textColor=teal, spaceAfter=0, leading=22)
+    s_doctype = _style("InvDocType", fontName="Helvetica-Bold", fontSize=22,
+                       textColor=ink, alignment=TA_RIGHT, leading=24)
+    s_meta = _style("InvMeta", fontName="Helvetica", fontSize=9.5,
+                    textColor=muted, alignment=TA_RIGHT, leading=14)
+    s_label = _style("InvSectionLabel", fontName="Helvetica-Bold", fontSize=8,
+                     textColor=muted, spaceAfter=3, leading=11)
+    s_body = _style("InvBody2", fontName="Helvetica", fontSize=9.5,
+                    textColor=ink, leading=13)
+    s_bodymuted = _style("InvBodyMuted", fontName="Helvetica", fontSize=9.5,
+                         textColor=muted, leading=13)
+    s_amountdue = _style("InvAmountDue", fontName="Helvetica-Bold", fontSize=15,
+                         textColor=ink, spaceBefore=6, spaceAfter=6, leading=18)
+    s_th = _style("InvTH", fontName="Helvetica-Bold", fontSize=8.5,
+                  textColor=muted, leading=11)
+    s_th_r = _style("InvTHR", fontName="Helvetica-Bold", fontSize=8.5,
+                    textColor=muted, alignment=TA_RIGHT, leading=11)
+    s_td = _style("InvTD", fontName="Helvetica", fontSize=9.5,
+                  textColor=ink, leading=13)
+    s_td_r = _style("InvTDR", fontName="Helvetica", fontSize=9.5,
+                    textColor=ink, alignment=TA_RIGHT, leading=13)
+    s_footer = _style("InvFooter", fontName="Helvetica", fontSize=8,
+                      textColor=muted, alignment=TA_LEFT, leading=12)
+
+    vendor = _vendor_details()
+    currency = (invoice.get("currency") or "USD").upper()
+    amount = float(invoice.get("amount") or 0)
+    status = (invoice.get("status") or "paid").lower()
+    is_paid = status == "paid"
+    # One document labeled "Invoice" that doubles as a receipt: it stays titled
+    # "Invoice" but, when paid through Apple, clearly shows the paid amount,
+    # paid date, and "Paid via Apple In-App Purchase" so it can never be
+    # mistaken for a second, separate charge.
+    doc_label = "Invoice"
+
+    story: List[Any] = []
+
+    # === HEADER: brand + document type ===
+    header = Table(
+        [[
+            Paragraph("PALM", s_brand),
+            Paragraph(doc_label, s_doctype),
+        ]],
+        colWidths=[3.4 * inch, 3.6 * inch],
+    )
+    header.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header)
+    story.append(Paragraph("PalmCare AI", s_bodymuted))
+    story.append(Spacer(1, 14))
+
+    # === META ROW: seller block (left) + invoice meta (right) ===
+    seller_lines = [f"<b>{html_escape(vendor['company'])}</b>"]
+    if vendor["address_line1"]:
+        seller_lines.append(html_escape(vendor["address_line1"]))
+    if vendor["address_line2"]:
+        seller_lines.append(html_escape(vendor["address_line2"]))
+    seller_lines.append(html_escape(vendor["email"]))
+    seller_lines.append(html_escape(vendor["website"]))
+    seller_block = Paragraph("<br/>".join(seller_lines), s_body)
+
+    meta_rows = [
+        f"Invoice number&nbsp;&nbsp;<b>{html_escape(str(invoice.get('invoice_number', '')))}</b>",
+    ]
+    meta_rows.append(f"Date of issue&nbsp;&nbsp;{_fmt_date(invoice.get('invoice_date'))}")
+    if is_paid and invoice.get("paid_at"):
+        meta_rows.append(f"Date paid&nbsp;&nbsp;{_fmt_date(invoice.get('paid_at'))}")
+    meta_block = Paragraph("<br/>".join(meta_rows), s_meta)
+
+    meta_table = Table(
+        [[seller_block, meta_block]],
+        colWidths=[3.6 * inch, 3.4 * inch],
+    )
+    meta_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(meta_table)
+    story.append(Spacer(1, 18))
+
+    # === BILL TO ===
+    story.append(Paragraph("BILL TO", s_label))
+    bill_lines = []
+    if invoice.get("customer_business"):
+        bill_lines.append(f"<b>{html_escape(str(invoice['customer_business']))}</b>")
+    if invoice.get("customer_name"):
+        bill_lines.append(html_escape(str(invoice["customer_name"])))
+    if invoice.get("customer_address"):
+        for ln in str(invoice["customer_address"]).split("\n"):
+            if ln.strip():
+                bill_lines.append(html_escape(ln.strip()))
+    if invoice.get("customer_email"):
+        bill_lines.append(html_escape(str(invoice["customer_email"])))
+    if not bill_lines:
+        bill_lines.append("Customer")
+    story.append(Paragraph("<br/>".join(bill_lines), s_body))
+    story.append(Spacer(1, 16))
+
+    # === HEADLINE AMOUNT ===
+    if is_paid:
+        headline = f"{_fmt_money(amount, currency)} paid on {_fmt_date(invoice.get('paid_at') or invoice.get('invoice_date'))}"
+    else:
+        headline = f"{_fmt_money(amount, currency)} due {_fmt_date(invoice.get('invoice_date'))}"
+    story.append(Paragraph(headline, s_amountdue))
+    story.append(Spacer(1, 6))
+
+    # === LINE ITEMS TABLE ===
+    period_start = invoice.get("period_start")
+    period_end = invoice.get("period_end")
+    period_str = ""
+    if period_start or period_end:
+        period_str = f"{_fmt_date(period_start)} - {_fmt_date(period_end)}".strip(" -")
+
+    plan_name = invoice.get("plan_name") or "PalmCare AI Subscription"
+    desc_html = f"<b>{html_escape(str(plan_name))}</b>"
+    if period_str:
+        desc_html += f"<br/><font color='#4B6B66'>{html_escape(period_str)}</font>"
+
+    unit_price = _fmt_money(amount, "").strip()
+    line_amount = _fmt_money(amount, "").strip()
+
+    table_data = [
+        [
+            Paragraph("DESCRIPTION", s_th),
+            Paragraph("QTY", s_th_r),
+            Paragraph("UNIT PRICE", s_th_r),
+            Paragraph("AMOUNT", s_th_r),
+        ],
+        [
+            Paragraph(desc_html, s_td),
+            Paragraph("1", s_td_r),
+            Paragraph(unit_price, s_td_r),
+            Paragraph(line_amount, s_td_r),
+        ],
+    ]
+    items_table = Table(
+        table_data,
+        colWidths=[3.7 * inch, 0.7 * inch, 1.3 * inch, 1.3 * inch],
+    )
+    items_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, 0), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+        ("TOPPADDING", (0, 1), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 1), (-1, -1), 8),
+        ("LINEBELOW", (0, 0), (-1, 0), 0.75, line),
+        ("LINEBELOW", (0, 1), (-1, 1), 0.5, line),
+    ]))
+    story.append(items_table)
+    story.append(Spacer(1, 4))
+
+    # === TOTALS ===
+    total_label = "Amount paid" if is_paid else "Amount due"
+    totals_data = [
+        [Paragraph("Subtotal", s_td_r), Paragraph(_fmt_money(amount, "").strip(), s_td_r)],
+        [Paragraph("Total", s_td_r), Paragraph(_fmt_money(amount, "").strip(), s_td_r)],
+        [
+            Paragraph(f"<b>{total_label}</b>", s_td_r),
+            Paragraph(f"<b>{_fmt_money(amount, currency)}</b>", s_td_r),
+        ],
+    ]
+    totals_table = Table(totals_data, colWidths=[5.7 * inch, 1.3 * inch])
+    totals_table.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LINEABOVE", (0, 2), (-1, 2), 0.5, line),
+        ("TOPPADDING", (0, 2), (-1, 2), 6),
+    ]))
+    story.append(totals_table)
+    story.append(Spacer(1, 18))
+
+    # === PAYMENT METHOD (App Store) ===
+    billed_via = invoice.get("billed_via") or "Apple In-App Purchase"
+    story.append(HRFlowable(width="100%", thickness=0.5, color=line))
+    story.append(Spacer(1, 8))
+    story.append(Paragraph("PAYMENT METHOD", s_label))
+    story.append(Paragraph(
+        f"Paid via {html_escape(str(billed_via))}. This subscription is billed and charged "
+        f"through your Apple ID. PalmCare does not charge your card directly for this purchase.",
+        s_bodymuted,
+    ))
+    story.append(Spacer(1, 20))
+
+    # === FOOTER: legal ===
+    story.append(HRFlowable(width="100%", thickness=0.5, color=line))
+    story.append(Spacer(1, 6))
+    footer_lines = [html_escape(vendor["product_owner"])]
+    if vendor["ein"]:
+        footer_lines.append(f"US EIN {html_escape(vendor['ein'])}")
+    footer_lines.append(
+        f"Questions about this invoice? Contact {html_escape(vendor['email'])}."
+    )
+    story.append(Paragraph("<br/>".join(footer_lines), s_footer))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 # Keep DOCX functions for backward compatibility

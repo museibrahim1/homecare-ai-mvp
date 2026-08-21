@@ -4,12 +4,23 @@
 // setups without the rewrite.
 export const API_BASE = '/api';
 
+// After a refresh the auth store holds this placeholder (real JWT is httpOnly).
+// Never send it as Authorization — the API treats it as an invalid JWT and
+// some proxies reject the request before the session cookie can authenticate.
+import { COOKIE_SESSION_TOKEN } from '@/lib/auth';
+
 /** Format a Date to YYYY-MM-DD string in LOCAL timezone (avoids UTC shift bugs) */
 export function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/** Auth headers for fetch calls. Skips the cookie-session placeholder. */
+export function bearerHeaders(token?: string | null): Record<string, string> {
+  if (!token || token === COOKIE_SESSION_TOKEN) return {};
+  return { Authorization: `Bearer ${token}` };
 }
 
 class ApiClient {
@@ -41,11 +52,9 @@ class ApiClient {
       ...((options.headers as Record<string, string>) || {}),
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    Object.assign(headers, bearerHeaders(token));
     // Send the httpOnly session cookie (primary web credential). The
-    // Authorization header above is only populated while the in-memory token
+    // Authorization header above is only populated while the in-memory JWT
     // exists; after a page refresh the cookie alone authenticates.
     const credentials: RequestCredentials = 'include';
 

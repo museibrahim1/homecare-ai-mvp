@@ -147,6 +147,53 @@ async def get_team_plan_limits(
         "upgrade_options": limits["upgrade_options"]
     }
 
+@router.get("/team/roster")
+async def team_roster(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Lightweight roster of the current business's team, for Team Chat.
+
+    Returns active user accounts in the same company (office staff, coordinators,
+    caregivers-as-users, and the owner) so agency teams can DM each other. The
+    caller is excluded so they don't message themselves.
+    """
+    if not current_user.company_name:
+        return []
+
+    members = db.query(User).filter(
+        User.company_name == current_user.company_name,
+        User.company_name.isnot(None),
+        User.company_name != "",
+        User.is_active == True,
+    ).all()
+
+    now = datetime.now(timezone.utc)
+
+    def _status(u: User) -> str:
+        la = getattr(u, "last_active", None)
+        if la is None:
+            return "offline"
+        if la.tzinfo is None:
+            la = la.replace(tzinfo=timezone.utc)
+        return "online" if (now - la).total_seconds() < 300 else "offline"
+
+    roster = []
+    for m in members:
+        if m.id == current_user.id:
+            continue
+        role_label = "Caregiver" if m.role == "caregiver" else "Coordinator"
+        roster.append({
+            "id": str(m.id),
+            "name": m.full_name or m.email.split("@")[0],
+            "email": m.email,
+            "role": role_label,
+            "status": _status(m),
+            "is_active": m.is_active,
+        })
+    return roster
+
+
 @router.get("/team")
 async def list_team_members(
     db: Session = Depends(get_db),

@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Date, Text, Index, Boolean, ForeignKey
+from sqlalchemy import Column, String, Date, DateTime, Text, Index, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -71,6 +71,13 @@ class Client(Base, TimestampMixin):
     
     # === NOTES ===
     notes = Column(Text, nullable=True)
+
+    # === FOLLOW-UP (syncs to Calendar) ===
+    # Set when a client is moved to follow_up or a follow-up note is saved next
+    # to the client on the pipeline/clients board. Drives a matching calendar
+    # follow-up so Visits + Calendar stay in sync.
+    follow_up_note = Column(Text, nullable=True)
+    follow_up_at = Column(DateTime(timezone=True), nullable=True)
     
     # === EXTERNAL SYSTEM INTEGRATION ===
     external_id = Column(String(255), nullable=True)

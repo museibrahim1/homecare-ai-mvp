@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause, Clock, RotateCcw, ChevronRight, Zap, Timer } from 'lucide-react';
+import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause, RotateCcw, Clock } from 'lucide-react';
 import { api } from '@/lib/api';
 import { AUDIO_UPLOAD_MAX_BYTES, AUDIO_UPLOAD_MAX_LABEL } from '@/lib/uploadLimits';
+import PipelineProcessingCard, { type PipelineDocStatus, type PipelineDocStep } from '@/components/PipelineProcessingCard';
 
 interface AudioUploaderProps {
   visitId: string;
@@ -11,6 +12,8 @@ interface AudioUploaderProps {
   onUploadComplete?: (audioAsset: any) => void;
   onClose?: () => void;
   autoProcess?: boolean;
+  /** Fires when the uploader enters or leaves the processing state */
+  onProcessingChange?: (processing: boolean) => void;
 }
 
 type InputMode = 'upload' | 'record';
@@ -23,61 +26,31 @@ interface PipelineStepState {
   error: string | null;
 }
 
+/** Quiet product labels. Matches Paper Processing tone, not fake SaaS progress theater. */
 const PIPELINE_STEPS = [
-  { key: 'transcription', label: 'Transcribing Audio', description: 'Converting speech to text', estimatedSeconds: 90, timeRange: '~30s-2min' },
-  { key: 'diarization', label: 'Identifying Speakers', description: 'Detecting who\'s speaking', estimatedSeconds: 45, timeRange: '~30s-1min' },
-  { key: 'alignment', label: 'Aligning Transcript', description: 'Matching words to speakers', estimatedSeconds: 10, timeRange: '~10s' },
-  { key: 'billing', label: 'Extracting Billables', description: 'Finding billable services', estimatedSeconds: 15, timeRange: '~15s' },
-  { key: 'note', label: 'Generating Visit Note', description: 'Creating SOAP note', estimatedSeconds: 20, timeRange: '~20s' },
-  { key: 'contract', label: 'Creating Contract', description: 'Building service agreement', estimatedSeconds: 20, timeRange: '~20s' },
+  { key: 'transcription', label: 'Transcript' },
+  { key: 'diarization', label: 'Speakers' },
+  { key: 'alignment', label: 'Alignment' },
+  { key: 'billing', label: 'Billables' },
+  { key: 'note', label: 'Visit note' },
+  { key: 'contract', label: 'Contract' },
 ];
 
-function formatEstimate(seconds: number): string {
-  if (seconds < 60) return `~${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  if (secs === 0) return `~${mins}min`;
-  return `~${mins}m ${secs}s`;
+function toDocStatus(status: StepStatus): PipelineDocStatus {
+  if (status === 'completed') return 'ready';
+  if (status === 'running') return 'writing';
+  if (status === 'failed') return 'failed';
+  return 'next';
 }
 
-function formatElapsed(ms: number): string {
-  const totalSecs = Math.floor(ms / 1000);
-  const mins = Math.floor(totalSecs / 60);
-  const secs = totalSecs % 60;
-  if (mins === 0) return `${secs}s`;
-  return `${mins}m ${secs}s`;
-}
-
-function StepIcon({ status, index }: { status: StepStatus; index: number }) {
-  if (status === 'completed') {
-    return (
-      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-500/30 flex items-center justify-center animate-check-bounce">
-        <CheckCircle className="w-5 h-5 text-emerald-400" />
-      </div>
-    );
-  }
-  if (status === 'running') {
-    return (
-      <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-500/40 flex items-center justify-center animate-step-glow">
-        <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
-      </div>
-    );
-  }
-  if (status === 'failed') {
-    return (
-      <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center">
-        <AlertCircle className="w-5 h-5 text-red-600" />
-      </div>
-    );
-  }
-  return (
-    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-      <span className="text-sm font-bold text-slate-400">{index + 1}</span>
-    </div>
-  );
-}
-
-export default function AudioUploader({ visitId, token, onUploadComplete, onClose, autoProcess = true }: AudioUploaderProps) {
+export default function AudioUploader({
+  visitId,
+  token,
+  onUploadComplete,
+  onClose,
+  autoProcess = true,
+  onProcessingChange,
+}: AudioUploaderProps) {
   const [state, setState] = useState<'idle' | 'dragging' | 'uploading' | 'processing' | 'success' | 'error'>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -86,7 +59,6 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollCountRef = useRef(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const uploadStartRef = useRef<number>(0);
   const MAX_POLL_COUNT = 200;
 
@@ -97,7 +69,6 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
     }
     return initial;
   });
-  const [now, setNow] = useState(Date.now());
 
   // Recording states
   const [inputMode, setInputMode] = useState<InputMode>('upload');
@@ -112,12 +83,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (state === 'processing' || state === 'uploading') {
-      timerRef.current = setInterval(() => setNow(Date.now()), 500);
-      return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }
-    if (timerRef.current) clearInterval(timerRef.current);
-  }, [state]);
+    onProcessingChange?.(state === 'processing');
+  }, [state, onProcessingChange]);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -422,25 +389,20 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
     if (pollIntervalRef.current) { clearInterval(pollIntervalRef.current); pollIntervalRef.current = null; }
   };
 
-  // --- Pipeline progress calculations ---
-  const completedCount = PIPELINE_STEPS.filter(s => stepStates[s.key]?.status === 'completed').length;
-  const totalSteps = PIPELINE_STEPS.length;
-  const overallPercent = Math.round((completedCount / totalSteps) * 100);
-
-  const estimatedTimeRemaining = PIPELINE_STEPS
-    .filter(s => stepStates[s.key]?.status === 'pending' || stepStates[s.key]?.status === 'running')
-    .reduce((sum, s) => {
-      const ss = stepStates[s.key];
-      if (ss.status === 'running' && ss.startedAt) {
-        const elapsed = (now - ss.startedAt) / 1000;
-        return sum + Math.max(0, s.estimatedSeconds - elapsed);
-      }
-      return sum + s.estimatedSeconds;
-    }, 0);
+  // --- Pipeline progress ---
+  const completedCount = PIPELINE_STEPS.filter((s) => stepStates[s.key]?.status === 'completed').length;
+  const runningStepId =
+    PIPELINE_STEPS.find((s) => stepStates[s.key]?.status === 'running')?.key ?? null;
+  const processingSteps: PipelineDocStep[] = PIPELINE_STEPS.map((step) => ({
+    id: step.key,
+    title: step.label,
+    status: toDocStatus(stepStates[step.key]?.status || 'pending'),
+  }));
 
   return (
-    <div className="card p-6">
-      {/* Header */}
+    <div className={state === 'processing' ? '' : 'card p-6'}>
+      {/* Header (hidden while Palm is building the visit) */}
+      {state !== 'processing' && (
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
@@ -448,15 +410,16 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           </div>
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Add Audio</h3>
-            <p className="text-slate-500 text-sm">Record or upload & auto-process with AI</p>
+            <p className="text-slate-500 text-sm">Record or upload and Palm writes the packet</p>
           </div>
         </div>
-        {onClose && state !== 'processing' && !isRecording && (
-          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg">
+        {onClose && !isRecording && (
+          <button type="button" onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg">
             <X className="w-5 h-5 text-slate-500" />
           </button>
         )}
       </div>
+      )}
 
       {/* Mode Toggle Tabs */}
       {state === 'idle' && !selectedFile && !audioBlob && (
@@ -486,181 +449,47 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
         </div>
       )}
 
-      {/* ==================== PIPELINE PROCESSING UI ==================== */}
+      {/* Paper Pipeline Glass processing view */}
       {state === 'processing' && (
-        <div className="space-y-5 animate-fade-in">
-          {/* Overall progress header */}
-          <div className="bg-gradient-to-r from-primary-500/10 via-indigo-500/5 to-transparent rounded-xl p-4 border border-primary-500/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-primary-400" />
-                  </div>
-                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full animate-ping opacity-75" />
-                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full" />
-                </div>
-                <div>
-                  <p className="text-slate-900 font-semibold">AI Processing</p>
-                  <p className="text-slate-500 text-xs flex items-center gap-1.5">
-                    Step {Math.min(completedCount + 1, totalSteps)} of {totalSteps}
-                    {estimatedTimeRemaining > 0 && (
-                      <>
-                        <span className="text-slate-300">·</span>
-                        <Timer className="w-3 h-3" />
-                        {formatEstimate(Math.round(estimatedTimeRemaining))} remaining
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-indigo-400 bg-clip-text text-transparent">
-                  {overallPercent}%
-                </span>
-              </div>
-            </div>
-
-            {/* Overall progress bar */}
-            <div className="relative h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-700 ease-out progress-stripe"
-                style={{ width: `${overallPercent}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Step-by-step timeline */}
-          <div className="relative">
-            {/* Vertical connector line */}
-            <div className="absolute left-[19px] top-5 bottom-5 w-px bg-slate-50" />
-            {/* Completed portion of connector */}
-            <div
-              className="absolute left-[19px] top-5 w-px bg-gradient-to-b from-emerald-500/60 to-primary-500/40 transition-all duration-700"
-              style={{ height: `${Math.max(0, (completedCount / totalSteps) * 100)}%` }}
-            />
-
-            <div className="space-y-1.5">
-              {PIPELINE_STEPS.map((step, index) => {
-                const ss = stepStates[step.key];
-                const isCompleted = ss.status === 'completed';
-                const isRunning = ss.status === 'running';
-                const isFailed = ss.status === 'failed';
-                const isPending = ss.status === 'pending';
-                const elapsed = isRunning && ss.startedAt ? now - ss.startedAt : 0;
-                const completedElapsed = isCompleted && ss.startedAt && ss.completedAt ? ss.completedAt - ss.startedAt : 0;
-                const stepPercent = isRunning ? Math.min(Math.round((elapsed / (step.estimatedSeconds * 1000)) * 100), 95) : 0;
-
-                return (
-                  <div
-                    key={step.key}
-                    className={`relative rounded-xl border transition-all duration-500 ${
-                      isCompleted
-                        ? 'bg-emerald-500/5 border-emerald-500/20'
-                        : isRunning
-                        ? 'bg-primary-500/[0.07] border-primary-200 shadow-lg shadow-primary-500/5'
-                        : isFailed
-                        ? 'bg-red-50 border-red-200'
-                        : 'bg-white/40 border-slate-200/40'
-                    }`}
-                    style={{ animationDelay: `${index * 60}ms` }}
-                  >
-                    <div className="relative flex items-center gap-3.5 p-3.5">
-                      {/* Step icon with timeline dot */}
-                      <div className="relative z-10 flex-shrink-0">
-                        <StepIcon status={ss.status} index={index} />
-                      </div>
-
-                      {/* Step info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-medium text-sm transition-colors duration-300 ${
-                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-slate-800' : isFailed ? 'text-red-600' : 'text-slate-400'
-                          }`}>
-                            {step.label}
-                          </span>
-                          {isRunning && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-50 text-primary-300 text-[10px] font-medium uppercase tracking-wider">
-                              <Zap className="w-2.5 h-2.5" />
-                              {stepPercent}%
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-slate-600' : isFailed ? 'text-red-600/70' : 'text-slate-300'
-                        }`}>
-                          {isFailed ? (ss.error || 'Step failed') : step.description}
-                        </p>
-
-                        {/* Per-step progress bar (running only) */}
-                        {isRunning && (
-                          <div className="mt-2 h-1 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-primary-500 to-indigo-400 rounded-full transition-all duration-1000 ease-linear progress-stripe"
-                              style={{ width: `${stepPercent}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Timing info */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {isCompleted && completedElapsed > 0 && (
-                          <span className="text-xs text-emerald-400/70 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                            {formatElapsed(completedElapsed)}
-                          </span>
-                        )}
-                        {isRunning && (
-                          <div className="text-right">
-                            <span className="text-xs text-primary-300 font-mono block">{formatElapsed(elapsed)}</span>
-                            <span className="text-[10px] text-slate-400">{step.timeRange}</span>
-                          </div>
-                        )}
-                        {isPending && (
-                          <span className="text-[10px] text-slate-300">{step.timeRange}</span>
-                        )}
-                        {isFailed && (
-                          <button
-                            onClick={handleRetry}
-                            className="flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-500/30 border border-red-200 rounded-lg text-red-600 text-xs font-medium transition-colors"
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                            Retry
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="pt-3 border-t border-slate-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-slate-400 text-xs flex items-center gap-1.5">
-                <Clock className="w-3 h-3" />
-                Processing time varies with audio length
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => {
-                  if (pollIntervalRef.current) { clearInterval(pollIntervalRef.current); pollIntervalRef.current = null; }
-                  onUploadComplete?.({});
-                }}
-                className="btn-primary px-6 py-2 flex items-center gap-2"
-              >
-                <ChevronRight className="w-4 h-4" />
-                Continue to Results
-              </button>
-            </div>
-            <p className="text-slate-400 text-xs text-center">Processing will continue in the background</p>
+        <div className="flex flex-col gap-4 animate-fade-in">
+          <PipelineProcessingCard
+            readyCount={completedCount}
+            totalCount={PIPELINE_STEPS.length}
+            clientFirstName=""
+            subtitle="Transcript, billables, visit note, and the contract."
+            steps={processingSteps}
+            processingStepId={runningStepId}
+            footer="Stay on this screen. Longer recordings take a few minutes."
+            onStepClick={failedStep ? () => handleRetry() : undefined}
+          />
+          {failedStep && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="mx-auto inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm font-semibold hover:bg-red-100"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Retry processing
+            </button>
+          )}
+          <div className="flex flex-col items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (pollIntervalRef.current) {
+                  clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                }
+                onUploadComplete?.({});
+              }}
+              className="text-sm font-semibold text-primary-600 hover:text-primary-700"
+            >
+              Continue in background
+            </button>
+            <p className="text-xs font-medium text-[#64748B]">You can leave. Palm keeps working.</p>
           </div>
         </div>
       )}
-
       {/* ==================== RECORDING INTERFACE ==================== */}
       {inputMode === 'record' && state !== 'success' && state !== 'processing' && state !== 'uploading' && !selectedFile && (
         <div className="border-2 border-dashed rounded-2xl p-8 text-center bg-slate-50/30 border-slate-200">

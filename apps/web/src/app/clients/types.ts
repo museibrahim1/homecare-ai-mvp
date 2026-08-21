@@ -40,6 +40,8 @@ export interface Client {
   preferred_times?: string;
   status?: string;
   notes?: string;
+  follow_up_note?: string | null;
+  follow_up_at?: string | null;
   created_at: string;
 }
 
