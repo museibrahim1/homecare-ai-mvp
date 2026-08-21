@@ -3,9 +3,11 @@
 
 Reads scripts/email/.platform_info_sends.json (written when emails are sent).
 Polls Resend GET /emails/{id} for last_event. On first transition to opened
-or clicked, emails Muse. Also watches for matching signups via Resend
-"New Signup" is already handled by the API; this script additionally flags
-when a watched contact's address appears in recent outbound onboarding mail.
+or clicked, emails Muse once (alerted_events is persisted by the GitHub
+workflow that runs this script). Re-opens do not re-alert. Also watches for
+matching signups via Resend "New Signup" is already handled by the API;
+this script additionally flags when a watched contact's address appears in
+recent outbound onboarding mail.
 
 Usage:
   python scripts/email/watch_platform_info_engagement.py
@@ -126,7 +128,7 @@ def check_sends() -> int:
         row["last_polled_at"] = datetime.now(timezone.utc).isoformat()
         alerted = set(row.get("alerted_events") or [])
 
-        # Prefer notifying on clicked; also notify on first opened.
+        # Prefer notifying on clicked; also notify on first opened only.
         for interesting in ("opened", "clicked"):
             if event == interesting and interesting not in alerted:
                 ok = _send_alert(
@@ -140,6 +142,9 @@ def check_sends() -> int:
                     # clicked already means they engaged; mark opened too so we don't double-spam later
                     if interesting == "clicked":
                         alerted.add("opened")
+                    # Persist immediately so a crash / next CI checkout cannot re-alert.
+                    row["alerted_events"] = sorted(alerted)
+                    _save_json(TRACK_LOG, rows)
 
         # If Resend only reports clicked as last_event, still fine.
         # If last_event is clicked but we never saw opened, alert clicked only.

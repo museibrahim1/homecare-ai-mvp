@@ -36,6 +36,36 @@ ENGAGEMENT_ALERT_TO = [
     if e.strip()
 ]
 
+# Process-local fallback when Redis is down (survives only until restart).
+_ALERT_DEDUPE_SEEN: set[str] = set()
+_ALERT_DEDUPE_TTL_SECONDS = 60 * 60 * 24 * 120  # 120 days
+
+
+def _claim_engagement_alert(email_id: str, kind: str) -> bool:
+    """Return True only the first time we should alert for this email_id + kind.
+
+    Resend can fire email.opened many times (prefetch, re-open). Muse only
+    wants the first open and the first click per outbound message.
+    """
+    if not email_id:
+        return False
+    key = f"engagement_alert:{email_id}:{kind}"
+
+    try:
+        import redis
+        from app.core.config import settings
+
+        r = redis.from_url(settings.redis_url, socket_connect_timeout=2)
+        claimed = r.set(key, "1", nx=True, ex=_ALERT_DEDUPE_TTL_SECONDS)
+        return bool(claimed)
+    except Exception as exc:
+        logger.warning(f"Engagement alert Redis dedupe unavailable: {exc}")
+
+    if key in _ALERT_DEDUPE_SEEN:
+        return False
+    _ALERT_DEDUPE_SEEN.add(key)
+    return True
+
 
 def _verify_resend_signature(
     raw_body: bytes,
@@ -194,13 +224,21 @@ async def resend_webhook(request: Request):
     tags = data.get("tags") or {}
     click_link = (data.get("click") or {}).get("link") or ""
 
-    # Immediate Muse alert for watched agency outreach (open / click).
+    # Immediate Muse alert for watched agency outreach (first open / first click only).
     if event_type in ("email.opened", "email.clicked"):
         watched_label = WATCHED_OUTREACH_EMAILS.get(str(to_email).lower())
         campaign = ""
         if isinstance(tags, dict):
             campaign = str(tags.get("campaign") or "")
-        if watched_label or campaign == "platform_info":
+        elif isinstance(tags, list):
+            for tag in tags:
+                if isinstance(tag, dict) and tag.get("name") == "campaign":
+                    campaign = str(tag.get("value") or "")
+                    break
+        kind = "opened" if event_type == "email.opened" else "clicked"
+        if (watched_label or campaign == "platform_info") and _claim_engagement_alert(
+            str(email_id), kind
+        ):
             try:
                 _alert_muse_engagement(
                     to_email=str(to_email),

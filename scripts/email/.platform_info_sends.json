@@ -35,8 +35,10 @@
     "slug": "kena_accentcare",
     "subject": "Still up for that July demo?",
     "campaign": "platform_info",
-    "last_event": "delivered",
-    "alerted_events": [],
+    "last_event": "opened",
+    "alerted_events": [
+      "opened"
+    ],
     "logged_at": "2026-08-20T22:50:09.072634+00:00",
     "last_polled_at": "2026-08-20T22:50:14.445361+00:00"
   },
@@ -48,8 +50,10 @@
     "slug": "stacie_comfort_keepers",
     "subject": "A quick look at PALM before Monday",
     "campaign": "platform_info",
-    "last_event": "sent",
-    "alerted_events": [],
+    "last_event": "opened",
+    "alerted_events": [
+      "opened"
+    ],
     "logged_at": "2026-08-20T23:19:45.490192+00:00",
     "last_polled_at": null
   }
