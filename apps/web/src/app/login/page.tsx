@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Mic, Waves, Shield, Zap } from 'lucide-react';
+import PalmOrb from '@/components/glass/PalmOrb';
+import WaveField from '@/components/glass/WaveField';
 import SocialAuthButtons from '@/components/SocialAuthButtons';
 
 export default function LoginPage() {
@@ -14,16 +15,12 @@ export default function LoginPage() {
   const { setToken, setUser, logout, token } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Clear any existing session when the login page loads
-  // so every sign-in requires fresh credentials.
-  // Intentionally using [] — adding token/logout as deps would cause infinite loop.
   useEffect(() => {
-    if (token) {
-      logout();
-    }
+    if (token) logout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -34,198 +31,161 @@ export default function LoginPage() {
 
     try {
       const response = await api.login(email, password);
-      
-      // Fetch user data to determine role/permissions
       let userData = null;
       try {
         userData = await api.getMe(response.access_token);
-      } catch (userErr) {
+      } catch {
+        /* optional */
       }
-      
-      // Set token and user data
+
       setToken(response.access_token);
-      if (userData) {
-        setUser(userData);
-      }
-      
-      // Small delay to ensure localStorage is updated before redirect
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Check if this is a first-time login for this user (show welcome page)
-      const userId = userData?.id || email;
-      const hasSeenWelcome = localStorage.getItem(`has-seen-welcome-${userId}`);
-      if (!hasSeenWelcome) {
-        localStorage.setItem(`has-seen-welcome-${userId}`, 'true');
-        router.push('/welcome');
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+      if (userData) setUser(userData);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary-700 p-12 flex-col justify-between relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        </div>
+    <div className="min-h-screen grid grid-cols-1 md:grid-cols-[minmax(280px,520px)_1fr] relative overflow-hidden bg-[#E7F1EF] antialiased">
+      {/* Left brand panel — dark teal */}
+      <div
+        className="flex flex-col justify-between p-8 sm:p-10 xl:p-14 relative overflow-hidden min-h-[280px] md:min-h-screen"
+        style={{ backgroundColor: '#071412' }}
+      >
+        <WaveField dark className="opacity-90" />
+        <Link href="/" className="relative z-10 flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <PalmOrb size={36} />
+          <span className="text-[18px] tracking-[0.02em] font-bold text-white">PALM</span>
+        </Link>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
+        <div className="relative z-10 flex flex-col gap-6 md:gap-9 max-w-[448px] py-6 md:py-0">
+          <PalmOrb size={160} className="hidden md:block shrink-0 w-[160px] h-[160px] xl:w-[220px] xl:h-[220px]" />
+          <div className="flex flex-col gap-3 md:gap-4">
+            <div className="flex items-baseline flex-wrap">
+              <span className="text-[40px] md:text-[48px] xl:text-[56px] leading-none tracking-tight font-extrabold text-white">
+                Palm&nbsp;
+              </span>
+              <span className="text-[40px] md:text-[48px] xl:text-[56px] leading-none tracking-tight font-extrabold text-[#2DD4BF]">
+                It.
+              </span>
             </div>
-            <h1 className="text-2xl font-bold" style={{ color: '#fff' }}>PalmCare AI</h1>
-          </div>
-          <p className="text-lg mt-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
-            Record it. Transcribe it. Contract it. All in your palm.
-          </p>
-        </div>
-
-        <div className="relative z-10 space-y-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Waves className="w-6 h-6" style={{ color: '#fff' }} />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Record It</h3>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Staff records a client assessment on their phone — AI captures every detail
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Zap className="w-6 h-6" style={{ color: '#fff' }} />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Contract It</h3>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                AI generates a complete assessment, care plan, and service agreement in seconds
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Shield className="w-6 h-6" style={{ color: '#fff' }} />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Review & Send</h3>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Review, edit, and send — contract is ready for the client to sign
-              </p>
-            </div>
+            <p className="text-[16px] md:text-[18px] leading-7 text-white/68 max-w-[380px]">
+              Welcome back. Pick up where you left off.
+            </p>
           </div>
         </div>
 
-        <div className="relative z-10">
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            © {new Date().getFullYear()} PalmCare AI. All rights reserved.
-          </p>
-        </div>
+        <p className="relative z-10 text-[13px] font-medium text-white/40">
+          Home care documentation
+        </p>
       </div>
 
-      {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
+      {/* Right form — frosted glass card */}
+      <div className="flex items-center justify-center px-5 py-10 sm:px-8 relative min-h-screen">
+        <WaveField className="opacity-40 md:hidden" />
+        <div className="relative z-10 w-full max-w-[440px] flex flex-col gap-6 p-8 sm:p-10 rounded-[24px] bg-[#FFFFFFB8] border border-[#FFFFFFE6] shadow-[0_30px_70px_#115E5924] backdrop-blur-xl">
+          <div className="flex flex-col items-start gap-[18px]">
+            <PalmOrb size={56} />
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-[30px] tracking-[-0.02em] font-bold leading-9 text-[#0F172A]">
+                Sign in
+              </h1>
+              <p className="text-[15px] leading-[18px] text-[#64748B]">
+                Pick up where you left off.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
-          </div>
-
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back. Let&apos;s Palm It.</h2>
-            <p className="text-slate-500">Your next client is waiting</p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
 
-          <div className="mb-6">
-            <SocialAuthButtons onError={setError} />
-          </div>
+          <SocialAuthButtons onError={setError} />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                Email address
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="email"
+                className="text-[13px] leading-4 tracking-[0.02em] font-semibold text-[#475569]"
+              >
+                Email
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="you@company.com"
+                className="h-[52px] w-full px-4 rounded-xl bg-white border border-[#D3E2DF] text-[15px] font-medium text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+                placeholder="you@agency.com"
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-sm text-primary-500 hover:text-primary-600 hover:underline">
-                  Forgot password?
-                </Link>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="password"
+                className="text-[13px] leading-4 tracking-[0.02em] font-semibold text-[#475569]"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-[52px] w-full px-4 pr-12 rounded-xl bg-white border border-[#D3E2DF] text-[15px] font-medium text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="••••••••"
-              />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ color: '#fff' }}
+              className="mt-1 h-[54px] w-full rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-base font-bold shadow-[0_12px_26px_#0D948852] transition-colors disabled:opacity-50"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign in'
-              )}
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
-
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-slate-400 text-sm">
-              Ready to Palm It?{' '}
-              <Link href="/register" className="text-primary-500 hover:underline font-medium">
-                Sign up free
-              </Link>
-            </p>
+          <div className="flex justify-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-[#64748B] hover:text-primary-600"
+            >
+              Forgot password
+            </Link>
           </div>
+
+          <div className="h-px w-full bg-[#D3E2DF]" />
+
+          <p className="text-center text-sm text-[#64748B]">
+            New here?{' '}
+            <Link href="/register" className="font-semibold text-primary-500 hover:underline">
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
     </div>

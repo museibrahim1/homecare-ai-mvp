@@ -69,7 +69,7 @@ export function Hero() {
               data-track="hero-cta-trial"
               className="btn-primary inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base"
             >
-              Start your 14-day free trial <ArrowRight className="w-4 h-4 shrink-0" />
+              Start your 30-day free trial <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
             <Link
               href="/book-demo"

@@ -455,7 +455,7 @@ export default function CommandCenterPage() {
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen glass-page">
       <Sidebar />
       <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto">
         {/* ── Top Banner ──────────────────────────────────── */}

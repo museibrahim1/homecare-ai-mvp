@@ -956,6 +956,190 @@ html {
 }
 
 /* ============================================================
+   Botanical Mint Glass (Paper Web Glass design language)
+   ============================================================ */
+.glass-page {
+  background: #E7F1EF;
+  color: #10211F;
+}
+.glass-rail {
+  background: rgba(255, 255, 255, 0.72);
+  border-right: 1px solid #10211F12;
+  box-shadow: 24px 0 48px #0D94880F;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+.glass-card {
+  /* Paper Web Glass: fill ~0.66, radius 24, soft teal shadow */
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid #FFFFFFE0;
+  box-shadow: 0 12px 32px #0D948817;
+  border-radius: 24px;
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+.glass-panel {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid #FFFFFFE0;
+  box-shadow: 0 12px 32px #0D948817;
+  border-radius: 20px;
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+.glass-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 10px;
+  border-radius: 16px;
+  background: #FFFFFFB3;
+  border: 1px solid #FFFFFFE0;
+  box-shadow: 0 8px 22px #0D948812;
+}
+.glass-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748B;
+  background: #FFFFFFB3;
+  border: 1px solid #FFFFFFE0;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.glass-pill:hover {
+  color: #10211F;
+  background: #FFFFFF;
+}
+.glass-pill-active {
+  color: #0D9488;
+  font-weight: 600;
+  background: #FFFFFF;
+  border: 1.5px solid #0D9488;
+}
+.glass-row {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding-right: 18px;
+  border-radius: 14px;
+  overflow: hidden;
+  gap: 12px;
+  background: #FFFFFFB8;
+  border: 1px solid #FFFFFFE0;
+  box-shadow: 0 8px 20px #0D948814;
+}
+.glass-row-bar {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+.glass-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: #0D9488;
+  color: #FFFFFF !important;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 18px #0D948833;
+  transition: background 0.15s ease;
+}
+.glass-btn-primary:hover {
+  background: #0F766E;
+}
+/* Segmented tab track: gray rail with white active pill */
+.glass-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: #F1F5F9;
+  border-radius: 10px;
+}
+.glass-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.glass-tab:hover {
+  color: #334155;
+}
+.glass-tab-active {
+  background: #ffffff;
+  color: #10211F;
+  font-weight: 600;
+  box-shadow: 0 1px 3px #0F172A14;
+}
+
+/* Paper Web Glass: soft translucent form field on glass surfaces */
+.glass-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #10211F1A;
+  border-radius: 12px;
+  color: #10211F;
+  font-size: 14px;
+  line-height: 20px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.glass-input::placeholder {
+  color: #94A3B8;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: #0D9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+.glass-input:hover:not(:focus) {
+  border-color: #10211F33;
+}
+/* Paper Web Glass: 48x28 toggle with 22px knob */
+.glass-toggle {
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  transition: background 0.18s ease;
+}
+.glass-toggle-on {
+  background: #0D9488;
+  justify-content: flex-end;
+}
+.glass-toggle-off {
+  background: #CBD5E1;
+  justify-content: flex-start;
+}
+.glass-toggle-knob {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 2px 5px #10211F33;
+  flex-shrink: 0;
+}
+
+/* ============================================================
    Mobile Responsive Fixes — Safari & Small Screens
    ============================================================ */
 

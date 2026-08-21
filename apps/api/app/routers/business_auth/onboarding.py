@@ -143,25 +143,9 @@ async def complete_onboarding(
     except Exception as e:
         logger.warning("AgencySettings on social onboard failed: %s", e)
 
-    try:
-        from app.models.subscription import Plan, Subscription, SubscriptionStatus
-        plan = (
-            db.query(Plan).filter(Plan.tier == "STARTER", Plan.is_active.is_(True)).first()
-            or db.query(Plan).filter(Plan.is_active.is_(True)).order_by(Plan.monthly_price).first()
-        )
-        if plan:
-            trial_end = datetime.now(timezone.utc) + timedelta(days=14)
-            db.add(Subscription(
-                business_id=business.id,
-                plan_id=plan.id,
-                status=SubscriptionStatus.TRIAL,
-                billing_cycle="monthly",
-                trial_ends_at=trial_end,
-                current_period_start=datetime.now(timezone.utc),
-                current_period_end=trial_end,
-            ))
-    except Exception as e:
-        logger.warning("Trial subscription on social onboard failed: %s", e)
+    # Do not grant a free trial here. Access starts when the user completes
+    # Apple In-App Purchase (30-day introductory trial or paid month).
+    # See docs/SUBSCRIPTION_TRIAL_POLICY.md.
 
     log_action(
         db=db,

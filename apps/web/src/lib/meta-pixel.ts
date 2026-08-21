@@ -7,7 +7,7 @@
  * Standard events used for ad optimization:
  *   - PageView              (layout + SPA route changes)
  *   - CompleteRegistration  (website signup)
- *   - StartTrial            (signup includes 14-day trial)
+ *   - StartTrial            (Apple IAP starts 30-day trial)
  *   - Lead                  (demo booking / contact)
  *   - AppStoreClick         (custom — App Store CTA clicks)
  */

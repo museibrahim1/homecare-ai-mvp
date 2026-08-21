@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
+import GlassShell from '@/components/GlassShell';
 import {
   CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2,
   Pencil, Trash2, AlertCircle, ChevronLeft, ChevronRight, Calendar,
@@ -35,6 +34,14 @@ const TYPE_CONFIG: Record<AppointmentType, { color: string; bg: string; border: 
   review:     { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-l-green-500', label: 'Care Review', icon: Users },
   meeting:    { color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-l-purple-500', label: 'Meeting', icon: Video },
   visit:      { color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-l-orange-500', label: 'Home Visit', icon: MapPin },
+};
+
+/* Paper agenda uses solid left color bars per appointment type */
+const TYPE_BAR: Record<AppointmentType, string> = {
+  assessment: '#3B82F6',
+  review: '#10B981',
+  meeting: '#8B5CF6',
+  visit: '#F59E0B',
 };
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
@@ -385,7 +392,7 @@ function ScheduleContent() {
   const isPlatformAdmin = user?.role === 'admin' && (user?.email || '').endsWith('@palmtai.com');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [view, setView] = useState<'day' | 'week' | 'month'>('day');
+  const [view, setView] = useState<'day' | 'week' | 'month'>('month');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
@@ -603,6 +610,26 @@ function ScheduleContent() {
         <OAuthHandler token={token} onConnected={() => setGoogleConnected(true)} onError={msg => setError(msg)} />
       </Suspense>
 
+      {/* Paper Calendar header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-2">
+        <div className="flex flex-col gap-1 min-w-0">
+          <h1 className="text-[32px] sm:text-[40px] font-bold tracking-tight leading-tight text-[#10211F]">
+            Calendar
+          </h1>
+          <p className="text-[15px] font-medium leading-6 text-[#64748B]">
+            Visits, assessments, and follow-ups on one board.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => { setFormData({ ...emptyForm(), date: dateStr }); setShowAddModal(true); }}
+          className="glass-btn-primary shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          New visit
+        </button>
+      </div>
+
       {/* Error */}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
@@ -611,7 +638,43 @@ function ScheduleContent() {
         </div>
       )}
 
-      {/* Stats Row */}
+      {/* Toolbar — Paper month chrome */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <button onClick={goToday} className="px-3 py-1.5 text-xs font-semibold text-[#4B6B66] hover:text-[#10211F] bg-[#FFFFFFB8] border border-[#FFFFFFE0] rounded-xl transition-colors">
+            Today
+          </button>
+          <div className="flex items-center">
+            <button onClick={goPrev} className="p-1.5 text-[#64748B] hover:text-[#10211F] hover:bg-white/60 rounded-l-xl transition-colors border border-[#FFFFFFE0] bg-[#FFFFFFB8]">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button onClick={goNext} className="p-1.5 text-[#64748B] hover:text-[#10211F] hover:bg-white/60 rounded-r-xl transition-colors border border-[#FFFFFFE0] border-l-0 bg-[#FFFFFFB8]">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <h2 className="text-sm lg:text-base font-semibold text-[#10211F] ml-1">{dateLabel}</h2>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="glass-tabs">
+            {[
+              { key: 'week' as const, label: 'Week' },
+              { key: 'month' as const, label: 'Month' },
+            ].map(v => (
+              <button
+                key={v.key}
+                type="button"
+                onClick={() => setView(v.key)}
+                className={`glass-tab ${view === v.key ? 'glass-tab-active' : ''}`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Legacy day stats removed from primary Paper layout — keep compact week stats */}
       <div className={`grid grid-cols-2 ${isPlatformAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 mb-6`}>
         {[
           { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50', show: true },
@@ -619,7 +682,7 @@ function ScheduleContent() {
           { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50', show: true },
           { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-slate-500', bg: googleConnected ? 'bg-emerald-50' : 'bg-slate-100', show: isPlatformAdmin },
         ].filter(s => s.show).map((s, i) => (
-          <div key={i} className="card p-3 lg:p-4 flex items-center gap-3" onClick={s.label === 'Google Sync' ? () => setShowConnectModal(true) : undefined} role={s.label === 'Google Sync' ? 'button' : undefined}>
+          <div key={i} className="glass-card p-3 lg:p-4 flex items-center gap-3" onClick={s.label === 'Google Sync' ? () => setShowConnectModal(true) : undefined} role={s.label === 'Google Sync' ? 'button' : undefined}>
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
@@ -631,68 +694,11 @@ function ScheduleContent() {
         ))}
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
-            Today
-          </button>
-          <div className="flex items-center">
-            <button onClick={goPrev} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-l-lg transition-colors border border-slate-200">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button onClick={goNext} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-r-lg transition-colors border border-slate-200 border-l-0">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <h2 className="text-sm lg:text-base font-semibold text-slate-900 ml-1">{dateLabel}</h2>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* View switcher */}
-          <div className="flex items-center bg-slate-50/30 rounded-lg p-0.5 border border-slate-200">
-            {[
-              { key: 'day' as const, label: 'Day', icon: List },
-              { key: 'week' as const, label: 'Week', icon: LayoutGrid },
-              { key: 'month' as const, label: 'Month', icon: CalendarDays },
-            ].map(v => (
-              <button
-                key={v.key}
-                onClick={() => setView(v.key)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  view === v.key ? 'bg-slate-50 text-slate-800' : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <v.icon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{v.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Sync button */}
-          {googleConnected && (
-            <button onClick={handleSyncNow} disabled={syncing} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 border border-green-500/20 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50">
-              {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
-              Sync
-            </button>
-          )}
-
-          {/* Add button */}
-          <button
-            onClick={() => { setFormData({ ...emptyForm(), date: dateStr }); setShowAddModal(true); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">New</span>
-          </button>
-        </div>
-      </div>
-
       {/* ─── Views ─── */}
       {view === 'day' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Timeline */}
-          <div className="lg:col-span-2 card p-4 lg:p-5 overflow-auto max-h-[calc(100vh-320px)]">
+          <div className="lg:col-span-2 glass-card p-4 lg:p-5 overflow-auto max-h-[calc(100vh-320px)]">
             {todayApts.length === 0 && (
               <div className="text-center py-8 mb-4 bg-slate-50/20 rounded-xl">
                 <CalendarDays className="w-8 h-8 text-slate-300 mx-auto mb-2" />
@@ -704,7 +710,7 @@ function ScheduleContent() {
           </div>
 
           {/* Sidebar: upcoming */}
-          <div className="card p-4 lg:p-5">
+          <div className="glass-card p-4 lg:p-5">
             <h3 className="text-sm font-semibold text-slate-900 mb-3">Upcoming</h3>
             <div className="space-y-2 max-h-[calc(100vh-380px)] overflow-y-auto">
               {appointments
@@ -746,46 +752,101 @@ function ScheduleContent() {
       )}
 
       {view === 'month' && (
-        <div className="card p-4 lg:p-5">
-          <div className="grid grid-cols-7 gap-px">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-[10px] text-slate-400 uppercase tracking-wider py-2">{d}</div>
-            ))}
-            {generateCalendarDays().map((day, i) => {
-              const dayDate = day ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day) : null;
-              const dayStr = dayDate ? formatLocalDate(dayDate) : '';
-              const dayApts = day ? appointments.filter(a => a.date === dayStr) : [];
-              const today = dayDate ? isToday(dayDate) : false;
-              const isSelected = dayDate ? isSameDay(dayDate, selectedDate) : false;
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Month grid card */}
+          <div className="grow min-w-0 glass-card p-5 lg:p-6">
+            <div className="grid grid-cols-7 gap-2 pb-1.5">
+              {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => (
+                <div key={d} className="text-center text-xs font-semibold tracking-[0.06em] text-[#94A3B8]">{d}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {generateCalendarDays().map((day, i) => {
+                const dayDate = day ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day) : null;
+                const dayStr = dayDate ? formatLocalDate(dayDate) : '';
+                const dayApts = day ? appointments.filter(a => a.date === dayStr) : [];
+                const today = dayDate ? isToday(dayDate) : false;
+                const isSelected = dayDate ? isSameDay(dayDate, selectedDate) : false;
+                const highlight = isSelected || today;
 
+                if (!day) {
+                  return <div key={i} className="min-h-[74px] rounded-[14px]" />;
+                }
+
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day))}
+                    className={`min-h-[74px] flex flex-col gap-1.5 py-2.5 px-3 text-left rounded-[14px] border transition-colors ${
+                      highlight
+                        ? 'bg-primary-500 border-transparent shadow-[0_10px_24px_#0D948852]'
+                        : 'bg-white/70 border-white/70 hover:bg-white/90'
+                    }`}
+                  >
+                    <span className={`text-sm font-medium leading-[18px] ${highlight ? 'text-white font-bold' : 'text-[#10211F]'}`}>{day}</span>
+                    <div className="space-y-1">
+                      {dayApts.slice(0, 2).map(a => (
+                        highlight ? (
+                          <div key={a.id} className="h-1 rounded-full bg-white/80" style={{ width: `${Math.min(34, 18 + a.title.length)}px` }} />
+                        ) : (
+                          <div key={a.id} className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+                        )
+                      ))}
+                      {dayApts.length > 2 && (
+                        <p className={`text-[10px] ${highlight ? 'text-white/80' : 'text-slate-400'}`}>+{dayApts.length - 2}</p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Agenda sidebar */}
+          <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <p className="text-[11px] font-semibold tracking-[0.1em] text-primary-500">
+                {isToday(selectedDate) ? 'TODAY' : format(selectedDate, 'EEEE').toUpperCase()}
+              </p>
+              <h2 className="text-[22px] font-bold tracking-tight leading-tight text-[#10211F]">
+                {format(selectedDate, 'EEEE, MMMM d')}
+              </h2>
+            </div>
+
+            {todayApts.length === 0 && (
+              <div className="glass-panel p-5 text-center">
+                <CalendarDays className="w-7 h-7 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">Nothing scheduled</p>
+              </div>
+            )}
+
+            {todayApts.map(apt => {
+              const cfg = TYPE_CONFIG[apt.type];
               return (
                 <button
-                  key={i}
-                  disabled={!day}
-                  onClick={() => day && (() => { setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day)); setView('day'); })()}
-                  className={`min-h-[80px] p-1.5 text-left transition-colors rounded-lg ${
-                    !day ? '' :
-                    isSelected ? 'bg-primary-50 ring-1 ring-primary-500/30' :
-                    today ? 'bg-primary-500/5' :
-                    'hover:bg-slate-50/30'
-                  }`}
+                  key={apt.id}
+                  onClick={() => handleEdit(apt)}
+                  className="flex items-stretch gap-3.5 p-[18px] rounded-[20px] text-left bg-[#FFFFFFB3] border border-[#FFFFFFE0] shadow-[0_12px_30px_#0D948817] hover:bg-white transition-colors"
                 >
-                  {day && (
-                    <>
-                      <span className={`text-xs font-medium ${today ? 'text-primary-400' : 'text-slate-800'}`}>{day}</span>
-                      <div className="mt-1 space-y-0.5">
-                        {dayApts.slice(0, 2).map(a => (
-                          <div key={a.id} className={`text-[9px] px-1 py-0.5 rounded truncate ${TYPE_CONFIG[a.type].bg} ${TYPE_CONFIG[a.type].color}`}>
-                            {a.time.slice(0, 5)} {a.title}
-                          </div>
-                        ))}
-                        {dayApts.length > 2 && <p className="text-[9px] text-slate-400 pl-1">+{dayApts.length - 2}</p>}
-                      </div>
-                    </>
-                  )}
+                  <div className="w-1 shrink-0 self-stretch rounded-full" style={{ backgroundColor: TYPE_BAR[apt.type] }} />
+                  <div className="grow min-w-0 flex flex-col gap-1">
+                    <span className="text-[13px] font-semibold text-primary-500">{formatTime12(apt.time)}</span>
+                    <span className="text-[15px] font-semibold leading-5 text-[#10211F] truncate">{apt.title}</span>
+                    <span className="text-[13px] font-medium text-[#4B6B66] truncate">
+                      {cfg.label}{apt.client ? ` · ${apt.client}` : ''}{apt.location ? ` · ${apt.location}` : ''}
+                    </span>
+                  </div>
                 </button>
               );
             })}
+
+            <button
+              onClick={() => { setFormData({ ...emptyForm(), date: dateStr }); setShowAddModal(true); }}
+              className="flex items-center justify-center h-[52px] rounded-[20px] gap-2 bg-[#0D94880F] border border-dashed border-[#0D948866] text-primary-500 hover:bg-[#0D948817] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-[15px] font-semibold">Add visit</span>
+            </button>
           </div>
         </div>
       )}
@@ -860,18 +921,12 @@ function ScheduleContent() {
 /* ─── Page Shell ─── */
 export default function SchedulePage() {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 min-w-0 flex flex-col">
-        <TopBar />
-        <div className="flex-1 p-4 lg:p-8">
-          <div className="max-w-6xl mx-auto">
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 text-primary-400 animate-spin" /></div>}>
-              <ScheduleContent />
-            </Suspense>
-          </div>
-        </div>
-      </main>
-    </div>
+    <GlassShell>
+      <div className="max-w-6xl mx-auto w-full">
+        <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 text-primary-400 animate-spin" /></div>}>
+          <ScheduleContent />
+        </Suspense>
+      </div>
+    </GlassShell>
   );
 }

@@ -45,7 +45,7 @@ KEY FACTS ABOUT PALMCARE AI:
 - Revenue analytics and custom reporting
 - HIPAA compliant: 256-bit AES encryption, role-based access, audit trails
 - Works for agencies of all sizes: small (up to 30 clients), medium (30-200), enterprise (200+)
-- 14-day free trial available, no credit card required
+- 30-day free trial starts only in the iOS app via Apple In-App Purchase (Apple ID payment method required). Apple auto-charges after the trial unless cancelled.
 - Onboarding typically takes 24 hours; caregivers learn the mobile app in ~15 minutes
 - Google Calendar, Google Drive, Gmail, and Stripe integrations
 

@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Users, Plus, Search, Phone, ChevronRight, ChevronLeft,
-  MapPin, Star, Clock, Upload, AlertCircle
+  MapPin, Star, Clock, Upload, AlertCircle, MessagesSquare
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import CaregiverModal from '@/components/CaregiverModal';
+import GlassTabs from '@/components/GlassTabs';
+import TeamChatPanel from '@/components/panels/TeamChatPanel';
 
 const API_BASE = '/api';
 
@@ -83,6 +85,7 @@ export default function CaregiversPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [expiringCerts, setExpiringCerts] = useState<ExpiringCert[]>([]);
+  const [activeTab, setActiveTab] = useState<'members' | 'chat'>('members');
   const pageSize = 25;
 
   useEffect(() => {
@@ -91,6 +94,22 @@ export default function CaregiversPage() {
       loadExpiringCerts();
     }
   }, [token]);
+
+  // Read the active tab from the URL so ?tab=chat deep links (and the retired
+  // /team-chat redirect) land on the chat surface
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'chat' || tab === 'members') setActiveTab(tab);
+  }, []);
+
+  const handleTabChange = (key: string) => {
+    const tab = key === 'chat' ? 'chat' : 'members';
+    setActiveTab(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', tab);
+    router.replace(`/caregivers?${params.toString()}`);
+  };
 
   const loadExpiringCerts = async () => {
     try {
@@ -183,33 +202,50 @@ export default function CaregiversPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center glass-page">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Caregivers</h1>
-              <p className="text-slate-500">Manage your caregiver team for client assignments</p>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => router.push('/integrations')} className="btn-secondary flex items-center gap-2">
-                <Upload className="w-5 h-5" />Import
-              </button>
-              <button onClick={handleAddNew} className="btn-primary flex items-center gap-2">
-                <Plus className="w-5 h-5" />Add Caregiver
-              </button>
-            </div>
+    <>
+    <GlassShell
+      title="Team"
+      subtitle="Manage your caregiver team and chat with staff"
+      action={
+        activeTab === 'members' ? (
+          <>
+            <button
+              onClick={() => router.push('/integrations')}
+              className="inline-flex items-center gap-2 h-11 px-[18px] rounded-xl bg-white/70 hover:bg-white text-[#4B6B66] hover:text-[#10211F] border border-white text-sm font-medium transition-colors"
+            >
+              <Upload className="w-5 h-5" />Import
+            </button>
+            <button onClick={handleAddNew} className="glass-btn-primary">
+              <Plus className="w-5 h-5" />Add Caregiver
+            </button>
+          </>
+        ) : undefined
+      }
+    >
+        <div className="max-w-6xl mx-auto w-full">
+          {/* Tabs */}
+          <div className="mb-6">
+            <GlassTabs
+              tabs={[
+                { key: 'members', label: 'Members', icon: Users },
+                { key: 'chat', label: 'Chat', icon: MessagesSquare },
+              ]}
+              active={activeTab}
+              onChange={handleTabChange}
+            />
           </div>
 
+          {activeTab === 'chat' ? (
+            <TeamChatPanel />
+          ) : (
+          <>
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
@@ -249,23 +285,23 @@ export default function CaregiversPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="card p-5">
+            <div className="glass-card p-5">
               <p className="text-slate-500 text-sm mb-1">Total Caregivers</p>
-              <p className="text-3xl font-bold text-slate-900">{caregivers.length}</p>
+              <p className="text-3xl font-bold text-[#10211F]">{caregivers.length}</p>
             </div>
-            <div className="card p-5">
+            <div className="glass-card p-5">
               <p className="text-slate-500 text-sm mb-1">Active</p>
               <p className="text-3xl font-bold text-accent-green">
                 {caregivers.filter(c => c.status === 'active').length}
               </p>
             </div>
-            <div className="card p-5">
+            <div className="glass-card p-5">
               <p className="text-slate-500 text-sm mb-1">High Care Qualified</p>
               <p className="text-3xl font-bold text-primary-400">
                 {caregivers.filter(c => c.can_handle_high_care).length}
               </p>
             </div>
-            <div className="card p-5">
+            <div className="glass-card p-5">
               <p className="text-slate-500 text-sm mb-1">Available</p>
               <p className="text-3xl font-bold text-accent-cyan">
                 {caregivers.filter(c => (c.current_client_count || 0) < (c.max_clients || 5)).length}
@@ -275,32 +311,32 @@ export default function CaregiversPage() {
 
           {/* Search */}
           <div className="mb-6 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8]" />
             <input
               type="text"
               placeholder="Search by name, email, phone, or certification..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-dark w-full pl-12"
+              className="glass-input w-full pl-12"
             />
           </div>
 
           {/* Caregiver List */}
           {loading ? (
-            <div className="card p-12 text-center">
+            <div className="glass-panel p-12 text-center">
               <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : filteredCaregivers.length === 0 ? (
-            <div className="card p-12 text-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-slate-500" />
+            <div className="glass-panel p-12 text-center">
+              <div className="w-16 h-16 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-[#94A3B8]" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-[#10211F] mb-2">
                 {searchQuery ? 'No caregivers found' : 'No caregivers yet'}
               </h3>
               <p className="text-slate-500 mb-4">Add caregivers to assign them to clients</p>
               {!searchQuery && (
-                <button onClick={handleAddNew} className="btn-primary">Add Caregiver</button>
+                <button onClick={handleAddNew} className="glass-btn-primary mx-auto">Add Caregiver</button>
               )}
             </div>
           ) : (
@@ -309,11 +345,11 @@ export default function CaregiversPage() {
                 <div
                   key={caregiver.id}
                   onClick={() => handleEditCaregiver(caregiver)}
-                  className="card card-hover p-5 cursor-pointer group"
+                  className="p-5 rounded-2xl bg-[#FFFFFFB8] border border-[#FFFFFFE0] shadow-[0_8px_20px_#0D948814] hover:bg-white transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      caregiver.can_handle_high_care ? 'bg-primary-50' : 'bg-slate-50'
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                      caregiver.can_handle_high_care ? 'bg-primary-50' : 'bg-white/70'
                     }`}>
                       <span className={`font-bold text-lg ${
                         caregiver.can_handle_high_care ? 'text-primary-400' : 'text-slate-600'
@@ -422,8 +458,10 @@ export default function CaregiversPage() {
               </div>
             </div>
           )}
+          </>
+          )}
         </div>
-      </main>
+    </GlassShell>
 
       {/* Caregiver Modal */}
       <CaregiverModal
@@ -433,6 +471,6 @@ export default function CaregiversPage() {
         onSave={handleSaveCaregiver}
         onDelete={handleDeleteCaregiver}
       />
-    </div>
+    </>
   );
 }

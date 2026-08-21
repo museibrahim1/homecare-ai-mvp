@@ -19,7 +19,7 @@ Set up in App Store Connect:
   1. Create a Subscription Group (e.g. "PalmCare Plans").
   2. Add the single auto-renewing subscription with this product ID (must
      match `APPLE_PRODUCT_TIER_MAP` below), priced at $199/month with a
-     14 day introductory free-trial offer:
+     30 day introductory free-trial offer:
         com.palmcareai.app.starter.monthly
   3. Add the same product to the App Store Connect API Issuer with a
      "Customer Communications" key so refund / cancel webhooks work.
@@ -70,7 +70,7 @@ APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
     "com.palmcareai.app.starter.monthly": PlanTier.STARTER,
 }
 
-# Products granting a 14 day free trial through an Apple introductory offer.
+# Products granting a 30-day free trial through an Apple introductory offer.
 APPLE_TRIAL_PRODUCT_IDS = {
     "com.palmcareai.app.starter.monthly",
 }

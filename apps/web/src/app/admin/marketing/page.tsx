@@ -112,7 +112,7 @@ export default function MarketingMaterialsPage() {
   const isPdf = (src: string) => src.endsWith('.pdf');
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen glass-page">
       <Sidebar />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         {/* Header */}

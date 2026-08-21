@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import { MessageSquare, Search, Send, Paperclip, Phone, Video, MessagesSquare, Plus, Loader2, Users, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -139,19 +139,17 @@ export default function MessagesPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-        </main>
-      </div>
+        </div>
+      </GlassShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 flex">
+    <GlassShell>
+      <div className="flex h-[calc(100vh-8rem)] glass-card overflow-hidden">
         {/* Conversations List */}
         <div className="w-80 border-r border-slate-200 flex flex-col">
           <div className="p-4 border-b border-slate-200">
@@ -356,7 +354,7 @@ export default function MessagesPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </GlassShell>
   );
 }

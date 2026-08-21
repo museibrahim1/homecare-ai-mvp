@@ -1,0 +1,28 @@
+name: Platform info email engagement watch
+
+# Polls Resend for tracked platform_info emails and emails Muse on open/click.
+# Needs scripts/email/.platform_info_sends.json committed on the branch.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Poll engagement
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          pip install -q python-dotenv requests
+          if [ ! -f scripts/email/.platform_info_sends.json ]; then
+            echo "No track log on branch yet — skipping"
+            exit 0
+          fi
+          python scripts/email/watch_platform_info_engagement.py --once

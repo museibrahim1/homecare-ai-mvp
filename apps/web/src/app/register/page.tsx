@@ -5,13 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2, Check, ArrowLeft, ArrowRight, Eye, EyeOff,
-  Building2, Shield, Clock, AlertCircle,
+  Building2, AlertCircle,
 } from 'lucide-react';
 import { trackFunnelStep } from '@/lib/analytics';
 import { getAttribution, getSignupSource } from '@/lib/attribution';
 import { trackSignUp } from '@/lib/ga';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
+import PalmOrb from '@/components/glass/PalmOrb';
+import WaveField from '@/components/glass/WaveField';
 import SocialAuthButtons from '@/components/SocialAuthButtons';
 
 const API = '/api';
@@ -23,8 +25,6 @@ const US_STATES = [
   'WI','WY','DC',
 ];
 
-// Self-reported acquisition channel. Answers where the automatic attribution
-// can't see (e.g. a ChatGPT recommendation looks like "direct" traffic).
 const REFERRAL_SOURCES = [
   { value: 'google', label: 'Google search' },
   { value: 'ai_assistant', label: 'ChatGPT or another AI assistant' },
@@ -38,11 +38,13 @@ const REFERRAL_SOURCES = [
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen glass-page flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+        </div>
+      }
+    >
       <RegisterForm />
     </Suspense>
   );
@@ -67,7 +69,7 @@ function RegisterForm() {
     if (lower.includes('already exists') && lower.includes('business'))
       return { message: 'This business is already registered.', hint: 'If this is your agency, try signing in or contact support.' };
     if (lower.includes('password') && (lower.includes('8 char') || lower.includes('security')))
-      return { message: 'Password doesn\'t meet security requirements.', hint: 'Use at least 8 characters with a mix of letters, numbers, and symbols.' };
+      return { message: "Password doesn't meet security requirements.", hint: 'Use at least 8 characters with a mix of letters, numbers, and symbols.' };
     if (lower.includes('rate limit') || lower.includes('too many'))
       return { message: 'Too many attempts. Please wait a moment.', hint: 'For security, we limit registration attempts. Try again in a few minutes.' };
     if (lower.includes('not configured'))
@@ -89,9 +91,15 @@ function RegisterForm() {
     setErrorHint(hint);
   };
 
-  const clearError = () => { setError(''); setErrorHint(''); };
+  const clearError = () => {
+    setError('');
+    setErrorHint('');
+  };
 
-  useEffect(() => { trackFunnelStep(1, 'registration', { plan: selectedPlan }); }, []);
+  useEffect(() => {
+    trackFunnelStep(1, 'registration', { plan: selectedPlan });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [form, setForm] = useState({
     owner_name: '',
@@ -111,10 +119,11 @@ function RegisterForm() {
     referral_source: '',
   });
 
-  const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
+  const set = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   const validateStep1 = () => {
     if (!form.owner_name.trim()) return 'Full name is required';
+    if (!form.name.trim()) return 'Agency name is required';
     if (!form.owner_email.trim()) return 'Email is required';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.owner_email)) return 'Please enter a valid email';
     if (!form.owner_password || form.owner_password.length < 8) return 'Password must be at least 8 characters';
@@ -134,7 +143,11 @@ function RegisterForm() {
 
   const handleNext = () => {
     const err = validateStep1();
-    if (err) { setError(err); setErrorHint(''); return; }
+    if (err) {
+      setError(err);
+      setErrorHint('');
+      return;
+    }
     clearError();
     setStep(2);
     trackFunnelStep(2, 'registration', { plan: selectedPlan });
@@ -142,7 +155,11 @@ function RegisterForm() {
 
   const handleRegister = async () => {
     const err = validateStep2();
-    if (err) { setError(err); setErrorHint(''); return; }
+    if (err) {
+      setError(err);
+      setErrorHint('');
+      return;
+    }
     clearError();
     setLoading(true);
 
@@ -165,253 +182,330 @@ function RegisterForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({ detail: 'Registration failed. Please try again.' }));
-        const detail = typeof data.detail === 'string' ? data.detail
-          : Array.isArray(data.detail) ? data.detail.map((d: any) => d.msg || d).join('. ')
-          : 'Registration failed. Please try again.';
+        const detail =
+          typeof data.detail === 'string'
+            ? data.detail
+            : Array.isArray(data.detail)
+              ? data.detail.map((d: { msg?: string }) => d.msg || d).join('. ')
+              : 'Registration failed. Please try again.';
         throw new Error(detail);
       }
 
-      // Registration creates the account AND a 14-day free trial, and returns
-      // an access token. Subscriptions/billing are managed via Apple IAP in the
-      // iOS app, so there is no web checkout step — sign the user straight in.
       const data = await res.json();
       trackFunnelStep(4, 'registration', { plan: selectedPlan });
-      // GA4 conversion event — lets Google Analytics report signups by
-      // source/medium alongside our internal attribution.
       try {
         trackSignUp({
           plan: selectedPlan,
           signup_source: getSignupSource(),
           referral_source: form.referral_source || 'not_answered',
         });
-      } catch { /* analytics must never break signup */ }
+      } catch {
+        /* analytics must never break signup */
+      }
       if (data.access_token) {
         setToken(data.access_token);
         try {
           const me = await api.getMe(data.access_token);
           if (me) setUser(me);
         } catch {
-          // non-fatal — user can still proceed; /welcome will load the session
+          /* non-fatal */
         }
         await new Promise((r) => setTimeout(r, 100));
         router.push('/welcome');
       } else {
         router.push('/login');
       }
-    } catch (e: any) {
-      setFriendlyError(e.message || 'Something went wrong. Please try again.');
+    } catch (e: unknown) {
+      setFriendlyError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
       setLoading(false);
     }
   };
 
-  const planConfig: Record<string, { label: string }> = {
-    starter: { label: 'PalmCare AI' },
-    growth: { label: 'PalmCare AI' },
-    enterprise: { label: 'PalmCare AI' },
-  };
-  const activePlan = planConfig[selectedPlan] || planConfig.starter;
-  const planLabel = activePlan.label;
-
-  const inputClass = "w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 focus:outline-none transition";
-  const labelClass = "block text-sm font-medium text-slate-700 mb-1.5";
+  const inputClass =
+    'h-[52px] w-full px-4 rounded-xl bg-white border border-[#D3E2DF] text-[15px] font-medium text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500';
+  const labelClass =
+    'text-[13px] leading-4 tracking-[0.02em] font-semibold text-[#475569]';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Nav — same bar as the homepage */}
-      <nav className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
-              <img src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
-            </div>
-            <span className="text-lg sm:text-xl font-bold text-slate-900">PalmCare AI</span>
-          </Link>
-          <p className="text-sm text-slate-600">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary-700 hover:text-primary-800 font-medium">Sign in</Link>
-          </p>
-        </div>
-      </nav>
+    <div className="min-h-screen grid grid-cols-1 md:grid-cols-[minmax(280px,520px)_1fr] relative overflow-hidden bg-[#E7F1EF] antialiased">
+      <div
+        className="flex flex-col justify-between p-8 sm:p-10 xl:p-14 relative overflow-hidden min-h-[280px] md:min-h-screen"
+        style={{ backgroundColor: '#071412' }}
+      >
+        <WaveField dark className="opacity-90" />
+        <Link href="/" className="relative z-10 flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <PalmOrb size={36} />
+          <span className="text-[18px] tracking-[0.02em] font-bold text-white">PALM</span>
+        </Link>
 
-      <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-10 sm:py-14">
-        <div className="w-full max-w-lg">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-              {step === 1 ? 'Start your 14-day free trial' : 'Tell us about your agency'}
-            </h1>
-            <p className="text-slate-600 mt-2">
-              {step === 1
-                ? 'Full access to every feature. No credit card required.'
-                : 'This sets up your contracts with the right state rules.'}
+        <div className="relative z-10 flex flex-col gap-6 md:gap-9 max-w-[448px] py-6 md:py-0">
+          <PalmOrb size={160} className="hidden md:block shrink-0 w-[160px] h-[160px] xl:w-[220px] xl:h-[220px]" />
+          <div className="flex flex-col gap-3 md:gap-4">
+            <div className="flex items-baseline flex-wrap">
+              <span className="text-[40px] md:text-[48px] xl:text-[56px] leading-none tracking-tight font-extrabold text-white">
+                Palm&nbsp;
+              </span>
+              <span className="text-[40px] md:text-[48px] xl:text-[56px] leading-none tracking-tight font-extrabold text-[#2DD4BF]">
+                It.
+              </span>
+            </div>
+            <p className="text-[16px] md:text-[18px] leading-7 text-white/68 max-w-[380px]">
+              Set up your agency and finish your first visit today.
             </p>
           </div>
+        </div>
 
-          {step === 1 && (
-            <div className="mb-6">
-              <SocialAuthButtons onError={setError} />
+        <p className="relative z-10 text-[13px] font-medium text-white/40">Home care documentation</p>
+      </div>
+
+      <div className="flex items-center justify-center px-5 py-10 sm:px-8 relative min-h-screen">
+        <WaveField className="opacity-40 md:hidden" />
+        <div className="relative z-10 w-full max-w-[480px] flex flex-col gap-5 p-8 sm:p-10 rounded-[24px] bg-[#FFFFFFB8] border border-[#FFFFFFE6] shadow-[0_30px_70px_#115E5924] backdrop-blur-xl">
+          <div className="flex flex-col items-start gap-4">
+            <PalmOrb size={56} />
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-[30px] tracking-[-0.02em] font-bold leading-9 text-[#0F172A]">
+                {step === 1 ? 'Create account' : 'Agency details'}
+              </h1>
+              <p className="text-[15px] leading-[18px] text-[#64748B]">
+                {step === 1
+                  ? 'Four documents from one recording.'
+                  : 'This sets up your contracts with the right state rules.'}
+              </p>
             </div>
-          )}
+          </div>
 
-          {/* Step indicator */}
-          <div className="flex items-center justify-center gap-2 mb-6">
-            {[
-              { n: 1, label: 'Account' },
-              { n: 2, label: 'Agency' },
-            ].map(({ n, label }) => (
+          <div className="flex items-center gap-2">
+            {[1, 2].map((n) => (
               <div key={n} className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  n === step ? 'bg-primary-600 text-white' :
-                  n < step ? 'bg-primary-50 text-primary-700' :
-                  'bg-slate-200 text-slate-500'
-                }`}>
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    n === step
+                      ? 'bg-primary-500 text-white'
+                      : n < step
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'bg-slate-200 text-slate-500'
+                  }`}
+                >
                   {n < step ? <Check className="w-3.5 h-3.5" /> : n}
                 </div>
-                <span className={`text-xs font-medium ${n === step ? 'text-slate-900' : 'text-slate-400'}`}>
-                  {label}
-                </span>
-                {n < 2 && <div className="w-8 h-px bg-slate-300 mx-1" />}
+                {n < 2 && <div className="w-8 h-px bg-[#D3E2DF]" />}
               </div>
             ))}
           </div>
 
-          <div className="card p-6 sm:p-8 shadow-lg shadow-slate-900/5">
-            {error && (
-              <div className="mb-5 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-red-700 text-sm font-medium">{error}</p>
-                    {errorHint && <p className="text-red-600/80 text-xs mt-1">{errorHint}</p>}
-                  </div>
-                  <button onClick={clearError} className="text-red-400 hover:text-red-600 transition shrink-0">
-                    <span className="sr-only">Dismiss</span>&times;
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-red-700 text-sm font-medium">{error}</p>
+                  {errorHint && <p className="text-red-600/80 text-xs mt-1">{errorHint}</p>}
+                </div>
+                <button type="button" onClick={clearError} className="text-red-400 hover:text-red-600">
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="flex flex-col gap-4">
+              <SocialAuthButtons onError={setFriendlyError} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>Full name</label>
+                  <input
+                    type="text"
+                    value={form.owner_name}
+                    onChange={(e) => set('owner_name', e.target.value)}
+                    placeholder="Maria Santos"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>Agency name</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => set('name', e.target.value)}
+                    placeholder="Sunrise Home Care"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Work email</label>
+                <input
+                  type="email"
+                  value={form.owner_email}
+                  onChange={(e) => set('owner_email', e.target.value)}
+                  placeholder="maria@agency.com"
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Password</label>
+                <div className="relative">
+                  <input
+                    type={showPw ? 'text' : 'password'}
+                    value={form.owner_password}
+                    onChange={(e) => set('owner_password', e.target.value)}
+                    placeholder="At least 8 characters"
+                    className={`${inputClass} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    aria-label={showPw ? 'Hide password' : 'Show password'}
+                  >
+                    {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
-            )}
+              <button
+                type="button"
+                onClick={handleNext}
+                className="h-[54px] w-full rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-base font-bold shadow-[0_12px_26px_#0D948852] flex items-center justify-center gap-2"
+              >
+                Continue <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
-            {/* STEP 1: Account */}
-            {step === 1 && (
-              <div>
-                <div className="space-y-4">
-                  <div>
-                    <label className={labelClass}>Full name</label>
-                    <input type="text" value={form.owner_name} onChange={e => set('owner_name', e.target.value)}
-                      placeholder="Jane Smith" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Work email</label>
-                    <input type="email" value={form.owner_email} onChange={e => set('owner_email', e.target.value)}
-                      placeholder="jane@agency.com" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Password</label>
-                    <div className="relative">
-                      <input type={showPw ? 'text' : 'password'} value={form.owner_password}
-                        onChange={e => set('owner_password', e.target.value)}
-                        placeholder="At least 8 characters" className={`${inputClass} pr-10`} />
-                      <button type="button" onClick={() => setShowPw(!showPw)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                        {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <button onClick={handleNext}
-                  className="btn-primary w-full mt-6 py-3 text-sm font-semibold flex items-center justify-center gap-2">
-                  Continue <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <p className="text-center text-slate-500 text-xs mt-4">
-                  Selected plan: <span className="text-primary-700 font-semibold">{planLabel}</span>
-                </p>
+          {step === 2 && (
+            <div className="flex flex-col gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(1);
+                  clearError();
+                }}
+                className="flex items-center gap-1 text-slate-500 hover:text-slate-700 text-sm"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>State of incorporation</label>
+                <select
+                  value={form.state_of_incorporation}
+                  onChange={(e) => set('state_of_incorporation', e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select state</option>
+                  {US_STATES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
-
-            {/* STEP 2: Agency */}
-            {step === 2 && (
-              <div>
-                <button onClick={() => { setStep(1); clearError(); }}
-                  className="flex items-center gap-1 text-slate-500 hover:text-slate-700 text-sm mb-5 transition">
-                  <ArrowLeft className="w-4 h-4" /> Back
-                </button>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className={labelClass}>Agency name</label>
-                    <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
-                      placeholder="ABC Home Care LLC" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>State of incorporation</label>
-                    <select value={form.state_of_incorporation} onChange={e => set('state_of_incorporation', e.target.value)} className={inputClass}>
-                      <option value="">Select state</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Phone</label>
-                    <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
-                      placeholder="(555) 000-0000" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Address</label>
-                    <input type="text" value={form.address} onChange={e => set('address', e.target.value)}
-                      placeholder="123 Main St" className={inputClass} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className={labelClass}>City</label>
-                      <input type="text" value={form.city} onChange={e => set('city', e.target.value)} className={inputClass} />
-                    </div>
-                    <div>
-                      <label className={labelClass}>State</label>
-                      <select value={form.state} onChange={e => set('state', e.target.value)} className={inputClass}>
-                        <option value="">State</option>
-                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={labelClass}>ZIP</label>
-                      <input type="text" value={form.zip_code} onChange={e => set('zip_code', e.target.value)} className={inputClass} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Where did you find us?</label>
-                    <select value={form.referral_source} onChange={e => set('referral_source', e.target.value)} className={inputClass}>
-                      <option value="">Select one (optional)</option>
-                      {REFERRAL_SOURCES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <button onClick={handleRegister} disabled={loading}
-                  className="btn-primary w-full mt-6 py-3 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
-                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</> :
-                    <><Building2 className="w-4 h-4" /> Create account and start free trial</>}
-                </button>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Phone</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => set('phone', e.target.value)}
+                  placeholder="(555) 000-0000"
+                  className={inputClass}
+                />
               </div>
-            )}
-          </div>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Address</label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => set('address', e.target.value)}
+                  placeholder="123 Main St"
+                  className={inputClass}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>City</label>
+                  <input
+                    type="text"
+                    value={form.city}
+                    onChange={(e) => set('city', e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>State</label>
+                  <select value={form.state} onChange={(e) => set('state', e.target.value)} className={inputClass}>
+                    <option value="">State</option>
+                    {US_STATES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>ZIP</label>
+                  <input
+                    type="text"
+                    value={form.zip_code}
+                    onChange={(e) => set('zip_code', e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className={labelClass}>Where did you find us?</label>
+                <select
+                  value={form.referral_source}
+                  onChange={(e) => set('referral_source', e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select one (optional)</option>
+                  {REFERRAL_SOURCES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={handleRegister}
+                disabled={loading}
+                className="h-[54px] w-full rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-base font-bold shadow-[0_12px_26px_#0D948852] disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Creating account…
+                  </>
+                ) : (
+                  <>
+                    <Building2 className="w-4 h-4" /> Create account
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
-          {/* Trust row — mirrors homepage hero */}
-          <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-slate-500">
-            <span className="inline-flex items-center gap-2">
-              <Shield className="w-4 h-4 text-primary-600" /> HIPAA compliant
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary-600" /> Cancel anytime
-            </span>
-            <span>No charge until the trial ends</span>
-          </div>
-
-          <p className="text-center text-slate-400 text-xs mt-8">
-            &copy; 2026 Palm Technologies, Inc. &middot;{' '}
-            <Link href="/privacy" className="hover:text-slate-600 underline underline-offset-2">Privacy Policy</Link>
+          <p className="text-center text-sm text-[#64748B]">
+            Already have an account?{' '}
+            <Link href="/login" className="font-semibold text-primary-500 hover:underline">
+              Sign in
+            </Link>
+          </p>
+          <p className="text-center text-xs text-[#94A3B8]">
+            By continuing you agree to the{' '}
+            <Link href="/terms" className="underline underline-offset-2">
+              Terms
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="underline underline-offset-2">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

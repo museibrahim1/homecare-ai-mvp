@@ -121,6 +121,32 @@ class TestDeclinedInContract:
         assert "Bathing assistance" in contract
         assert "I don't want anybody bathing me" in contract
         assert "PER-SERVICE SCHEDULE" in contract or "Companion Care" in contract
+        assert "====" not in contract
+        assert "Severity:" not in contract
+
+
+class TestSanitizeContractPlainText:
+    def test_strips_equals_banners_and_severity(self):
+        from libs.contract_template import sanitize_contract_plain_text, format_list
+
+        raw = (
+            "Intro line\n"
+            "================================================================================\n"
+            "1. SERVICES TO BE PROVIDED\n"
+            "================================================================================\n"
+            "• Bathroom safety equipment (Severity: High)\n"
+            "Signature: _______________________________\n"
+        )
+        cleaned = sanitize_contract_plain_text(raw)
+        assert "====" not in cleaned
+        assert "Severity:" not in cleaned
+        assert "1. SERVICES TO BE PROVIDED" in cleaned
+        assert "________________" in cleaned
+        assert "Bathroom safety equipment" in cleaned
+
+        listed = format_list([{"concern": "Pet safety", "severity": "Medium"}])
+        assert listed == "• Pet safety"
+        assert "Severity" not in listed
 
 
 class TestMergeDeclined:

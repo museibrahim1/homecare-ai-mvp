@@ -74,7 +74,7 @@ struct MainTabView: View {
         // Soft prompt: browse freely; Done / swipe dismisses. Assessment start
         // has its own gate in RecordView.
         .sheet(isPresented: $showSoftPaywall) {
-            PaywallView(isRequired: false, allowsNotNow: true)
+            PaywallView(isRequired: true, allowsNotNow: false)
                 .environmentObject(api)
         }
     }

@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 
 interface Client {
   id: string;
@@ -52,6 +52,40 @@ const COMMON_SERVICES = [
   'Wound Care',
   'Physical Therapy',
   'Respite Care',
+];
+
+const CARE_SPECIALTIES = [
+  'Personal Care',
+  'Companion Care',
+  'Skilled Nursing',
+  'Dementia and Alzheimer Care',
+  'Post-Surgical Recovery',
+  'Hospice Support',
+  'Respite Care',
+  'Pediatric Care',
+];
+
+const PAYOR_OPTIONS = [
+  'Private Pay',
+  'Medicaid',
+  'Medicare',
+  'Long-Term Care Insurance',
+  'Veterans Affairs',
+  'Workers Compensation',
+  'Other',
+];
+
+const BILLING_PARTIES = [
+  { id: 'client', label: 'Client' },
+  { id: 'family', label: 'Family or Responsible Party' },
+  { id: 'insurance', label: 'Insurance or Payor' },
+  { id: 'agency', label: 'Agency' },
+];
+
+const SIGNATURE_METHODS = [
+  { id: 'electronic', label: 'Electronic signature' },
+  { id: 'wet', label: 'Wet signature (in person)' },
+  { id: 'docusign', label: 'DocuSign' },
 ];
 
 const DAYS_OF_WEEK = [
@@ -89,6 +123,10 @@ export default function NewContractPage() {
   const [weeklyHours, setWeeklyHours] = useState<number>(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [insurancePayor, setInsurancePayor] = useState('');
+  const [careSpecialty, setCareSpecialty] = useState('');
+  const [billingParty, setBillingParty] = useState('client');
+  const [signatureMethod, setSignatureMethod] = useState('electronic');
   const [cancellationPolicy, setCancellationPolicy] = useState(
     'Either party may terminate this agreement with 30 days written notice.'
   );
@@ -187,7 +225,13 @@ export default function NewContractPage() {
           hours_per_week: hoursPerWeek || weeklyHours || undefined,
           start_time: startTime || undefined,
           end_time: endTime || undefined,
-        },
+          // Extra care metadata persisted alongside the schedule (stored as a
+          // free-form JSON dict on the backend contract model)
+          insurance_payor: insurancePayor || undefined,
+          care_specialty: careSpecialty || undefined,
+          billing_party: billingParty || undefined,
+          signature_method: signatureMethod || undefined,
+        } as Record<string, unknown>,
         hourly_rate: hourlyRate || undefined,
         weekly_hours: weeklyHours || undefined,
         start_date: startDate || undefined,
@@ -209,7 +253,7 @@ export default function NewContractPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center glass-page">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -217,9 +261,8 @@ export default function NewContractPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center p-8">
+      <GlassShell>
+        <div className="flex-1 flex items-center justify-center py-24">
           <div className="text-center">
             <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-emerald-600" />
@@ -230,17 +273,19 @@ export default function NewContractPage() {
             </p>
             <Loader2 className="w-5 h-5 text-primary-400 animate-spin mx-auto" />
           </div>
-        </main>
-      </div>
+        </div>
+      </GlassShell>
     );
   }
 
-  return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+  const previewClient = clients.find((c) => c.id === selectedClient);
+  const previewServices = services.filter((s) => s.name.trim());
+  const selectedDayLabels = DAYS_OF_WEEK.filter((d) => scheduleDays.includes(d.id)).map((d) => d.label);
 
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
+  return (
+    <GlassShell>
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+          <div className="min-w-0">
           {/* Header */}
           <div className="mb-8">
             <button
@@ -274,7 +319,7 @@ export default function NewContractPage() {
           {/* Form */}
           <div className="space-y-6">
             {/* Section 1: Client & Title */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-primary-400" />
                 Client & Title
@@ -286,7 +331,7 @@ export default function NewContractPage() {
                     Client *
                   </label>
                   {loadingClients ? (
-                    <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg">
+                    <div className="flex items-center gap-2 p-3 bg-white/60 rounded-xl">
                       <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
                       <span className="text-slate-500">Loading clients...</span>
                     </div>
@@ -299,7 +344,7 @@ export default function NewContractPage() {
                           setTimeout(autoGenerateTitle, 0);
                         }
                       }}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
                     >
                       <option value="">Select a client...</option>
                       {clients.map((client) => (
@@ -310,7 +355,7 @@ export default function NewContractPage() {
                       ))}
                     </select>
                   ) : (
-                    <div className="p-4 bg-slate-100 rounded-lg text-center">
+                    <div className="p-4 bg-white/60 rounded-xl text-center">
                       <p className="text-slate-500 text-sm mb-2">No clients yet</p>
                       <button
                         onClick={() => router.push('/clients')}
@@ -332,12 +377,12 @@ export default function NewContractPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Personal Care Service Agreement — Jane Doe"
-                      className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                     {selectedClient && (
                       <button
                         onClick={autoGenerateTitle}
-                        className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 hover:border-slate-300 transition text-sm whitespace-nowrap"
+                        className="px-3 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-500 hover:text-slate-900 hover:border-slate-300 transition text-sm whitespace-nowrap"
                         title="Auto-generate title from services and client"
                       >
                         Auto
@@ -348,8 +393,63 @@ export default function NewContractPage() {
               </div>
             </div>
 
+            {/* Section: Payor & Care Details */}
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                Payor & Care Details
+              </h2>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                    Insurance / Payor
+                  </label>
+                  <select
+                    value={insurancePayor}
+                    onChange={(e) => setInsurancePayor(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="">Select payor...</option>
+                    {PAYOR_OPTIONS.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                    Care Specialty
+                  </label>
+                  <select
+                    value={careSpecialty}
+                    onChange={(e) => setCareSpecialty(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="">Select specialty...</option>
+                    {CARE_SPECIALTIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                    Billing Party
+                  </label>
+                  <select
+                    value={billingParty}
+                    onChange={(e) => setBillingParty(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
+                  >
+                    {BILLING_PARTIES.map((b) => (
+                      <option key={b.id} value={b.id}>{b.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Section 2: Services */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
                 Services
@@ -367,7 +467,7 @@ export default function NewContractPage() {
                       <button
                         key={svc}
                         onClick={() => addCommonService(svc)}
-                        className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-600 hover:text-slate-900 hover:border-primary-500/50 transition"
+                        className="px-3 py-1 bg-white/70 border border-[#FFFFFFE0] rounded-full text-xs text-slate-600 hover:text-slate-900 hover:border-primary-500/50 transition"
                       >
                         + {svc}
                       </button>
@@ -380,14 +480,14 @@ export default function NewContractPage() {
                 {services.map((service, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 bg-slate-50/30 border border-slate-200 rounded-lg p-3"
+                    className="flex items-center gap-3 bg-white/60 border border-[#FFFFFFE0] rounded-xl p-3"
                   >
                     <input
                       type="text"
                       value={service.name}
                       onChange={(e) => updateServiceLine(index, 'name', e.target.value)}
                       placeholder="Service name"
-                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
+                      className="flex-1 px-3 py-2 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
                     />
                     <div className="flex items-center gap-1">
                       <span className="text-slate-400 text-sm">$</span>
@@ -398,13 +498,13 @@ export default function NewContractPage() {
                           updateServiceLine(index, 'rate', parseFloat(e.target.value) || 0)
                         }
                         placeholder="0"
-                        className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
+                        className="w-20 px-3 py-2 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
                       />
                     </div>
                     <select
                       value={service.unit}
                       onChange={(e) => updateServiceLine(index, 'unit', e.target.value)}
-                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
+                      className="px-3 py-2 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
                     >
                       <option value="hour">/hr</option>
                       <option value="visit">/visit</option>
@@ -434,7 +534,7 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 3: Schedule */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-purple-600" />
                 Schedule
@@ -454,7 +554,7 @@ export default function NewContractPage() {
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           scheduleDays.includes(day.id)
                             ? 'bg-primary-500 text-white'
-                            : 'bg-slate-50 text-slate-500 hover:text-slate-900 border border-slate-200'
+                            : 'bg-white/70 text-slate-500 hover:text-slate-900 border border-[#FFFFFFE0]'
                         }`}
                       >
                         {day.label}
@@ -472,7 +572,7 @@ export default function NewContractPage() {
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -483,7 +583,7 @@ export default function NewContractPage() {
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -491,7 +591,7 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 4: Rates & Dates */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="glass-card p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-emerald-600" />
                 Rates & Duration
@@ -508,7 +608,7 @@ export default function NewContractPage() {
                     onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)}
                     placeholder="25.00"
                     step="0.01"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -520,7 +620,7 @@ export default function NewContractPage() {
                     value={weeklyHours || ''}
                     onChange={(e) => setWeeklyHours(parseFloat(e.target.value) || 0)}
                     placeholder="20"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -531,7 +631,7 @@ export default function NewContractPage() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -542,7 +642,7 @@ export default function NewContractPage() {
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -564,7 +664,7 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 5: Terms (Collapsible) */}
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="glass-card overflow-hidden">
               <button
                 onClick={() => setShowTerms(!showTerms)}
                 className="w-full p-6 flex items-center justify-between text-left"
@@ -582,6 +682,30 @@ export default function NewContractPage() {
 
               {showTerms && (
                 <div className="px-6 pb-6 space-y-4">
+                  {/* Florida required clauses callout */}
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-medium mb-1">Florida required clauses</p>
+                      <p>Florida home care agreements must include a client bill of rights, the agency license number, a grievance and complaint procedure, and a 30 day termination notice. Confirm these appear in your terms below before sending.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 text-sm font-medium mb-2">
+                      Signature Method
+                    </label>
+                    <select
+                      value={signatureMethod}
+                      onChange={(e) => setSignatureMethod(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 focus:border-primary-500 focus:outline-none"
+                    >
+                      {SIGNATURE_METHODS.map((s) => (
+                        <option key={s.id} value={s.id}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div>
                     <label className="block text-slate-600 text-sm font-medium mb-2">
                       Cancellation Policy
@@ -590,7 +714,7 @@ export default function NewContractPage() {
                       value={cancellationPolicy}
                       onChange={(e) => setCancellationPolicy(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                   <div>
@@ -601,7 +725,7 @@ export default function NewContractPage() {
                       value={termsAndConditions}
                       onChange={(e) => setTermsAndConditions(e.target.value)}
                       rows={5}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl focus:ring-2 focus:ring-primary-500/20 text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                 </div>
@@ -619,7 +743,7 @@ export default function NewContractPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !selectedClient || !title.trim()}
-                className="flex items-center gap-2 px-8 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
+                className="glass-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -635,8 +759,63 @@ export default function NewContractPage() {
               </button>
             </div>
           </div>
+          </div>
+
+          {/* Live contract preview (Paper Web Glass) */}
+          <aside className="glass-card p-6 lg:sticky lg:top-8 flex flex-col gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary-600">
+              Contract preview
+            </p>
+            <h3 className="text-lg font-bold text-[#10211F] leading-6">
+              {title.trim() || 'Home Care Service Agreement'}
+            </h3>
+            <p className="text-sm font-medium leading-5 text-[#4B6B66]">
+              {previewClient
+                ? `Client ${previewClient.full_name}.`
+                : 'Select a client to begin.'}
+              {insurancePayor ? ` ${insurancePayor}.` : ''}
+              {careSpecialty ? ` ${careSpecialty}.` : ''}
+            </p>
+            {previewServices.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {previewServices.map((s, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary-soft text-primary-700 border border-[#99F6E4]"
+                  >
+                    {s.name}
+                    {s.rate ? ` · $${s.rate}/${s.unit}` : ''}
+                  </span>
+                ))}
+              </div>
+            )}
+            {(hourlyRate > 0 || weeklyHours > 0) && (
+              <p className="text-sm font-medium leading-5 text-[#4B6B66]">
+                {weeklyHours > 0 ? `${weeklyHours} hrs/wk` : 'Hours TBD'}
+                {hourlyRate > 0 ? ` at $${hourlyRate}/hr` : ''}
+                {startDate ? ` starting ${startDate}` : ''}
+                {selectedDayLabels.length > 0 ? `. ${selectedDayLabels.join(', ')}.` : '.'}
+              </p>
+            )}
+            {hourlyRate > 0 && weeklyHours > 0 && (
+              <div className="flex items-center justify-between rounded-xl bg-primary-soft border border-[#99F6E4] px-4 py-3">
+                <span className="text-sm text-[#134E4A]">Estimated weekly total</span>
+                <span className="text-lg font-bold text-primary-deep">
+                  ${calculateWeeklyTotal().toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            )}
+            <div className="mt-1 rounded-xl bg-primary-soft border border-[#99F6E4] px-4 py-3">
+              <p className="text-xs font-bold tracking-[0.04em] text-primary-deep mb-1">
+                STATE REQUIRED CLAUSES
+              </p>
+              <p className="text-[13px] leading-5 font-medium text-[#134E4A]">
+                Client bill of rights, agency license number, grievance procedure, and 30 day
+                termination notice are added per your state rules.
+              </p>
+            </div>
+          </aside>
         </div>
-      </main>
-    </div>
+    </GlassShell>
   );
 }

@@ -643,11 +643,11 @@ async def seed_database():
                 "AI voice to contract", "Smart SOAP notes",
                 "Advanced analytics and reporting", "Custom contract templates",
                 "50 state compliance engine", "HIPAA BAA included",
-                "Priority support", "250 GB storage", "14 day free trial",
+                "Priority support", "250 GB storage", "30 day free trial",
             ])
             _plan_defs = [
                 dict(name="PalmCare AI", tier=PlanTier.STARTER,
-                     description="One plan, everything included. Unlimited assessments, unlimited team members, and a 14 day free trial.",
+                     description="One plan, everything included. Unlimited assessments, unlimited team members, and a 30 day free trial.",
                      monthly_price=199, annual_price=0, max_users=999, max_clients=9999,
                      max_visits_per_month=99999, max_storage_gb=250, is_active=True, is_contact_sales=False,
                      features=_unlimited),

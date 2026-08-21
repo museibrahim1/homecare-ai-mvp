@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ChevronDown, ArrowRight, HelpCircle, Plus, Minus } from 'lucide-react';
+import { ArrowRight, HelpCircle, Plus, Minus } from 'lucide-react';
+import GlassMarketingShell from '@/components/glass/GlassMarketingShell';
 
 const FAQ_CATEGORIES = [
   {
@@ -11,11 +11,11 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'What is PalmCare AI?',
-        a: 'PalmCare AI is an AI-native documentation platform built specifically for home care agencies. It turns voice-recorded client assessments into signed service contracts automatically — eliminating manual data entry, form-filling, and paperwork delays.',
+        a: 'PalmCare AI is an AI-native documentation platform built for home care agencies. It turns voice-recorded client assessments into notes, billables, and service agreements so staff spend less time on re-entry.',
       },
       {
         q: 'How does the voice assessment feature work?',
-        a: 'Tap record and have a natural conversation with the client. Our AI (powered by Deepgram Nova-3) transcribes the conversation in real time, identifies who is speaking, and automatically extracts care needs, services, medications, and billing items. No forms to fill out — just talk.',
+        a: 'Tap record and have a natural conversation with the client. AI transcribes the conversation, identifies who is speaking, and extracts care needs, services, medications, and billing items. No forms to fill out. Just talk.',
       },
       {
         q: 'How long does it take to get set up?',
@@ -23,11 +23,11 @@ const FAQ_CATEGORIES = [
       },
       {
         q: 'Do you offer a free trial?',
-        a: 'Yes — every plan comes with a 14-day free trial with full access to all features. No credit card required. You can also book a free 30-minute demo with our team to see the platform in action before signing up.',
+        a: 'Yes. Every plan comes with a 30-day free trial when you subscribe in the PalmCare iOS app. An Apple ID payment method is required. You can also book a demo with our team before signing up.',
       },
       {
         q: 'What devices and browsers does PalmCare AI support?',
-        a: 'The web dashboard works on all modern browsers (Chrome, Safari, Firefox, Edge). The mobile companion app is available for iOS with Android coming soon. Voice recording works on any device with a microphone.',
+        a: 'The web dashboard works on Chrome, Safari, Firefox, and Edge. The mobile companion app is available for iOS. Voice recording works on any device with a microphone.',
       },
     ],
   },
@@ -36,11 +36,11 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'What makes PalmCare AI different from AxisCare, WellSky, or CareTime?',
-        a: 'Those are legacy scheduling and billing systems — they digitized paper forms but didn\'t eliminate them. PalmCare AI is AI-first: voice-powered assessments, automatic contract generation, smart billing extraction, and an intelligent CRM. Your data flows from a voice recording to a signed contract without manual re-entry.',
+        a: 'Those platforms focus on scheduling and billing workflows. PalmCare is AI-first: voice assessments, automatic contract generation, billing extraction from the visit, and a CRM built around that pipeline.',
       },
       {
         q: 'How does automatic contract generation work?',
-        a: 'After the AI transcribes and analyzes your assessment conversation, it maps the extracted data — services, hours, rates, diagnoses, and state-specific requirements — into a compliant service agreement template. The contract is pre-filled and ready for review in seconds, not hours.',
+        a: 'After AI transcribes and analyzes the assessment, it maps services, hours, rates, and state-specific requirements into a service agreement. The contract is pre-filled and ready for review in minutes.',
       },
       {
         q: 'Can I use my existing contract templates?',
@@ -48,15 +48,11 @@ const FAQ_CATEGORIES = [
       },
       {
         q: 'Does PalmCare AI handle billing?',
-        a: 'Yes. The system automatically identifies billable items from assessment conversations, calculates hours based on the service plan, and generates invoices aligned with payer requirements. It supports Medicaid, Medicare, and private-pay billing workflows.',
+        a: 'The system identifies billable items from assessment conversations and surfaces hours, rates, and services for review. It supports Medicaid, Medicare, and private-pay workflows in the product.',
       },
       {
         q: 'Can caregivers use PalmCare AI on their phones?',
-        a: 'Absolutely. Our iOS companion app lets caregivers clock in/out via GPS, log Activities of Daily Living (ADLs), view their schedule, and receive real-time updates. Agencies can track all caregiver activity from the admin dashboard.',
-      },
-      {
-        q: 'Does the AI support multiple languages?',
-        a: 'Our transcription engine supports 36+ languages including Spanish, Mandarin, Tagalog, French, and Haitian Creole — covering the most common languages spoken in home care settings across the US.',
+        a: 'Yes. The iOS app lets staff record assessments, manage clients, and run the documentation pipeline from the field.',
       },
     ],
   },
@@ -65,19 +61,19 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'Is PalmCare AI HIPAA compliant?',
-        a: 'Yes. We use 256-bit AES encryption for data at rest and in transit, role-based access controls, comprehensive audit trails, and secure cloud infrastructure. All voice recordings and patient data are handled in full compliance with HIPAA regulations. We provide a Business Associate Agreement (BAA) for all agency plans.',
+        a: 'Yes. We use encryption for data at rest and in transit, role-based access controls, audit trails, and secure cloud infrastructure. We provide a Business Associate Agreement (BAA) for agency plans.',
       },
       {
         q: 'Where is my data stored?',
-        a: 'All data is stored on SOC 2 compliant cloud infrastructure in the United States. Data is encrypted at rest with AES-256 and in transit with TLS 1.3. We never sell or share your data with third parties.',
+        a: 'All data is stored on SOC 2 compliant cloud infrastructure in the United States. We never sell your data to third parties.',
       },
       {
         q: 'Who can access client records?',
-        a: 'PalmCare AI uses role-based access controls. Agency administrators define who can view, edit, or export client data. Every access is logged in a comprehensive audit trail.',
+        a: 'PalmCare uses role-based access controls. Agency administrators define who can view, edit, or export client data. Access is logged in an audit trail.',
       },
       {
         q: 'Do you comply with state-specific home care regulations?',
-        a: 'Yes. Our contract generation engine includes a 50-state knowledge base with state-specific documentation requirements, mandatory clauses, and regulatory compliance rules. Contracts are automatically tailored to your state\'s requirements.',
+        a: 'Our contract generation engine includes a 50-state knowledge base with state-specific documentation requirements and mandatory clauses. Contracts are tailored to your state.',
       },
     ],
   },
@@ -86,19 +82,19 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'How much does PalmCare AI cost?',
-        a: 'One plan, one price: $199 a month with everything included. That covers unlimited assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, the 50 state compliance engine, and a HIPAA BAA. Every agency gets the full product, and you can start with a 14-day free trial.',
+        a: 'One plan, one price: $199 a month with everything included. Unlimited assessments, unlimited team members, AI voice to contract, SOAP notes, analytics, the 50 state compliance engine, and a HIPAA BAA. Start with a 30-day free trial in the iOS app.',
       },
       {
         q: 'What support is included?',
-        a: 'Every subscription includes priority support and a HIPAA BAA. There is one plan, so there are no support tiers to compare. Reach the team by email and in-app, with same-day response.',
+        a: 'Every subscription includes priority support and a HIPAA BAA. Reach the team by email and in-app.',
       },
       {
         q: 'Can I cancel anytime?',
-        a: 'Yes, you can cancel your subscription at any time. There are no long-term contracts or cancellation fees. If you cancel, you\'ll retain access through the end of your billing period.',
+        a: 'Yes. Manage or cancel in the PalmCare iOS app or Apple Subscriptions. You keep access through the end of the billing period.',
       },
       {
         q: 'Do you help with data migration from our current system?',
-        a: 'Yes. Our onboarding team assists with data migration from any existing system — whether you\'re using spreadsheets, paper files, or another software platform. We\'ll import your client records, caregiver profiles, and templates.',
+        a: 'Yes. Onboarding can help import client records and related data from spreadsheets, paper files, or another platform.',
       },
     ],
   },
@@ -109,30 +105,27 @@ const ALL_FAQS = FAQ_CATEGORIES.flatMap((c) => c.faqs);
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-dark-700 rounded-xl overflow-hidden transition-colors hover:border-dark-600">
+    <div className="glass-card overflow-hidden">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-5 text-left"
       >
-        <span className="text-white font-medium pr-4">{q}</span>
+        <span className="text-[#10211F] font-medium pr-4">{q}</span>
         {open ? (
-          <Minus className="w-5 h-5 text-primary-400 shrink-0" />
+          <Minus className="w-5 h-5 text-primary-600 shrink-0" />
         ) : (
-          <Plus className="w-5 h-5 text-dark-400 shrink-0" />
+          <Plus className="w-5 h-5 text-[#7A8C88] shrink-0" />
         )}
       </button>
-      {open && (
-        <div className="px-5 pb-5 text-dark-400 leading-relaxed">
-          {a}
-        </div>
-      )}
+      {open && <div className="px-5 pb-5 text-[#4B6B66] leading-relaxed">{a}</div>}
     </div>
   );
 }
 
 export default function FaqPage() {
   return (
-    <div className="min-h-screen landing-dark" style={{ background: '#000' }}>
+    <GlassMarketingShell>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -151,78 +144,53 @@ export default function FaqPage() {
         }}
       />
 
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={30} height={30} className="object-contain" />
-            </div>
-            <span className="text-xl font-bold text-white">PalmCare AI</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-dark-300 hover:text-white transition text-sm">Home</Link>
-            <Link href="/features" className="text-dark-300 hover:text-white transition text-sm">Features</Link>
-            <Link href="/blog" className="text-dark-300 hover:text-white transition text-sm">Blog</Link>
-            <Link href="/faq" className="text-white font-medium text-sm">FAQ</Link>
-            <a href="/register" className="btn-primary py-2 px-4 text-sm">Sign Up Free</a>
+      <main className="max-w-3xl mx-auto px-5 sm:px-10 py-10 sm:py-14 pb-20">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-500/10 rounded-2xl mb-6">
+            <HelpCircle className="w-7 h-7 text-primary-600" />
           </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#10211F] mb-4 tracking-tight">
+            Frequently asked questions
+          </h1>
+          <p className="text-lg text-[#4B6B66] max-w-2xl mx-auto">
+            Everything you need to know about PalmCare AI. Can&apos;t find what you&apos;re looking for?{' '}
+            <Link href="/contact" className="text-primary-700 font-medium hover:text-primary-800 underline underline-offset-2">
+              Contact our team
+            </Link>
+            .
+          </p>
         </div>
-      </nav>
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500/10 rounded-2xl mb-6">
-              <HelpCircle className="w-8 h-8 text-primary-400" />
+        {FAQ_CATEGORIES.map((category) => (
+          <div key={category.name} className="mb-12">
+            <h2 className="text-2xl font-bold text-[#10211F] mb-5">{category.name}</h2>
+            <div className="space-y-3">
+              {category.faqs.map((faq) => (
+                <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+              ))}
             </div>
-            <h1 className="text-5xl font-bold text-white mb-4">Frequently Asked Questions</h1>
-            <p className="text-xl text-dark-400 max-w-2xl mx-auto">
-              Everything you need to know about PalmCare AI. Can&apos;t find what you&apos;re looking for?{' '}
-              <Link href="/contact" className="text-primary-400 hover:text-primary-300 transition underline underline-offset-2">
-                Contact our team
-              </Link>
-              .
-            </p>
           </div>
+        ))}
 
-          {FAQ_CATEGORIES.map((category) => (
-            <div key={category.name} className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-5">{category.name}</h2>
-              <div className="space-y-3">
-                {category.faqs.map((faq) => (
-                  <FaqItem key={faq.q} q={faq.q} a={faq.a} />
-                ))}
-              </div>
-            </div>
-          ))}
-
-          <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border border-primary-500/20 text-center">
-            <h3 className="text-2xl font-bold text-white mb-3">Still have questions?</h3>
-            <p className="text-dark-400 mb-6">
-              Book a free demo and our team will walk you through everything — tailored to your agency.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a href="/register" className="btn-primary py-3 px-8 text-base inline-flex items-center gap-2">
-                Start Your 14-Day Free Trial <ArrowRight className="w-4 h-4" />
-              </a>
-              <Link href="/contact" className="py-3 px-8 text-base text-dark-300 hover:text-white border border-dark-600 hover:border-dark-500 rounded-xl transition inline-flex items-center gap-2">
-                Contact Us
-              </Link>
-            </div>
+        <div className="mt-12 glass-card p-8 text-center">
+          <h3 className="text-2xl font-bold text-[#10211F] mb-3">Still have questions?</h3>
+          <p className="text-[#4B6B66] mb-6">Book a demo and we will walk through the product for your agency.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/register"
+              className="py-3 px-7 rounded-full bg-primary-500 text-white font-semibold inline-flex items-center gap-2 hover:bg-primary-600"
+            >
+              Start free trial <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className="py-3 px-7 rounded-full border border-[#10211F18] text-[#10211F] font-semibold hover:bg-white/40"
+            >
+              Contact us
+            </Link>
           </div>
         </div>
       </main>
-
-      <footer className="py-12 px-6 border-t border-dark-700 bg-dark-900">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-dark-400 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-dark-400 text-sm">
-            <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
-            <Link href="/terms" className="hover:text-white transition">Terms</Link>
-            <Link href="/contact" className="hover:text-white transition">Contact</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </GlassMarketingShell>
   );
 }

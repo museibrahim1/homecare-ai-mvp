@@ -29,21 +29,12 @@ interface NavSectionData {
 
 const salesNavItems: NavItemData[] = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/pipeline', label: 'Deals Pipeline', icon: Target },
-  { href: '/leads', label: 'Leads', icon: Users },
+  { href: '/pipeline', label: 'Sales', icon: Target },
   { href: '/schedule', label: 'My Schedule', icon: CalendarDays },
 ];
 
 const clientsNavItems: NavItemData[] = [
   { href: '/clients', label: 'All Clients', icon: Users },
-  { href: '/visits', label: 'Assessments', icon: Calendar },
-  { href: '/care-tracker', label: 'Care Tracker', icon: Activity },
-  { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw },
-];
-
-const communicationNavItems: NavItemData[] = [
-  { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare },
-  { href: '/notes', label: 'Notes & Tasks', icon: FileText },
 ];
 
 const resourcesNavItems: NavItemData[] = [
@@ -57,7 +48,6 @@ const resourcesNavItems: NavItemData[] = [
 const agencyAdminNavItems: NavItemData[] = [
   { href: '/caregivers', label: 'Team Members', icon: UserCheck },
   { href: '/billing', label: 'Billing', icon: CreditCard },
-  { href: '/activity', label: 'Activity Monitor', icon: Eye },
   { href: '/integrations', label: 'Integrations', icon: Link2 },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
@@ -106,10 +96,10 @@ const NavItem = memo(function NavItem({
       scroll={false}
       prefetch={true}
       onClick={handleClick}
-      className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md transition-all group cursor-pointer select-none text-[13px] ${
+      className={`flex items-center gap-2.5 px-3 py-[7px] rounded-xl transition-all group cursor-pointer select-none text-[13px] ${
         isActive 
-          ? 'bg-primary-50 text-primary-700 font-semibold' 
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800 font-medium'
+          ? 'bg-[#0D948814] text-primary-700 font-semibold' 
+          : 'text-slate-600 hover:bg-white/60 hover:text-slate-800 font-medium'
       }`}
     >
       <ItemIcon className={`w-4 h-4 flex-shrink-0 ${
@@ -229,7 +219,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl text-slate-600 glass-card hover:bg-white/90 transition-colors"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
@@ -237,12 +227,12 @@ export default function Sidebar() {
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/20 z-[55]" onClick={() => setMobileOpen(false)} />
+        <div className="lg:hidden fixed inset-0 bg-black/20 z-[55] backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — glass rail chrome (Paper Web Glass) */}
       <aside className={`
-        w-60 bg-white border-r border-slate-200 flex flex-col h-screen flex-shrink-0
+        w-60 glass-rail flex flex-col h-screen flex-shrink-0
         fixed lg:sticky top-0 left-0 z-[60] pointer-events-auto
         transition-transform duration-200 ease-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -257,14 +247,14 @@ export default function Sidebar() {
         </button>
 
         {/* Logo */}
-        <div className="px-4 py-4 flex-shrink-0 border-b border-slate-100">
+        <div className="px-4 py-5 flex-shrink-0 border-b border-[#10211F12]">
           <Link href="/dashboard" className="flex items-center gap-2.5" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
-            <div className="w-8 h-8 flex-shrink-0 bg-primary-500 rounded-lg flex items-center justify-center overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={22} height={22} className="object-contain" />
+            <div className="w-10 h-10 flex-shrink-0 bg-primary-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-[0_4px_14px_rgba(13,148,136,0.35)]">
+              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={26} height={26} className="object-contain" />
             </div>
             <div className="min-w-0">
-              <span className="text-sm font-bold text-slate-900 block leading-tight">PalmCare AI</span>
-              <span className="text-[10px] text-slate-400 leading-tight">Home Care Platform</span>
+              <span className="text-sm font-bold text-[#10211F] tracking-[0.02em] block leading-tight">PALM</span>
+              <span className="text-[10px] text-[#64748B] leading-tight">Home care docs</span>
             </div>
           </Link>
         </div>
@@ -294,7 +284,6 @@ export default function Sidebar() {
 
           <CollapsibleSection title="Overview" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={!isAdmin} />
           <CollapsibleSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={!isAdmin} />
-          <CollapsibleSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
           <CollapsibleSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
           <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
 
@@ -304,7 +293,7 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-slate-100 flex-shrink-0">
+        <div className="border-t border-[#10211F12] flex-shrink-0">
           {/* User */}
           <div className="flex items-center gap-2.5 px-4 py-3">
             <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -313,10 +302,10 @@ export default function Sidebar() {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-slate-800 font-medium truncate text-[12px] leading-tight">
+              <p className="text-[#10211F] font-medium truncate text-[12px] leading-tight">
                 {user?.full_name || 'Admin User'}
               </p>
-              <p className="text-slate-400 text-[10px] truncate leading-tight">
+              <p className="text-[#64748B] text-[10px] truncate leading-tight">
                 {user?.email || 'User'}
               </p>
             </div>

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import AudioUploader from '@/components/AudioUploader';
 import TranscriptImporter from '@/components/TranscriptImporter';
 import UpgradeModal from '@/components/UpgradeModal';
@@ -146,18 +146,17 @@ export default function NewVisitPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <main className="flex-1 p-8">
-        <div className="max-w-2xl mx-auto">
+    <GlassShell>
+      <div className="max-w-2xl mx-auto w-full">
           {/* Header */}
           <div className="mb-8">
             <button
@@ -434,7 +433,6 @@ export default function NewVisitPage() {
             </div>
           )}
         </div>
-      </main>
 
       {/* Upgrade Modal */}
       <UpgradeModal
@@ -448,6 +446,6 @@ export default function NewVisitPage() {
         usedCount={usage?.total_assessments || 0}
         maxCount={usage?.max_allowed || 2}
       />
-    </div>
+    </GlassShell>
   );
 }

@@ -11,9 +11,8 @@ import {
 import PalmAgent from '@/components/PalmAgent';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
-import OnboardingChecklist from '@/components/OnboardingChecklist';
+import GlassRail from '@/components/GlassRail';
+import PaperHomeDashboard from '@/components/glass/PaperHomeDashboard';
 import AreaChart from '@/components/charts/AreaChart';
 import DonutChart from '@/components/charts/DonutChart';
 import BarChart from '@/components/charts/BarChart';
@@ -329,7 +328,7 @@ function CustomizePanel({ prefs, onUpdate, onClose }: { prefs: WidgetPrefs; onUp
 /* ─── Main Dashboard ─── */
 export default function DashboardPage() {
   const router = useRouter();
-  const { token, isReady } = useRequireAuth();
+  const { token, isReady, user } = useRequireAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
   interface DashboardVisit { id: string; created_at?: string; scheduled_start?: string; status?: string; client_name?: string; client?: { full_name?: string }; contract_generated?: boolean; note_generated?: boolean; }
   interface DashboardClient { id: string; full_name: string; status?: string; updated_at?: string; }
@@ -807,62 +806,127 @@ export default function DashboardPage() {
     i++;
   }
 
+  const firstName = (user?.full_name || 'there').split(' ')[0];
+  const needsReviewVisits = recentVisits.filter(
+    (v) =>
+      ['completed', 'pending_review', 'ready', 'processed'].includes((v.status || '').toLowerCase()) ||
+      Boolean((v as { contract_status?: string }).contract_status)
+  ).slice(0, 3);
+
+  const reviewItems = (needsReviewVisits.length ? needsReviewVisits : recentVisits.slice(0, 1)).map((v) => {
+    const name = v.client_name || v.client?.full_name || 'Client';
+    const initials = name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    return {
+      id: v.id,
+      name,
+      initials: initials || 'CL',
+      subtitle: v.scheduled_start
+        ? `Visit from ${format(new Date(v.scheduled_start), 'MMMM d')}`
+        : 'Ready for your review',
+      badge: v.status === 'completed' ? 'Ready' : undefined,
+      href: `/visits/${v.id}`,
+    };
+  });
+
+  const dueThisWeek = allVisits.filter((v) => {
+    if (!v.scheduled_start) return false;
+    const d = new Date(v.scheduled_start);
+    const now = new Date();
+    const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return d >= now && d <= weekEnd;
+  });
+  const dueHint =
+    dueThisWeek[0]?.client_name
+      ? `${dueThisWeek[0].client_name.split(' ')[0]} soon`
+      : 'No visits scheduled';
+
+  const paperPipeline = [
+    { label: 'Active', value: allClients.filter((c) => ['active', 'assigned'].includes(c.status || 'active')).length, color: '#0D9488' },
+    { label: 'Proposal sent', value: allClients.filter((c) => ['proposal', 'pending_review'].includes(c.status || '')).length, color: '#F59E0B' },
+    { label: 'In assessment', value: allClients.filter((c) => c.status === 'assessment').length, color: '#7C3AED' },
+  ];
+
+  const topReviewName = reviewItems[0]?.name;
+  const greetingSub =
+    reviewItems.length > 0
+      ? reviewItems.length === 1
+        ? 'One visit is ready for your review.'
+        : `${reviewItems.length} visits are ready for your review.`
+      : 'Record a visit when you are ready.';
+
+  const paperDocs =
+    reviewItems.length > 0
+      ? [
+          { title: 'Care plan', status: 'Ready', statusTone: 'ready' as const },
+          { title: 'Billables', status: 'From visit', statusTone: 'muted' as const },
+          { title: 'Visit note', status: 'Ready', statusTone: 'ready' as const },
+          { title: 'Service agreement', status: 'Draft', statusTone: 'warn' as const },
+        ]
+      : [];
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 min-w-0 flex flex-col">
-        <TopBar />
-        <div className="flex-1 p-4 lg:p-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-slate-900">Dashboard</h1>
-                <p className="text-slate-500 text-sm mt-0.5">Record. Transcribe. Contract. All in your palm.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="period-selector">
-                  {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
-                    <button key={p} onClick={() => setPeriod(p)} className={period === p ? 'active' : ''}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => setShowCustomize(true)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors" title="Customize dashboard">
-                  <Settings2 className="w-4 h-4" />
-                </button>
-              </div>
+    <>
+      <div className="flex min-h-screen glass-page">
+        <GlassRail />
+        <div className="flex-1 min-w-0 flex flex-col relative overflow-x-hidden">
+          {showCustomize && (
+            <CustomizePanel
+              prefs={widgetPrefs}
+              onUpdate={updateWidgetPrefs}
+              onClose={() => setShowCustomize(false)}
+            />
+          )}
+          {error && (
+            <div className="mx-5 sm:mx-8 lg:mx-12 mt-6 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 relative z-10">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <p className="text-red-600 text-sm flex-1">{error}</p>
+              <button type="button" onClick={() => setError(null)} className="text-red-500 text-xs underline">
+                Dismiss
+              </button>
             </div>
-
-            {showCustomize && <CustomizePanel prefs={widgetPrefs} onUpdate={updateWidgetPrefs} onClose={() => setShowCustomize(false)} />}
-
-            {error && (
-              <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <p className="text-red-600 text-sm flex-1">{error}</p>
-                <button onClick={() => setError(null)} className="text-red-500 text-xs underline">Dismiss</button>
-              </div>
-            )}
-
-            <OnboardingChecklist />
-
-            {/* Dynamic widget layout */}
-            <div className="space-y-4">
-              {layoutRows.map((row, idx) => {
-                if (row.type === 'pair') {
-                  return (
-                    <div key={idx} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {row.ids.map(id => renderWidget(id))}
-                    </div>
-                  );
-                }
-                return renderWidget(row.ids[0]);
-              })}
-            </div>
-          </div>
+          )}
+          <PaperHomeDashboard
+            loading={loading}
+            firstName={firstName}
+            greetingSub={greetingSub}
+            stats={[
+              {
+                label: 'Clients',
+                value: stats.totalClients,
+                hint: stats.totalClients === 0 ? 'Add your first client' : 'All active',
+              },
+              {
+                label: 'Due this week',
+                value: dueThisWeek.length || stats.hoursThisWeek,
+                hint: dueHint,
+              },
+              {
+                label: 'Needs review',
+                value: Math.max(reviewItems.length, stats.pendingReview),
+                hint: topReviewName || 'Nothing waiting',
+                accent: true,
+              },
+            ]}
+            trend={monthlyData}
+            pipeline={paperPipeline}
+            reviewItems={reviewItems}
+            docs={paperDocs}
+            docsLabel={
+              topReviewName
+                ? `FROM ${topReviewName.split(' ')[0].toUpperCase()}'S VISIT · FOUR DOCUMENTS, ONE RECORDING`
+                : 'FOUR DOCUMENTS, ONE RECORDING'
+            }
+            onCustomize={() => setShowCustomize(true)}
+            onPalmIt={() => router.push('/visits/new')}
+          />
         </div>
-      </main>
+      </div>
       <PalmAgent />
-    </div>
+    </>
   );
 }

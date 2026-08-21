@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import Sidebar from '@/components/Sidebar';
-import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import GlassShell from '@/components/GlassShell';
+import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = '/api';
@@ -163,12 +163,82 @@ export default function DocumentsPage() {
     checkDriveStatus();
   }, [token]);
 
+  const [typeFilter, setTypeFilter] = useState<'all' | 'care' | 'billables' | 'notes' | 'contracts'>('all');
+
+  const docKind = (file: Document): 'care' | 'billables' | 'notes' | 'contracts' | 'other' => {
+    const blob = `${file.name} ${file.type} ${file.folder || ''}`.toLowerCase();
+    if (blob.includes('billable') || blob.includes('billing')) return 'billables';
+    if (blob.includes('care plan') || blob.includes('care_plan') || blob.includes('careplan')) return 'care';
+    if (blob.includes('note') || blob.includes('soap') || file.type === 'note') return 'notes';
+    if (blob.includes('contract') || blob.includes('agreement') || file.type === 'contract') return 'contracts';
+    if (file.folder?.toLowerCase().includes('contract')) return 'contracts';
+    if (file.folder?.toLowerCase().includes('assessment')) return 'care';
+    return 'other';
+  };
+
   const filteredFiles = files.filter(file => {
     const matchesSearch = !searchQuery || file.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       (file.client_name && file.client_name.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesFolder = !selectedFolder || file.folder === selectedFolder;
-    return matchesSearch && matchesFolder;
+    const kind = docKind(file);
+    const matchesType = typeFilter === 'all' || kind === typeFilter;
+    return matchesSearch && matchesFolder && matchesType;
   });
+
+  const UNASSIGNED = 'Unassigned';
+
+  // Group the filtered documents by client, sorted alphabetically with Unassigned last.
+  const clientGroups = useMemo(() => {
+    const map = new Map<string, Document[]>();
+    for (const file of filteredFiles) {
+      const key = file.client_name && file.client_name.trim() ? file.client_name.trim() : UNASSIGNED;
+      const bucket = map.get(key);
+      if (bucket) bucket.push(file);
+      else map.set(key, [file]);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => {
+      if (a === UNASSIGNED) return 1;
+      if (b === UNASSIGNED) return -1;
+      return a.localeCompare(b);
+    });
+  }, [filteredFiles]);
+
+  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
+  const toggleClient = (name: string) => {
+    setExpandedClients(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+  // An active search auto-expands every matching group so results stay visible.
+  const searching = searchQuery.trim().length > 0;
+  const isClientExpanded = (name: string) => searching || expandedClients.has(name);
+
+  const clientInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  };
+
+  const shortDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const detailFor = (file: Document) => {
+    if (file.size) return file.size;
+    if (file.format) return file.format;
+    return file.type || 'Document';
+  };
+
+  const statusFor = (file: Document) => {
+    if (file.type === 'audio') return { label: 'Recording', tone: 'muted' as const };
+    if (file.name.toLowerCase().includes('draft')) return { label: 'Draft', tone: 'warn' as const };
+    return { label: 'Ready', tone: 'ready' as const };
+  };
 
   const handleFileUpload = async (uploadedFiles: FileList | null) => {
     if (!uploadedFiles || !token) return;
@@ -427,336 +497,340 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
-            <p className="text-slate-500">Contracts, assessments, and recordings from your clients</p>
+    <GlassShell>
+        {/* Paper Documents header */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <p className="text-[11px] tracking-[0.12em] font-semibold text-primary-500">LIBRARY</p>
+            <h1 className="text-[32px] sm:text-[40px] font-bold tracking-tight leading-tight text-[#10211F]">
+              Documents
+            </h1>
+            <p className="text-[15px] font-medium leading-6 text-[#64748B] max-w-xl">
+              Everything Palm generated from your visits, ready to send.
+            </p>
           </div>
-          <div className="flex gap-3">
-            <button 
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <div className="relative w-full sm:w-[280px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search documents"
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#FFFFFFB8] border border-[#FFFFFFE0] text-[14px] text-[#10211F] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-primary-500/30 shadow-[0_8px_20px_#0D948812]"
+              />
+            </div>
+            <button
+              type="button"
               onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+              className="glass-btn-primary"
             >
-              <Upload className="w-5 h-5" />
-              Upload File
+              <Upload className="w-4 h-4" />
+              Upload
             </button>
-            <button 
+            <button
+              type="button"
               onClick={() => setShowDriveModal(true)}
               disabled={checkingDrive}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
-                driveConnected 
-                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
-                  : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+              className={`inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-semibold border transition-colors ${
+                driveConnected
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-[#FFFFFFB8] text-[#4B6B66] border-[#FFFFFFE0] hover:bg-white'
               }`}
             >
               {checkingDrive ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : driveConnected ? (
-                <Check className="w-5 h-5" />
+                <Check className="w-4 h-4" />
               ) : (
-                <Cloud className="w-5 h-5" />
+                <Cloud className="w-4 h-4" />
               )}
-              {driveConnected ? 'Drive Connected' : 'Connect Google Drive'}
-            </button>
-            <button 
-              onClick={fetchDocuments}
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition-colors"
-            >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              {driveConnected ? 'Drive' : 'Drive'}
             </button>
           </div>
         </div>
 
-        {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600" />
               <span className="text-red-600">{error}</span>
             </div>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
+            <button type="button" onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Google Drive Status Banner */}
         {driveConnected && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-green-500/20 rounded-xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+          <div className="p-4 glass-card flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                 <Cloud className="w-5 h-5 text-emerald-600" />
               </div>
-              <div>
-                <p className="text-slate-900 font-medium">Google Drive Connected</p>
-                <p className="text-sm text-slate-500">Your files are synced from Google Drive</p>
+              <div className="min-w-0">
+                <p className="text-[#10211F] font-medium">Google Drive connected</p>
+                <p className="text-sm text-[#64748B]">Files sync from Drive when you refresh</p>
               </div>
             </div>
-            <button 
+            <button
+              type="button"
               onClick={handleSyncDrive}
               disabled={driveLoading}
-              className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-2 text-sm font-semibold shrink-0"
             >
               {driveLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              {driveLoading ? 'Syncing...' : 'Sync Now'}
+              {driveLoading ? 'Syncing…' : 'Sync'}
             </button>
           </div>
         )}
 
-        {/* Search & View Toggle */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search documents or clients..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
-            />
-          </div>
-          <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
+        {/* Paper type chips */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {(
+            [
+              { key: 'all' as const, label: 'All' },
+              { key: 'care' as const, label: 'Care plans' },
+              { key: 'billables' as const, label: 'Billables' },
+              { key: 'notes' as const, label: 'Notes' },
+              { key: 'contracts' as const, label: 'Contracts' },
+            ]
+          ).map((chip) => (
             <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2.5 ${viewMode === 'grid' ? 'bg-slate-50 text-slate-800' : 'text-slate-500'}`}
+              key={chip.key}
+              type="button"
+              onClick={() => setTypeFilter(chip.key)}
+              className={`glass-pill ${typeFilter === chip.key ? 'glass-pill-active' : ''}`}
             >
-              <Grid className="w-5 h-5" />
+              {chip.label}
             </button>
+          ))}
+          <span className="ml-auto text-[13px] font-medium text-[#7A8C88]">
+            {filteredFiles.length} document{filteredFiles.length === 1 ? '' : 's'} across {clientGroups.length} client{clientGroups.length === 1 ? '' : 's'}
+          </span>
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[#FFFFFFB3] border border-[#FFFFFFE0]">
             <button
+              type="button"
               onClick={() => setViewMode('list')}
-              className={`p-2.5 ${viewMode === 'list' ? 'bg-slate-50 text-slate-800' : 'text-slate-500'}`}
+              aria-label="List view"
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+                viewMode === 'list' ? 'bg-white text-primary-600 shadow-[0_2px_8px_#0D948814]' : 'text-[#7A8C88] hover:text-[#10211F]'
+              }`}
             >
-              <List className="w-5 h-5" />
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+                viewMode === 'grid' ? 'bg-white text-primary-600 shadow-[0_2px_8px_#0D948814]' : 'text-[#7A8C88] hover:text-[#10211F]'
+              }`}
+            >
+              <Grid className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Folders - Single click to filter */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Folders</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {folders.map(folder => (
-              <button
-                key={folder.id}
-                onClick={() => handleFolderClick(folder.name)}
-                className={`bg-white border rounded-xl p-4 hover:border-primary-200 transition-colors text-left ${
-                  selectedFolder === folder.name ? 'border-primary-500/50 bg-primary-500/5' : 'border-slate-200'
-                }`}
-              >
-                <div className="text-3xl mb-3">{folder.icon}</div>
-                <h3 className="font-medium text-slate-900 mb-1">{folder.name}</h3>
-                <p className="text-sm text-slate-500">{folder.count} files</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Files */}
+        {/* Paper doc table */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {selectedFolder ? `${selectedFolder}` : 'All Documents'}
-            </h2>
-            {selectedFolder && (
-              <button 
-                onClick={() => setSelectedFolder(null)}
-                className="text-sm text-primary-400 hover:text-primary-300"
-              >
-                Clear filter
-              </button>
-            )}
-          </div>
-          
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
             </div>
           ) : filteredFiles.length === 0 ? (
-            <div className="text-center py-20 bg-white border border-slate-200 rounded-xl">
-              <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <FolderOpen className="w-8 h-8 text-slate-500" />
+            <div className="text-center py-20 glass-card">
+              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <FolderOpen className="w-8 h-8 text-primary-500" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No documents yet</h3>
-              <p className="text-slate-500 mb-4">Documents from your assessments will appear here automatically</p>
-              <a 
-                href="/visits/new" 
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+              <h3 className="text-lg font-medium text-[#10211F] mb-2">No documents yet</h3>
+              <p className="text-[#64748B] mb-4">Documents from your assessments will appear here automatically</p>
+              <a
+                href="/visits/new"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Start New Assessment
               </a>
             </div>
-          ) : viewMode === 'list' ? (
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Name</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Client</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Type</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Size</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Modified</th>
-                    <th className="px-6 py-4"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredFiles.map(file => {
-                    const FileIcon = getFileIcon(file);
-                    return (
-                      <tr key={file.id} className="border-b border-slate-200/30 hover:bg-slate-50/20 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              file.type === 'contract' ? 'bg-purple-50' :
-                              file.type === 'note' ? 'bg-blue-50' :
-                              file.type === 'audio' ? 'bg-emerald-50' :
-                              'bg-slate-50'
-                            }`}>
-                              <FileIcon className={`w-4 h-4 ${
-                                file.type === 'contract' ? 'text-purple-600' :
-                                file.type === 'note' ? 'text-blue-600' :
-                                file.type === 'audio' ? 'text-emerald-600' :
-                                'text-slate-500'
-                              }`} />
-                            </div>
-                            <span className="font-medium text-slate-900">{file.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {file.client_name ? (
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-400" />
-                              <span className="text-slate-600">{file.client_name}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[file.format] || 'bg-slate-50 text-slate-600'}`}>
-                            {file.format}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-slate-500">{file.size}</td>
-                        <td className="px-6 py-4 text-slate-500 text-sm">{formatDate(file.created_at)}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1">
-                            {file.webViewLink ? (
-                              <a 
-                                href={file.webViewLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
-                              >
-                                <Link2 className="w-4 h-4 text-slate-500" />
-                              </a>
-                            ) : file.type === 'audio' ? (
-                              <button 
-                                onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
-                                title="Preview"
-                              >
-                                <Play className="w-4 h-4 text-slate-500" />
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
-                                title="Preview"
-                              >
-                                <Eye className="w-4 h-4 text-slate-500" />
-                              </button>
-                            )}
-                            {file.download_url && (
-                              <button 
-                                onClick={() => handleDownload(file)}
-                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
-                                title="Download"
-                              >
-                                <Download className="w-4 h-4 text-slate-500" />
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteFile(file.id)}
-                              className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-600" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
           ) : (
-            // Grid view
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {filteredFiles.map(file => {
-                const FileIcon = getFileIcon(file);
+            <div className="flex flex-col gap-3">
+              {clientGroups.map(([clientName, docs]) => {
+                const open = isClientExpanded(clientName);
+                const unassigned = clientName === UNASSIGNED;
                 return (
-                  <div
-                    key={file.id}
-                    className="bg-white border border-slate-200 rounded-xl p-4 hover:border-primary-200 transition-colors group"
-                  >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                      file.type === 'contract' ? 'bg-purple-50' :
-                      file.type === 'note' ? 'bg-blue-50' :
-                      file.type === 'audio' ? 'bg-emerald-50' :
-                      'bg-slate-50'
-                    }`}>
-                      <FileIcon className={`w-6 h-6 ${
-                        file.type === 'contract' ? 'text-purple-600' :
-                        file.type === 'note' ? 'text-blue-600' :
-                        file.type === 'audio' ? 'text-emerald-600' :
-                        'text-slate-500'
-                      }`} />
-                    </div>
-                    <h3 className="font-medium text-slate-900 text-sm truncate mb-1" title={file.name}>
-                      {file.name}
-                    </h3>
-                    {file.client_name && (
-                      <p className="text-xs text-slate-500 truncate mb-2">{file.client_name}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[file.format] || 'bg-slate-50 text-slate-600'}`}>
-                        {file.format}
+                  <div key={clientName} className="glass-card overflow-hidden !p-0">
+                    {/* Client accordion header */}
+                    <button
+                      type="button"
+                      onClick={() => toggleClient(clientName)}
+                      aria-expanded={open}
+                      className="w-full flex items-center gap-4 py-4 px-5 sm:px-6 text-left hover:bg-white/40 transition-colors"
+                    >
+                      <div
+                        className={`w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-sm font-bold ${
+                          unassigned ? 'bg-slate-100 text-slate-500' : 'bg-[#0D94881A] text-primary-700'
+                        }`}
+                      >
+                        {clientInitials(clientName)}
+                      </div>
+                      <div className="grow min-w-0 flex flex-col gap-0.5">
+                        <span className="text-[16px] leading-tight font-semibold text-[#10211F] truncate">
+                          {clientName}
+                        </span>
+                        <span className="text-[13px] font-medium text-[#7A8C88]">
+                          {docs.length} document{docs.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center h-[26px] px-3 rounded-full text-xs font-semibold bg-[#0D94881A] text-[#0F766E] shrink-0">
+                        {docs.length}
                       </span>
-                      <span className="text-xs text-slate-400">{file.size}</span>
-                    </div>
-                    <div className="flex gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {file.download_url && (
-                        <button 
-                          onClick={() => handleDownload(file)}
-                          className="flex-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
-                          title="Download"
-                        >
-                          <Download className="w-4 h-4 text-slate-600 mx-auto" />
-                        </button>
+                      {open ? (
+                        <ChevronDown className="w-5 h-5 shrink-0 text-[#7A8C88]" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 shrink-0 text-[#7A8C88]" />
                       )}
-                      <button 
-                        onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                        className="flex-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
-                        title="Preview"
-                      >
-                        <Eye className="w-4 h-4 text-slate-600 mx-auto" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteFile(file.id)}
-                        className="flex-1 p-2 bg-slate-50 hover:bg-red-500/30 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4 text-slate-600 hover:text-red-600 mx-auto" />
-                      </button>
-                    </div>
+                    </button>
+
+                    {/* Expanded documents */}
+                    {open && (
+                      <div className="border-t border-[#10211F0F]">
+                        {viewMode === 'grid' ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4 sm:p-5">
+                            {docs.map((file) => {
+                              const FileIcon = getFileIcon(file);
+                              const status = statusFor(file);
+                              return (
+                                <button
+                                  key={file.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedFile(file);
+                                    setShowPreviewModal(true);
+                                  }}
+                                  className="flex flex-col gap-3 p-4 rounded-2xl bg-[#FFFFFFB8] border border-[#FFFFFFE0] shadow-[0_8px_20px_#0D948814] text-left hover:bg-white transition-colors"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-[#0D94881A]">
+                                      <FileIcon className="w-5 h-5 text-primary-600" />
+                                    </div>
+                                    <span
+                                      className={`inline-flex items-center h-[24px] px-[10px] rounded-full gap-1.5 text-[11px] font-semibold ${
+                                        status.tone === 'ready'
+                                          ? 'bg-[#0D94881A] text-[#0F766E]'
+                                          : status.tone === 'warn'
+                                            ? 'bg-amber-50 text-amber-700'
+                                            : 'bg-slate-100 text-slate-600'
+                                      }`}
+                                    >
+                                      {status.label}
+                                    </span>
+                                  </div>
+                                  <div className="min-w-0 flex flex-col gap-0.5">
+                                    <span className="text-[14px] leading-[18px] font-semibold text-[#10211F] truncate">
+                                      {file.name.replace(/_/g, ' ').replace(/\.[^.]+$/, '')}
+                                    </span>
+                                    <span className="text-[12px] font-medium text-[#7A8C88]">
+                                      {detailFor(file)} · {shortDate(file.created_at)}
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div>
+                            {docs.map((file) => {
+                              const FileIcon = getFileIcon(file);
+                              const status = statusFor(file);
+                              return (
+                                <div
+                                  key={file.id}
+                                  className="w-full flex items-center py-3.5 px-5 sm:px-6 gap-3 sm:gap-4 border-b border-[#10211F0F] last:border-b-0 hover:bg-white/40 transition-colors group"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedFile(file);
+                                      setShowPreviewModal(true);
+                                    }}
+                                    className="grow flex items-center gap-3 sm:gap-4 min-w-0 text-left"
+                                  >
+                                    <div className="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-[#0D94881A]">
+                                      <FileIcon className="w-[18px] h-[18px] text-primary-600" />
+                                    </div>
+                                    <div className="grow min-w-0 flex flex-col gap-0.5">
+                                      <span className="text-[15px] leading-[19px] font-semibold text-[#10211F] truncate">
+                                        {file.name.replace(/_/g, ' ').replace(/\.[^.]+$/, '')}
+                                      </span>
+                                      <span className="text-[13px] font-medium text-[#4B6B66] truncate">
+                                        {detailFor(file)}
+                                      </span>
+                                    </div>
+                                    <div className="hidden sm:flex w-[110px] shrink-0">
+                                      <span
+                                        className={`inline-flex items-center h-[26px] px-[11px] rounded-full gap-1.5 text-xs font-semibold ${
+                                          status.tone === 'ready'
+                                            ? 'bg-[#0D94881A] text-[#0F766E]'
+                                            : status.tone === 'warn'
+                                              ? 'bg-amber-50 text-amber-700'
+                                              : 'bg-slate-100 text-slate-600'
+                                        }`}
+                                      >
+                                        <span
+                                          className={`w-1.5 h-1.5 rounded-full ${
+                                            status.tone === 'ready'
+                                              ? 'bg-primary-500'
+                                              : status.tone === 'warn'
+                                                ? 'bg-amber-500'
+                                                : 'bg-slate-400'
+                                          }`}
+                                        />
+                                        {status.label}
+                                      </span>
+                                    </div>
+                                    <div className="hidden sm:block w-16 shrink-0 text-[13px] font-medium text-[#7A8C88]">
+                                      {shortDate(file.created_at)}
+                                    </div>
+                                  </button>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {file.download_url && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDownload(file)}
+                                        aria-label="Download"
+                                        className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#4B6B66] hover:bg-white hover:text-primary-600 transition-colors"
+                                      >
+                                        <Download className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedFile(file);
+                                        setShowPreviewModal(true);
+                                      }}
+                                      aria-label="Preview"
+                                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#4B6B66] hover:bg-white hover:text-primary-600 transition-colors"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteFile(file.id)}
+                                      aria-label="Delete"
+                                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#4B6B66] hover:bg-red-50 hover:text-red-600 transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -982,7 +1056,6 @@ export default function DocumentsPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </GlassShell>
   );
 }

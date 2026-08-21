@@ -16,7 +16,6 @@ import {
   CheckCircle,
   AlertCircle,
   Timer,
-  Sparkles,
   Play,
   Loader2,
   Trash2,
@@ -25,7 +24,7 @@ import {
 import { useRequireAuth } from '@/lib/auth';
 import { api, formatLocalDate } from '@/lib/api';
 import { Visit } from '@/lib/types';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import UpgradeModal from '@/components/UpgradeModal';
 import PalmAgent from '@/components/PalmAgent';
 import { API_BASE, SAMPLE_TRANSCRIPT_TEXT } from './constants';
@@ -331,25 +330,21 @@ export default function VisitsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessments</h1>
-              <p className="text-slate-500">Review and manage care assessments</p>
-            </div>
-            <div className="flex gap-3">
+    <>
+    <GlassShell
+      title="Visits"
+      subtitle="Recordings and assessments for your clients."
+      action={
+        <div className="flex gap-3">
               {/* Admin Cleanup Button - only for platform admins */}
               {isAdmin && (
                 <button 
@@ -365,7 +360,7 @@ export default function VisitsPage() {
               {!isAdmin && visits.length > 0 && (
                 <button 
                   onClick={handleClearAll}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#FFFFFFB8] hover:bg-red-50 text-[#4B6B66] hover:text-red-600 rounded-xl font-medium transition-colors border border-[#FFFFFFE0]"
                 >
                   <Trash2 className="w-5 h-5" />
                   Clear All
@@ -382,7 +377,7 @@ export default function VisitsPage() {
                   }
                 }}
                 disabled={creatingDemo}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#FFFFFFB8] text-[#10211F] rounded-xl font-semibold border border-[#FFFFFFE0] hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creatingDemo ? (
                   <>
@@ -405,14 +400,15 @@ export default function VisitsPage() {
                     router.push('/visits/new');
                   }
                 }}
-                className="btn-primary flex items-center gap-2"
+                className="glass-btn-primary"
               >
                 <Plus className="w-5 h-5" />
-                New Assessment
+                New visit
               </button>
-            </div>
-          </div>
-
+        </div>
+      }
+    >
+        <div className="max-w-6xl mx-auto w-full">
           {/* Error Banner */}
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
@@ -432,9 +428,6 @@ export default function VisitsPage() {
                 : 'bg-slate-50 border-slate-200'
             }`}>
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${usage.upgrade_required ? 'bg-amber-50' : 'bg-primary-50'}`}>
-                  <Sparkles className={`w-5 h-5 ${usage.upgrade_required ? 'text-amber-600' : 'text-primary-400'}`} />
-                </div>
                 <div>
                   <p className={`font-medium ${usage.upgrade_required ? 'text-amber-600' : 'text-slate-800'}`}>
                     {usage.upgrade_required 
@@ -528,20 +521,17 @@ export default function VisitsPage() {
           ) : filteredVisits.length === 0 ? (
             <div className="space-y-6">
               {/* Demo CTA Card */}
-              <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-200">
+              <div className="card p-8 border border-primary-200 bg-primary-50/40">
                 <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shrink-0">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-slate-900 mb-2">Try a Sample Assessment</h3>
                     <p className="text-slate-600 mb-4">
-                      See how PalmCare AI transforms a care assessment conversation into a proposal-ready contract in seconds.
+                      See how PalmCare AI turns a care assessment into a proposal-ready contract in minutes.
                     </p>
                     <button 
                       onClick={createSampleAssessment}
                       disabled={creatingDemo}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {creatingDemo ? (
                         <>
@@ -649,7 +639,7 @@ export default function VisitsPage() {
             </div>
           )}
         </div>
-      </main>
+    </GlassShell>
 
       {/* Upgrade Modal */}
       <UpgradeModal
@@ -660,6 +650,6 @@ export default function VisitsPage() {
       />
 
       <PalmAgent />
-    </div>
+    </>
   );
 }

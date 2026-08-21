@@ -46,15 +46,27 @@ def _check_demo_rate_limit(ip: str) -> None:
 
 DEMO_DURATION_MINUTES = 30
 
-DEMO_SLOTS = [
+# Morning hours stay on the picker as unavailable so the calendar looks busy.
+# Bookable window: 1:00 PM – 6:00 PM Central.
+DEMO_MORNING_DISPLAY = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+]
+DEMO_SLOTS = [
     "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-    "16:00", "16:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00",
 ]
 
-DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/New_York")
+DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/Chicago")
+DEMO_TIMEZONE_LABEL = "Central Time"
 SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
 ZOOM_MEETING_LINK = os.getenv("ZOOM_MEETING_LINK", "")
+
+
+def _day_schedule() -> list[dict]:
+    """Full day view: morning marked unavailable, afternoon bookable."""
+    rows = [{"time": t, "available": False} for t in DEMO_MORNING_DISPLAY]
+    rows.extend({"time": t, "available": True} for t in DEMO_SLOTS)
+    return rows
 
 
 class DemoBookingRequest(BaseModel):
@@ -238,19 +250,32 @@ async def _create_calendar_event(
 
 @router.get("/slots")
 async def get_available_slots():
-    """Return available demo time slots for the next 14 weekdays."""
+    """Return demo slots for the next 14 weekdays (1–6pm Central bookable).
+
+    `slots` lists bookable times only. `schedule` includes morning times marked
+    unavailable so the UI can show early hours as booked.
+    """
     slots = {}
+    schedule = {}
     today = datetime.now(timezone.utc).date()
 
     days_added = 0
     current = today + timedelta(days=1)  # start from tomorrow
     while days_added < 14:
         if current.weekday() < 5:  # Mon-Fri
-            slots[current.isoformat()] = DEMO_SLOTS.copy()
+            key = current.isoformat()
+            slots[key] = DEMO_SLOTS.copy()
+            schedule[key] = _day_schedule()
             days_added += 1
         current += timedelta(days=1)
 
-    return {"timezone": DEMO_TIMEZONE, "duration_minutes": DEMO_DURATION_MINUTES, "slots": slots}
+    return {
+        "timezone": DEMO_TIMEZONE,
+        "timezone_label": DEMO_TIMEZONE_LABEL,
+        "duration_minutes": DEMO_DURATION_MINUTES,
+        "slots": slots,
+        "schedule": schedule,
+    }
 
 
 @router.post("/book", response_model=DemoBookingResponse)
@@ -290,13 +315,13 @@ async def book_demo(
         formatted_time = start_dt.strftime("%I:%M %p")
 
     elif admin_user:
-        # Auto-pick the next available weekday at 10:00 AM
+        # Auto-pick the next weekday at the first afternoon slot (1:00 PM CT)
         today = datetime.now(timezone.utc).date()
         candidate = today + timedelta(days=1)
         while candidate.weekday() >= 5:
             candidate += timedelta(days=1)
-        auto_slot = "10:00"
-        hour, minute = 10, 0
+        auto_slot = DEMO_SLOTS[0]
+        hour, minute = map(int, auto_slot.split(":"))
         start_dt = datetime(candidate.year, candidate.month, candidate.day, hour, minute)
         end_dt = start_dt + timedelta(minutes=DEMO_DURATION_MINUTES)
         formatted_date = candidate.strftime("%B %d, %Y")
@@ -398,7 +423,7 @@ async def book_demo(
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Time</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_time} Eastern Time (US and Canada)</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_time} {DEMO_TIMEZONE_LABEL} (US and Canada)</td>
                         </tr>
                         {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">{"Zoom Link" if ZOOM_MEETING_LINK else "Meeting Link"}</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
                     </table>
@@ -492,7 +517,7 @@ async def book_demo(
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Heard About Us</td>
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{referral_e}</td>
                         </tr>
-                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</td></tr>' if has_schedule else ''}
+                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' CT</td></tr>' if has_schedule else ''}
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Zoom Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
                     </table>
                     {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Start Zoom Meeting</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}

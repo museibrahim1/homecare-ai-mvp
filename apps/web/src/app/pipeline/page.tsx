@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Sidebar from '@/components/Sidebar';
-import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical } from 'lucide-react';
+import GlassShell from '@/components/GlassShell';
+import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical, Users } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import GlassTabs from '@/components/GlassTabs';
+import LeadsPanel from '@/components/panels/LeadsPanel';
 
 type Deal = {
   id: string;
@@ -38,7 +40,23 @@ export default function PipelinePage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [newDeal, setNewDeal] = useState({ name: '', email: '', phone: '', value: '', stage: 'intake', notes: '' });
-  
+  const [activeTab, setActiveTab] = useState<'deals' | 'leads'>('deals');
+
+  // Read the active tab from the URL on mount so deep links like ?tab=leads work
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'leads' || tab === 'deals') setActiveTab(tab);
+  }, []);
+
+  const handleTabChange = (key: string) => {
+    const tab = key === 'leads' ? 'leads' : 'deals';
+    setActiveTab(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', tab);
+    router.replace(`/pipeline?${params.toString()}`);
+  };
+
   // Drag and drop state
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
@@ -215,7 +233,7 @@ export default function PipelinePage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center glass-page">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -223,67 +241,79 @@ export default function PipelinePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
-        <main className="flex-1 p-8 flex items-center justify-center">
+      <GlassShell title="Sales" subtitle="Track deals through the care process and manage new leads">
+        <div className="flex items-center justify-center py-24">
           <RefreshCw className="w-8 h-8 text-primary-500 animate-spin" />
-        </main>
-      </div>
+        </div>
+      </GlassShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Deals Pipeline</h1>
-            <p className="text-slate-500">Track your clients through the care process</p>
-          </div>
-          <div className="flex gap-3">
-            <button 
+    <GlassShell
+      title="Sales"
+      subtitle="Track deals through the care process and manage new leads"
+      action={
+        activeTab === 'deals' ? (
+          <>
+            <button
               onClick={loadPipelineData}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/70 hover:bg-white text-slate-800 border border-white/80 rounded-lg transition-colors"
             >
               <RefreshCw className="w-5 h-5" />
               Refresh
             </button>
-            <button 
+            <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+              className="glass-btn-primary"
             >
               <Plus className="w-5 h-5" />
               Add Deal
             </button>
-          </div>
+          </>
+        ) : undefined
+      }
+    >
+        {/* Tabs */}
+        <div>
+          <GlassTabs
+            tabs={[
+              { key: 'deals', label: 'Deals Pipeline', icon: Target },
+              { key: 'leads', label: 'Leads', icon: Users },
+            ]}
+            active={activeTab}
+            onChange={handleTabChange}
+          />
         </div>
 
+        {activeTab === 'leads' ? (
+          <LeadsPanel />
+        ) : (
+        <>
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="glass-card p-4">
             <div className="flex items-center gap-3 mb-2">
               <Target className="w-5 h-5 text-blue-600" />
               <span className="text-slate-500 text-sm">Total Pipeline</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="glass-card p-4">
             <div className="flex items-center gap-3 mb-2">
               <Clock className="w-5 h-5 text-amber-600" />
               <span className="text-slate-500 text-sm">In Progress</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage !== 'active').length}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="glass-card p-4">
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500 text-sm">Active Clients</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage === 'active').length}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="glass-card p-4">
             <div className="flex items-center gap-3 mb-2">
               <DollarSign className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500 text-sm">Avg Deal Value</span>
@@ -295,14 +325,14 @@ export default function PipelinePage() {
         </div>
 
         {/* Stage Legend */}
-        <div className="bg-white rounded-xl p-4 border border-slate-200 mb-6">
+        <div className="glass-panel p-4 mb-6">
           <h3 className="text-sm font-medium text-slate-500 mb-3">
             Client Journey: <span className="text-primary-400">Drag and drop</span> clients between stages, or click to edit
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {stages.map((stage, idx) => (
               <div key={stage.id} className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium text-slate-900 ${stage.color}`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${stage.color}`}>
                   {stage.name}
                 </div>
                 {idx < stages.length - 1 && (
@@ -314,29 +344,29 @@ export default function PipelinePage() {
         </div>
 
         {/* Kanban Board */}
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-3 overflow-x-auto pb-4">
           {stages.map(stage => (
             <div key={stage.id} className="flex-shrink-0 w-72">
               <div 
-                className={`bg-white rounded-xl p-4 border-2 transition-all min-h-[400px] ${
+                className={`p-3 rounded-[18px] border transition-all min-h-[400px] ${
                   dragOverStage === stage.id 
-                    ? 'border-primary-500 bg-primary-50' 
-                    : 'border-slate-200'
+                    ? 'border-2 border-primary-500 bg-primary-50/60' 
+                    : 'border-[#FFFFFFE0] bg-[#FFFFFFB3] shadow-[0_10px_26px_#0D948814]'
                 }`}
                 onDragOver={(e) => handleDragOver(e, stage.id)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, stage.id)}
               >
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${stage.color}`} />
-                    <span className="font-medium text-slate-800">{stage.name}</span>
-                    <span className="text-xs bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full">
+                    <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
+                    <span className="font-bold text-[13px] text-[#10211F]">{stage.name}</span>
+                    <span className="text-xs bg-white/70 text-slate-600 px-2 py-0.5 rounded-full">
                       {getDealsForStage(stage.id).length}
                     </span>
                   </div>
                 </div>
-                <div className="text-sm text-slate-500 mb-4">
+                <div className="text-xs font-medium text-[#4B6B66] mb-3">
                   ${getStageValue(stage.id).toLocaleString()} total
                 </div>
                 <div className="space-y-3">
@@ -352,7 +382,7 @@ export default function PipelinePage() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, deal)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white border border-slate-200 rounded-lg p-4 hover:border-primary-200 transition-all cursor-grab active:cursor-grabbing group ${
+                      className={`bg-white border border-[#FFFFFFE0] rounded-[14px] p-3 shadow-[0_2px_8px_#0D948810] hover:shadow-[0_6px_16px_#0D948820] transition-all cursor-grab active:cursor-grabbing group ${
                         draggedDeal?.id === deal.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -362,10 +392,10 @@ export default function PipelinePage() {
                       >
                         <div className="flex items-start gap-2">
                           <GripVertical className="w-4 h-4 text-slate-400 group-hover:text-slate-600 flex-shrink-0 mt-0.5" />
-                          <h3 className="font-medium text-slate-900 mb-2 flex-1">{deal.name}</h3>
+                          <h3 className="font-semibold text-sm text-[#10211F] mb-2 flex-1">{deal.name}</h3>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-emerald-600 font-medium">${deal.value.toLocaleString()}/mo</span>
+                          <span className="text-[13px] font-bold text-primary-600">${deal.value.toLocaleString()}/mo</span>
                           <span className="text-xs text-slate-400">{deal.daysInStage}d</span>
                         </div>
                         {deal.hasContract && (
@@ -377,7 +407,7 @@ export default function PipelinePage() {
                       </div>
                       
                       {/* Quick Stage Move Buttons */}
-                      <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200">
+                      <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200/70">
                         {prevStage && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, prevStage.id); }}
@@ -413,14 +443,16 @@ export default function PipelinePage() {
             </div>
           ))}
         </div>
+        </>
+        )}
 
         {/* Add Deal Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-[#10211F]/25 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="glass-card p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-slate-900">Add New Client</h2>
-                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/60 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
@@ -434,7 +466,7 @@ export default function PipelinePage() {
                       value={newDeal.name}
                       onChange={(e) => setNewDeal({ ...newDeal, name: e.target.value })}
                       placeholder="Full name"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl text-[#10211F] placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                     />
                   </div>
                 </div>
@@ -447,7 +479,7 @@ export default function PipelinePage() {
                       value={newDeal.email}
                       onChange={(e) => setNewDeal({ ...newDeal, email: e.target.value })}
                       placeholder="email@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl text-[#10211F] placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                     />
                   </div>
                 </div>
@@ -460,7 +492,7 @@ export default function PipelinePage() {
                       value={newDeal.phone}
                       onChange={(e) => setNewDeal({ ...newDeal, phone: e.target.value })}
                       placeholder="(555) 123-4567"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl text-[#10211F] placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                     />
                   </div>
                 </div>
@@ -469,7 +501,7 @@ export default function PipelinePage() {
                   <select
                     value={newDeal.stage}
                     onChange={(e) => setNewDeal({ ...newDeal, stage: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl text-[#10211F] focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                   >
                     {stages.map(s => (
                       <option key={s.id} value={s.id}>{s.name}</option>
@@ -483,20 +515,20 @@ export default function PipelinePage() {
                     onChange={(e) => setNewDeal({ ...newDeal, notes: e.target.value })}
                     placeholder="Additional notes..."
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-white/80 border border-[#10211F1A] rounded-xl text-[#10211F] placeholder-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 resize-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-white/70 hover:bg-white text-slate-800 border border-white rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddDeal}
-                  className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                  className="flex-1 glass-btn-primary justify-center"
                 >
                   Add Client
                 </button>
@@ -507,11 +539,11 @@ export default function PipelinePage() {
 
         {/* Deal Detail Modal */}
         {showDetailModal && selectedDeal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-[#10211F]/25 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="glass-card p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-slate-900">{selectedDeal.name}</h2>
-                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-white/60 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
@@ -567,7 +599,6 @@ export default function PipelinePage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </GlassShell>
   );
 }

@@ -114,14 +114,7 @@ export default function SocialAuthButtons({ onError }: Props) {
         router.push('/onboarding');
         return;
       }
-      const userId = response.user?.id || response.user?.email || 'user';
-      const hasSeenWelcome = localStorage.getItem(`has-seen-welcome-${userId}`);
-      if (!hasSeenWelcome) {
-        localStorage.setItem(`has-seen-welcome-${userId}`, 'true');
-        router.push('/welcome');
-      } else {
-        router.push('/dashboard');
-      }
+      router.push('/dashboard');
     },
     [router, setToken, setUser],
   );
@@ -313,7 +306,7 @@ export default function SocialAuthButtons({ onError }: Props) {
             type="button"
             onClick={() => void handleApple()}
             disabled={busy}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-black text-white font-medium disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 h-[52px] px-4 rounded-xl bg-black text-white font-semibold disabled:opacity-50"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden>
               <path d="M16.365 1.43c0 1.14-.42 2.2-1.18 3.03-.8.88-2.12 1.56-3.22 1.47-.14-1.1.4-2.26 1.16-3.08.8-.88 2.2-1.54 3.24-1.42zM20.5 17.1c-.58 1.34-.86 1.93-1.61 3.11-1.05 1.63-2.53 3.66-4.36 3.68-1.63.03-2.05-1.06-4.27-1.05-2.22.01-2.69 1.08-4.32 1.05-1.83-.03-3.23-1.85-4.28-3.48C-.3 16.9-.7 12.7 1.2 9.9c1.2-1.78 3.1-2.82 4.88-2.82 1.82 0 2.96 1.07 4.46 1.07 1.45 0 2.34-1.08 4.46-1.08 1.6 0 3.29.87 4.48 2.37-3.94 2.16-3.3 7.8.99 7.66z" />
@@ -325,7 +318,7 @@ export default function SocialAuthButtons({ onError }: Props) {
             type="button"
             onClick={() => void handleGoogle()}
             disabled={busy}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-800 font-medium disabled:opacity-50 hover:bg-slate-50"
+            className="w-full flex items-center justify-center gap-2 h-[52px] px-4 rounded-xl border border-[#D3E2DF] bg-white text-slate-800 font-semibold disabled:opacity-50 hover:bg-slate-50"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
               <path
@@ -349,9 +342,9 @@ export default function SocialAuthButtons({ onError }: Props) {
           </button>
 
           <div className="flex items-center gap-3 text-xs text-slate-400">
-            <div className="flex-1 h-px bg-slate-200" />
+            <div className="flex-1 h-px bg-[#D3E2DF]" />
             or use email
-            <div className="flex-1 h-px bg-slate-200" />
+            <div className="flex-1 h-px bg-[#D3E2DF]" />
           </div>
         </>
       )}

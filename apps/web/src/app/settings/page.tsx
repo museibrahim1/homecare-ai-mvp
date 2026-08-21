@@ -33,14 +33,14 @@ import {
   Laptop
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 
 import { UploadedDocument, AgencySettings } from './types';
 import { API_BASE, defaultAgency, documentCategories } from './constants';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { token, isReady, logout } = useRequireAuth();
+  const { token, isReady, logout, user } = useRequireAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -565,9 +565,11 @@ export default function SettingsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
 
@@ -640,21 +642,14 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <main className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Settings</h1>
-              <p className="text-slate-500">Manage your company and account settings</p>
-            </div>
+    <GlassShell
+      title="Settings"
+      subtitle="Manage your profile, preferences, and integrations."
+      action={
             <button 
               onClick={handleSave}
               disabled={saving}
-              className="btn-primary flex items-center gap-2 disabled:opacity-50"
+              className="glass-btn-primary disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -663,13 +658,40 @@ export default function SettingsPage() {
               ) : (
                 <Save className="w-5 h-5" />
               )}
-              {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+              {saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
+            </button>
+      }
+    >
+        <div className="max-w-5xl mx-auto w-full space-y-6">
+          {/* Paper profile card */}
+          <div className="glass-card flex flex-col sm:flex-row sm:items-center gap-5 p-6">
+            <div className="w-16 h-16 shrink-0 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
+              {(user?.full_name || 'MS')
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()}
+            </div>
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <p className="text-lg font-bold text-[#10211F]">{user?.full_name || 'Your profile'}</p>
+              <p className="text-sm font-medium text-[#64748B] truncate">{user?.email || ''}</p>
+              <p className="text-sm font-medium text-[#7A8C88]">
+                {[user?.role || 'Admin', agency.name || 'Your agency', agency.state].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('profile')}
+              className="h-[42px] px-5 rounded-[21px] bg-[#0D94881A] text-sm font-semibold text-[#0F766E] hover:bg-[#0D948826] transition-colors shrink-0"
+            >
+              Edit profile
             </button>
           </div>
 
           {/* AI Extraction Status */}
           {extractionMessage && (
-            <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
+            <div className={`p-4 rounded-xl flex items-center gap-3 ${
               extractionMessage.includes('✓') 
                 ? 'bg-accent-green/10 border border-accent-green/30' 
                 : 'bg-primary-50 border border-primary-200'
@@ -687,7 +709,7 @@ export default function SettingsPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
               <p className="text-red-600 flex-1">{error}</p>
               <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
@@ -697,17 +719,17 @@ export default function SettingsPage() {
           )}
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-slate-200 pb-4 overflow-x-auto">
+          <div className="glass-toolbar flex flex-wrap gap-1 overflow-x-auto">
             {tabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+                  className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-[10px] text-[13px] transition-colors whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'bg-primary-50 text-primary-400'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-white text-[#10211F] font-semibold shadow-[0_1px_3px_#0F172A14]'
+                      : 'text-[#64748B] font-medium hover:text-[#334155] hover:bg-white/40'
                   }`}
                 >
                   <TabIcon className="w-4 h-4" />
@@ -721,14 +743,14 @@ export default function SettingsPage() {
           {activeTab === 'agency' && (
             <div className="space-y-6">
               {/* Quick Upload for Auto-Fill */}
-              <div className="card p-6 bg-gradient-to-r from-primary-500/10 to-purple-500/10 border-primary-200">
+              <div className="glass-card p-6" style={{ background: 'linear-gradient(135deg, rgba(13,148,136,0.10), rgba(255,255,255,0.66))' }}>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-primary-400" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#0D94881A]">
+                    <Sparkles className="w-6 h-6 text-primary-500" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-slate-900 font-semibold mb-1">Auto-Fill Company Info</h3>
-                    <p className="text-slate-600 text-sm mb-3">
+                    <h3 className="text-[#10211F] font-semibold mb-1">Auto-Fill Company Info</h3>
+                    <p className="text-[#4B6B66] text-sm mb-3">
                       Upload any document with your company letterhead, and AI will extract your business information automatically.
                     </p>
                     <div className="flex gap-3">
@@ -754,8 +776,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Logo Upload */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4 flex items-center gap-2">
                   <Image className="w-5 h-5 text-primary-400" />
                   Company Logo
                 </h2>
@@ -766,7 +788,7 @@ export default function SettingsPage() {
                         <img 
                           src={logoPreview} 
                           alt="Company logo" 
-                          className="w-32 h-32 object-contain bg-slate-50 rounded-xl border border-slate-200"
+                          className="w-32 h-32 object-contain bg-white/60 rounded-xl border border-white/70"
                         />
                         <button
                           onClick={removeLogo}
@@ -778,7 +800,7 @@ export default function SettingsPage() {
                     ) : (
                       <div 
                         onClick={() => logoInputRef.current?.click()}
-                        className="w-32 h-32 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 hover:border-primary-500 flex flex-col items-center justify-center cursor-pointer transition"
+                        className="w-32 h-32 bg-white/50 rounded-xl border-2 border-dashed border-[#10211F1A] hover:border-primary-500 flex flex-col items-center justify-center cursor-pointer transition"
                       >
                         <Upload className="w-8 h-8 text-slate-400 mb-2" />
                         <span className="text-slate-500 text-xs">Upload Logo</span>
@@ -804,8 +826,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Company Information */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-primary-400" />
                   Company Information
                 </h2>
@@ -816,7 +838,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.name}
                       onChange={(e) => setAgency(prev => ({ ...prev, name: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="Your Home Care Agency"
                     />
                   </div>
@@ -826,7 +848,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.address}
                       onChange={(e) => setAgency(prev => ({ ...prev, address: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="123 Main Street, Suite 100"
                     />
                   </div>
@@ -836,7 +858,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.city}
                       onChange={(e) => setAgency(prev => ({ ...prev, city: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="City"
                     />
                   </div>
@@ -847,7 +869,7 @@ export default function SettingsPage() {
                         type="text"
                         value={agency.state}
                         onChange={(e) => setAgency(prev => ({ ...prev, state: e.target.value }))}
-                        className="input-dark w-full"
+                        className="glass-input w-full"
                         placeholder="State"
                       />
                     </div>
@@ -857,7 +879,7 @@ export default function SettingsPage() {
                         type="text"
                         value={agency.zip_code}
                         onChange={(e) => setAgency(prev => ({ ...prev, zip_code: e.target.value }))}
-                        className="input-dark w-full"
+                        className="glass-input w-full"
                         placeholder="12345"
                       />
                     </div>
@@ -868,7 +890,7 @@ export default function SettingsPage() {
                       type="tel"
                       value={agency.phone}
                       onChange={(e) => setAgency(prev => ({ ...prev, phone: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -878,7 +900,7 @@ export default function SettingsPage() {
                       type="email"
                       value={agency.email}
                       onChange={(e) => setAgency(prev => ({ ...prev, email: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="contact@agency.com"
                     />
                   </div>
@@ -888,7 +910,7 @@ export default function SettingsPage() {
                       type="url"
                       value={agency.website}
                       onChange={(e) => setAgency(prev => ({ ...prev, website: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="https://www.youragency.com"
                     />
                   </div>
@@ -896,8 +918,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Business Identifiers */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Business Identifiers</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4">Business Identifiers</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-1">License Number</label>
@@ -905,7 +927,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.license_number}
                       onChange={(e) => setAgency(prev => ({ ...prev, license_number: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="License #"
                     />
                   </div>
@@ -915,7 +937,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.npi_number}
                       onChange={(e) => setAgency(prev => ({ ...prev, npi_number: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="NPI #"
                     />
                   </div>
@@ -923,8 +945,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Contact Person */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Primary Contact</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4">Primary Contact</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-1">Contact Name</label>
@@ -932,7 +954,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.contact_person}
                       onChange={(e) => setAgency(prev => ({ ...prev, contact_person: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="John Smith"
                     />
                   </div>
@@ -942,7 +964,7 @@ export default function SettingsPage() {
                       type="text"
                       value={agency.contact_title}
                       onChange={(e) => setAgency(prev => ({ ...prev, contact_title: e.target.value }))}
-                      className="input-dark w-full"
+                      className="glass-input w-full"
                       placeholder="Administrator"
                     />
                   </div>
@@ -950,8 +972,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Brand Colors */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Brand Colors</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4">Brand Colors</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-2">Primary Color</label>
@@ -966,7 +988,7 @@ export default function SettingsPage() {
                         type="text"
                         value={agency.primary_color}
                         onChange={(e) => setAgency(prev => ({ ...prev, primary_color: e.target.value }))}
-                        className="input-dark flex-1"
+                        className="glass-input flex-1"
                       />
                     </div>
                   </div>
@@ -983,7 +1005,7 @@ export default function SettingsPage() {
                         type="text"
                         value={agency.secondary_color}
                         onChange={(e) => setAgency(prev => ({ ...prev, secondary_color: e.target.value }))}
-                        className="input-dark flex-1"
+                        className="glass-input flex-1"
                       />
                     </div>
                   </div>
@@ -995,8 +1017,8 @@ export default function SettingsPage() {
           {/* Billing & Rates Tab */}
           {activeTab === 'billing' && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-1 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-1 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-primary-500" />
                   Pay Sources
                 </h2>
@@ -1031,8 +1053,8 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-1">Service Types</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-1">Service Types</h2>
                 <p className="text-sm text-slate-500 mb-4">What services does your agency provide?</p>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -1067,8 +1089,8 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-1">Hourly Rates</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-1">Hourly Rates</h2>
                 <p className="text-sm text-slate-500 mb-4">The AI uses these rates when generating contracts. Leave blank for system defaults.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
@@ -1086,7 +1108,7 @@ export default function SettingsPage() {
                           value={(agency as any)[r.key] ?? ''}
                           onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
                           placeholder="—"
-                          className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                          className="glass-input pl-7 text-sm"
                         />
                       </div>
                     </div>
@@ -1113,7 +1135,7 @@ export default function SettingsPage() {
                               value={(agency as any)[r.key] ?? ''}
                               onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
                               placeholder="—"
-                              className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                              className="glass-input pl-7 text-sm"
                             />
                           </div>
                         </div>
@@ -1141,7 +1163,7 @@ export default function SettingsPage() {
                               value={(agency as any)[r.key] ?? ''}
                               onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
                               placeholder="—"
-                              className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                              className="glass-input pl-7 text-sm"
                             />
                           </div>
                         </div>
@@ -1151,11 +1173,11 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-                <Sparkles className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+              <div className="glass-card p-4 flex gap-3" style={{ background: 'linear-gradient(135deg, rgba(13,148,136,0.10), rgba(255,255,255,0.66))' }}>
+                <Sparkles className="w-5 h-5 text-primary-500 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-blue-800 text-sm font-medium">How the AI uses your rates</p>
-                  <p className="text-blue-600 text-xs mt-0.5">
+                  <p className="text-[#10211F] text-sm font-medium">How the AI uses your rates</p>
+                  <p className="text-[#4B6B66] text-xs mt-0.5">
                     When the AI generates a contract, it checks the client's insurance type and uses your configured rate.
                     If a rate isn't set, it falls back to industry-standard defaults for your state.
                   </p>
@@ -1168,8 +1190,8 @@ export default function SettingsPage() {
           {activeTab === 'documents' && (
             <div className="space-y-6">
               {/* Upload New Document */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4 flex items-center gap-2">
                   <Upload className="w-5 h-5 text-primary-400" />
                   Upload Documents
                 </h2>
@@ -1190,7 +1212,7 @@ export default function SettingsPage() {
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                             selectedCategory === cat.id
                               ? 'bg-primary-50 text-primary-400 border border-primary-500/50'
-                              : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
+                              : 'bg-white/60 text-[#4B6B66] border border-white/70 hover:border-[#0D948855]'
                           }`}
                         >
                           <CatIcon className="w-4 h-4" />
@@ -1207,7 +1229,7 @@ export default function SettingsPage() {
                   className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                     uploadingDoc 
                       ? 'border-primary-500/50 bg-primary-500/5' 
-                      : 'border-slate-200 hover:border-primary-500 bg-slate-50/30'
+                      : 'border-[#10211F1A] hover:border-primary-500 bg-white/40'
                   }`}
                 >
                   {uploadingDoc ? (
@@ -1233,8 +1255,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Uploaded Documents List */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Uploaded Documents</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4">Uploaded Documents</h2>
                 
                 {agency.documents.length === 0 ? (
                   <div className="text-center py-8">
@@ -1251,7 +1273,7 @@ export default function SettingsPage() {
                       return (
                         <div 
                           key={doc.id}
-                          className="flex items-center justify-between p-4 bg-slate-100 rounded-xl border border-slate-200"
+                          className="flex items-center justify-between p-4 bg-white/60 rounded-xl border border-white/70"
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
@@ -1276,8 +1298,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Default Policies */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Default Policies</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4">Default Policies</h2>
                 <p className="text-slate-500 text-sm mb-4">
                   These will be used as defaults when generating contracts. You can also upload policy documents above for more detailed extraction.
                 </p>
@@ -1287,7 +1309,7 @@ export default function SettingsPage() {
                     <textarea
                       value={agency.cancellation_policy}
                       onChange={(e) => setAgency(prev => ({ ...prev, cancellation_policy: e.target.value }))}
-                      className="input-dark w-full h-24 resize-none"
+                      className="glass-input w-full h-24 resize-none"
                       placeholder="24-hour notice required for cancellations..."
                     />
                   </div>
@@ -1296,7 +1318,7 @@ export default function SettingsPage() {
                     <textarea
                       value={agency.terms_and_conditions}
                       onChange={(e) => setAgency(prev => ({ ...prev, terms_and_conditions: e.target.value }))}
-                      className="input-dark w-full h-32 resize-none"
+                      className="glass-input w-full h-32 resize-none"
                       placeholder="Standard terms and conditions for your services..."
                     />
                   </div>
@@ -1307,8 +1329,8 @@ export default function SettingsPage() {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="card p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-semibold text-[#10211F] mb-6 flex items-center gap-2">
                 <User className="w-5 h-5 text-primary-400" />
                 Profile Settings
               </h2>
@@ -1319,7 +1341,7 @@ export default function SettingsPage() {
                     type="text"
                     value={agency.contact_person}
                     onChange={(e) => setAgency(prev => ({ ...prev, contact_person: e.target.value }))}
-                    className="input-dark w-full"
+                    className="glass-input w-full"
                     placeholder="Your full name"
                   />
                 </div>
@@ -1329,7 +1351,7 @@ export default function SettingsPage() {
                     type="email"
                     value={agency.email}
                     onChange={(e) => setAgency(prev => ({ ...prev, email: e.target.value }))}
-                    className="input-dark w-full"
+                    className="glass-input w-full"
                     placeholder="you@company.com"
                   />
                 </div>
@@ -1339,7 +1361,7 @@ export default function SettingsPage() {
                     type="tel"
                     value={agency.phone}
                     onChange={(e) => setAgency(prev => ({ ...prev, phone: e.target.value }))}
-                    className="input-dark w-full"
+                    className="glass-input w-full"
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>
@@ -1354,7 +1376,7 @@ export default function SettingsPage() {
               {teamLimits && (
                 <div className={`p-4 rounded-xl border ${
                   teamLimits.can_invite 
-                    ? 'bg-white border-slate-200'
+                    ? 'bg-white/60 border-white/70'
                     : 'bg-amber-50 border-amber-200'
                 }`}>
                   <div className="flex items-center justify-between">
@@ -1399,10 +1421,10 @@ export default function SettingsPage() {
               )}
               
               {/* Team Header */}
-              <div className="card p-6">
+              <div className="glass-card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-[#10211F] flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary-400" />
                       Team Members
                     </h2>
@@ -1458,7 +1480,7 @@ export default function SettingsPage() {
                           <select
                             value={member.role}
                             onChange={(e) => handleUpdateMember(member.id, { role: e.target.value })}
-                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-500"
+                            className="bg-white/70 border border-[#10211F1A] rounded-lg px-3 py-1.5 text-sm text-[#4B6B66]"
                           >
                             <option value="owner">Owner</option>
                             <option value="admin">Admin</option>
@@ -1482,12 +1504,12 @@ export default function SettingsPage() {
               </div>
               
               {/* Voice ID Setup Tip */}
-              <div className="card p-6 border border-primary-500/20 bg-primary-500/5">
+              <div className="glass-card p-6" style={{ background: 'linear-gradient(135deg, rgba(13,148,136,0.10), rgba(255,255,255,0.66))' }}>
                 <div className="flex gap-4">
-                  <Volume2 className="w-6 h-6 text-primary-400 flex-shrink-0" />
+                  <Volume2 className="w-6 h-6 text-primary-500 flex-shrink-0" />
                   <div>
-                    <h3 className="text-slate-900 font-medium mb-1">Voice ID for Team Members</h3>
-                    <p className="text-slate-500 text-sm">
+                    <h3 className="text-[#10211F] font-medium mb-1">Voice ID for Team Members</h3>
+                    <p className="text-[#4B6B66] text-sm">
                       Each team member can set up their Voice ID in Settings &gt; Voice ID. This allows the system 
                       to automatically identify who is speaking during assessments.
                     </p>
@@ -1502,7 +1524,7 @@ export default function SettingsPage() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-[#10211F] flex items-center gap-2">
                     <UserPlus className="w-5 h-5 text-primary-400" />
                     Invite Team Member
                   </h3>
@@ -1523,7 +1545,7 @@ export default function SettingsPage() {
                         type="text"
                         value={inviteName}
                         onChange={(e) => setInviteName(e.target.value)}
-                        className="input-dark w-full"
+                        className="glass-input w-full"
                         placeholder="John Smith"
                       />
                     </div>
@@ -1533,7 +1555,7 @@ export default function SettingsPage() {
                         type="email"
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
-                        className="input-dark w-full"
+                        className="glass-input w-full"
                         placeholder="john@company.com"
                       />
                     </div>
@@ -1542,7 +1564,7 @@ export default function SettingsPage() {
                       <select
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value)}
-                        className="input-dark w-full"
+                        className="glass-input w-full"
                       >
                         <option value="caregiver">Caregiver</option>
                         <option value="admin">Admin</option>
@@ -1586,7 +1608,7 @@ export default function SettingsPage() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-2xl p-6 w-full max-w-lg border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-[#10211F] flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary-400" />
                     Upgrade Your Plan
                   </h3>
@@ -1654,8 +1676,8 @@ export default function SettingsPage() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="card p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-semibold text-[#10211F] mb-6 flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary-400" />
                 Notification Preferences
               </h2>
@@ -1667,15 +1689,15 @@ export default function SettingsPage() {
                   { label: 'New Client Alerts', key: 'new_client_alerts' as const },
                   { label: 'Contract Expiration Alerts', key: 'contract_expiration_alerts' as const },
                 ]).map((setting) => (
-                  <div key={setting.key} className="flex items-center justify-between py-3 border-b border-slate-200 last:border-0">
-                    <span className="text-slate-700">{setting.label}</span>
+                  <div key={setting.key} className="flex items-center justify-between py-3 border-b border-[#10211F12] last:border-0">
+                    <span className="text-[15px] font-semibold text-[#10211F]">{setting.label}</span>
                     <button
                       role="switch"
                       aria-checked={notifications[setting.key]}
                       onClick={() => setNotifications(prev => ({ ...prev, [setting.key]: !prev[setting.key] }))}
-                      className={`w-12 h-6 rounded-full transition-colors relative ${notifications[setting.key] ? 'bg-primary-500' : 'bg-slate-100'}`}
+                      className={`glass-toggle ${notifications[setting.key] ? 'glass-toggle-on' : 'glass-toggle-off'}`}
                     >
-                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${notifications[setting.key] ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                      <div className="glass-toggle-knob" />
                     </button>
                   </div>
                 ))}
@@ -1686,19 +1708,24 @@ export default function SettingsPage() {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-6 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary-400" />
                   Security Settings
                 </h2>
                 <div className="space-y-4">
-                  <div className="py-3 border-b border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-slate-700">Two-Factor Authentication</p>
-                        <p className="text-slate-400 text-sm">
-                          {mfaEnabled ? 'Enabled — your account is protected with TOTP' : 'Add an extra layer of security'}
-                        </p>
+                  <div className="py-3 border-b border-[#10211F12]">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-10 h-10 shrink-0 rounded-md flex items-center justify-center bg-[#0D94881A]">
+                          <Shield className="w-5 h-5 text-primary-500" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[15px] font-semibold text-[#10211F]">Two-Factor Authentication</p>
+                          <p className="text-[13px] font-medium text-[#7A8C88]">
+                            {mfaEnabled ? 'Enabled — your account is protected with TOTP' : 'Add an extra layer of security'}
+                          </p>
+                        </div>
                       </div>
                       {mfaStep === 'idle' && (
                         <button
@@ -1716,7 +1743,7 @@ export default function SettingsPage() {
                     )}
 
                     {mfaStep === 'setup' && (
-                      <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                      <div className="mt-4 p-4 bg-white/60 rounded-xl border border-white/70 space-y-4">
                         <p className="text-sm text-slate-700 font-medium">Scan this QR code with your authenticator app:</p>
                         <div className="flex justify-center">
                           <img
@@ -1782,16 +1809,22 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div className="py-3">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3.5 mb-3">
+                      <div className="w-10 h-10 shrink-0 rounded-md flex items-center justify-center bg-[#0D94881A]">
+                        <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="#0D9488" strokeWidth="1.8" />
+                          <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#0D9488" strokeWidth="1.8" />
+                        </svg>
+                      </div>
                       <div>
-                        <p className="text-slate-700">Change Password</p>
-                        <p className="text-slate-400 text-sm">Update your account password</p>
+                        <p className="text-[15px] font-semibold text-[#10211F]">Change Password</p>
+                        <p className="text-[13px] font-medium text-[#7A8C88]">Update your account password</p>
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <input type="password" placeholder="Current password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
-                      <input type="password" placeholder="New password (min 8 characters)" value={newPw} onChange={e => setNewPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
-                      <input type="password" placeholder="Confirm new password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
+                      <input type="password" placeholder="Current password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="glass-input" />
+                      <input type="password" placeholder="New password (min 8 characters)" value={newPw} onChange={e => setNewPw(e.target.value)} className="glass-input" />
+                      <input type="password" placeholder="Confirm new password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="glass-input" />
                       {pwMsg && <p className={`text-sm ${pwMsg.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>{pwMsg.text}</p>}
                       <button
                         disabled={pwLoading || !currentPw || !newPw || newPw !== confirmPw || newPw.length < 8}
@@ -1820,8 +1853,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Active Sessions / Log Out All Devices */}
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h2 className="text-lg font-semibold text-[#10211F] mb-2 flex items-center gap-2">
                   <Laptop className="w-5 h-5 text-primary-400" />
                   Active Sessions
                 </h2>
@@ -1829,7 +1862,7 @@ export default function SettingsPage() {
                   If you suspect unauthorized access or left your account signed in on another device, 
                   you can sign out of all devices at once. You will need to sign in again everywhere.
                 </p>
-                <div className="flex items-center justify-between p-4 bg-slate-50/30 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between p-4 bg-white/60 rounded-xl border border-white/70">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
                       <LogOut className="w-5 h-5 text-orange-600" />
@@ -1854,18 +1887,18 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="card p-6 border-red-200">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="glass-card p-6" style={{ borderColor: '#DC262640' }}>
+                <h2 className="text-lg font-semibold text-[#10211F] mb-4 flex items-center gap-2">
                   <Database className="w-5 h-5 text-red-600" />
                   Danger Zone
                 </h2>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-700">Delete Account</p>
-                    <p className="text-slate-400 text-sm">Permanently delete your account and all data</p>
+                    <p className="text-[#10211F] font-medium">Delete Account</p>
+                    <p className="text-[#7A8C88] text-sm">Permanently delete your account and all data</p>
                   </div>
                   {!showDeleteForm && (
-                    <button onClick={() => setShowDeleteForm(true)} className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-500/30 transition">
+                    <button onClick={() => setShowDeleteForm(true)} className="px-4 h-[42px] rounded-xl text-sm font-semibold text-[#DC2626] bg-[#DC26260F] border border-[#DC262640] hover:bg-[#DC26261A] transition">
                       Delete Account
                     </button>
                   )}
@@ -1911,7 +1944,6 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </GlassShell>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ChatWidget from '@/components/ChatWidget';
@@ -11,22 +11,48 @@ import {
   ArrowRight,
   Zap,
   Shield,
-  BarChart3,
-  ChevronDown,
-  Menu,
-  X,
-  Brain,
-  ClipboardList,
   Lock,
-  Smartphone,
+  X,
 } from 'lucide-react';
 
-import { Hero } from '@/components/landing/Hero';
-import { LaunchIntro } from '@/components/landing/LaunchIntro';
+import GlassLandingHero from '@/components/glass/GlassLandingHero';
 import { FaqItem } from '@/components/landing/FaqItem';
 import { FEATURES_TABS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
 
-const LAUNCH_SEEN_KEY = 'palm_launch_intro_seen';
+const SOCIAL_LINKS = [
+  {
+    href: 'https://www.linkedin.com/company/palmtechnologies',
+    label: 'LinkedIn',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden>
+        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22 0H2C.9 0 0 .9 0 2v20c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V2c0-1.1-.9-2-2-2z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://www.instagram.com/palmcareai',
+    label: 'Instagram',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden>
+        <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 8.15 2.23 9.42 2.17 9.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.69 21.3.27 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.41-10.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://www.facebook.com/palmtechnologies',
+    label: 'Facebook',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden>
+        <path d="M22.68 0H1.32A1.32 1.32 0 0 0 0 1.32v21.36A1.32 1.32 0 0 0 1.32 24h11.5v-9.29H9.69v-3.62h3.13V8.41c0-3.1 1.89-4.79 4.66-4.79 1.33 0 2.47.1 2.8.14v3.24h-1.92c-1.5 0-1.8.72-1.8 1.77v2.31h3.6l-.47 3.62h-3.13V24h6.12A1.32 1.32 0 0 0 24 22.68V1.32A1.32 1.32 0 0 0 22.68 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://www.threads.net/@palmcareai',
+    label: 'Threads',
+    icon: <span className="text-sm font-bold leading-none">@</span>,
+  },
+];
 
 const OLD_WAY = [
   'Type the assessment into forms — during or after the visit',
@@ -59,27 +85,6 @@ const COMPARE_ROWS = [
   { label: 'Time to a ready-to-sign agreement', palm: 'Minutes', scribes: 'Not produced', templates: 'Hours', manual: 'Hours' },
 ];
 
-const NAV_FEATURES = [
-  { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
-  { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
-  { href: '/features#billing', icon: BarChart3, label: 'Billing & Reports', desc: 'Automated billing & analytics' },
-  { href: '/features#caregiver', icon: Smartphone, label: 'Caregiver Tools', desc: 'Mobile app & ADL logging' },
-  { href: '/features#templates', icon: FileText, label: 'Templates & OCR', desc: 'Upload & auto-fill contracts' },
-  { href: '/features#security', icon: Lock, label: 'Security & Compliance', desc: 'HIPAA compliant & encrypted' },
-];
-
-const NAV_RESOURCES = [
-  { label: 'Blog', href: '/blog' },
-  { label: 'Documentation software', href: '/home-care-documentation-software' },
-  { label: 'Compare options', href: '/compare' },
-  { label: 'Alternatives', href: '/alternatives' },
-  { label: 'ROI Calculator', href: '/roi-calculator' },
-  { label: 'FAQ', href: '/faq' },
-  { label: 'Contact Us', href: '/contact' },
-  { label: 'System Status', href: '/status' },
-  { label: 'Privacy Policy', href: '/privacy' },
-];
-
 const HOW_IT_WORKS = [
   { step: '01', title: 'Record', description: 'Staff records the client assessment on their phone — in person or over the phone. One tap to start.', icon: Mic },
   { step: '02', title: 'Transcribe', description: 'AI transcribes the conversation, identifies speakers, and extracts care needs and billable items.', icon: Zap },
@@ -87,200 +92,17 @@ const HOW_IT_WORKS = [
 ];
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [activeFeatureTab, setActiveFeatureTab] = useState('ai');
-  const [navDropdown, setNavDropdown] = useState<string | null>(null);
-  const [showLaunch, setShowLaunch] = useState(false);
-
-  // Show the launch splash once per browser session (respect return visits
-  // within the same session so it never gets in the way).
-  useEffect(() => {
-    try {
-      if (!sessionStorage.getItem(LAUNCH_SEEN_KEY)) setShowLaunch(true);
-    } catch {
-      // Private mode or storage disabled — skip the intro rather than break.
-    }
-  }, []);
-
-  const dismissLaunch = () => {
-    setShowLaunch(false);
-    try { sessionStorage.setItem(LAUNCH_SEEN_KEY, '1'); } catch { /* ignore */ }
-  };
-
-  // Lock body scroll while the mobile menu or launch splash is open
-  useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen || showLaunch ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen, showLaunch]);
-
-  const closeMobileMenu = () => { setMobileMenuOpen(false); setMobileSection(null); };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* ── LAUNCH SPLASH (first visit per session) ── */}
-      {showLaunch && <LaunchIntro onEnter={dismissLaunch} />}
-
-      {/* ── NAVIGATION ── */}
-      <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-600 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                <Image src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-slate-900 truncate">PalmCare AI</span>
-            </Link>
-
-            {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-1">
-              <div className="relative" onMouseEnter={() => setNavDropdown('features')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-slate-600 hover:text-slate-900 transition rounded-lg">
-                  Features <ChevronDown className="w-4 h-4" />
-                </button>
-                {navDropdown === 'features' && (
-                  <div className="absolute top-full left-0 pt-2 w-[520px] max-w-[calc(100vw-2rem)]">
-                    <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-4 grid grid-cols-2 gap-2">
-                      {NAV_FEATURES.map(item => (
-                        <Link key={item.href} href={item.href} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition">
-                          <div className="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center shrink-0">
-                            <item.icon className="w-4.5 h-4.5 text-primary-600" />
-                          </div>
-                          <div>
-                            <p className="text-slate-900 font-medium text-sm">{item.label}</p>
-                            <p className="text-slate-500 text-xs">{item.desc}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative" onMouseEnter={() => setNavDropdown('solutions')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-slate-600 hover:text-slate-900 transition rounded-lg">
-                  Solutions <ChevronDown className="w-4 h-4" />
-                </button>
-                {navDropdown === 'solutions' && (
-                  <div className="absolute top-full left-0 pt-2 w-72">
-                    <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-2">
-                      {[
-                        { label: 'Small Agencies', desc: 'Up to 30 clients', href: '#solutions' },
-                        { label: 'Medium Agencies', desc: '30–200 clients', href: '#solutions' },
-                        { label: 'Enterprise', desc: '200+ clients', href: '#solutions' },
-                      ].map(item => (
-                        <a key={item.label} href={item.href} onClick={() => setNavDropdown(null)} className="block p-3 rounded-lg hover:bg-slate-50 transition">
-                          <p className="text-slate-900 font-medium text-sm">{item.label}</p>
-                          <p className="text-slate-500 text-xs">{item.desc}</p>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative" onMouseEnter={() => setNavDropdown('resources')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-slate-600 hover:text-slate-900 transition rounded-lg">
-                  Resources <ChevronDown className="w-4 h-4" />
-                </button>
-                {navDropdown === 'resources' && (
-                  <div className="absolute top-full left-0 pt-2 w-56">
-                    <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-2">
-                      {NAV_RESOURCES.map(item => (
-                        <Link key={item.label} href={item.href} className="block p-3 rounded-lg hover:bg-slate-50 transition text-slate-700 text-sm font-medium">{item.label}</Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <Link href="/mobile-app" className="px-3 py-2 text-slate-600 hover:text-slate-900 transition">Mobile App</Link>
-              <Link href="/pricing" className="px-3 py-2 text-slate-600 hover:text-slate-900 transition">Pricing</Link>
-            </div>
-
-            <div className="hidden lg:flex items-center gap-3">
-              <Link href="/login" className="text-slate-600 hover:text-slate-900 transition px-3 py-2">Sign in</Link>
-              <Link href="/register" className="btn-primary py-2 px-5 text-sm">Start free trial</Link>
-            </div>
-
-            <button
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileMenuOpen}
-              onClick={() => (mobileMenuOpen ? closeMobileMenu() : setMobileMenuOpen(true))}
-              className="lg:hidden p-2.5 -mr-1 text-slate-600 hover:text-slate-900 rounded-lg"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu — full-height scrollable panel, anchored below the nav bar */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full inset-x-0 h-[calc(100dvh-61px)] bg-white overflow-y-auto overscroll-contain border-t border-slate-200">
-            <div className="px-4 py-4 pb-safe space-y-1">
-              <button
-                onClick={() => setMobileSection(mobileSection === 'features' ? null : 'features')}
-                className="w-full flex items-center justify-between py-3.5 px-2 text-slate-900 font-medium rounded-lg active:bg-slate-50"
-                aria-expanded={mobileSection === 'features'}
-              >
-                Features
-                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${mobileSection === 'features' ? 'rotate-180' : ''}`} />
-              </button>
-              {mobileSection === 'features' && (
-                <div className="pb-2 space-y-1">
-                  {NAV_FEATURES.map(item => (
-                    <Link key={item.href} href={item.href} onClick={closeMobileMenu} className="flex items-center gap-3 py-2.5 px-3 rounded-lg active:bg-slate-50">
-                      <div className="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center shrink-0">
-                        <item.icon className="w-4.5 h-4.5 text-primary-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-slate-900 text-sm font-medium">{item.label}</p>
-                        <p className="text-slate-500 text-xs truncate">{item.desc}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              <a href="#solutions" onClick={closeMobileMenu} className="block py-3.5 px-2 text-slate-900 font-medium rounded-lg active:bg-slate-50">Solutions</a>
-              <Link href="/mobile-app" onClick={closeMobileMenu} className="block py-3.5 px-2 text-slate-900 font-medium rounded-lg active:bg-slate-50">Mobile App</Link>
-              <Link href="/pricing" onClick={closeMobileMenu} className="block py-3.5 px-2 text-slate-900 font-medium rounded-lg active:bg-slate-50">Pricing</Link>
-
-              <button
-                onClick={() => setMobileSection(mobileSection === 'resources' ? null : 'resources')}
-                className="w-full flex items-center justify-between py-3.5 px-2 text-slate-900 font-medium rounded-lg active:bg-slate-50"
-                aria-expanded={mobileSection === 'resources'}
-              >
-                Resources
-                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${mobileSection === 'resources' ? 'rotate-180' : ''}`} />
-              </button>
-              {mobileSection === 'resources' && (
-                <div className="pb-2 space-y-1">
-                  {NAV_RESOURCES.map(item => (
-                    <Link key={item.label} href={item.href} onClick={closeMobileMenu} className="block py-2.5 px-3 text-slate-600 text-sm rounded-lg active:bg-slate-50">{item.label}</Link>
-                  ))}
-                </div>
-              )}
-
-              <div className="pt-4 mt-3 border-t border-slate-200 space-y-3">
-                <Link href="/login" onClick={closeMobileMenu} className="block w-full text-center py-3 rounded-lg text-slate-700 font-medium border border-slate-300 active:bg-slate-50">Sign in</Link>
-                <Link href="/register" onClick={closeMobileMenu} className="block w-full text-center btn-primary py-3 px-5">Start free trial</Link>
-                <div className="flex items-center justify-center gap-4 pt-2 pb-6 text-xs text-slate-500">
-                  <span className="inline-flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary-600" /> HIPAA compliant</span>
-                  <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary-600" /> 256-bit encryption</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+    <div className="min-h-screen glass-page">
+      {/* Paper Web Glass landing hero */}
+      <GlassLandingHero />
 
       <main>
-      {/* ═══ HERO ═══ */}
-      <Hero />
 
       {/* ═══ WHAT IS PALMCARE AI (AEO answer block) ═══ */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 border-b border-slate-200">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 border-b border-[#10211F12]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">What is PalmCare AI?</h2>
           <p className="text-lg text-slate-600 mt-4 leading-relaxed">
@@ -317,7 +139,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 border-y border-[#10211F12]">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
             <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">How it works</p>
@@ -347,7 +169,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mb-10 sm:mb-12">
             <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Platform</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Everything you need to run your agency</h2>
-            <p className="text-lg text-slate-600 mt-4">Built for care professionals — not retrofitted from generic software.</p>
+            <p className="text-lg text-slate-600 mt-4">Built for care professionals, not retrofitted from generic software.</p>
           </div>
 
           {/* Tabs: swipeable on mobile */}
@@ -371,13 +193,13 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {FEATURES_TABS.find(t => t.id === activeFeatureTab)?.features.map((feature, i) => (
-              <div key={i} className="card card-hover p-5 h-full flex flex-col">
-                <div className="relative w-full aspect-[4/3] sm:aspect-video rounded-lg overflow-hidden border border-slate-200 mb-4 bg-slate-50 shrink-0">
+              <div key={i} className="glass-card p-5 h-full flex flex-col">
+                <div className="relative w-full aspect-[4/3] sm:aspect-[3/4] lg:aspect-[4/5] rounded-2xl overflow-hidden mb-4 bg-[#10211F08] shrink-0">
                   <Image
                     src={feature.image}
                     alt={`${feature.title} screenshot`}
                     fill
-                    className="object-contain p-1.5"
+                    className="object-cover object-top"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                 </div>
@@ -404,7 +226,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mb-12 sm:mb-16">
             <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Solutions</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Built for agencies of every size</h2>
-            <p className="text-lg text-slate-600 mt-4">Whether you serve 10 clients or 1,000+, PalmCare AI scales with your agency.</p>
+            <p className="text-lg text-slate-600 mt-4">From a handful of clients to hundreds. PalmCare scales with your agency.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {SOLUTIONS.map((sol, i) => (
@@ -508,7 +330,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-slate-900 rounded-2xl px-6 sm:px-12 py-12 sm:py-16 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Spend your time on care, not paperwork</h2>
-            <p className="text-lg text-slate-300 mt-4 max-w-2xl mx-auto">Start your 14-day free trial today. Full access to every feature — cancel anytime.</p>
+            <p className="text-lg text-slate-300 mt-4 max-w-2xl mx-auto">Start your 30-day free trial in the iOS app. Full access, then Apple charges monthly unless you cancel.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
               <Link href="/register" data-track="final-cta-trial" className="btn-primary inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base">
                 Start free trial <ArrowRight className="w-4 h-4 shrink-0" />
@@ -517,7 +339,7 @@ export default function LandingPage() {
                 Talk to us
               </Link>
             </div>
-            <p className="text-slate-400 text-sm mt-6">HIPAA compliant &middot; 14-day free trial &middot; No credit card required</p>
+            <p className="text-slate-400 text-sm mt-6">HIPAA compliant &middot; 30-day free trial via Apple &middot; Auto-renews after trial</p>
           </div>
         </div>
       </section>
@@ -570,6 +392,20 @@ export default function LandingPage() {
               <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
                 AI documentation for home care agencies. Record it. Transcribe it. Contract it.
               </p>
+              <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                {SOCIAL_LINKS.map((s) => (
+                  <a
+                    key={s.href}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`PalmCare AI on ${s.label}`}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#0D94881A] text-[#0F766E] hover:bg-[#0D948828] transition"
+                  >
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-4 text-sm">Product</h3>
@@ -614,16 +450,14 @@ export default function LandingPage() {
       </footer>
 
       {/* ── STICKY CTA BAR (mobile only) ── */}
-      {!mobileMenuOpen && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-slate-200 py-3 px-4 sm:px-6 lg:hidden pb-safe">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFFB8] backdrop-blur-xl border-t border-[#10211F12] py-3 px-4 sm:px-6 lg:hidden pb-safe">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-slate-700 text-sm font-medium hidden sm:block">Try PalmCare AI free for 14 days</p>
+            <p className="text-slate-700 text-sm font-medium hidden sm:block">Try PalmCare AI free for 30 days</p>
             <div className="flex items-center gap-2 flex-1 sm:flex-none">
               <Link href="/register" className="flex-1 text-center btn-primary py-3 px-4 text-sm">Start free trial</Link>
             </div>
           </div>
         </div>
-      )}
 
       <ChatWidget />
     </div>

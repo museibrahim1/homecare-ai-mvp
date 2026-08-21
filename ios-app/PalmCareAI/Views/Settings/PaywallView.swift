@@ -1,20 +1,22 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: one auto-renewable plan with a 14-day Apple trial.
+/// Subscription paywall: one auto-renewable plan with a 30-day Apple trial.
 /// Tapping the CTA runs StoreKit `product.purchase()`, which presents the
-/// native App Store payment sheet (same system UI as Zoom / other IAP apps).
+/// native App Store payment sheet. Trial requires an Apple ID payment method;
+/// Apple auto-charges the monthly price when the trial ends unless cancelled.
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
-    /// When true (assessment gate): no "Done". User can still tap "Not now"
-    /// to cancel the recording attempt and keep browsing.
+    /// When true (assessment gate): no "Done". User must subscribe or cancel
+    /// the recording attempt via "Not now" only when allowsNotNow is true.
     var isRequired: Bool = false
 
-    /// Soft prompts (launch / sign-in) can always dismiss.
-    var allowsNotNow: Bool = true
+    /// Soft prompts may dismiss. Assessment / post-auth gates should pass false
+    /// so the user must start the Apple subscription (or leave the gated action).
+    var allowsNotNow: Bool = false
 
     @State private var selectedProductID: String = "com.palmcareai.app.starter.monthly"
     @State private var showSuccess = false
@@ -199,7 +201,7 @@ struct PaywallView: View {
                             .foregroundColor(.palmSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                         if hasTrialOffer {
-                            Text("14 day free trial")
+                            Text("30 day free trial")
                                 .font(.system(size: 10, weight: .heavy))
                                 .foregroundColor(.palmPrimary)
                                 .padding(.horizontal, 8)
@@ -275,7 +277,7 @@ struct PaywallView: View {
                     }
                     Text(store.purchaseInFlight
                          ? "Processing…"
-                         : (selectedHasTrial ? "Start 14 Day Free Trial" : "Subscribe"))
+                         : (selectedHasTrial ? "Start 30 Day Free Trial" : "Subscribe"))
                         .font(.system(size: 16, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -288,9 +290,11 @@ struct PaywallView: View {
                 .shadow(color: PalmGlass.tealShadow, radius: 14, y: 6)
             }
             .disabled(store.purchaseInFlight || store.purchasedProductIDs.contains(selectedProductID))
-            .accessibilityLabel(selectedHasTrial ? "Start 14 day free trial" : "Subscribe to the plan")
+            .accessibilityLabel(selectedHasTrial ? "Start 30 day free trial" : "Subscribe to the plan")
 
-            Text("Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
+            Text(selectedHasTrial
+                 ? "30 days free, then \(store.products.first(where: { $0.id == selectedProductID })?.displayPrice ?? "$199")/month. Charged to your Apple ID. Auto-renews until you cancel in Settings → Apple ID → Subscriptions. Cancel anytime before the trial ends to avoid being charged."
+                 : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)

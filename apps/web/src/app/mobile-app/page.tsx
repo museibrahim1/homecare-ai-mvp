@@ -102,7 +102,7 @@ export default function MobileAppPage() {
             </div>
           </div>
           <div className="ma-hero-phone-wrap">
-            <PhoneFrame src="/screenshots/ios/00_landing.png" alt="PalmCare AI landing screen" />
+            <PhoneFrame src="/screenshots/glass/paper-pipeline-palm-it.png" alt="PalmCare AI Palm It screen" />
           </div>
         </div>
       </section>
@@ -152,15 +152,15 @@ export default function MobileAppPage() {
           </p>
           <div className="ma-showcase-phones">
             <div className="ma-showcase-col">
-              <PhoneFrame src="/screenshots/ios/01_home.png" alt="PalmCare AI home dashboard" />
+              <PhoneFrame src="/screenshots/glass/paper-app-home.png" alt="PalmCare AI home dashboard" />
               <div className="sc-lbl">Dashboard</div>
             </div>
             <div className="ma-showcase-col ma-showcase-hero">
-              <PhoneFrame src="/screenshots/ios/03_record.png" alt="PalmCare AI recording screen" />
+              <PhoneFrame src="/screenshots/glass/paper-pipeline-recording.png" alt="PalmCare AI recording screen" />
               <div className="sc-lbl">Palm It</div>
             </div>
             <div className="ma-showcase-col">
-              <PhoneFrame src="/screenshots/ios/02_clients.png" alt="PalmCare AI clients list" />
+              <PhoneFrame src="/screenshots/glass/paper-app-clients.png" alt="PalmCare AI clients list" />
               <div className="sc-lbl">Clients</div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function MobileAppPage() {
             </div>
           </div>
           <div className="ma-why-phone-wrap">
-            <PhoneFrame src="/screenshots/ios/07_contract.png" alt="PalmCare AI contract view" />
+            <PhoneFrame src="/screenshots/glass/paper-pipeline-contract.png" alt="PalmCare AI contract view" />
           </div>
         </div>
       </section>

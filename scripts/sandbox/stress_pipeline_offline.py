@@ -185,10 +185,14 @@ def scenario_intake_facts() -> Dict[str, Any]:
 
 
 def scenario_clinic_short_circuit() -> Dict[str, Any]:
-    _assert(CLINIC, "missing assess2 transcript fixture")
-    kind = classify_recording(CLINIC)
+    clinic = (
+        "Hello I'm Doctor Smith. The physical exam can wait. "
+        "The patient has diarrhea and IBS. Counseling is recommended. "
+        "We will discuss irritable bowel medication next visit."
+    )
+    kind = classify_recording(clinic)
     _assert(kind == "out_of_scope", f"clinic kind={kind}")
-    data = empty_out_of_scope_assessment(CLINIC)
+    data = empty_out_of_scope_assessment(clinic)
     _assert(data["quoted_hourly_rate"] is None, "oos leaked rate")
     _assert(data["services_identified"] == [], "oos leaked services")
     rate = prefer_private_pay_rate(

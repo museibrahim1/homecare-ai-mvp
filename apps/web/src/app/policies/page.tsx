@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import { RefreshCw, Plus, AlertCircle, CheckCircle, Clock, Search, Filter, X, User, Calendar, FileText, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -150,34 +150,28 @@ export default function PoliciesPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
-        <main className="flex-1 p-8 flex items-center justify-center">
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-        </main>
-      </div>
+        </div>
+      </GlassShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Policies & Renewals</h1>
-            <p className="text-slate-500">Manage care agreements and contract renewals</p>
-          </div>
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            New Policy
-          </button>
-        </div>
-
+    <GlassShell
+      title="Policies & Renewals"
+      subtitle="Manage care agreements and contract renewals"
+      action={
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          New Policy
+        </button>
+      }
+    >
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-slate-200 rounded-xl p-6">
@@ -447,7 +441,6 @@ export default function PoliciesPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </GlassShell>
   );
 }

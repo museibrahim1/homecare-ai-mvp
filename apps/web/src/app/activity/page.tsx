@@ -1,141 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import { Eye, Search, Filter, User, FileText, Calendar, Clock, Activity } from 'lucide-react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
-const mockActivities = [
-  { id: 1, user: 'Sarah Johnson', action: 'Created new client', target: 'Margaret Thompson', time: '2 minutes ago', type: 'create' },
-  { id: 2, user: 'Mike Chen', action: 'Updated care plan', target: 'Robert Williams', time: '15 minutes ago', type: 'update' },
-  { id: 3, user: 'Emily Rodriguez', action: 'Completed assessment', target: 'Eleanor Davis', time: '1 hour ago', type: 'complete' },
-  { id: 4, user: 'David Kim', action: 'Generated contract', target: 'James Wilson', time: '2 hours ago', type: 'generate' },
-  { id: 5, user: 'Sarah Johnson', action: 'Scheduled visit', target: 'Patricia Moore', time: '3 hours ago', type: 'schedule' },
-  { id: 6, user: 'Mike Chen', action: 'Added team member', target: 'Jennifer Lee', time: '5 hours ago', type: 'create' },
-  { id: 7, user: 'Emily Rodriguez', action: 'Updated billing', target: 'Charles Brown', time: 'Yesterday', type: 'update' },
-  { id: 8, user: 'David Kim', action: 'Sent message', target: 'Dorothy Taylor', time: 'Yesterday', type: 'message' },
-];
-
-const typeConfig: Record<string, { color: string; bgColor: string }> = {
-  create: { color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-  update: { color: 'text-blue-600', bgColor: 'bg-blue-50' },
-  complete: { color: 'text-purple-600', bgColor: 'bg-purple-50' },
-  generate: { color: 'text-orange-600', bgColor: 'bg-orange-50' },
-  schedule: { color: 'text-cyan-600', bgColor: 'bg-cyan-50' },
-  message: { color: 'text-pink-600', bgColor: 'bg-pink-500/20' },
-};
-
-export default function ActivityPage() {
-  const [activities] = useState(mockActivities);
-  const [searchQuery, setSearchQuery] = useState('');
-
+// The standalone Activity Monitor has been retired. Redirect to the dashboard.
+export default function ActivityRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard');
+  }, [router]);
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Activity Monitor</h1>
-            <p className="text-slate-500">Track team actions and system activity</p>
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
-            <Clock className="w-5 h-5" />
-            Last 24 hours
-          </button>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="w-5 h-5 text-primary-400" />
-              <span className="text-slate-500 text-sm">Total Actions</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">156</p>
-            <span className="text-xs text-emerald-600">+12% from yesterday</span>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <User className="w-5 h-5 text-blue-600" />
-              <span className="text-slate-500 text-sm">Active Users</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">8</p>
-            <span className="text-xs text-slate-400">out of 12 team members</span>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-5 h-5 text-emerald-600" />
-              <span className="text-slate-500 text-sm">Documents Created</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">23</p>
-            <span className="text-xs text-slate-400">contracts & care plans</span>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-5 h-5 text-purple-600" />
-              <span className="text-slate-500 text-sm">Visits Scheduled</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">45</p>
-            <span className="text-xs text-slate-400">for this week</span>
-          </div>
-        </div>
-
-        {/* Search & Filter */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search activity..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
-            />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
-            <Filter className="w-5 h-5" />
-            Filter
-          </button>
-        </div>
-
-        {/* Activity Feed */}
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-slate-200">
-            <h2 className="font-semibold text-slate-900">Recent Activity</h2>
-          </div>
-          <div className="divide-y divide-slate-200/30">
-            {activities.filter(a => {
-              if (!searchQuery.trim()) return true;
-              const q = searchQuery.toLowerCase();
-              return a.user.toLowerCase().includes(q) || a.action.toLowerCase().includes(q) || a.target.toLowerCase().includes(q) || a.time.toLowerCase().includes(q);
-            }).map(activity => {
-              const config = typeConfig[activity.type];
-              return (
-                <div key={activity.id} className="p-4 hover:bg-slate-50/20 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
-                      <span className={`font-medium text-sm ${config.color}`}>
-                        {activity.user.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-slate-800">
-                        <span className="font-medium">{activity.user}</span>
-                        <span className="text-slate-500"> {activity.action} </span>
-                        <span className="font-medium text-primary-400">{activity.target}</span>
-                      </p>
-                      <span className="text-sm text-slate-400">{activity.time}</span>
-                    </div>
-                    <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors">
-                      <Eye className="w-4 h-4 text-slate-500" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </main>
+    <div className="min-h-screen flex items-center justify-center glass-page">
+      <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
     </div>
   );
 }

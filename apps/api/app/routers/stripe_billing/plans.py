@@ -64,7 +64,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     import json
 
     # One plan, one price: a single $199/month plan with everything included
-    # and a 14 day free trial (granted through the Apple IAP introductory
+    # and a 30 day free trial (granted through the Apple IAP introductory
     # offer on com.palmcareai.app.starter.monthly). The legacy Growth,
     # Professional, and Enterprise tiers are kept as inactive rows so existing
     # subscriptions that still point at them keep resolving, but they no longer

@@ -1,150 +1,128 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Mic, ArrowRight, Shield, Heart, Zap, Globe, Users, Award, Lock } from 'lucide-react';
+import GlassMarketingShell from '@/components/glass/GlassMarketingShell';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-dark-900 landing-dark">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden"><Image src="/hand-icon-white.png" alt="PalmCare AI" width={30} height={30} className="object-contain" /></div>
-            <span className="text-xl font-bold text-white">PalmCare AI</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/#features" className="text-dark-300 hover:text-white transition">Features</Link>
-            <Link href="/#pricing" className="text-dark-300 hover:text-white transition">Pricing</Link>
-            <Link href="/contact" className="text-dark-300 hover:text-white transition">Contact</Link>
-            <Link href="/login" className="text-dark-300 hover:text-white transition">Sign In</Link>
-            <Link href="/register" className="btn-primary py-2 px-5 text-sm">Sign Up Free</Link>
+    <GlassMarketingShell>
+      <main className="max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 pt-10 sm:pt-14 pb-20">
+        <div className="max-w-4xl mx-auto text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full mb-6">
+            <Heart className="w-4 h-4 text-primary-600" />
+            <span className="text-sm text-primary-700 font-medium">About PalmCare AI</span>
           </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#10211F] mb-6 tracking-tight">
+            Built by someone who knows the grind
+          </h1>
+          <p className="text-lg text-[#4B6B66] leading-relaxed max-w-3xl mx-auto">
+            Home care agencies lose hours every week to manual documentation. Assessments are handwritten,
+            contracts are generic, and paperwork delays cost time and money. PalmCare AI cuts that work.
+            One tap. AI handles the rest.
+          </p>
         </div>
-      </nav>
 
-      <main className="pt-28 pb-20">
-        {/* Hero */}
-        <section className="px-6 pb-16">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full mb-6">
-              <Heart className="w-4 h-4 text-primary-400" />
-              <span className="text-sm text-primary-400">About PalmCare AI</span>
-            </div>
-            <h1 className="text-5xl font-bold text-white mb-6">
-              Built by Someone Who Knows
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> the Grind</span>
-            </h1>
-            <p className="text-xl text-dark-300 leading-relaxed max-w-3xl mx-auto">
-              Home care agencies lose hours every week to manual documentation. Assessments are hand-written, contracts are generic, 
-              and paperwork delays cost time and money. PalmCare AI eliminates that entirely. One tap. AI handles the rest.
+        <section className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center mb-20">
+          <div>
+            <h2 className="text-3xl font-bold text-[#10211F] mb-6">Where care meets intelligence</h2>
+            <p className="text-[#4B6B66] mb-4 leading-relaxed">
+              PalmCare AI was founded by Muse Ibrahim, someone who has worked in home care and knows the grind.
+              We chose a different path from legacy software: AI paired with how agencies actually operate.
+            </p>
+            <p className="text-[#4B6B66] mb-4 leading-relaxed">
+              Your caregivers should not need software training. No forms to fill, no clicks to learn. Just
+              record and review. Every feature was designed for caregivers in the field, administrators
+              managing caseloads, and owners scaling their businesses.
+            </p>
+            <p className="text-[#4B6B66] leading-relaxed">
+              Staff records an assessment, AI generates the contract, and the client signs. Often before you
+              leave the chair.
             </p>
           </div>
-        </section>
-
-        {/* Mission */}
-        <section className="px-6 py-16 bg-dark-800">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-6">Where Care Meets Intelligence</h2>
-                <p className="text-dark-300 mb-4 leading-relaxed">
-                  PalmCare AI was founded by Muse Ibrahim — someone who has worked in home care and knows the grind. 
-                  We chose a different path from legacy software: one that combines AI with deep understanding of how agencies actually operate.
-                </p>
-                <p className="text-dark-300 mb-4 leading-relaxed">
-                  Your caregivers shouldn&apos;t need software training. No forms to fill, no clicks to learn — just record and review. 
-                  Every feature was designed for the people who use it: caregivers in the field, administrators managing caseloads, and agency owners scaling their businesses.
-                </p>
-                <p className="text-dark-300 leading-relaxed">
-                  The result is a platform that feels intuitive from day one. Staff records an assessment, AI generates the contract, 
-                  and the client signs — all before you leave the chair.
-                </p>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { icon: Zap, title: 'AI-first', desc: 'Built with AI at the core, not bolted on' },
+              { icon: Heart, title: 'People-first', desc: 'Technology that helps, not complicates' },
+              { icon: Shield, title: 'HIPAA compliant', desc: 'Security and BAA from day one' },
+              { icon: Globe, title: 'Built to scale', desc: 'From a handful of clients to thousands' },
+            ].map((item) => (
+              <div key={item.title} className="glass-card p-5">
+                <item.icon className="w-8 h-8 text-primary-600 mb-3" />
+                <h3 className="text-[#10211F] font-semibold mb-1">{item.title}</h3>
+                <p className="text-[#4B6B66] text-sm">{item.desc}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: Zap, title: 'AI-First', desc: 'Built with AI at the core, not bolted on' },
-                  { icon: Heart, title: 'People-First', desc: 'Technology that empowers, not complicates' },
-                  { icon: Shield, title: 'HIPAA Compliant', desc: 'Enterprise-grade security from day one' },
-                  { icon: Globe, title: 'Built to Scale', desc: 'From 5 clients to 5,000+' },
-                ].map((item, i) => (
-                  <div key={i} className="card p-5">
-                    <item.icon className="w-8 h-8 text-primary-400 mb-3" />
-                    <h3 className="text-white font-semibold mb-1">{item.title}</h3>
-                    <p className="text-dark-400 text-sm">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Why Different */}
-        <section className="px-6 py-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-white mb-12 text-center">Why PalmCare AI is Different</h2>
-            <div className="space-y-8">
-              {[
-                {
-                  icon: Mic,
-                  title: 'Voice-Native Intelligence',
-                  description: 'Other platforms make you type everything. PalmCare AI starts with voice — one tap to start, AI handles the rest. Transcription, data extraction, contract generation, and billing — all from a single recording.',
-                },
-                {
-                  icon: Zap,
-                  title: 'Speed That Matters',
-                  description: 'What used to take 3+ hours of paperwork now takes under 10 minutes. Our agencies report saving 20+ hours per week on administrative tasks, freeing staff to focus on client care and business growth.',
-                },
-                {
-                  icon: Users,
-                  title: 'Built For Care Professionals',
-                  description: 'We didn\'t build a generic business tool and add "home care" to the name. Every field, workflow, and automation was designed specifically for home care agency workflows — from intake assessments to signed contracts.',
-                },
-                {
-                  icon: Award,
-                  title: 'Customer-Obsessed Support',
-                  description: 'We don\'t just sell software. Every customer gets hands-on onboarding, dedicated support, and a team that understands home care. Our average support response time is under 15 minutes.',
-                },
-              ].map((item, i) => (
-                <div key={i} className="flex gap-6 items-start">
-                  <div className="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center shrink-0">
-                    <item.icon className="w-7 h-7 text-primary-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
-                    <p className="text-dark-300 leading-relaxed">{item.description}</p>
-                  </div>
+        <section className="max-w-4xl mx-auto mb-20">
+          <h2 className="text-3xl font-bold text-[#10211F] mb-10 text-center">Why PalmCare AI is different</h2>
+          <div className="space-y-8">
+            {[
+              {
+                icon: Mic,
+                title: 'Voice-native',
+                description:
+                  'Other platforms make you type everything. PalmCare starts with voice. Transcription, extraction, contract generation, and billables from a single recording.',
+              },
+              {
+                icon: Zap,
+                title: 'Minutes, not hours',
+                description:
+                  'Record the visit. PalmCare writes the care plan, the billables, and the contract. Most agencies finish paperwork the same day.',
+              },
+              {
+                icon: Users,
+                title: 'Built for care professionals',
+                description:
+                  'Every field and workflow was designed for home care intake, not a generic CRM with a home care label.',
+              },
+              {
+                icon: Award,
+                title: 'Hands-on support',
+                description:
+                  'Onboarding help, responsive support, and a team that understands home care operations.',
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex gap-5 items-start">
+                <div className="w-12 h-12 bg-primary-500/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <item.icon className="w-6 h-6 text-primary-600" />
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="px-6 py-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/20">
-              <h2 className="text-3xl font-bold text-white mb-4">Ready to Palm It?</h2>
-              <p className="text-xl text-dark-300 mb-8">Book a free 5-minute demo. See how PalmCare AI turns assessments into signed contracts in seconds.</p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 14-Day Free Trial<ArrowRight className="w-5 h-5" /></Link>
+                <div>
+                  <h3 className="text-xl font-semibold text-[#10211F] mb-2">{item.title}</h3>
+                  <p className="text-[#4B6B66] leading-relaxed">{item.description}</p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-dark-700">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-dark-400 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2"><Shield className="w-5 h-5 text-emerald-600" /><span className="text-dark-400 text-sm">HIPAA Compliant</span></div>
-            <div className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-600" /><span className="text-dark-400 text-sm">256-bit Encrypted</span></div>
+        <div className="glass-card p-10 sm:p-12 text-center max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-[#10211F] mb-4">Ready to Palm It?</h2>
+          <p className="text-lg text-[#4B6B66] mb-8">
+            Book a short demo, or start a 30-day free trial in the iOS app and see the pipeline on your own cases.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 py-3 px-7 rounded-full bg-primary-500 text-white font-semibold hover:bg-primary-600"
+            >
+              Start free trial <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/book-demo"
+              className="inline-flex items-center gap-2 py-3 px-7 rounded-full border border-[#10211F18] text-[#10211F] font-semibold hover:bg-white/40"
+            >
+              Book a demo
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-8 text-[#7A8C88] text-sm">
+            <span className="inline-flex items-center gap-2"><Shield className="w-4 h-4" /> HIPAA Compliant</span>
+            <span className="inline-flex items-center gap-2"><Lock className="w-4 h-4" /> Encrypted</span>
           </div>
         </div>
-      </footer>
-    </div>
+      </main>
+    </GlassMarketingShell>
   );
 }

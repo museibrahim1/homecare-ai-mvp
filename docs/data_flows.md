@@ -44,8 +44,9 @@ Cost per assessment: about $0.37. Time: minutes instead of 2 to 3 hours by hand.
 5. **Stays in sync** — renewals, refunds, cancellations arrive as App Store
    Server Notifications V2 (`POST /billing/apple/notifications`).
 
-14-day free trials on Starter and Growth come from Apple introductory offers
-and are mirrored server side (`SubscriptionStatus.TRIAL`).
+30-day free trial on the monthly plan comes from Apple introductory offers
+and is mirrored server side (`SubscriptionStatus.TRIAL`). Web registration alone
+does not unlock assessments.
 
 ## Flow 3: Sign-up and login
 

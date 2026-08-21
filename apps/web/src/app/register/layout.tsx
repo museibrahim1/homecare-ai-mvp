@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Start Your Free Trial',
   description:
-    'Join the pros who Palm It. 14-day free trial, no credit card required. Close faster, document smarter — never lose a client to paperwork again.',
+    'Join the pros who Palm It. Create your account, then start a 30-day free trial in the iOS app via Apple. Auto-charges after the trial unless you cancel.',
   openGraph: {
     title: 'Start Your Free Trial — PalmCare AI',
     description:

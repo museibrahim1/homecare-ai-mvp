@@ -33,9 +33,14 @@ import {
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { stripSeparators } from '@/lib/formatText';
-import Sidebar from '@/components/Sidebar';
+import GlassRail from '@/components/GlassRail';
+import GlassTabs from '@/components/GlassTabs';
 
 const API_BASE = '/api';
+
+/* ─── Glass secondary button (Paper Web Glass) ─── */
+const GLASS_BTN_SECONDARY =
+  'inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-medium text-[#4B6B66] bg-[#FFFFFFB3] border border-[#FFFFFFE0] hover:bg-white hover:text-[#10211F] transition-colors';
 
 interface Client {
   id: string;
@@ -481,7 +486,7 @@ export default function ClientDetailPage() {
   /* ─── Loading / Error states ─── */
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center glass-page">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -489,8 +494,8 @@ export default function ClientDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
+      <div className="flex min-h-screen glass-page">
+        <GlassRail />
         <main className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -503,15 +508,15 @@ export default function ClientDetailPage() {
 
   if (error && !client) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
+      <div className="flex min-h-screen glass-page">
+        <GlassRail />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-slate-900 mb-2">Client Not Found</h2>
             <p className="text-slate-500 mb-6">{error}</p>
-            <button onClick={() => router.push('/clients')} className="btn-primary">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+            <button onClick={() => router.push('/clients')} className="glass-btn-primary mx-auto">
+              <ArrowLeft className="w-4 h-4" />
               Back to Clients
             </button>
           </div>
@@ -531,12 +536,12 @@ export default function ClientDetailPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+    <div className="flex min-h-screen glass-page">
+      <GlassRail />
 
       <main className="flex-1 overflow-auto">
         {/* ─── Top Bar ─── */}
-        <div className="sticky top-0 z-20 bg-white backdrop-blur-sm border-b border-slate-200">
+        <div className="sticky top-0 z-20 bg-[#FFFFFFB8] backdrop-blur-xl border-b border-[#10211F12]">
           <div className="max-w-7xl mx-auto px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -579,7 +584,7 @@ export default function ClientDetailPage() {
                   <>
                     <button
                       onClick={cancelEditing}
-                      className="btn-secondary flex items-center gap-2 text-sm"
+                      className={GLASS_BTN_SECONDARY}
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -587,7 +592,7 @@ export default function ClientDetailPage() {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="btn-primary flex items-center gap-2 text-sm"
+                      className="glass-btn-primary text-sm disabled:opacity-50"
                     >
                       {saving ? (
                         <>
@@ -606,14 +611,14 @@ export default function ClientDetailPage() {
                   <>
                     <button
                       onClick={() => router.push(`/visits?client=${client.id}`)}
-                      className="btn-secondary flex items-center gap-2 text-sm"
+                      className={GLASS_BTN_SECONDARY}
                     >
                       <Plus className="w-4 h-4" />
                       New Assessment
                     </button>
                     <button
                       onClick={startEditing}
-                      className="btn-secondary flex items-center gap-2 text-sm"
+                      className={GLASS_BTN_SECONDARY}
                     >
                       <Edit3 className="w-4 h-4" />
                       Edit
@@ -645,7 +650,7 @@ export default function ClientDetailPage() {
 
         {/* ─── Pipeline Progress Bar ─── */}
         <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="bg-white rounded-2xl p-6 border border-slate-200">
+          <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Client Pipeline</h3>
               {updatingStatus && <Loader2 className="w-4 h-4 animate-spin text-primary-400" />}
@@ -682,21 +687,16 @@ export default function ClientDetailPage() {
 
         {/* ─── Tab Navigation ─── */}
         <div className="max-w-7xl mx-auto px-8">
-          <div className="flex items-center gap-1 border-b border-slate-200">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 -mb-px border-b-2 transition-colors text-sm font-medium ${activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-                {tab.count !== undefined && tab.count > 0 && (
-                  <span className="text-xs bg-slate-100 px-1.5 py-0.5 rounded-full">{tab.count}</span>
-                )}
-              </button>
-            ))}
-          </div>
+          <GlassTabs
+            tabs={tabs.map((tab) => ({
+              key: tab.id,
+              label: tab.label,
+              icon: tab.icon,
+              count: tab.count !== undefined && tab.count > 0 ? tab.count : undefined,
+            }))}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as typeof activeTab)}
+          />
         </div>
 
         {/* ─── Main Content ─── */}
@@ -708,7 +708,7 @@ export default function ClientDetailPage() {
               {/* Left Column */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Contact Info */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Contact Information</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={Phone} label="Primary Phone" value={data.phone} field="phone" isEditing={isEditing} onChange={handleFieldChange} type="tel" placeholder="(555) 123-4567" href={!isEditing && data.phone ? `tel:${data.phone}` : undefined} />
@@ -741,7 +741,7 @@ export default function ClientDetailPage() {
                 </div>
 
                 {/* Personal Details */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Personal Details</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={!isEditing ? User : undefined} label="Preferred Name" value={data.preferred_name} field="preferred_name" isEditing={isEditing} onChange={handleFieldChange} placeholder="Johnny" />
@@ -769,7 +769,7 @@ export default function ClientDetailPage() {
                 </div>
 
                 {/* Insurance */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Insurance</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={!isEditing ? Shield : undefined} label="Provider" value={data.insurance_provider} field="insurance_provider" isEditing={isEditing} onChange={handleFieldChange} placeholder="Blue Cross Blue Shield" />
@@ -783,7 +783,7 @@ export default function ClientDetailPage() {
               {/* Right Column */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Emergency Contacts */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-red-600" />
                     Emergency Contacts
@@ -806,31 +806,31 @@ export default function ClientDetailPage() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {client.emergency_contact_name ? (
-                        <div className="bg-slate-100 rounded-lg p-4">
+                        <div className="bg-white/55 border border-white/60 rounded-xl p-4">
                           <p className="text-xs text-slate-500 mb-1">Primary Contact</p>
                           <p className="font-medium text-slate-800">{client.emergency_contact_name}</p>
                           <p className="text-sm text-slate-600">{client.emergency_contact_relationship || 'Relationship N/A'}</p>
                           {client.emergency_contact_phone && <a href={`tel:${client.emergency_contact_phone}`} className="text-sm text-primary-400 hover:underline mt-1 block">{client.emergency_contact_phone}</a>}
                         </div>
                       ) : (
-                        <div className="bg-slate-100 rounded-lg p-4 text-center"><p className="text-slate-400 text-sm">No primary emergency contact</p></div>
+                        <div className="bg-white/50 border border-white/60 rounded-xl p-4 text-center"><p className="text-slate-400 text-sm">No primary emergency contact</p></div>
                       )}
                       {client.emergency_contact_2_name ? (
-                        <div className="bg-slate-100 rounded-lg p-4">
+                        <div className="bg-white/55 border border-white/60 rounded-xl p-4">
                           <p className="text-xs text-slate-500 mb-1">Secondary Contact</p>
                           <p className="font-medium text-slate-800">{client.emergency_contact_2_name}</p>
                           <p className="text-sm text-slate-600">{client.emergency_contact_2_relationship || 'Relationship N/A'}</p>
                           {client.emergency_contact_2_phone && <a href={`tel:${client.emergency_contact_2_phone}`} className="text-sm text-primary-400 hover:underline mt-1 block">{client.emergency_contact_2_phone}</a>}
                         </div>
                       ) : (
-                        <div className="bg-slate-100 rounded-lg p-4 text-center"><p className="text-slate-400 text-sm">No secondary emergency contact</p></div>
+                        <div className="bg-white/50 border border-white/60 rounded-xl p-4 text-center"><p className="text-slate-400 text-sm">No secondary emergency contact</p></div>
                       )}
                     </div>
                   )}
                 </div>
 
                 {/* Recent Visits (read-only) */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                       <Activity className="w-4 h-4 text-primary-400" />
@@ -849,7 +849,7 @@ export default function ClientDetailPage() {
                   ) : (
                     <div className="space-y-2">
                       {visits.slice(0, 5).map((visit) => (
-                        <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="flex items-center justify-between p-3 bg-slate-100 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group">
+                        <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="flex items-center justify-between p-3 bg-white/50 hover:bg-white/80 border border-white/60 rounded-xl cursor-pointer transition-colors group">
                           <div className="flex items-center gap-3">
                             <div className={`w-2 h-2 rounded-full ${visit.status === 'completed' ? 'bg-green-400' : visit.status === 'processing' ? 'bg-yellow-400 animate-pulse' : visit.status === 'failed' ? 'bg-red-400' : 'bg-dark-400'}`} />
                             <div>
@@ -870,7 +870,7 @@ export default function ClientDetailPage() {
                 </div>
 
                 {/* Notes (editable) */}
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="glass-panel p-5">
                   <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Notes</h3>
                   <EditableTextArea label="" value={data.notes} field="notes" isEditing={isEditing} onChange={handleFieldChange} placeholder="General notes about this client..." rows={4} />
                 </div>
@@ -883,24 +883,24 @@ export default function ClientDetailPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">All Assessments</h2>
-                <button onClick={() => router.push(`/visits?client=${client.id}`)} className="btn-primary flex items-center gap-2 text-sm">
+                <button onClick={() => router.push(`/visits?client=${client.id}`)} className="glass-btn-primary text-sm">
                   <Plus className="w-4 h-4" />
                   New Assessment
                 </button>
               </div>
               {visits.length === 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <div className="glass-panel p-12 text-center">
                   <Activity className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-slate-900 font-semibold mb-2">No assessments</h3>
                   <p className="text-slate-500 text-sm">Start the first assessment for {client.full_name}</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                  <div className="grid grid-cols-5 gap-4 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <div className="glass-panel overflow-hidden">
+                  <div className="grid grid-cols-5 gap-4 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-white/50">
                     <div>Date</div><div>Caregiver</div><div>Status</div><div>Outputs</div><div></div>
                   </div>
                   {visits.map((visit) => (
-                    <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="grid grid-cols-5 gap-4 px-4 py-3 hover:bg-slate-100 cursor-pointer transition-colors border-b border-slate-200 last:border-0">
+                    <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="grid grid-cols-5 gap-4 px-4 py-3 hover:bg-white/60 cursor-pointer transition-colors border-b border-white/50 last:border-0">
                       <div className="text-sm text-slate-500">{new Date(visit.scheduled_date || visit.created_at).toLocaleDateString()}</div>
                       <div className="text-sm text-slate-600">{visit.caregiver_name || '-'}</div>
                       <div>
@@ -928,7 +928,7 @@ export default function ClientDetailPage() {
                 <span className="text-sm text-slate-500">{contracts.length} contract{contracts.length !== 1 ? 's' : ''}</span>
               </div>
               {contracts.length === 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <div className="glass-panel p-12 text-center">
                   <FileSignature className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-slate-900 font-semibold mb-2">No contracts</h3>
                   <p className="text-slate-500 text-sm">Contracts are generated from completed assessments</p>
@@ -936,7 +936,7 @@ export default function ClientDetailPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {contracts.map((contract) => (
-                    <div key={contract.id} className="bg-white rounded-xl border border-slate-200 p-5 hover:border-primary-500/50 transition-colors">
+                    <div key={contract.id} className="glass-panel p-5 hover:border-primary-500/50 transition-colors">
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <h4 className="font-semibold text-slate-900">{contract.title || `Contract #${contract.contract_number || contract.id.slice(0, 8)}`}</h4>
@@ -945,10 +945,10 @@ export default function ClientDetailPage() {
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${contract.status === 'active' ? 'bg-emerald-50 text-emerald-600' : contract.status === 'draft' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>{contract.status}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Hourly Rate</p><p className="text-lg font-bold text-emerald-600">${Number(contract.hourly_rate || 0).toFixed(2)}</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Hours</p><p className="text-lg font-bold text-slate-900">{Number(contract.weekly_hours || 0)} hrs</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Cost</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0)).toFixed(2)}</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Monthly Est.</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0) * 4.33).toFixed(2)}</p></div>
+                        <div className="bg-white/55 border border-white/60 rounded-lg p-3"><p className="text-xs text-slate-500">Hourly Rate</p><p className="text-lg font-bold text-emerald-600">${Number(contract.hourly_rate || 0).toFixed(2)}</p></div>
+                        <div className="bg-white/55 border border-white/60 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Hours</p><p className="text-lg font-bold text-slate-900">{Number(contract.weekly_hours || 0)} hrs</p></div>
+                        <div className="bg-white/55 border border-white/60 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Cost</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0)).toFixed(2)}</p></div>
+                        <div className="bg-white/55 border border-white/60 rounded-lg p-3"><p className="text-xs text-slate-500">Monthly Est.</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0) * 4.33).toFixed(2)}</p></div>
                       </div>
                       {contract.services && contract.services.length > 0 && (
                         <div className="mb-3">
@@ -971,7 +971,7 @@ export default function ClientDetailPage() {
           {activeTab === 'care' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Care Requirements */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <Stethoscope className="w-4 h-4 text-purple-600" />
                   Care Requirements
@@ -1039,7 +1039,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Care Plan */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-600" />
                   Care Plan
@@ -1051,7 +1051,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Scheduling Preferences */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-4 h-4 text-emerald-600" />
                   Scheduling Preferences
@@ -1072,7 +1072,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Physician */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-teal-600" />
                   Physician
@@ -1100,7 +1100,7 @@ export default function ClientDetailPage() {
           {activeTab === 'medical' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Diagnoses */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <Heart className="w-4 h-4 text-red-600" />
                   Diagnoses
@@ -1121,7 +1121,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Allergies */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-orange-600" />
                   Allergies
@@ -1140,7 +1140,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Medications */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <Pill className="w-4 h-4 text-blue-600" />
                   Current Medications
@@ -1149,7 +1149,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Medical Notes */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="glass-panel p-5">
                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                   <FileText className="w-4 h-4 text-purple-600" />
                   Medical Notes
@@ -1162,7 +1162,7 @@ export default function ClientDetailPage() {
 
         {/* ─── Floating Save Bar (visible when editing) ─── */}
         {isEditing && (
-          <div className="sticky bottom-0 z-20 bg-white/95 backdrop-blur-sm border-t border-slate-200">
+          <div className="sticky bottom-0 z-20 bg-[#FFFFFFB8] backdrop-blur-xl border-t border-[#10211F12]">
             <div className="max-w-7xl mx-auto px-8 py-3 flex items-center justify-between">
               <p className="text-sm text-slate-500">
                 <Edit3 className="w-4 h-4 inline mr-1" />
@@ -1172,7 +1172,7 @@ export default function ClientDetailPage() {
                 <button onClick={cancelEditing} className="px-4 py-2 text-slate-500 hover:text-slate-900 transition-colors text-sm">
                   Cancel
                 </button>
-                <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 text-sm">
+                <button onClick={handleSave} disabled={saving} className="glass-btn-primary text-sm disabled:opacity-50">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -1185,8 +1185,8 @@ export default function ClientDetailPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-white rounded-2xl w-full max-w-md p-6 border border-slate-200">
+          <div className="absolute inset-0 bg-[#10211F]/40 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative glass-card w-full max-w-md p-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 className="w-6 h-6 text-red-600" /></div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Client</h3>

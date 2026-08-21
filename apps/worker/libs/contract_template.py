@@ -6,6 +6,7 @@ Supports DOCX templates with placeholder variables.
 """
 
 import os
+import re
 import logging
 from datetime import datetime, date
 from typing import Dict, Any, List, Optional
@@ -32,27 +33,21 @@ Address: {client_address}
 Phone: {client_phone}
 Emergency Contact: {emergency_contact} ({emergency_phone})
 
-================================================================================
 1. SERVICES TO BE PROVIDED
-================================================================================
 
 The following home care services will be provided. Each service includes its
 agreed frequency from the assessment:
 
 {services_list}
 
-================================================================================
 1A. SERVICES NOT INCLUDED (DECLINED)
-================================================================================
 
 The client or authorized representative declined the following services. These
 are not included in this Agreement unless added later in writing:
 
 {declined_services_list}
 
-================================================================================
 2. CARE ASSESSMENT SUMMARY
-================================================================================
 
 Care Need Level: {care_need_level}
 Primary Diagnosis: {primary_diagnosis}
@@ -61,9 +56,7 @@ Secondary Conditions: {secondary_conditions}
 Client Profile:
 {client_profile}
 
-================================================================================
 3. SCHEDULE OF SERVICES
-================================================================================
 
 Overall Frequency: {frequency}
 Days: {schedule_days}
@@ -73,9 +66,7 @@ Hours per Week: {weekly_hours}
 Per-service schedule:
 {per_service_schedule}
 
-================================================================================
 4. SERVICE RATES AND PAYMENT
-================================================================================
 
 Hourly Rate: ${hourly_rate}/hour
 Estimated Weekly Cost: ${weekly_cost}
@@ -83,64 +74,50 @@ Estimated Monthly Cost: ${monthly_cost}
 
 Payment Terms: {payment_terms}
 
-================================================================================
 5. SPECIAL REQUIREMENTS
-================================================================================
 
 {special_requirements}
 
-================================================================================
 6. SAFETY CONSIDERATIONS
-================================================================================
 
 {safety_concerns}
 
-================================================================================
 7. CANCELLATION POLICY
-================================================================================
 
 {cancellation_policy}
 
-================================================================================
 8. TERMS AND CONDITIONS
-================================================================================
 
 {terms_and_conditions}
 
-================================================================================
 9. SIGNATURES
-================================================================================
 
 By signing below, both parties agree to the terms and conditions of this Agreement.
 
 
 Client/Authorized Representative:
 
-Signature: _________________________________ Date: _______________
+Signature: _______________________________  Date: ______________
 
 Printed Name: {client_name}
 
 
 Agency Representative:
 
-Signature: _________________________________ Date: _______________
+Signature: _______________________________  Date: ______________
 
-Printed Name: ________________________________
+Printed Name: _______________________________
 
-Title: ________________________________
+Title: _______________________________
 
 
-================================================================================
 CARE PLAN GOALS
-================================================================================
 
 Short-Term Goals (30 days):
 {short_term_goals}
 
 Long-Term Goals (90+ days):
 {long_term_goals}
-
-================================================================================
 """
 
 
@@ -282,20 +259,49 @@ def format_list(items: List, prefix: str = "• ") -> str:
         elif isinstance(item, dict):
             # Handle object items
             if 'concern' in item:
-                text = item['concern']
-                if item.get('severity'):
-                    text += f" (Severity: {item['severity']})"
+                text = str(item['concern'] or "").strip()
             elif 'name' in item:
-                text = item['name']
+                text = str(item['name'] or "").strip()
             elif 'requirement' in item:
-                text = item['requirement']
+                text = str(item['requirement'] or "").strip()
             else:
                 text = str(item)
-            lines.append(f"{prefix}{text}")
+            # Drop internal metadata like "(Severity: High)" from client-facing copy.
+            text = re.sub(r"\s*\(Severity:\s*[^)]+\)", "", text, flags=re.IGNORECASE).strip()
+            if text:
+                lines.append(f"{prefix}{text}")
         else:
             lines.append(f"{prefix}{str(item)}")
     
-    return "\n".join(lines)
+    return "\n".join(lines) if lines else "None specified"
+
+
+def sanitize_contract_plain_text(text: str) -> str:
+    """Strip ASCII banner lines and severity tags from stored contract bodies."""
+    if not text:
+        return ""
+    cleaned_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped and set(stripped) <= {"=", " "} and len(stripped) >= 4:
+            # Skip pure ==== banner lines (keep signature underscores)
+            continue
+        if stripped and set(stripped) <= {"-", " "} and len(stripped) >= 8:
+            continue
+        line = re.sub(r"\s*\(Severity:\s*[^)]+\)", "", line, flags=re.IGNORECASE)
+        cleaned_lines.append(line.rstrip())
+    # Collapse runs of blank lines left by removed banners
+    out: List[str] = []
+    blank = 0
+    for line in cleaned_lines:
+        if not line.strip():
+            blank += 1
+            if blank <= 1:
+                out.append("")
+            continue
+        blank = 0
+        out.append(line)
+    return "\n".join(out).strip() + ("\n" if out else "")
 
 
 def format_goals(goals: List) -> str:
@@ -488,7 +494,9 @@ def generate_contract_from_template(
     }
     
     # Fill in template
-    contract_text = DEFAULT_CONTRACT_TEMPLATE.format(**template_vars)
+    contract_text = sanitize_contract_plain_text(
+        DEFAULT_CONTRACT_TEMPLATE.format(**template_vars)
+    )
     
     return contract_text
 

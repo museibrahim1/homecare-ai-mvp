@@ -44,7 +44,7 @@ struct TermsPrivacySheet: View {
 
                     termsSection(
                         title: "6. Subscriptions & Billing",
-                        body: "New accounts include a free trial with full access. Subscriptions are sold through Apple In-App Purchase and billed to your Apple ID. Payment, renewals, and cancellations are managed by Apple — you can manage or cancel anytime in Settings → Apple ID → Subscriptions. Prices are shown in the app before purchase."
+                        body: "Access starts with a 30-day free trial through Apple In-App Purchase in the PalmCare app. You must subscribe with your Apple ID (payment method on file) to begin the trial. Unless you cancel at least 24 hours before the trial ends, Apple automatically charges the monthly subscription price and renews until you cancel in Settings → Apple ID → Subscriptions. Prices are shown in the app before purchase."
                     )
 
                     termsSection(

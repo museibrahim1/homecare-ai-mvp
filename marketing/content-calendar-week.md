@@ -4,7 +4,7 @@
 > testimonials. Lead with the agency's real pain (documentation after every visit) and the
 > one-line promise: **record the visit → AI writes the notes, billing & contract.**
 >
-> Primary CTA: 14-day free trial, no credit card. Subscriptions via the PALM iOS app.
+> Primary CTA: 30-day free trial via Apple IAP in the iOS app. Auto-charges after trial unless cancelled.
 > Link in bio / `palmcareai.com`.
 
 ## Audience

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import { FileText, Download, Edit3, Eye, Loader2, Search, Calendar, DollarSign, Clock, User, Filter, RefreshCw, Printer, Mail, AlertCircle, X, Layers } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -203,16 +203,11 @@ export default function ProposalsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Contract Proposals</h1>
-            <p className="text-slate-500">View, edit, and export client service agreements</p>
-          </div>
-          <div className="flex gap-3">
+    <GlassShell
+      title="Contract Proposals"
+      subtitle="View, edit, and export client service agreements"
+      action={
+        <div className="flex gap-3">
             <Link
               href="/contracts/new"
               className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
@@ -227,9 +222,9 @@ export default function ProposalsPage() {
               <FileText className="w-5 h-5" />
               New from Pipeline
             </Link>
-          </div>
         </div>
-
+      }
+    >
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[250px]">
@@ -423,7 +418,6 @@ export default function ProposalsPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </GlassShell>
   );
 }

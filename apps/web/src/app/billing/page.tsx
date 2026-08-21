@@ -9,12 +9,12 @@ import {
   Loader2,
   Zap,
   HardDrive,
+  Users,
   Apple,
   Smartphone,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
+import GlassShell from '@/components/GlassShell';
 
 const API_BASE = '/api';
 
@@ -39,6 +39,22 @@ interface PlanData {
   max_storage_gb: number;
 }
 
+interface SeatData {
+  current_users: number;
+  max_users: number;
+}
+
+interface InvoiceData {
+  id: string;
+  invoice_number: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  invoice_date: string | null;
+  paid_at: string | null;
+  description: string | null;
+}
+
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
   active:    { label: 'Active',    color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
   trial:     { label: 'Free Trial', color: 'text-blue-700',  bg: 'bg-blue-50 border-blue-200',       icon: Clock },
@@ -52,18 +68,34 @@ export default function BillingPage() {
   const { token, isReady } = useRequireAuth();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [plan, setPlan] = useState<PlanData | null>(null);
+  const [seats, setSeats] = useState<SeatData | null>(null);
+  const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
+    const auth = { Authorization: `Bearer ${token}` };
     try {
-      const res = await fetch(`${API_BASE}/billing/subscription`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const [subRes, seatRes, invRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/billing/subscription`, { headers: auth }),
+        fetch(`${API_BASE}/auth/business/team/limits`, { headers: auth }),
+        fetch(`${API_BASE}/billing/invoices`, { headers: auth }),
+      ]);
+
+      if (subRes.status === 'fulfilled' && subRes.value.ok) {
+        const data = await subRes.value.json();
         setSubscription(data.subscription || null);
         setPlan(data.plan || null);
+      }
+      if (seatRes.status === 'fulfilled' && seatRes.value.ok) {
+        const data = await seatRes.value.json();
+        if (typeof data.max_users === 'number' && typeof data.current_users === 'number') {
+          setSeats({ current_users: data.current_users, max_users: data.max_users });
+        }
+      }
+      if (invRes.status === 'fulfilled' && invRes.value.ok) {
+        const data = await invRes.value.json();
+        setInvoices(Array.isArray(data.invoices) ? data.invoices : []);
       }
     } catch {
       // non-fatal: show the "manage in app" guidance regardless
@@ -83,142 +115,295 @@ export default function BillingPage() {
 
   if (!isReady || loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar />
-        <main className="flex-1 min-w-0 flex flex-col">
-          <TopBar />
-          <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
-          </div>
-        </main>
-      </div>
+      <GlassShell title="Billing">
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
+
+  const planCatalog = [
+    {
+      tier: 'starter',
+      name: 'Starter',
+      price: '$199',
+      period: '/mo',
+      blurb: 'For solo owners and small teams getting started.',
+      features: ['15 AI assessments per month', 'Care plans, billables and contracts', '50-state contract rules'],
+    },
+    {
+      tier: 'growth',
+      name: 'Growth',
+      price: '$699',
+      period: '/mo',
+      blurb: 'For growing agencies running weekly intakes.',
+      features: ['40 AI assessments per month', 'Team chat and Gmail sync', 'Priority processing'],
+      highlight: true,
+    },
+    {
+      tier: 'enterprise',
+      name: 'Enterprise',
+      price: '$1,199.99',
+      period: '/mo',
+      blurb: 'For multi-location agencies at scale.',
+      features: ['120 AI assessments per month', 'Unlimited team members', 'Dedicated support'],
+    },
+  ];
+
+  const currentTier = (plan?.tier || '').toLowerCase();
+  const currentName = (plan?.name || '').toLowerCase();
+  const isCurrentPlan = (tier: string) =>
+    currentTier === tier || currentTier === (tier === 'enterprise' ? 'pro' : tier) || currentName.includes(tier);
 
   const status = subscription?.status || 'none';
   const statusInfo = STATUS_CONFIG[status] || STATUS_CONFIG.none;
   const StatusIcon = statusInfo.icon;
 
-  const usagePercent = plan?.max_visits_per_month
-    ? Math.min(100, Math.round(((subscription?.visits_this_month || 0) / plan.max_visits_per_month) * 100))
+  const hasVisitCap = !!plan && plan.max_visits_per_month > 0 && plan.max_visits_per_month < 99999;
+  const usagePercent = hasVisitCap
+    ? Math.min(100, Math.round(((subscription?.visits_this_month || 0) / plan!.max_visits_per_month) * 100))
     : 0;
   const storagePercent = plan?.max_storage_gb
     ? Math.min(100, Math.round(((subscription?.storage_used_mb || 0) / (plan.max_storage_gb * 1024)) * 100))
     : 0;
+  const hasSeatCap = !!seats && seats.max_users > 0 && seats.max_users < 999;
+  const seatPercent = hasSeatCap
+    ? Math.min(100, Math.round((seats!.current_users / seats!.max_users) * 100))
+    : 0;
+
+  const changePlanAction = (
+    <a href="#plans" className="glass-btn-primary" style={{ borderRadius: 22, height: 44 }}>
+      Change plan
+    </a>
+  );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 min-w-0 flex flex-col">
-        <TopBar />
-        <div className="flex-1 p-4 lg:p-8">
-          <div className="max-w-3xl mx-auto space-y-6">
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-slate-900">Subscription</h1>
-              <p className="text-slate-500 text-sm mt-0.5">View your plan and usage. Subscriptions are managed in the PalmCare app.</p>
-            </div>
-
-            {/* Current plan */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <div className="flex items-center justify-between gap-4 mb-5">
-                <div>
-                  <div className="text-sm text-slate-500">Current plan</div>
-                  <div className="text-2xl font-bold text-slate-900 mt-0.5">{plan?.name || 'No active plan'}</div>
-                </div>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium ${statusInfo.bg} ${statusInfo.color}`}>
-                  <StatusIcon className="w-4 h-4" />
-                  {statusInfo.label}
-                </span>
-              </div>
-
-              {subscription && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5 text-sm">
-                  {status === 'trial' && subscription.trial_ends_at && (
-                    <div className="text-slate-600">
-                      <span className="text-slate-400">Trial ends:</span> {formatDate(subscription.trial_ends_at)}
-                    </div>
-                  )}
-                  {subscription.current_period_end && status !== 'trial' && (
-                    <div className="text-slate-600">
-                      <span className="text-slate-400">Renews:</span> {formatDate(subscription.current_period_end)}
-                    </div>
-                  )}
-                  {subscription.cancelled_at && (
-                    <div className="text-slate-600">
-                      <span className="text-slate-400">Cancelled:</span> {formatDate(subscription.cancelled_at)}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Usage meters */}
-              {plan && (
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1.5">
-                      <span className="flex items-center gap-1.5 text-slate-600"><Zap className="w-4 h-4 text-primary-500" /> Assessments this month</span>
-                      <span className="font-medium text-slate-900">
-                        {subscription?.visits_this_month || 0}{plan.max_visits_per_month >= 99999 ? '' : ` / ${plan.max_visits_per_month}`}
-                      </span>
-                    </div>
-                    {plan.max_visits_per_month < 99999 && (
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary-500 rounded-full" style={{ width: `${usagePercent}%` }} />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1.5">
-                      <span className="flex items-center gap-1.5 text-slate-600"><HardDrive className="w-4 h-4 text-primary-500" /> Storage</span>
-                      <span className="font-medium text-slate-900">
-                        {((subscription?.storage_used_mb || 0) / 1024).toFixed(1)} GB / {plan.max_storage_gb} GB
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary-500 rounded-full" style={{ width: `${storagePercent}%` }} />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Manage subscription via Apple */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0">
-                  <Apple className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-slate-900">Manage your subscription in the PalmCare app</h2>
-                  <p className="text-sm text-slate-500 mt-0.5">
-                    Plans, payments, upgrades, and cancellations are handled securely through your Apple ID.
-                  </p>
-                </div>
-              </div>
-
-              <ol className="space-y-3 text-sm text-slate-700">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-600">1</span>
-                  <span>Open the <span className="font-medium">PalmCare AI</span> app on your iPhone or iPad.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-600">2</span>
-                  <span>Go to <span className="font-medium">Settings → Subscription</span> to upgrade, downgrade, or start a plan.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-600">3</span>
-                  <span>To cancel or change billing, open <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>.</span>
-                </li>
-              </ol>
-
-              <div className="mt-5 flex items-center gap-2 text-xs text-slate-400">
-                <Smartphone className="w-4 h-4" />
-                Don&apos;t have the app yet? Search &quot;PalmCare AI&quot; on the App Store.
+    <GlassShell title="Billing" subtitle="Plan, usage, and invoices in one place." action={changePlanAction}>
+      <div className="max-w-4xl w-full space-y-6">
+        {/* Current plan */}
+        <div className="glass-card p-[22px]">
+          <div className="flex items-start justify-between gap-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.08em] text-primary-500">Current plan</div>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[13px] font-medium ${statusInfo.bg} ${statusInfo.color}`}>
+              <StatusIcon className="w-3.5 h-3.5" />
+              {statusInfo.label}
+            </span>
+          </div>
+          <div className="flex items-end justify-between gap-4 mt-2">
+            <div className="flex flex-col gap-1 min-w-0">
+              <div className="text-2xl font-bold tracking-tight text-[#10211F]">{plan?.name || 'No active plan'}</div>
+              <div className="text-[15px] font-medium text-[#4B6B66]">
+                {hasVisitCap
+                  ? `${plan!.max_visits_per_month} assessments / month.`
+                  : plan
+                    ? 'Unlimited assessments.'
+                    : 'Choose a plan below to get started.'}
+                {status === 'trial' && subscription?.trial_ends_at
+                  ? ` Trial ends ${formatDate(subscription.trial_ends_at)}.`
+                  : subscription?.current_period_end && status !== 'trial'
+                    ? ` Renews ${formatDate(subscription.current_period_end)}.`
+                    : ''}
               </div>
             </div>
+            {plan && plan.monthly_price > 0 && (
+              <div className="shrink-0 text-2xl font-bold tracking-tight text-[#10211F]">
+                ${plan.monthly_price % 1 === 0 ? plan.monthly_price.toLocaleString() : plan.monthly_price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                <span className="text-[15px] font-medium text-[#4B6B66]"> / mo</span>
+              </div>
+            )}
           </div>
         </div>
-      </main>
+
+        {/* Usage: assessments, storage, seats */}
+        {(plan || seats) && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {plan && (
+              <>
+                <UsageCard
+                  icon={<Zap className="w-4 h-4 text-primary-500" />}
+                  label="Assessments this month"
+                  value={hasVisitCap
+                    ? `${subscription?.visits_this_month || 0} / ${plan.max_visits_per_month}`
+                    : `${subscription?.visits_this_month || 0}`}
+                  percent={usagePercent}
+                  showBar={hasVisitCap}
+                />
+                <UsageCard
+                  icon={<HardDrive className="w-4 h-4 text-primary-500" />}
+                  label="Storage"
+                  value={`${((subscription?.storage_used_mb || 0) / 1024).toFixed(1)} / ${plan.max_storage_gb} GB`}
+                  percent={storagePercent}
+                  showBar
+                />
+              </>
+            )}
+            {seats && (
+              <UsageCard
+                icon={<Users className="w-4 h-4 text-primary-500" />}
+                label="Team seats"
+                value={hasSeatCap ? `${seats.current_users} / ${seats.max_users}` : `${seats.current_users}`}
+                percent={seatPercent}
+                showBar={hasSeatCap}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Choose a plan */}
+        <div id="plans">
+          <h2 className="text-lg font-bold text-[#10211F] mb-1">Choose a plan</h2>
+          <p className="text-[#4B6B66] text-sm mb-4">Pick the tier that fits your agency. Purchases and changes are completed in the PalmCare app.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {planCatalog.map((p) => {
+              const current = isCurrentPlan(p.tier);
+              return (
+                <div
+                  key={p.tier}
+                  className={`glass-card p-5 flex flex-col ${current || p.highlight ? 'ring-2 ring-primary-500' : ''}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-[13px] font-semibold uppercase tracking-[0.06em] ${current || p.highlight ? 'text-primary-500' : 'text-[#4B6B66]'}`}>{p.name}</span>
+                    {current ? (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-600">Current</span>
+                    ) : p.highlight ? (
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary-50 text-primary-600">Popular</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-[32px] leading-9 font-bold tracking-tight text-[#10211F]">{p.price}</span>
+                    <span className="text-[13px] text-[#4B6B66]">{p.period}</span>
+                  </div>
+                  <p className="text-xs text-[#4B6B66] mb-4">{p.blurb}</p>
+                  <ul className="space-y-2 mb-5 flex-1">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-[#4B6B66]">
+                        <CheckCircle2 className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    disabled={current}
+                    className={`w-full h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
+                      current
+                        ? 'bg-primary-500 text-white cursor-default'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {current ? 'Manage in App Store' : 'Choose in app'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent invoices */}
+        <div>
+          <h2 className="text-lg font-bold text-[#10211F] mb-3">Recent invoices</h2>
+          {invoices.length > 0 ? (
+            <div className="glass-panel p-2 flex flex-col gap-1">
+              {invoices.map((inv) => {
+                const paid = (inv.status || '').toLowerCase() === 'paid';
+                return (
+                  <div key={inv.id} className="flex items-center h-16 px-[18px] rounded-xl gap-4 hover:bg-white/50 transition-colors">
+                    <div className="flex flex-col gap-0.5 grow min-w-0">
+                      <div className="text-[15px] font-semibold leading-[18px] text-[#10211F] truncate">
+                        {inv.invoice_date
+                          ? new Date(inv.invoice_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                          : inv.invoice_number || 'Invoice'}
+                      </div>
+                      {inv.description && (
+                        <div className="text-[13px] font-medium leading-4 text-[#4B6B66] truncate">{inv.description}</div>
+                      )}
+                    </div>
+                    <div className={`shrink-0 text-[13px] font-semibold capitalize ${paid ? 'text-primary-500' : 'text-amber-600'}`}>
+                      {inv.status || '—'}
+                    </div>
+                    <div className="shrink-0 w-[90px] text-right text-[15px] font-semibold text-[#10211F]">
+                      ${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="glass-panel p-8 flex flex-col items-center justify-center text-center gap-1">
+              <div className="text-[15px] font-semibold text-[#10211F]">No invoices yet</div>
+              <p className="text-[13px] text-[#4B6B66] max-w-xs">
+                Invoices appear here after your first payment. Subscriptions purchased in the PalmCare app are billed through your Apple ID.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Manage subscription via Apple */}
+        <div className="glass-card p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-[#10211F] flex items-center justify-center flex-shrink-0">
+              <Apple className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-[#10211F]">Manage your subscription in the PalmCare app</h2>
+              <p className="text-sm text-[#4B6B66] mt-0.5">
+                Plans, payments, upgrades, and cancellations are handled securely through your Apple ID.
+              </p>
+            </div>
+          </div>
+
+          <ol className="space-y-3 text-sm text-[#334155]">
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">1</span>
+              <span>Open the <span className="font-medium">PalmCare AI</span> app on your iPhone or iPad.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">2</span>
+              <span>Go to <span className="font-medium">Settings → Subscription</span> to upgrade, downgrade, or start a plan.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">3</span>
+              <span>To cancel or change billing, open <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>.</span>
+            </li>
+          </ol>
+
+          <div className="mt-5 flex items-center gap-2 text-xs text-[#4B6B66]">
+            <Smartphone className="w-4 h-4" />
+            Don&apos;t have the app yet? Search &quot;PalmCare AI&quot; on the App Store.
+          </div>
+        </div>
+      </div>
+    </GlassShell>
+  );
+}
+
+function UsageCard({
+  icon,
+  label,
+  value,
+  percent,
+  showBar,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  percent: number;
+  showBar: boolean;
+}) {
+  return (
+    <div className="glass-panel p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-[#4B6B66]">
+          {icon}
+          {label}
+        </span>
+        <span className="text-[13px] font-semibold text-[#10211F]">{value}</span>
+      </div>
+      {showBar && (
+        <div className="h-2 rounded-full overflow-hidden bg-slate-100">
+          <div className="h-full rounded-full bg-primary-500" style={{ width: `${percent}%` }} />
+        </div>
+      )}
     </div>
   );
 }

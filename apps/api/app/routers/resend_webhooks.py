@@ -24,6 +24,18 @@ from app.models.sales_lead import SalesLead
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Hot outreach: email Muse immediately when these contacts open or click.
+WATCHED_OUTREACH_EMAILS = {
+    "familylovebehavioral@gmail.com": "Nurdennis Pena / Family Love Behavioral",
+    "info@ednascarehhc.com": "Wanda / Edna's Care",
+    "kenatriplett@accentcare.com": "Kena / AccentCare",
+}
+ENGAGEMENT_ALERT_TO = [
+    e.strip()
+    for e in (os.getenv("ADMIN_NOTIFICATION_EMAILS") or os.getenv("ADMIN_NOTIFICATION_EMAIL") or "museibrahim@palmtai.com").split(",")
+    if e.strip()
+]
+
 
 def _verify_resend_signature(
     raw_body: bytes,
@@ -80,6 +92,59 @@ def _find_lead_by_email(db, to_email: str):
     ).first()
 
 
+def _alert_muse_engagement(
+    *,
+    to_email: str,
+    label: str,
+    event_type: str,
+    subject: str,
+    email_id: str,
+    click_link: str = "",
+) -> None:
+    """Fire-and-forget Resend alert when a watched outreach email is opened/clicked."""
+    import requests as _requests
+
+    api_key = os.getenv("RESEND_API_KEY", "")
+    if not api_key or not ENGAGEMENT_ALERT_TO:
+        return
+
+    kind = "OPENED" if event_type == "email.opened" else "CLICKED"
+    click_row = (
+        f'<p style="margin:0 0 4px;color:#334155;"><strong>Link:</strong> {click_link}</p>'
+        if click_link
+        else ""
+    )
+    html = f"""
+    <div style="font-family:-apple-system,sans-serif;max-width:560px;">
+      <div style="background:#ecfdf5;border:1px solid #99f6e4;border-radius:12px;padding:20px;">
+        <p style="margin:0 0 8px;font-size:18px;font-weight:700;color:#0f766e;">
+          Outreach email {kind}
+        </p>
+        <p style="margin:0 0 4px;color:#334155;"><strong>Who:</strong> {label}</p>
+        <p style="margin:0 0 4px;color:#334155;"><strong>Email:</strong> {to_email}</p>
+        <p style="margin:0 0 4px;color:#334155;"><strong>Subject:</strong> {subject}</p>
+        {click_row}
+        <p style="margin:0;color:#64748b;font-size:13px;">Resend id: {email_id}</p>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin:12px 0 0;">
+        Note: open pixels can fire from Gmail prefetch. Clicks are the stronger read signal.
+      </p>
+    </div>
+    """
+    _requests.post(
+        "https://api.resend.com/emails",
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        json={
+            "from": "PalmCare Tracking <sales@send.palmtai.com>",
+            "to": ENGAGEMENT_ALERT_TO,
+            "reply_to": "sales@palmtai.com",
+            "subject": f"[Engagement] {label} {kind.lower()}",
+            "html": html,
+        },
+        timeout=15,
+    )
+
+
 @router.post("/resend")
 async def resend_webhook(request: Request):
     """Handle Resend webhook events for email tracking.
@@ -126,6 +191,27 @@ async def resend_webhook(request: Request):
 
     to_email = to_list[0] if isinstance(to_list, list) else to_list
     now = datetime.now(timezone.utc)
+    tags = data.get("tags") or {}
+    click_link = (data.get("click") or {}).get("link") or ""
+
+    # Immediate Muse alert for watched agency outreach (open / click).
+    if event_type in ("email.opened", "email.clicked"):
+        watched_label = WATCHED_OUTREACH_EMAILS.get(str(to_email).lower())
+        campaign = ""
+        if isinstance(tags, dict):
+            campaign = str(tags.get("campaign") or "")
+        if watched_label or campaign == "platform_info":
+            try:
+                _alert_muse_engagement(
+                    to_email=str(to_email),
+                    label=watched_label or campaign or "platform_info",
+                    event_type=event_type,
+                    subject=subject,
+                    email_id=email_id,
+                    click_link=click_link,
+                )
+            except Exception as alert_err:
+                logger.warning(f"Engagement alert failed: {alert_err}")
 
     db = SessionLocal()
     try:
@@ -156,6 +242,11 @@ async def resend_webhook(request: Request):
                 inv.updated_at = now
                 logger.info(f"Investor email clicked: {inv.fund_name} ({to_email})")
 
+            if lead:
+                lead.email_open_count = (getattr(lead, "email_open_count", 0) or 0) + 1
+                lead.last_email_opened_at = now
+                lead.updated_at = now
+                logger.info(f"Lead email clicked: {lead.provider_name} ({to_email})")
         elif event_type == "email.bounced":
             if inv:
                 log_entry = {

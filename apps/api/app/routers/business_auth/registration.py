@@ -180,26 +180,9 @@ async def register_business(
     except Exception as e:
         logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
     
-    # Create the 14-day trial subscription. There is a single plan now
-    # (the STARTER tier, $199/month), so every new agency starts there.
-    try:
-        from app.models.subscription import Plan, Subscription, SubscriptionStatus
-        plan = db.query(Plan).filter(Plan.tier == "STARTER", Plan.is_active.is_(True)).first() or \
-            db.query(Plan).filter(Plan.is_active.is_(True)).order_by(Plan.monthly_price).first()
-        if plan:
-            trial_end = datetime.now(timezone.utc) + timedelta(days=14)
-            db.add(Subscription(
-                business_id=business.id,
-                plan_id=plan.id,
-                status=SubscriptionStatus.TRIAL,
-                billing_cycle="monthly",
-                trial_ends_at=trial_end,
-                current_period_start=datetime.now(timezone.utc),
-                current_period_end=trial_end,
-            ))
-    except Exception as e:
-        logger.warning(f"Could not auto-create trial subscription: {e}")
-
+    # Create the subscription only after Apple IAP (trial or paid). Registration
+    # alone does not unlock assessments — see docs/SUBSCRIPTION_TRIAL_POLICY.md.
+    # Legacy path kept for ops tooling that still seeds trial rows intentionally.
     signup_source = getattr(registration, "signup_source", None) or "direct"
     referral_source = getattr(registration, "referral_source", None) or "not_answered"
     attribution = getattr(registration, "attribution", None) or {}
@@ -286,6 +269,35 @@ async def register_business(
             attribution=attribution,
             selected_plan=registration.selected_plan or "starter",
         )
+        # Extra ping when a watched outreach contact signs up (or used platform_info UTMs).
+        watched = {
+            "familylovebehavioral@gmail.com": "Nurdennis / Family Love Behavioral",
+            "info@ednascarehhc.com": "Wanda / Edna's Care",
+            "kenatriplett@accentcare.com": "Kena / AccentCare",
+        }
+        last = (attribution or {}).get("last_touch") or {}
+        first = (attribution or {}).get("first_touch") or {}
+        campaign = (last.get("utm_campaign") or first.get("utm_campaign") or "").lower()
+        watch_label = watched.get(owner_email.lower())
+        if watch_label or campaign == "platform_info":
+            extra_to = os.getenv("ADMIN_NOTIFICATION_EMAILS") or "museibrahim@palmtai.com,musajama89@gmail.com"
+            for ae in [e.strip() for e in extra_to.split(",") if e.strip()]:
+                if ae.lower() == admin_email.lower():
+                    continue
+                try:
+                    email_service.send_admin_new_registration(
+                        admin_email=ae,
+                        business_name=f"[WATCHED] {agency_name}",
+                        business_id=str(business.id),
+                        owner_name=registration.owner_name.strip(),
+                        owner_email=owner_email,
+                        signup_source=f"{signup_source or 'unknown'} | {watch_label or campaign}",
+                        referral_source=referral_source,
+                        attribution=attribution,
+                        selected_plan=registration.selected_plan or "starter",
+                    )
+                except Exception:
+                    pass
     except Exception:
         pass
 

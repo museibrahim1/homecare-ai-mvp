@@ -60,10 +60,12 @@ class Settings(BaseSettings):
     deepgram_api_key: str = ""
     openai_api_key: str = ""
 
-    # TestFlight/beta: every account gets full access with no assessment or
-    # team-size limits. Pricing/limits will be set from real usage data after
-    # the beta. Flip BETA_FREE_ACCESS=false when billing goes live.
-    beta_free_access: bool = True
+    # When false, access requires an Apple subscription (trial or paid).
+    # Flip BETA_FREE_ACCESS=true only for temporary staging / demo overrides.
+    beta_free_access: bool = False
+
+    # Apple introductory free-trial length (must match App Store Connect).
+    apple_trial_days: int = 30
     
     # Google Calendar / Gmail OAuth (not identity login)
     google_client_id: str = ""

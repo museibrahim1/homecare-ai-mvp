@@ -313,7 +313,7 @@ export function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' 
   };
   
   return (
-    <div className={`${sizeClasses[size]} rounded-full ${colors[colorIndex]} flex items-center justify-center font-semibold text-slate-900`}>
+    <div className={`${sizeClasses[size]} rounded-full ${colors[colorIndex]} flex items-center justify-center font-bold text-white`}>
       {initials}
     </div>
   );
@@ -367,6 +367,18 @@ export function InsuranceBadge({ client }: { client: Client }) {
 }
 
 // Grouped Client Row Component
+const ROW_BAR: Record<string, string> = {
+  intake: '#3B82F6',
+  assessment: '#A855F7',
+  pending: '#EAB308',
+  proposal: '#F97316',
+  active: '#10B981',
+  assigned: '#0D9488',
+  follow_up: '#8B5CF6',
+  inactive: '#94A3B8',
+  discharged: '#EF4444',
+};
+
 export function ClientRow({ 
   client, 
   onClick,
@@ -379,50 +391,61 @@ export function ClientRow({
   isConfirmingDelete?: boolean;
 }) {
   const status = client.status || 'active';
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+  const bar = ROW_BAR[status] || ROW_BAR.active;
+  const insuranceLabel = client.medicaid_id
+    ? 'Medicaid'
+    : client.medicare_id
+      ? 'Medicare'
+      : client.insurance_provider
+        ? 'Private'
+        : 'No insurance';
   
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 cursor-pointer transition-all border-l-4 ${config.borderColor} group ${isConfirmingDelete ? 'bg-red-50' : ''}`}
+      className={`flex items-center h-16 shrink-0 pr-[18px] rounded-[14px] overflow-hidden gap-3 bg-[#FFFFFFB8] border border-[#FFFFFFE0] shadow-[0_8px_20px_#0D948814] cursor-pointer group transition-opacity hover:opacity-95 ${
+        isConfirmingDelete ? 'ring-1 ring-red-300' : ''
+      }`}
     >
-      <ClientAvatar name={client.full_name} />
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium text-slate-900 truncate">{client.full_name}</p>
-          <InsuranceBadge client={client} />
+      <div className="w-1 self-stretch shrink-0" style={{ background: bar }} />
+      <div className="flex items-center w-[min(304px,32%)] shrink-0 gap-3 min-w-0">
+        <ClientAvatar name={client.full_name} size="sm" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <p className="text-sm font-semibold leading-[18px] text-[#10211F] truncate">{client.full_name}</p>
+          <p className="text-xs font-medium leading-4 text-[#64748B] truncate">{insuranceLabel}</p>
         </div>
       </div>
       
-      <StatusBadge status={status} />
-      
-      <div className="w-32 text-sm text-slate-500">
-        {client.phone || '-'}
+      <div className="w-[140px] shrink-0">
+        <StatusBadge status={status} />
       </div>
       
-      <div className="w-36 text-sm text-slate-500 truncate">
+      <div className="w-[140px] shrink-0 text-[13px] font-medium leading-4 text-[#4B6B66]">
+        {client.phone || '—'}
+      </div>
+      
+      <div className="grow min-w-0 text-[13px] font-medium leading-4 text-[#4B6B66] truncate">
         {client.primary_diagnosis || 'General Care'}
       </div>
       
       {isConfirmingDelete ? (
         <button
           onClick={onDelete}
-          className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all animate-pulse"
+          className="shrink-0 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all animate-pulse"
         >
           Confirm?
         </button>
       ) : (
         <button
           onClick={onDelete}
-          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+          className="shrink-0 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
           title="Delete client"
         >
           <Trash2 className="w-4 h-4" />
         </button>
       )}
       
-      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="w-4 h-4 shrink-0 text-[#CBD5E1] group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
     </div>
   );
 }

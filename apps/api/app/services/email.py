@@ -395,11 +395,13 @@ class EmailService:
         brochure = _brochure_attachment()
         return self._send_glass(
             to=business_email,
-            subject=f"Welcome to {BRAND}. Your trial is live",
+            subject=f"Welcome to {BRAND}. Subscribe in the app to start your trial",
             title="Welcome aboard",
             body_html=(
-                f"Hi {business_name}. Your 14-day trial is live. "
-                "Record a visit, review the docs, and send the agreement when you're ready."
+                f"Hi {business_name}. Your account is ready. "
+                "Open the PalmCare iOS app, choose the plan, and start your 30-day free trial "
+                "through Apple. Payment is on file with Apple. Unless you cancel before the trial ends, "
+                "Apple will charge your Apple ID for the monthly plan and renew automatically."
             ),
             cta_label="Open PalmCare",
             cta_url=f"{self.app_url}/login",

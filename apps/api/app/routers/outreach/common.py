@@ -182,7 +182,7 @@ AGENCY_TEMPLATES = [
             "PALM records the visit on iPhone and writes the paperwork from that conversation. "
             "Your assessor reviews once. The family can sign the same day.",
         ],
-        "Free for 14 days. No credit card to start.",
+        "30 days free via Apple. Starts when you subscribe in the iOS app.",
         bullets=[
             "One recording becomes care plan, billables, notes, and contract",
             "Built for home care agencies, not generic AI chat",
@@ -198,7 +198,7 @@ AGENCY_TEMPLATES = [
             "record the assessment during the visit. Review the care plan and contract before you leave.",
             "Office and field stay on the same packet. No overnight retype.",
         ],
-        "50-state rules built in. Free for 14 days.",
+        "50-state rules built in. 30-day trial via Apple.",
         bullets=[
             "Voice assessment on the phone in the home",
             "Four documents from one recording",

@@ -22,7 +22,7 @@ Covers "home care agency" (home + care from title + agency), caregiver roles
 transcription, scheduling).
 
 ## Promotional Text (170 chars, updatable without release)
-"Record the visit. PALM writes the transcript, care notes, billables, and a ready to sign service contract in minutes. Start your 14 day free trial."
+"Record the visit. PALM writes the transcript, care notes, billables, and a ready to sign service contract in minutes. Start your 30 day free trial via Apple."
 
 ## Category
 Primary: **Medical**

@@ -12,35 +12,49 @@ import {
   LayoutGrid,
   List,
   BarChart3,
-  Link2,
   X,
   Loader2,
   Filter,
   MoreHorizontal,
   Activity,
   Trash2,
-  Building2,
-  Shield,
   FileSpreadsheet,
   UserPlus,
   Check
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
 import ClientModal from '@/components/ClientModal';
 import PalmAgent from '@/components/PalmAgent';
+import GlassShell from '@/components/GlassShell';
+import GlassTabs from '@/components/GlassTabs';
+import LeadsPanel from '@/components/panels/LeadsPanel';
+import AssessmentsPanel from '@/components/panels/AssessmentsPanel';
+import CareTrackerPanel from '@/components/panels/CareTrackerPanel';
 
 import { Client, ViewMode, InsuranceFilter } from './types';
 import { API_BASE, STATUS_CONFIG, CARE_SPECIALTY_OPTIONS, PRIORITY_OPTIONS } from './constants';
 import { QuickAddModal, ClientAvatar, StatusBadge, InsuranceBadge, ClientRow } from './components';
+
+function GlassBoardHeader() {
+  return (
+    <div className="flex items-center h-7 px-[18px] gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+      <div className="w-1 shrink-0" />
+      <div className="w-[min(304px,32%)] shrink-0">Client</div>
+      <div className="w-[140px] shrink-0">Visit Status</div>
+      <div className="w-[140px] shrink-0">Phone</div>
+      <div className="grow">Care Specialty</div>
+      <div className="w-4 shrink-0" />
+    </div>
+  );
+}
 
 export default function ClientsPage() {
   const router = useRouter();
   const { token, isReady } = useRequireAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<'clients' | 'leads' | 'assessments' | 'care'>('clients');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [insuranceFilter, setInsuranceFilter] = useState<InsuranceFilter>('all');
@@ -76,6 +90,23 @@ export default function ClientsPage() {
       loadClients();
     }
   }, [token]);
+
+  // Read the active section from the URL so deep links like ?section=care work
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+    if (section === 'leads' || section === 'assessments' || section === 'care' || section === 'clients') {
+      setActiveSection(section);
+    }
+  }, []);
+
+  const handleSectionChange = (key: string) => {
+    const section = (['leads', 'assessments', 'care'].includes(key) ? key : 'clients') as typeof activeSection;
+    setActiveSection(section);
+    const params = new URLSearchParams(window.location.search);
+    params.set('section', section);
+    router.replace(`/clients?${params.toString()}`);
+  };
 
   const loadClients = async () => {
     try {
@@ -306,213 +337,180 @@ export default function ClientsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center glass-page">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <main className="flex-1 min-w-0 flex flex-col">
-        <TopBar />
-        <div className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-1">Clients</h1>
-              <p className="text-slate-500">Manage your client pipeline</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => router.push('/integrations')}
-                className="btn-secondary flex items-center gap-2 text-sm"
+    <>
+    <GlassShell
+      title="Clients"
+      subtitle="Board, leads, assessments, and care in one place."
+      action={
+        activeSection === 'clients' ? (
+          <div className="flex items-center gap-3">
+            <div className="relative" ref={plusMenuRef}>
+              <button
+                type="button"
+                onClick={() => setShowPlusMenu(!showPlusMenu)}
+                className="p-2.5 text-[#64748B] hover:text-[#10211F] glass-panel rounded-xl transition-colors"
               >
-                <Link2 className="w-4 h-4" />
-                Integrate
+                <MoreHorizontal className="w-5 h-5" />
               </button>
-              <div className="relative" ref={plusMenuRef}>
-                <button 
-                  onClick={() => setShowPlusMenu(!showPlusMenu)}
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
-                {showPlusMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden">
-                    <button
-                      onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                    >
-                      <UserPlus className="w-4 h-4 text-primary-500" />
-                      Add New Client
-                    </button>
-                    <button
-                      onClick={() => { setShowPlusMenu(false); csvInputRef.current?.click(); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                    >
-                      <FileSpreadsheet className="w-4 h-4 text-green-500" />
-                      {csvImporting ? 'Importing...' : 'Import from CSV'}
-                    </button>
-                  </div>
-                )}
-              </div>
+              {showPlusMenu && (
+                <div className="absolute top-full right-0 mt-2 w-52 glass-panel z-50 py-1.5 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-[#4B6B66] hover:bg-white/60 hover:text-[#10211F] transition-colors"
+                  >
+                    <UserPlus className="w-4 h-4 text-primary-500" />
+                    Add New Client
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowPlusMenu(false); csvInputRef.current?.click(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-[#4B6B66] hover:bg-white/60 hover:text-[#10211F] transition-colors"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-green-500" />
+                    {csvImporting ? 'Importing...' : 'Import from CSV'}
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-
-          {/* Insurance Type Filter Tabs */}
-          <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-4">
             <button
-              onClick={() => setInsuranceFilter('all')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                insuranceFilter === 'all' 
-                  ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
+              type="button"
+              onClick={() => setQuickAddOpen(true)}
+              className="glass-btn-primary"
+              data-testid="open-quick-add-client"
             >
-              <Users className="w-4 h-4" />
-              All Clients
-              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{clients.length}</span>
-            </button>
-            <button
-              onClick={() => setInsuranceFilter('medicaid')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                insuranceFilter === 'medicaid' 
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <Building2 className="w-4 h-4" />
-              Medicaid
-              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{medicaidCount}</span>
-            </button>
-            <button
-              onClick={() => setInsuranceFilter('medicare')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                insuranceFilter === 'medicare' 
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Medicare
-              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{medicareCount}</span>
-            </button>
-            <button
-              onClick={() => setInsuranceFilter('private')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                insuranceFilter === 'private' 
-                  ? 'bg-purple-50 text-purple-700 border border-purple-200' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <Heart className="w-4 h-4" />
-              Private Insurance
-              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{privateCount}</span>
+              <Plus className="w-4 h-4" />
+              Add client
             </button>
           </div>
-
-          {/* View Tabs & Search */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === 'table' 
-                    ? 'bg-white text-slate-800 shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <List className="w-4 h-4" />
-                Main table
-              </button>
-              <button
-                onClick={() => setViewMode('pipeline')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === 'pipeline' 
-                    ? 'bg-white text-slate-800 shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <LayoutGrid className="w-4 h-4" />
-                Pipeline
-              </button>
-              <button
-                onClick={() => setViewMode('forecast')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === 'forecast' 
-                    ? 'bg-white text-slate-800 shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                Forecast
-              </button>
-              <button
-                onClick={() => setQuickAddOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
-                title="Add new client"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search clients..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
+        ) : undefined
+      }
+    >
+          {activeSection === 'leads' ? (
+            <>
+              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+                <GlassTabs
+                  tabs={[
+                    { key: 'clients', label: 'Clients', icon: Users },
+                    { key: 'leads', label: 'Leads', icon: UserPlus },
+                    { key: 'assessments', label: 'Assessments', icon: BarChart3 },
+                    { key: 'care', label: 'Care Tracker', icon: Activity },
+                  ]}
+                  active={activeSection}
+                  onChange={handleSectionChange}
+                  variant="toolbar"
                 />
               </div>
-              <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600">
-                <Filter className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={() => setQuickAddOpen(true)}
-                className="btn-primary flex items-center gap-2 py-2"
-                data-testid="open-quick-add-client"
+              <LeadsPanel />
+            </>
+          ) : activeSection === 'assessments' ? (
+            <>
+              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+                <GlassTabs
+                  tabs={[
+                    { key: 'clients', label: 'Clients', icon: Users },
+                    { key: 'leads', label: 'Leads', icon: UserPlus },
+                    { key: 'assessments', label: 'Assessments', icon: BarChart3 },
+                    { key: 'care', label: 'Care Tracker', icon: Activity },
+                  ]}
+                  active={activeSection}
+                  onChange={handleSectionChange}
+                  variant="toolbar"
+                />
+              </div>
+              <AssessmentsPanel />
+            </>
+          ) : activeSection === 'care' ? (
+            <>
+              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+                <GlassTabs
+                  tabs={[
+                    { key: 'clients', label: 'Clients', icon: Users },
+                    { key: 'leads', label: 'Leads', icon: UserPlus },
+                    { key: 'assessments', label: 'Assessments', icon: BarChart3 },
+                    { key: 'care', label: 'Care Tracker', icon: Activity },
+                  ]}
+                  active={activeSection}
+                  onChange={handleSectionChange}
+                  variant="toolbar"
+                />
+              </div>
+              <CareTrackerPanel />
+            </>
+          ) : (
+          <>
+          {/* Insurance pills — Paper order: under header, above toolbar */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {(
+              [
+                { key: 'all' as const, label: 'All Clients', count: clients.length },
+                { key: 'medicaid' as const, label: 'Medicaid', count: medicaidCount },
+                { key: 'medicare' as const, label: 'Medicare', count: medicareCount },
+                { key: 'private' as const, label: 'Private Insurance', count: privateCount },
+              ]
+            ).map((pill) => (
+              <button
+                key={pill.key}
+                type="button"
+                onClick={() => setInsuranceFilter(pill.key)}
+                className={`glass-pill ${insuranceFilter === pill.key ? 'glass-pill-active' : ''}`}
               >
-                <Plus className="w-4 h-4" />
-                Add Client
+                {pill.label}
+                <span className="ml-1.5 text-[11px] opacity-70">{pill.count}</span>
               </button>
+            ))}
+          </div>
+
+          {/* Paper glass toolbar: section tabs + search */}
+          <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+            <GlassTabs
+              tabs={[
+                { key: 'clients', label: 'Clients', icon: Users },
+                { key: 'leads', label: 'Leads', icon: UserPlus },
+                { key: 'assessments', label: 'Assessments', icon: BarChart3 },
+                { key: 'care', label: 'Care Tracker', icon: Activity },
+              ]}
+              active={activeSection}
+              onChange={handleSectionChange}
+              variant="toolbar"
+            />
+            <div className="relative flex-1 min-w-[180px] max-w-xs ml-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+              <input
+                type="text"
+                placeholder="Search clients..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-9 pl-9 pr-3 bg-white/70 border border-white rounded-xl text-[#10211F] text-sm placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              />
             </div>
           </div>
 
-          {/* Main Content */}
+          {/* Main Content — Paper Clients board (grouped rows; no Main table / Pipeline / Forecast switcher) */}
           {loading ? (
-            <div className="card p-12 text-center">
+            <div className="glass-panel p-12 text-center">
               <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-slate-500">Loading clients...</p>
+              <p className="text-[#64748B]">Loading clients...</p>
             </div>
           ) : viewMode === 'table' ? (
             /* Table View - Grouped by Status */
-            <div className="space-y-8">
+            <div className="flex flex-col gap-5">
               {/* Intake Queue Section */}
               {intakeClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-teal-700">Intake queue</h2>
-                    <span className="text-sm text-slate-500">({intakeClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#0D9488]">Intake queue</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({intakeClients.length})</span>
                   </div>
-                  
-                  {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <GlassBoardHeader />
+                  <div className="flex flex-col gap-2">
                     {intakeClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -528,23 +526,13 @@ export default function ClientsPage() {
 
               {/* Assessment Section */}
               {assessmentClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-purple-700">In Assessment</h2>
-                    <span className="text-sm text-slate-500">({assessmentClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#7C3AED]">In Assessment</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({assessmentClients.length})</span>
                   </div>
-                  
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <GlassBoardHeader />
+                  <div className="flex flex-col gap-2">
                     {assessmentClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -560,24 +548,13 @@ export default function ClientsPage() {
 
               {/* Proposal Sent Section */}
               {proposalClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-orange-700">Awaiting signature</h2>
-                    <span className="text-sm text-slate-500">({proposalClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#EA580C]">Awaiting signature</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({proposalClients.length})</span>
                   </div>
-                  
-                  {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <GlassBoardHeader />
+                  <div className="flex flex-col gap-2">
                     {proposalClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -593,24 +570,13 @@ export default function ClientsPage() {
 
               {/* Assigned to Care Team Section */}
               {assignedClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-emerald-700">Active clients</h2>
-                    <span className="text-sm text-slate-500">({assignedClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#059669]">Active clients</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({assignedClients.length})</span>
                   </div>
-                  
-                  {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <GlassBoardHeader />
+                  <div className="flex flex-col gap-2">
                     {assignedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -626,23 +592,13 @@ export default function ClientsPage() {
 
               {/* Follow-up Section */}
               {followUpClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-purple-700">Follow-up required</h2>
-                    <span className="text-sm text-slate-500">({followUpClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#7C3AED]">Follow-up required</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({followUpClients.length})</span>
                   </div>
-                  
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <GlassBoardHeader />
+                  <div className="flex flex-col gap-2">
                     {followUpClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -658,23 +614,12 @@ export default function ClientsPage() {
 
               {/* Ungrouped Clients (catch-all for unexpected statuses) */}
               {ungroupedClients.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-slate-600">Other Clients</h2>
-                    <span className="text-sm text-slate-500">({ungroupedClients.length})</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h2 className="text-sm font-bold leading-[18px] text-[#64748B]">Other Clients</h2>
+                    <span className="text-xs font-medium text-[#94A3B8]">({ungroupedClients.length})</span>
                   </div>
-                  
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <div className="w-10" />
-                    <div className="flex-1">Client</div>
-                    <div className="w-28">Visit status</div>
-                    <div className="w-32">Phone</div>
-                    <div className="w-36">Care specialty</div>
-                    <div className="w-8" />
-                    <div className="w-4" />
-                  </div>
-
-                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
+                  <div className="flex flex-col gap-2">
                     {ungroupedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -690,19 +635,19 @@ export default function ClientsPage() {
 
               {/* Empty State */}
               {filteredClients.length === 0 && (
-                <div className="card p-12 text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-slate-400" />
+                <div className="glass-panel p-12 text-center">
+                  <div className="w-16 h-16 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-[#94A3B8]" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  <h3 className="text-lg font-semibold text-[#10211F] mb-2">
                     {searchQuery ? 'No clients found' : 'No clients yet'}
                   </h3>
-                  <p className="text-slate-400 mb-4">
+                  <p className="text-[#64748B] mb-4">
                     {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
                   </p>
                   {!searchQuery && (
-                    <button onClick={() => setQuickAddOpen(true)} className="btn-primary">
-                      <Plus className="w-4 h-4 mr-2" />
+                    <button type="button" onClick={() => setQuickAddOpen(true)} className="glass-btn-primary mx-auto">
+                      <Plus className="w-4 h-4" />
                       Add Client
                     </button>
                   )}
@@ -903,8 +848,9 @@ export default function ClientsPage() {
               </div>
             </div>
           )}
-        </div>
-      </main>
+          </>
+          )}
+    </GlassShell>
 
       {/* Full Client Modal */}
       <ClientModal
@@ -954,6 +900,6 @@ export default function ClientsPage() {
       )}
 
       <PalmAgent />
-    </div>
+    </>
   );
 }

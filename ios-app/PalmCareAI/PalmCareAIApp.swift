@@ -85,7 +85,7 @@ struct PalmCareAIApp: App {
                 }
             }
             .sheet(isPresented: $showAuthPaywall) {
-                PaywallView(isRequired: false, allowsNotNow: true)
+                PaywallView(isRequired: true, allowsNotNow: false)
                     .environmentObject(api)
             }
             .onChange(of: api.needsOnboarding) { needs in

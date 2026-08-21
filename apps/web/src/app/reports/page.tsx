@@ -18,7 +18,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 
 const API_BASE = '/api';
 
@@ -142,9 +142,11 @@ export default function ReportsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
 
@@ -532,19 +534,8 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Reports</h1>
-              <p className="text-slate-500">Generate and export reports</p>
-            </div>
-          </div>
-
+    <GlassShell title="Reports" subtitle="Generate and export reports">
+        <div className="max-w-6xl mx-auto w-full">
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
@@ -716,7 +707,6 @@ export default function ReportsPage() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </GlassShell>
   );
 }

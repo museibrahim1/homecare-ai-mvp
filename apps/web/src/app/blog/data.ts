@@ -362,7 +362,7 @@ PandaDoc is not specific to home care, but plenty of agencies use it for proposa
 2. **Home health or home care?** Medicare-certified home health needs OASIS tools. Non-medical home care needs assessment-to-contract tools.
 3. **Trial with a real client, not a demo script.** Ten minutes with your own assessment tells you more than any sales call.
 
-If your slowest job is getting from a finished assessment to a signed agreement, that exact job is what [PalmCare AI](/register) was built for. You can try it free for 14 days.
+If your slowest job is getting from a finished assessment to a signed agreement, that exact job is what [PalmCare AI](/register) was built for. You can try it free for 30 days in the iOS app.
 `,
   },
   {
@@ -469,7 +469,7 @@ The minimum bar is encryption at rest and in transit, role-based access, audit l
 
 ## 5. Can I test it with a real assessment before paying?
 
-A scripted demo always works. The real test is your actual audio: a real assessment with background noise, interruptions, and a client who wanders off topic. A vendor confident in their product will let you run one. A 14-day trial with full features is the standard now. Anything less deserves the question of why not.
+A scripted demo always works. The real test is your actual audio: a real assessment with background noise, interruptions, and a client who wanders off topic. A vendor confident in their product will let you run one. A 30-day trial with full features is the standard now. Anything less deserves the question of why not.
 
 ## The short version
 
@@ -833,7 +833,7 @@ This is where AI-native tools change the equation. PalmCare AI turns a recorded 
 
 ## See a Real Quote
 
-PalmCare AI offers transparent plans for solo, growing, and enterprise agencies, each with a 14-day free trial and no setup fee. [Book a demo](/) and we'll walk through a quote based on your client count — no guesswork.
+PalmCare AI offers transparent plans for solo, growing, and enterprise agencies, each with a 30-day free trial via Apple and no setup fee. [Book a demo](/) and we'll walk through a quote based on your client count. No guesswork.
 `,
   },
   {

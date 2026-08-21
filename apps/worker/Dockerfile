@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v24 - Simplify pipeline to always clear and re-transcribe
+# Version: v25 - Interview assessments keep services without invented hours
 WORKDIR /app
 
 # Install system dependencies for audio processing

@@ -415,10 +415,7 @@ def generate_service_contract(self, visit_id: str, manage_status: bool = True):
                     logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
                 logger.info(f"  = ${hourly_rate:.2f}/hr final rate (system defaults)")
         
-        # Ensure we have at least some hours if services were identified
-        if weekly_hours == 0 and len(services) > 0:
-            weekly_hours = len(services) * 4  # Minimum 4 hrs per service
-            logger.info(f"Fallback: {weekly_hours} hrs from {len(services)} services x 4 hrs each")
+        # Do not invent weekly hours when the transcript never stated a schedule.
         
         # Log the final calculation
         weekly_cost = hourly_rate * weekly_hours

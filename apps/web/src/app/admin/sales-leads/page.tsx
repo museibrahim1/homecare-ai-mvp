@@ -455,14 +455,14 @@ export default function SalesLeadsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen glass-page flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen glass-page flex">
       <Sidebar />
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Header */}

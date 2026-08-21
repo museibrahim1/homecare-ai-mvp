@@ -15,7 +15,7 @@ const PLANS = [
     name: 'PalmCare AI',
     price: 199,
     period: '/mo',
-    description: 'Everything included, one flat price, 14 day free trial',
+    description: 'Everything included, one flat price, 30 day free trial',
     features: [
       'Unlimited AI assessments',
       'Unlimited team members',
@@ -27,7 +27,7 @@ const PLANS = [
       'HIPAA BAA included',
       'Priority support',
     ],
-    overage: '14 day free trial',
+    overage: '30 day free trial',
     popular: false,
     color: 'from-primary-500 to-purple-500',
     borderColor: 'border-primary-500/50',

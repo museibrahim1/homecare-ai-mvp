@@ -230,7 +230,7 @@ export default async function BlogPostPage({ params }: Props) {
             <h3 className="text-2xl font-bold text-white mb-3">Ready to see PalmCare AI in action?</h3>
             <p className="text-slate-300 mb-6">Record an assessment and watch it become a care plan, billables, and a signed contract.</p>
             <Link href="/register" className="btn-primary py-3 px-8 text-base inline-block">
-              Start your 14-day free trial
+              Start your 30-day free trial
             </Link>
           </div>
         </article>

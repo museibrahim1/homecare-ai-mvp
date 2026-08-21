@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: 'How do I get started?',
-    a: 'Start a 14-day free trial at palmcareai.com/register, download the iOS app from the App Store, or book a demo at palmcareai.com/book-demo.',
+    a: 'Create an account at palmcareai.com/register, then start the 30-day free trial in the PalmCare iOS app through Apple (payment method required). Or book a demo at palmcareai.com/book-demo.',
   },
 ];
 

@@ -8,7 +8,7 @@ import {
   Plus, Users, ArrowRight
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import Sidebar from '@/components/Sidebar';
+import GlassShell from '@/components/GlassShell';
 import { api } from '@/lib/api';
 
 const API_BASE = '/api';
@@ -115,9 +115,11 @@ export default function IntegrationsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <GlassShell>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </GlassShell>
     );
   }
 
@@ -128,15 +130,10 @@ export default function IntegrationsPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-y-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
-          <p className="text-slate-500 mt-1">Import clients from external systems or connect via webhooks</p>
-        </div>
-
+    <GlassShell
+      title="Integrations"
+      subtitle="Import clients from external systems or connect via webhooks"
+    >
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-slate-200 pb-4">
           {tabs.map(tab => {
@@ -414,7 +411,6 @@ export default function IntegrationsPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </GlassShell>
   );
 }

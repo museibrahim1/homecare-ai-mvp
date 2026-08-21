@@ -5,7 +5,7 @@ import {
   Check, AlertTriangle, DollarSign, 
   ChevronDown, ChevronUp, MessageSquareQuote, User,
   Heart, Pill, Activity, Utensils, PersonStanding, 
-  Home, Users, Shield, Sparkles, Clock
+  Home, Users, Shield, Clock
 } from 'lucide-react';
 import { BillableItem, billableTimeLabel, isRecommendedBillable } from '@/lib/types';
 import { api } from '@/lib/api';
@@ -173,12 +173,8 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
   if (items.length === 0) {
     return (
       <div className="p-12 text-center">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <DollarSign className="w-8 h-8 text-slate-500" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Services Detected</h3>
-        <p className="text-slate-500 mb-2">Run the billing analysis to extract services from the transcript</p>
-        <p className="text-sm text-slate-400">AI will identify care services mentioned in the conversation</p>
+        <h3 className="text-lg font-semibold text-[#10211F] mb-2">No care services yet</h3>
+        <p className="text-[#64748B]">Run billing to list services from this visit.</p>
       </div>
     );
   }
@@ -187,19 +183,14 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
     <div className="p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Identified Care Services</h3>
-            <p className="text-slate-500 text-sm">
-              {items.length} service{items.length !== 1 ? 's' : ''} extracted from transcript
-              {recommendedCount > 0
-                ? ` · ${recommendedCount} recommended from assessment (not timed visit work)`
-                : ''}
-            </p>
-          </div>
+        <div>
+          <h3 className="text-lg font-semibold text-[#10211F]">Care services</h3>
+          <p className="text-[#64748B] text-sm">
+            {items.length} service{items.length !== 1 ? 's' : ''}
+            {recommendedCount > 0
+              ? ` · ${recommendedCount} recommended from assessment`
+              : ''}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {recommendedCount > 0 && (

@@ -142,7 +142,7 @@ struct RecordView: View {
             .sheet(isPresented: $showAssessmentPaywall, onDismiss: {
                 // If they subscribed, start recording on the next tap.
             }) {
-                PaywallView(isRequired: true, allowsNotNow: true)
+                PaywallView(isRequired: true, allowsNotNow: false)
                     .environmentObject(api)
             }
             .palmConfirmAlert(
