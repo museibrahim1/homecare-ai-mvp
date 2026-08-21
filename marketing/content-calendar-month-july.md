@@ -50,6 +50,17 @@
 
 ---
 
+## LAUNCH DAY (Fri Jul 10) — App Store approval
+
+PALM went live on the App Store this morning. A one-shot launch announcement
+posted to Facebook (video), Instagram (Reel), Threads (video), and LinkedIn
+(image, link in first comment) via `.github/workflows/launch-announcement.yml`
+and `scripts/social/launch_announcement.py`. TikTok is manual; captions and the
+full record live in `marketing/app-store-launch/launch-day-posts.md`.
+The regular Friday post (`gap-friday-done.png`) still went out at 11:30 AM ET.
+
+---
+
 ## WEEK 1 (Jul 13 to Jul 19)
 
 ### Mon Jul 13, Meta (FB and IG), #1 iMessage thread
