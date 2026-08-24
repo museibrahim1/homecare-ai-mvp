@@ -57,6 +57,7 @@ final class StoreKitService: ObservableObject {
         guard let raw = email?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
               !raw.isEmpty else { return false }
         if raw == "demo-screenshots@palmtai.com" { return true }
+        if raw == "demo@agency.com" { return true }
         if let bundleDemo = Bundle.main.infoDictionary?["DEMO_EMAIL"] as? String,
            bundleDemo.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == raw {
             return true

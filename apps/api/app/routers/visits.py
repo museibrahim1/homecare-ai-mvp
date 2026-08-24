@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
+from app.core.demo_accounts import is_demo_email
 from app.core.deps import get_db, get_current_user
 from app.core.tenancy import get_user_visit, owned_by_visible_users, iter_visible_client_ids, visible_user_ids
 from app.models.user import User
@@ -36,6 +37,10 @@ FREE_ASSESSMENT_LIMIT = 50
 
 def _get_user_subscription(db: Session, user: User):
     """Check if user has an active paid subscription."""
+    # Demo accounts always have full access for live demos and App Review.
+    if is_demo_email(getattr(user, "email", None)):
+        return {"has_paid_plan": True, "plan_name": "Demo Access", "tier": "enterprise"}
+
     # Full access is granted to all accounts during the current promotional
     # period. The label is user-facing, so it must not reference "beta".
     if settings.beta_free_access:

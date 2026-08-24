@@ -634,19 +634,7 @@ async def seed_database():
                 db.commit()
                 logger.info("Admin user created: admin@palmtai.com")
         
-        # Force-logout demo account on startup so any existing sessions are invalidated
-        demo_user = db.query(User).filter(User.email == "demo@agency.com").first()
-        if demo_user:
-            if not getattr(demo_user, 'force_logout_at', None):
-                logger.info("Force-logging out demo@agency.com from all devices")
-                demo_user.force_logout_at = datetime.now(timezone.utc)
-                # Also clear any Google tokens
-                if getattr(demo_user, 'google_calendar_connected', False):
-                    demo_user.google_calendar_connected = False
-                    demo_user.google_calendar_access_token = None
-                    demo_user.google_calendar_refresh_token = None
-                    demo_user.google_calendar_token_expiry = None
-                db.commit()
+        # Demo accounts should stay logged in during live demos. Do not force-logout.
         
         # Seed pricing plans (display + feature limits only; billing is handled
         # by Apple In-App Purchase, so no Stripe price IDs are wired here).

@@ -123,7 +123,7 @@ async def chat_message(request: Request, body: ChatRequest):
             max_tokens=400,
             system=SYSTEM_PROMPT,
             messages=user_messages,
-            temperature=0.7,
+            extra_body={"temperature": 0.7},
         )
 
         reply = response.content[0].text if response.content else "I'm sorry, I couldn't generate a response. Please try again."
