@@ -148,9 +148,13 @@ def send_email(subject: str, html: str) -> str:
             "Content-Type": "application/json",
         },
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        body = json.loads(resp.read().decode())
-        return str(body.get("id", ""))
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            body = json.loads(resp.read().decode())
+            return str(body.get("id", ""))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode(errors="replace")
+        raise RuntimeError(f"Resend HTTP {exc.code}: {detail}") from exc
 
 
 def main() -> int:
