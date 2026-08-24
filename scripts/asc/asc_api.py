@@ -1,5 +1,6 @@
 """Shared App Store Connect API helper (official API, JWT auth)."""
 import json
+import os
 import time
 import urllib.request
 import urllib.error
@@ -7,9 +8,12 @@ import urllib.parse
 
 import jwt  # PyJWT
 
-KEY_ID = "N5LFW2CYVG"
-ISSUER_ID = "18430c66-4e0a-4733-8058-efaef5e61ce0"
-KEY_PATH = "/Users/musaibrahim/.appstoreconnect/private_keys/AuthKey_N5LFW2CYVG.p8"
+KEY_ID = os.environ.get("ASC_KEY_ID", "N5LFW2CYVG")
+ISSUER_ID = os.environ.get("ASC_ISSUER_ID", "18430c66-4e0a-4733-8058-efaef5e61ce0")
+KEY_PATH = os.environ.get(
+    "ASC_AUTH_KEY_PATH",
+    "/Users/musaibrahim/.appstoreconnect/private_keys/AuthKey_N5LFW2CYVG.p8",
+)
 BASE = "https://api.appstoreconnect.apple.com"
 
 _token_cache = {"token": None, "exp": 0}

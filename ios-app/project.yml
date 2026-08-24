@@ -15,7 +15,7 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "1.3"
-    CURRENT_PROJECT_VERSION: "17"
+    CURRENT_PROJECT_VERSION: "18"
 
 targets:
   PalmCareAI:
@@ -78,6 +78,7 @@ targets:
         # Backend base URL. Empty falls back to the production Railway URL
         # in code, so this can be overridden by a build configuration.
         API_BASE_URL: ""
+        DEMO_EMAIL: "demo@agency.com"
         # PostHog (optional override). If empty, app falls back to defaults.
         POSTHOG_API_KEY: ""
         POSTHOG_HOST: "https://us.i.posthog.com"
