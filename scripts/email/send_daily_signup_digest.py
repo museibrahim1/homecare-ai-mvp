@@ -20,10 +20,13 @@ import urllib.request
 from datetime import date
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(PROJECT_ROOT / ".env")
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(PROJECT_ROOT / ".env")
+except ImportError:
+    pass
 
 API_BASE = os.getenv("PALM_API_BASE", "https://api-production-a0a2.up.railway.app")
 CRON_SECRET = os.getenv("CRON_SECRET", "") or os.getenv("INTERNAL_API_KEY", "")
