@@ -19,8 +19,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 from lib.utm import app_link  # noqa: E402
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-FROM = "Muse Ibrahim <museibrahim@palmtai.com>"
-FROM_FALLBACK = "Muse Ibrahim <sales@send.palmtai.com>"
+FROM = "Muse Ibrahim <sales@send.palmtai.com>"
 REPLY_TO = "museibrahim@palmtai.com"
 
 STACIE_EMAIL = os.getenv("STACIE_EMAIL", "staciewitts@comfortkeepers.com").strip()
@@ -90,7 +89,7 @@ def build_html() -> str:
       <p style="font-size:15px;line-height:1.65;color:#334155;margin:0 0 4px;">Muse Ibrahim</p>
       <p style="font-size:13px;line-height:1.5;color:#64748b;margin:0;">
         Founder, PALM by Palm Technologies<br/>
-        <a href="mailto:museibrahim@palmtai.com" style="color:#0d9488;text-decoration:none;">museibrahim@palmtai.com</a>
+        <a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a>
         · palmcareai.com
       </p>
     </div>
@@ -144,21 +143,18 @@ def main() -> int:
         print(f"Preview saved: {preview_path}")
         return 0
 
-    base_payload = {
+    payload = {
+        "from": FROM,
         "to": [to_email],
         "reply_to": REPLY_TO,
         "subject": subject,
         "html": html,
     }
-
-    for from_addr in (FROM, FROM_FALLBACK):
-        payload = {**base_payload, "from": from_addr}
-        ok, detail = send_resend(payload)
-        if ok:
-            print(f"SENT -> {to_email}  from={from_addr}  id={detail}")
-            return 0
-        print(f"FAIL from {from_addr}: {detail}")
-
+    ok, detail = send_resend(payload)
+    if ok:
+        print(f"SENT -> {to_email}  from={FROM}  id={detail}")
+        return 0
+    print(f"FAIL: {detail}")
     return 1
 
 
