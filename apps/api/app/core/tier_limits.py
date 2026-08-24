@@ -7,7 +7,8 @@ paid plan (the STARTER tier, $199/month, everything included), so paid users
 get a generous cap while the free trial stays limited:
 
     free        5 AI requests / minute
-    starter   120 AI requests / minute (the single paid plan)
+    mobile     40 AI requests / minute (iPhone assessments plan)
+    starter   120 AI requests / minute (full platform plan)
     growth    120 AI requests / minute (legacy tier)
     professional 120 AI requests / minute (legacy tier)
     enterprise  120 AI requests / minute (legacy tier)
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 TIER_AI_LIMITS_PER_MINUTE: dict[str, int] = {
     "free": 5,
+    "mobile": 40,
     "starter": 120,
     "growth": 120,
     "professional": 120,

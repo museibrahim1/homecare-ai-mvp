@@ -142,7 +142,7 @@ struct RecordView: View {
             .sheet(isPresented: $showAssessmentPaywall, onDismiss: {
                 // If they subscribed, start recording on the next tap.
             }) {
-                PaywallView(isRequired: true, allowsNotNow: false)
+                PaywallView(isRequired: true, allowsNotNow: true)
                     .environmentObject(api)
             }
             .palmConfirmAlert(
@@ -878,6 +878,8 @@ struct RecordView: View {
             }
 
             let email = await MainActor.run { api.cachedUserEmail }
+            await StoreKitService.shared.syncEntitlements()
+            await StoreKitService.shared.syncBackendAccess(using: api)
             if !StoreKitService.shared.hasPaidAccess(email: email) {
                 // Soft browse is fine; recording requires a trial or plan.
                 await MainActor.run { showAssessmentPaywall = true }
@@ -910,19 +912,25 @@ struct RecordView: View {
     }
 
     private func handlePickedAudioFile(_ url: URL) {
-        guard StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else {
-            showAssessmentPaywall = true
-            return
-        }
-        guard let client = selectedClient else {
-            errorMessage = "Please select a client first."
-            showError = true
-            return
-        }
-        // Uploading a file also sends audio to our AI processors, so it must
-        // clear the same consent gate as a live recording.
-        requireAIConsent {
-            session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
+        Task {
+            await StoreKitService.shared.syncEntitlements()
+            await StoreKitService.shared.syncBackendAccess(using: api)
+            guard StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else {
+                await MainActor.run { showAssessmentPaywall = true }
+                return
+            }
+            guard let client = selectedClient else {
+                await MainActor.run {
+                    errorMessage = "Please select a client first."
+                    showError = true
+                }
+                return
+            }
+            await MainActor.run {
+                requireAIConsent {
+                    session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
+                }
+            }
         }
     }
 

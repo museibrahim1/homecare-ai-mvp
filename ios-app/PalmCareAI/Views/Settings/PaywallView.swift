@@ -1,48 +1,60 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: one auto-renewable plan with a 30-day Apple trial.
-/// Tapping the CTA runs StoreKit `product.purchase()`, which presents the
-/// native App Store payment sheet. Trial requires an Apple ID payment method;
-/// Apple auto-charges the monthly price when the trial ends unless cancelled.
+/// Subscription paywall: Mobile ($80) and Platform ($199) auto-renewing plans.
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
-    /// When true (assessment gate): no "Done". User must subscribe or cancel
-    /// the recording attempt via "Not now" only when allowsNotNow is true.
     var isRequired: Bool = false
-
-    /// Soft prompts may dismiss. Assessment / post-auth gates should pass false
-    /// so the user must start the Apple subscription (or leave the gated action).
     var allowsNotNow: Bool = false
 
-    @State private var selectedProductID: String = "com.palmcareai.app.starter.monthly"
+    @State private var selectedProductID: String = "com.palmcareai.app.mobile.monthly"
     @State private var showSuccess = false
     @State private var restoreMessage: String?
 
     private struct PlanInfo {
-        let assessments: String
-        let team: String
+        let title: String
+        let subtitle: String
         let highlights: [String]
         let hasTrial: Bool
     }
 
-    private let planInfo = PlanInfo(
-        assessments: "Unlimited AI assessments",
-        team: "Unlimited team members",
-        highlights: [
-            "AI voice to contract",
-            "Smart SOAP notes",
-            "Advanced analytics and reporting",
-            "Custom contract templates",
-            "50-state compliance engine",
-            "HIPAA BAA included",
-            "Priority support",
-        ],
-        hasTrial: true
-    )
+    private let planInfoByProductID: [String: PlanInfo] = [
+        "com.palmcareai.app.mobile.monthly": PlanInfo(
+            title: "PalmCare Mobile",
+            subtitle: "Unlimited assessments on iPhone",
+            highlights: [
+                "AI voice to contract",
+                "Smart SOAP notes and billables",
+                "50-state compliance engine",
+                "HIPAA BAA included",
+            ],
+            hasTrial: true
+        ),
+        "com.palmcareai.app.starter.monthly": PlanInfo(
+            title: "PalmCare Platform",
+            subtitle: "Mobile + web CRM and team seats",
+            highlights: [
+                "Everything in Mobile",
+                "Web dashboard and analytics",
+                "Unlimited team members",
+                "Custom contract templates",
+                "Priority support",
+            ],
+            hasTrial: true
+        ),
+    ]
+
+    private func planInfo(for product: Product) -> PlanInfo {
+        planInfoByProductID[product.id] ?? PlanInfo(
+            title: "PalmCare AI",
+            subtitle: "Unlimited AI assessments",
+            highlights: ["AI voice to contract", "Smart SOAP notes"],
+            hasTrial: true
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -51,7 +63,7 @@ struct PaywallView: View {
                     header
 
                     if store.isLoadingProducts {
-                        ProgressView("Loading plan…")
+                        ProgressView("Loading plans…")
                             .padding(.vertical, 40)
                     } else if store.products.isEmpty {
                         loadFailedView
@@ -70,7 +82,7 @@ struct PaywallView: View {
                 .padding(.bottom, 40)
             }
             .background(PalmGlassBackground())
-            .navigationTitle("PalmCare AI")
+            .navigationTitle("Choose your plan")
             .navigationBarTitleDisplayMode(.inline)
             .palmTransparentNavBar()
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -92,6 +104,11 @@ struct PaywallView: View {
             }
             .task {
                 await store.loadProducts()
+                await store.syncBackendAccess(using: api)
+                if store.hasPaidAccess(email: api.cachedUserEmail) {
+                    dismiss()
+                    return
+                }
                 if let first = store.products.first {
                     selectedProductID = first.id
                 }
@@ -99,7 +116,7 @@ struct PaywallView: View {
             .alert("You're all set", isPresented: $showSuccess) {
                 Button("OK") { dismiss() }
             } message: {
-                Text("Your subscription is active. Every feature is unlocked.")
+                Text("Your subscription is active.")
             }
             .alert("Restore Purchases", isPresented: Binding(
                 get: { restoreMessage != nil },
@@ -124,20 +141,18 @@ struct PaywallView: View {
         }
     }
 
-    // MARK: - Sections
-
     private var header: some View {
         VStack(spacing: 10) {
             PalmOrbLogo(size: 72, animated: false)
 
-            Text("One plan. Everything included.")
+            Text("Record on iPhone. PALM writes the paperwork.")
                 .font(.system(size: 22, weight: .heavy))
                 .foregroundColor(.palmText)
                 .tracking(-0.3)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
 
-            Text("Record the visit. PALM writes the notes, billables, and the state-compliant service agreement.")
+            Text("Pick Mobile for assessments on your phone, or Platform for the full web CRM and team seats.")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
@@ -171,9 +186,10 @@ struct PaywallView: View {
     }
 
     private func planCard(_ product: Product) -> some View {
+        let info = planInfo(for: product)
         let isSelected = selectedProductID == product.id
         let isOwned = store.purchasedProductIDs.contains(product.id)
-        let hasTrialOffer = planInfo.hasTrial && product.subscription?.introductoryOffer != nil
+        let hasTrialOffer = info.hasTrial && product.subscription?.introductoryOffer != nil
 
         return Button {
             selectedProductID = product.id
@@ -182,7 +198,7 @@ struct PaywallView: View {
                 HStack(alignment: .top, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
-                            Text("PalmCare AI")
+                            Text(info.title)
                                 .font(.system(size: 17, weight: .bold))
                                 .foregroundColor(.palmText)
                                 .lineLimit(1)
@@ -196,7 +212,7 @@ struct PaywallView: View {
                                     .cornerRadius(6)
                             }
                         }
-                        Text("\(planInfo.assessments) · \(planInfo.team)")
+                        Text(info.subtitle)
                             .font(.system(size: 12))
                             .foregroundColor(.palmSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -228,7 +244,7 @@ struct PaywallView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(planInfo.highlights, id: \.self) { line in
+                    ForEach(info.highlights, id: \.self) { line in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 14))
@@ -252,20 +268,19 @@ struct PaywallView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("PalmCare AI, \(product.displayPrice) per month")
+        .accessibilityLabel("\(info.title), \(product.displayPrice) per month")
     }
 
     private var purchaseButton: some View {
-        let selectedHasTrial = store.products.first(where: { $0.id == selectedProductID })
-            .flatMap { product -> Bool? in
-                planInfo.hasTrial && product.subscription?.introductoryOffer != nil
-            } ?? false
+        let selectedProduct = store.products.first(where: { $0.id == selectedProductID })
+        let selectedInfo = selectedProduct.map { planInfo(for: $0) }
+        let selectedHasTrial = selectedInfo?.hasTrial == true
+            && selectedProduct?.subscription?.introductoryOffer != nil
 
         return VStack(spacing: 12) {
             Button {
-                guard let product = store.products.first(where: { $0.id == selectedProductID }) else { return }
+                guard let product = selectedProduct else { return }
                 Task {
-                    // Presents Apple's native App Store subscription sheet.
                     if await store.purchase(product) {
                         showSuccess = true
                     }
@@ -293,8 +308,8 @@ struct PaywallView: View {
             .accessibilityLabel(selectedHasTrial ? "Start 30 day free trial" : "Subscribe to the plan")
 
             Text(selectedHasTrial
-                 ? "30 days free, then \(store.products.first(where: { $0.id == selectedProductID })?.displayPrice ?? "$199")/month. Charged to your Apple ID. Auto-renews until you cancel in Settings → Apple ID → Subscriptions. Cancel anytime before the trial ends to avoid being charged."
-                 : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
+                 ? "30 days free, then \(selectedProduct?.displayPrice ?? "$80")/month. Charged to your Apple ID. Auto-renews until you cancel in Settings → Apple ID → Subscriptions."
+                 : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings.")
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)

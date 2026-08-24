@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getAllSlugs } from './blog/data';
+import { getAllSlugs, getPostBySlug } from './blog/data';
 
 const BASE_URL = 'https://palmcareai.com';
 
@@ -33,9 +33,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   for (const slug of BLOG_SLUGS) {
+    const post = getPostBySlug(slug);
     pages.push({
       url: `${BASE_URL}/blog/${slug}`,
-      lastModified: new Date(),
+      lastModified: post?.date ? new Date(post.date) : new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     });

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import GlassRail from './GlassRail';
+import MobileWebGate from './MobileWebGate';
 
 interface GlassShellProps {
   children: ReactNode;
@@ -36,7 +37,7 @@ export default function GlassShell({ children, title, subtitle, action }: GlassS
               {action && <div className="flex items-center gap-3 shrink-0">{action}</div>}
             </div>
           )}
-          {children}
+          <MobileWebGate>{children}</MobileWebGate>
         </div>
       </main>
     </div>

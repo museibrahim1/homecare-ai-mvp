@@ -85,7 +85,7 @@ struct PalmCareAIApp: App {
                 }
             }
             .sheet(isPresented: $showAuthPaywall) {
-                PaywallView(isRequired: true, allowsNotNow: false)
+                PaywallView(isRequired: false, allowsNotNow: true)
                     .environmentObject(api)
             }
             .onChange(of: api.needsOnboarding) { needs in
@@ -104,6 +104,7 @@ struct PalmCareAIApp: App {
                     // Re-verify App Store entitlements so renewals, refunds,
                     // and revocations made outside the app are enforced.
                     Task { await StoreKitService.shared.syncEntitlements() }
+                    Task { await StoreKitService.shared.syncBackendAccess(using: api) }
                     Task { await syncAnalyticsIdentity() }
                     // Refresh needs_onboarding (social User-first path).
                     Task {
@@ -188,6 +189,7 @@ struct PalmCareAIApp: App {
                 #endif
                 if api.isAuthenticated {
                     await StoreKitService.shared.syncEntitlements()
+                    await StoreKitService.shared.syncBackendAccess(using: api)
                 }
             }
         }
@@ -218,11 +220,14 @@ struct PalmCareAIApp: App {
 
     private func promptAuthPaywallIfNeeded() {
         guard api.isAuthenticated, !api.needsOnboarding else { return }
-        // First-run users get the sample packet, then the launch paywall.
-        // Skip here so we don't stack two sheets back to back.
         if !UserDefaults.standard.bool(forKey: "hasSeenSampleVisit") { return }
-        guard !StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else { return }
-        showAuthPaywall = true
+        Task {
+            await StoreKitService.shared.syncBackendAccess(using: api)
+            guard !StoreKitService.shared.hasPaidAccess(email: api.cachedUserEmail) else { return }
+            await MainActor.run {
+                showAuthPaywall = true
+            }
+        }
     }
 
     private func syncAnalyticsIdentity() async {

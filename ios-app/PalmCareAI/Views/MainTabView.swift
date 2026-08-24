@@ -46,6 +46,7 @@ struct MainTabView: View {
         .onAppear {
             Task {
                 await store.syncEntitlements()
+                await store.syncBackendAccess(using: api)
                 _ = try? await api.fetchUser(forceRefresh: false)
                 promptLaunchPaywallIfNeeded()
             }
@@ -74,7 +75,7 @@ struct MainTabView: View {
         // Soft prompt: browse freely; Done / swipe dismisses. Assessment start
         // has its own gate in RecordView.
         .sheet(isPresented: $showSoftPaywall) {
-            PaywallView(isRequired: true, allowsNotNow: false)
+            PaywallView(isRequired: false, allowsNotNow: true)
                 .environmentObject(api)
         }
     }

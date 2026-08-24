@@ -49,6 +49,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const TIER_COLORS: Record<string, string> = {
   free: 'text-slate-500',
+  mobile: 'text-teal-600',
   starter: 'text-blue-600',
   professional: 'text-purple-600',
   enterprise: 'text-amber-600',

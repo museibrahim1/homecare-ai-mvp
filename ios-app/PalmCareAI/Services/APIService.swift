@@ -93,7 +93,6 @@ class APIService: ObservableObject {
                 KeychainHelper.save(token)
             } else {
                 KeychainHelper.delete()
-                clearCache()
             }
         }
     }
@@ -211,6 +210,10 @@ class APIService: ObservableObject {
         needsOnboarding = false
         refreshToken = nil
         token = nil
+        clearCache()
+        Task { @MainActor in
+            StoreKitService.shared.clearBackendAccess()
+        }
 
         // Clear any cached PHI from UserDefaults (legacy keys + new ones).
         let defaults = UserDefaults.standard
@@ -326,6 +329,7 @@ class APIService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("ios", forHTTPHeaderField: "X-Palm-Client")
         request.timeoutInterval = 30
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
@@ -377,6 +381,7 @@ class APIService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("ios", forHTTPHeaderField: "X-Palm-Client")
         request.timeoutInterval = 30
         request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
@@ -412,6 +417,7 @@ class APIService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("ios", forHTTPHeaderField: "X-Palm-Client")
         request.timeoutInterval = 30
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

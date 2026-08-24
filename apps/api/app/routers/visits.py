@@ -1,11 +1,12 @@
 import logging
 from typing import Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.core.demo_accounts import is_demo_email
+from app.core.plan_access import is_ios_client, is_mobile_only_tier, tier_has_web_platform
 from app.core.deps import get_db, get_current_user
 from app.core.tenancy import get_user_visit, owned_by_visible_users, iter_visible_client_ids, visible_user_ids
 from app.models.user import User
@@ -104,15 +105,18 @@ async def get_usage(
         max_allowed = FREE_ASSESSMENT_LIMIT
         can_create = total_visits < FREE_ASSESSMENT_LIMIT
     
+    tier = sub_info["tier"]
     return {
         "completed_assessments": completed_count,
         "total_assessments": total_visits,
         "max_allowed": max_allowed,
         "can_create": can_create,
         "plan_name": sub_info["plan_name"],
-        "plan_tier": sub_info["tier"],
+        "plan_tier": tier,
         "has_paid_plan": sub_info["has_paid_plan"],
         "upgrade_required": not can_create,
+        "mobile_only": is_mobile_only_tier(tier),
+        "web_platform_access": tier_has_web_platform(tier),
     }
 
 
@@ -162,12 +166,24 @@ async def list_visits(
 @router.post("", response_model=VisitResponse, status_code=status.HTTP_201_CREATED)
 async def create_visit(
     visit_in: VisitCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new visit (data isolation enforced)."""
     # Check free tier limit
     sub_info = _get_user_subscription(db, current_user)
+    if is_mobile_only_tier(sub_info.get("tier")) and not is_ios_client(
+        request.headers.get("User-Agent"),
+        request.headers.get("X-Palm-Client"),
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "PalmCare Mobile includes assessments on iPhone. "
+                "Upgrade to PalmCare Platform in the app for web assessments."
+            ),
+        )
     if not sub_info["has_paid_plan"]:
         total_visits = db.query(Visit).join(
             Client, Visit.client_id == Client.id

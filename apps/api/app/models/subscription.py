@@ -16,6 +16,7 @@ from app.db.base import Base
 
 class PlanTier(str, Enum):
     FREE = "free"
+    MOBILE = "mobile"
     STARTER = "starter"
     GROWTH = "growth"
     PROFESSIONAL = "professional"
@@ -126,8 +127,9 @@ class Invoice(Base):
     due_date = Column(DateTime(timezone=True))
     paid_at = Column(DateTime(timezone=True))
     
-    # External reference
-    stripe_invoice_id = Column(String(255))
+    # External reference. Unique when set so Apple (apple:<tx>) and Stripe
+    # invoice ids cannot mint duplicate paid rows for the same charge.
+    stripe_invoice_id = Column(String(255), unique=True, index=True)
     
     # Description
     description = Column(Text)

@@ -652,9 +652,19 @@ async def seed_database():
                 "50 state compliance engine", "HIPAA BAA included",
                 "Priority support", "250 GB storage", "30 day free trial",
             ])
+            _mobile = _json.dumps([
+                "Unlimited AI assessments on iPhone", "AI voice to contract",
+                "Smart SOAP notes and billables", "50 state compliance engine",
+                "HIPAA BAA included", "iPhone app access", "30 day free trial",
+            ])
             _plan_defs = [
-                dict(name="PalmCare AI", tier=PlanTier.STARTER,
-                     description="One plan, everything included. Unlimited assessments, unlimited team members, and a 30 day free trial.",
+                dict(name="PalmCare Mobile", tier=PlanTier.MOBILE,
+                     description="Assessments on iPhone. Record the visit and PALM writes notes, billables, and the contract.",
+                     monthly_price=80, annual_price=0, max_users=1, max_clients=50,
+                     max_visits_per_month=99999, max_storage_gb=50, is_active=True, is_contact_sales=False,
+                     features=_mobile),
+                dict(name="PalmCare Platform", tier=PlanTier.STARTER,
+                     description="Full platform: web CRM, team seats, analytics, and unlimited assessments on iPhone and web.",
                      monthly_price=199, annual_price=0, max_users=999, max_clients=9999,
                      max_visits_per_month=99999, max_storage_gb=250, is_active=True, is_contact_sales=False,
                      features=_unlimited),

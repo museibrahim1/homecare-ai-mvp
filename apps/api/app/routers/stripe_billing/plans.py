@@ -63,31 +63,45 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     from app.models.subscription import PlanTier
     import json
 
-    # One plan, one price: a single $199/month plan with everything included
-    # and a 30 day free trial (granted through the Apple IAP introductory
-    # offer on com.palmcareai.app.starter.monthly). The legacy Growth,
-    # Professional, and Enterprise tiers are kept as inactive rows so existing
-    # subscriptions that still point at them keep resolving, but they no longer
-    # appear on the public pricing surface.
+    # Two active plans: Mobile ($80, iPhone assessments) and Platform ($199,
+    # full web + mobile). Apple IAP product IDs must match apple_iap.py.
+    MOBILE_FEATURES = json.dumps([
+        "Unlimited AI assessments on iPhone", "AI voice to contract",
+        "Smart SOAP notes and billables", "50 state compliance engine",
+        "HIPAA BAA included", "iPhone app access", "30 day free trial",
+    ])
     UNLIMITED_FEATURES = json.dumps([
         "Unlimited AI assessments", "Unlimited team members",
         "AI voice to contract", "Smart SOAP notes",
         "Advanced analytics and reporting", "Custom contract templates",
         "50 state compliance engine", "HIPAA BAA included",
-        "Priority support", "250 GB storage", "14 day free trial",
+        "Priority support", "250 GB storage", "30 day free trial",
     ])
     PLANS = [
         {
-            # The single, full-featured plan. Uses the STARTER tier so it maps
-            # to the existing com.palmcareai.app.starter.monthly product ID
-            # (already priced at $199 in App Store Connect).
-            "name": "PalmCare AI",
+            "name": "PalmCare Mobile",
+            "tier": PlanTier.MOBILE,
+            "description": (
+                "Assessments on iPhone. Record the visit and PALM writes the "
+                "notes, billables, and a state compliant service agreement."
+            ),
+            "monthly_price": 80,
+            "annual_price": 0,
+            "setup_fee": 0,
+            "max_users": 1,
+            "max_clients": 50,
+            "max_visits_per_month": 99999,
+            "max_storage_gb": 50,
+            "is_contact_sales": False,
+            "is_active": True,
+            "features": MOBILE_FEATURES,
+        },
+        {
+            "name": "PalmCare Platform",
             "tier": PlanTier.STARTER,
             "description": (
-                "One plan, everything included. Record the visit and PALM writes "
-                "the notes, the billables, and a state compliant service agreement "
-                "in minutes. Unlimited assessments, unlimited team members, and a "
-                "14 day free trial."
+                "Full platform: web CRM, team seats, analytics, and unlimited "
+                "assessments on iPhone and web. Includes a 30 day free trial."
             ),
             "monthly_price": 199,
             "annual_price": 0,

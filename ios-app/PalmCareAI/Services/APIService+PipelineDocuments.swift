@@ -42,6 +42,7 @@ extension APIService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("ios", forHTTPHeaderField: "X-Palm-Client")
         request.timeoutInterval = 30
         request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {

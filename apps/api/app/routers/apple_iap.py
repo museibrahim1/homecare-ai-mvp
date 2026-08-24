@@ -17,10 +17,11 @@ Why this exists separate from `stripe_billing.py`:
 
 Set up in App Store Connect:
   1. Create a Subscription Group (e.g. "PalmCare Plans").
-  2. Add the single auto-renewing subscription with this product ID (must
-     match `APPLE_PRODUCT_TIER_MAP` below), priced at $199/month with a
-     30 day introductory free-trial offer:
-        com.palmcareai.app.starter.monthly
+  2. Add two auto-renewing monthly subscriptions (must match
+     `APPLE_PRODUCT_TIER_MAP` below), each with a 30 day introductory
+     free-trial offer:
+        com.palmcareai.app.mobile.monthly   ($79.99 USA, ~$80)
+        com.palmcareai.app.starter.monthly  ($199)
   3. Add the same product to the App Store Connect API Issuer with a
      "Customer Communications" key so refund / cancel webhooks work.
 
@@ -61,17 +62,18 @@ router = APIRouter()
 # Map App Store Connect product IDs → internal plan tier.
 # Must stay in sync with the iOS `StoreKitService.productIDs` list.
 #
-# PalmCare now sells a single $199/month plan, backed by the one existing
-# product ID `com.palmcareai.app.starter.monthly` (already priced at $199 in
-# App Store Connect). The old Growth / Pro product IDs are intentionally no
-# longer accepted. Legacy subscribers keep their access via their existing
-# Subscription row; the app just stops selling those products.
+# iOS sells two monthly plans (must match StoreKitService.productIDs):
+#   mobile   $80/mo  — iPhone assessments only
+#   starter $199/mo  — full web + mobile platform
+# Legacy Growth / Pro product IDs are no longer accepted.
 APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
+    "com.palmcareai.app.mobile.monthly": PlanTier.MOBILE,
     "com.palmcareai.app.starter.monthly": PlanTier.STARTER,
 }
 
 # Products granting a 30-day free trial through an Apple introductory offer.
 APPLE_TRIAL_PRODUCT_IDS = {
+    "com.palmcareai.app.mobile.monthly",
     "com.palmcareai.app.starter.monthly",
 }
 

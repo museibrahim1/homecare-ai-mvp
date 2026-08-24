@@ -15,11 +15,10 @@ import StoreKit
 final class StoreKitService: ObservableObject {
     static let shared = StoreKitService()
 
-    /// PALM sells a single $199/month plan. Must stay in sync with
-    /// APPLE_PRODUCT_TIER_MAP on the backend and the product configured in
-    /// App Store Connect ("PALM Plans" group). Legacy Growth/Pro product IDs
-    /// are no longer sold.
+    /// Monthly plans sold in the iPhone app. Must stay in sync with
+    /// APPLE_PRODUCT_TIER_MAP on the backend and App Store Connect.
     static let monthlyProductIDs: [String] = [
+        "com.palmcareai.app.mobile.monthly",
         "com.palmcareai.app.starter.monthly",
     ]
 
@@ -30,6 +29,8 @@ final class StoreKitService: ObservableObject {
 
     @Published var products: [Product] = []
     @Published var purchasedProductIDs: Set<String> = []
+    @Published private(set) var backendHasPaidPlan = false
+    @Published private(set) var backendCanCreate = false
     @Published var isLoadingProducts = false
     @Published var purchaseInFlight = false
     @Published var lastError: String?
@@ -39,7 +40,8 @@ final class StoreKitService: ObservableObject {
     /// whenever that set changes.
     var hasActiveEntitlement: Bool { !purchasedProductIDs.isEmpty }
 
-    /// Demo accounts and active Apple subscriptions skip paywall prompts.
+    /// Demo accounts, App Store entitlements, and server-side plan access
+    /// (free tier under limit, Stripe, or Apple verified on the backend).
     func hasPaidAccess(email: String?) -> Bool {
         if Self.isDemoEmail(email) { return true }
         #if DEBUG
@@ -50,7 +52,31 @@ final class StoreKitService: ObservableObject {
             return true
         }
         #endif
-        return hasActiveEntitlement
+        if hasActiveEntitlement { return true }
+        if backendHasPaidPlan { return true }
+        if backendCanCreate { return true }
+        return false
+    }
+
+    func clearBackendAccess() {
+        backendHasPaidPlan = false
+        backendCanCreate = false
+    }
+
+    /// Align the paywall with `/visits/usage` so web billing, free tier, and
+    /// ops-granted access match what the API already allows.
+    func syncBackendAccess(using api: APIService = .shared) async {
+        guard api.isAuthenticated else {
+            clearBackendAccess()
+            return
+        }
+        do {
+            let usage = try await api.fetchUsage()
+            backendHasPaidPlan = usage.has_paid_plan == true
+            backendCanCreate = usage.can_create != false
+        } catch {
+            // Keep the last known server state on transient network errors.
+        }
     }
 
     static func isDemoEmail(_ email: String?) -> Bool {

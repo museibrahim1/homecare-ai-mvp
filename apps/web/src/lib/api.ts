@@ -255,6 +255,8 @@ class ApiClient {
       plan_tier: string;
       has_paid_plan: boolean;
       upgrade_required: boolean;
+      mobile_only?: boolean;
+      web_platform_access?: boolean;
     }>('/visits/usage', {}, token);
   }
 
