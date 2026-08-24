@@ -155,7 +155,7 @@ class TestGenerateWithGroundedClaude:
         ]
         monkeypatch.setattr(
             "libs.billing.analyze_transcript_with_claude",
-            lambda segments: services,
+            lambda segments, conversation_kind=None: services,
         )
         segments = [
             {

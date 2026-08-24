@@ -49,7 +49,7 @@ class TestBillableRecommendations:
     def test_intake_items_are_flagged_recommendations(self, monkeypatch):
         monkeypatch.setattr(
             "libs.billing.analyze_transcript_with_claude",
-            lambda segments: [
+            lambda segments, conversation_kind=None: [
                 {
                     "category": "COMPANIONSHIP",
                     "task": "Companionship",
