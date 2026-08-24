@@ -62,7 +62,8 @@ function followUpId(clientId: string): string {
   return `followup-${clientId}`;
 }
 
-function defaultFollowUpDate(): string {
+/** YYYY-MM-DD one week from today in the local timezone. */
+export function defaultFollowUpDate(): string {
   const d = new Date();
   d.setDate(d.getDate() + 7);
   return formatLocalDate(d);

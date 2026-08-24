@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarClock, Loader2, X } from 'lucide-react';
 import { api, formatLocalDate } from '@/lib/api';
-import { upsertFollowUp } from '@/lib/followUpSync';
+import { defaultFollowUpDate, upsertFollowUp } from '@/lib/followUpSync';
 
 export interface FollowUpClient {
   id: string;
@@ -68,7 +68,10 @@ export default function FollowUpNoteModal({
     setSaving(true);
     setError(null);
     try {
-      const followUpAt = date ? new Date(`${date}T09:00:00`).toISOString() : null;
+      // Match calendar default: blank date means one week out, and that same
+      // date must be stored on the client so reloads stay in sync.
+      const resolvedDate = date || defaultFollowUpDate();
+      const followUpAt = new Date(`${resolvedDate}T09:00:00`).toISOString();
       await api.updateClient(token, client.id, {
         follow_up_note: note.trim() || null,
         follow_up_at: followUpAt,
@@ -78,7 +81,7 @@ export default function FollowUpNoteModal({
         clientId: client.id,
         clientName: client.full_name,
         note: note.trim(),
-        date: date || undefined,
+        date: resolvedDate,
         token,
         googleConnected,
       });

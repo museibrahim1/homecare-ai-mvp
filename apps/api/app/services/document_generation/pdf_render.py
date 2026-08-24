@@ -586,10 +586,8 @@ def generate_invoice_pdf(invoice: Dict[str, Any]) -> bytes:
     """
     Generate a clean, professional subscription invoice / receipt PDF.
 
-    One document serves as both invoice and receipt: because PalmCare
-    subscriptions are charged by Apple through In-App Purchase, the PDF is
-    marked "Paid via App Store" so it can never be mistaken for a second,
-    separate charge.
+    Payment-method copy depends on ``billed_via`` (Apple IAP, Stripe, or other).
+    Do not assume App Store billing when regenerating arbitrary invoices.
 
     Expected keys in ``invoice``:
       invoice_number, invoice_date, status, amount, currency,
@@ -803,16 +801,27 @@ def generate_invoice_pdf(invoice: Dict[str, Any]) -> bytes:
     story.append(totals_table)
     story.append(Spacer(1, 18))
 
-    # === PAYMENT METHOD (App Store) ===
-    billed_via = invoice.get("billed_via") or "Apple In-App Purchase"
+    # === PAYMENT METHOD ===
+    billed_via = str(invoice.get("billed_via") or "PalmCare billing").strip()
+    billed_via_l = billed_via.lower()
+    if "apple" in billed_via_l:
+        payment_copy = (
+            f"Paid via {html_escape(billed_via)}. This subscription is billed and charged "
+            f"through your Apple ID. PalmCare does not charge your card directly for this purchase."
+        )
+    elif "stripe" in billed_via_l:
+        payment_copy = (
+            f"Paid via {html_escape(billed_via)}. This subscription is billed and charged "
+            f"to the card on file through Stripe. Apple is not the merchant of record for this purchase."
+        )
+    else:
+        payment_copy = (
+            f"Paid via {html_escape(billed_via)}. Keep this invoice with your agency records."
+        )
     story.append(HRFlowable(width="100%", thickness=0.5, color=line))
     story.append(Spacer(1, 8))
     story.append(Paragraph("PAYMENT METHOD", s_label))
-    story.append(Paragraph(
-        f"Paid via {html_escape(str(billed_via))}. This subscription is billed and charged "
-        f"through your Apple ID. PalmCare does not charge your card directly for this purchase.",
-        s_bodymuted,
-    ))
+    story.append(Paragraph(payment_copy, s_bodymuted))
     story.append(Spacer(1, 20))
 
     # === FOOTER: legal ===

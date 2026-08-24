@@ -29,6 +29,7 @@ WATCHED_OUTREACH_EMAILS = {
     "familylovebehavioral@gmail.com": "Nurdennis Pena / Family Love Behavioral",
     "info@ednascarehhc.com": "Wanda / Edna's Care",
     "kenatriplett@accentcare.com": "Kena / AccentCare",
+    "staciewitts@comfortkeepers.com": "Stacie Witts / Comfort Keepers",
 }
 ENGAGEMENT_ALERT_TO = [
     e.strip()
@@ -236,7 +237,7 @@ async def resend_webhook(request: Request):
                     campaign = str(tag.get("value") or "")
                     break
         kind = "opened" if event_type == "email.opened" else "clicked"
-        if (watched_label or campaign == "platform_info") and _claim_engagement_alert(
+        if (watched_label or campaign in ("platform_info", "comfort_keepers_followup")) and _claim_engagement_alert(
             str(email_id), kind
         ):
             try:

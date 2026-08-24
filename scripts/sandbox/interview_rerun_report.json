@@ -1,0 +1,43 @@
+[
+  {
+    "client": "Harold Jensen",
+    "visit_id": "af778380-93d5-4093-956c-d594df5b16be",
+    "weekly_hours": "0.00",
+    "hourly_rate": "0.00",
+    "services": [
+      "Homemaker",
+      "Companion Care",
+      "Respite"
+    ],
+    "care_plan_goal_preview": [
+      "Assist client with light housekeeping tasks (dishes, tidying) that she is unable to complete due to frequent bathroom urgency and fatigue",
+      "Provide companionship during daytime hours to reduce social isolation and support emotional well-being",
+      "Provide respite to caregiver spouse to relieve caregiver burden while he is at work or managing the special needs child"
+    ],
+    "eicna_rationale": "Client cannot manage household tasks, is frequently bedridden, is out of work, and cannot care for her children due to chronic IBS with severe diarrhea and pain. Caregiver spouse is overwhelmed managing a special needs c",
+    "billable_count": 4,
+    "note_type": "training_with_embedded_intake",
+    "note_preview": "This recording is a clinical communication training role-play with an embedded home care intake. The trainer (SPEAKER_0) coaches trainees through a simulated patient interview while simultaneously demonstrating therapeutic communication tec"
+  },
+  {
+    "client": "Robert Calloway",
+    "visit_id": "e205b4b0-013d-450e-beff-a32ad88ac144",
+    "weekly_hours": "0.00",
+    "hourly_rate": "0.00",
+    "services": [
+      "Homemaker",
+      "Companion Care",
+      "Respite"
+    ],
+    "care_plan_goal_preview": [
+      "Assist client with light housekeeping tasks (dishes, laundry, tidying) that she is unable to complete due to frequent bathroom urgency and fatigue.",
+      "Prepare nutritious meals and snacks daily to address client's inability to cook and reported difficulty eating.",
+      "Provide companionship and safety monitoring on days client is confined to bed, ensuring she is not left alone for extended periods.",
+      "Provide scheduled respite to spouse so he can attend to work and personal needs without leaving client unsupervised."
+    ],
+    "eicna_rationale": "Client is unable to perform housework, cook, care for children, or work due to chronic IBS with severe diarrhea and pain ongoing for two years. She reports days entirely in bed, social withdrawal, and inability to manage",
+    "billable_count": 3,
+    "note_type": "training_with_embedded_intake",
+    "note_preview": "This recording is a clinical communication training session containing an embedded home care intake role-play. The trainer (SPEAKER_0) coaches participants through a dyadic patient interview involving a homebound woman presenting with chron"
+  }
+]

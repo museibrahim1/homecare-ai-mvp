@@ -27,12 +27,58 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.business import Business, BusinessUser
 from app.models.subscription import Invoice, Plan, Subscription
 
 logger = logging.getLogger(__name__)
+
+# Human-readable payment labels written into the PDF.
+BILLED_VIA_APPLE = "Apple In-App Purchase"
+BILLED_VIA_STRIPE = "Stripe"
+BILLED_VIA_PALM = "PalmCare billing"
+
+
+def resolve_billed_via(
+    invoice: Invoice,
+    meta: Optional[dict] = None,
+) -> str:
+    """
+    Pick the payment channel for PDF rendering.
+
+    Prefer structured ``line_items`` metadata, then the external id prefix, then
+    description heuristics. Never assume Apple when the charge was Stripe.
+    """
+    meta = meta or {}
+    raw = (meta.get("billed_via") or "").strip().lower()
+    if raw in {"apple_iap", "apple", "app_store", "app store"}:
+        return BILLED_VIA_APPLE
+    if raw in {"stripe", "card", "stripe_card"}:
+        return BILLED_VIA_STRIPE
+    if raw in {"palm", "palmcare", "internal"}:
+        return BILLED_VIA_PALM
+    if raw:
+        # Already a display string from an older writer.
+        if "apple" in raw:
+            return BILLED_VIA_APPLE
+        if "stripe" in raw:
+            return BILLED_VIA_STRIPE
+        return meta.get("billed_via") or BILLED_VIA_PALM
+
+    ext_id = (invoice.stripe_invoice_id or "").strip()
+    if ext_id.startswith("apple:"):
+        return BILLED_VIA_APPLE
+    if ext_id:
+        return BILLED_VIA_STRIPE
+
+    desc = (invoice.description or "").lower()
+    if "apple" in desc:
+        return BILLED_VIA_APPLE
+    if "stripe" in desc:
+        return BILLED_VIA_STRIPE
+    return BILLED_VIA_PALM
 
 
 def _s3_key(business_id: Any, invoice_id: Any) -> str:
@@ -177,7 +223,12 @@ def create_apple_invoice(
             description=f"{plan_name} billed via Apple In-App Purchase",
         )
         db.add(invoice)
-        db.flush()  # assigns invoice.id without committing
+        try:
+            db.flush()  # assigns invoice.id; unique index catches races
+        except IntegrityError:
+            # Another request already inserted this apple:<transaction_id>.
+            db.rollback()
+            return None
 
         pdf_payload = _build_pdf_payload(
             invoice=invoice,
@@ -187,7 +238,7 @@ def create_apple_invoice(
             billing_cycle=billing_cycle,
             period_start=period_start,
             period_end=period_end,
-            billed_via="Apple In-App Purchase",
+            billed_via=BILLED_VIA_APPLE,
         )
 
         storage_key: Optional[str] = None
@@ -220,7 +271,12 @@ def create_apple_invoice(
             ],
         })
 
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            return None
+
         db.refresh(invoice)
         logger.info(
             "Created Apple IAP invoice %s for business %s (%s %s)",
@@ -272,6 +328,7 @@ def get_invoice_pdf_bytes(db: Session, invoice: Invoice) -> bytes:
             return None
 
     plan_name = meta.get("plan_name") or (invoice.description or "PalmCare AI Subscription")
+    billed_via = resolve_billed_via(invoice, meta)
     payload = _build_pdf_payload(
         invoice=invoice,
         business=business,
@@ -280,6 +337,6 @@ def get_invoice_pdf_bytes(db: Session, invoice: Invoice) -> bytes:
         billing_cycle=meta.get("billing_cycle") or "monthly",
         period_start=_parse_dt(meta.get("period_start")),
         period_end=_parse_dt(meta.get("period_end")),
-        billed_via="Apple In-App Purchase",
+        billed_via=billed_via,
     )
     return generate_invoice_pdf(payload)
