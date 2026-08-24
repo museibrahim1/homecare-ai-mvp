@@ -1035,7 +1035,10 @@ class LLMService:
         if json_response:
             system_prompt = f"{system_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No markdown, no explanation, just the JSON object."
         
-        response = self.anthropic_client.messages.create(
+        from libs.anthropic_compat import create_message
+
+        response = create_message(
+            self.anthropic_client,
             model=self.model if self.model in self.ANTHROPIC_MODELS else "claude-sonnet-4-6",
             max_tokens=max_tokens,
             system=system_prompt,

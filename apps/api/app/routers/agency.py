@@ -469,7 +469,10 @@ Return ONLY a JSON object with these fields (use null for missing fields):
                 "Extract and return the JSON object with company information."
             )
 
-        response = client.messages.create(
+        from app.services.anthropic_compat import create_message
+
+        response = create_message(
+            client,
             model="claude-sonnet-4-6",
             max_tokens=2000,
             system=system_prompt,

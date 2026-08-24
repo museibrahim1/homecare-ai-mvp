@@ -1,0 +1,80 @@
+{
+  "ran_at": "2026-08-24T11:08:40.280364+00:00",
+  "api": "https://api-production-a0a2.up.railway.app",
+  "email": "demo@agency.com",
+  "checks": [
+    {
+      "label": "user profile",
+      "path": "/auth/me",
+      "status": 200,
+      "seconds": 0.055
+    },
+    {
+      "label": "clients list",
+      "path": "/clients",
+      "status": 200,
+      "seconds": 0.203,
+      "client_count": 9,
+      "sample_client_detail_seconds": 0.097
+    },
+    {
+      "label": "subscription usage",
+      "path": "/visits/usage",
+      "status": 200,
+      "seconds": 0.247,
+      "upgrade_required": false,
+      "has_paid_plan": true
+    },
+    {
+      "label": "billing",
+      "path": "/billing/subscription",
+      "status": 200,
+      "seconds": 0.065
+    },
+    {
+      "label": "visits list",
+      "path": "/visits?page_size=20",
+      "status": 200,
+      "seconds": 0.212
+    }
+  ],
+  "ok": true,
+  "login": "ok",
+  "showcase_visits": [
+    {
+      "visit_id": "8cd6e94e-d0fc-43cf-894d-c48b861a696a",
+      "client": "Robert Williams",
+      "note": 200,
+      "contract": 200,
+      "billables": 200
+    },
+    {
+      "visit_id": "8b61c515-fd5f-455f-b017-6e2f38cbb933",
+      "client": "Patricia Martinez",
+      "note": 200,
+      "contract": 200,
+      "billables": 200
+    },
+    {
+      "visit_id": "8afc898d-fb7f-4b51-9a08-769cafdcc0f4",
+      "client": "Patricia Martinez",
+      "note": 200,
+      "contract": 200,
+      "billables": 200
+    },
+    {
+      "visit_id": "17e00004-b6d6-48dd-93e9-d98c40bf01d4",
+      "client": "Dorothy Chen",
+      "note": 404,
+      "contract": 200,
+      "billables": 200
+    },
+    {
+      "visit_id": "32a36656-0b30-4d6d-8e6c-3a46f55c6452",
+      "client": "Moscow\u2019s",
+      "note": 200,
+      "contract": 200,
+      "billables": 200
+    }
+  ]
+}

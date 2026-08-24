@@ -145,7 +145,10 @@ def classify_recording(transcript_text: str) -> str:
         import anthropic
 
         client = anthropic.Anthropic(api_key=api_key, timeout=45.0)
-        response = client.messages.create(
+        from libs.anthropic_compat import create_message
+
+        response = create_message(
+            client,
             model="claude-sonnet-4-6",
             max_tokens=120,
             temperature=0,
