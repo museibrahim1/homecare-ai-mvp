@@ -1,0 +1,25 @@
+[
+  {
+    "campaign": "comfort_keepers_followup",
+    "to_email": "staciewitts@comfortkeepers.com",
+    "subject": "Thank you for your time today, and next steps with PALM",
+    "resend_email_id": "fcdc7636-bcb6-4afe-a586-e890f7d00f13",
+    "logged_at": "2026-08-24T15:42:00+00:00",
+    "note": "First send (sales fallback after palmtai.com FROM failed)"
+  },
+  {
+    "campaign": "comfort_keepers_followup",
+    "to_email": "staciewitts@comfortkeepers.com",
+    "subject": "Thank you for your time today, and next steps with PALM",
+    "resend_email_id": "0662795f-c3cc-4a17-a01d-f3fd47e571bd",
+    "logged_at": "2026-08-24T15:44:00+00:00",
+    "note": "Duplicate resend before dedupe guard existed"
+  },
+  {
+    "campaign": "comfort_keepers_duplicate_apology",
+    "to_email": "staciewitts@comfortkeepers.com",
+    "subject": "Sorry about the duplicate email",
+    "resend_email_id": "bb746f2a-4504-4a4a-98ee-03c7876adb8f",
+    "logged_at": "2026-08-24T15:46:41.667617+00:00"
+  }
+]

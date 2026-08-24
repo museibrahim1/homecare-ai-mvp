@@ -4,9 +4,14 @@ Usage:
   python3 scripts/email/send_stacie_comfort_keepers_followup.py           # dry run
   python3 scripts/email/send_stacie_comfort_keepers_followup.py --preview # to Muse
   python3 scripts/email/send_stacie_comfort_keepers_followup.py --send    # to Stacie
+  python3 scripts/email/send_stacie_comfort_keepers_followup.py --send --force  # bypass dedupe
+
+Dedupe: scripts/email/.outreach_sends.json (campaign + recipient email).
 """
+import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -21,6 +26,8 @@ from lib.utm import app_link  # noqa: E402
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FROM = "Muse Ibrahim <sales@send.palmtai.com>"
 REPLY_TO = "museibrahim@palmtai.com"
+SEND_LOG = Path(__file__).resolve().parent / ".outreach_sends.json"
+CAMPAIGN = "comfort_keepers_followup"
 
 STACIE_EMAIL = os.getenv("STACIE_EMAIL", "staciewitts@comfortkeepers.com").strip()
 STACIE_NAME = os.getenv("STACIE_NAME", "Stacie").strip() or "Stacie"
@@ -32,6 +39,31 @@ APP = app_link(
     content="app_store_cta",
 )
 IMG = "https://palmcareai.com/screenshots/email/recording_screen.png"
+
+
+def load_send_log() -> list[dict]:
+    if not SEND_LOG.exists():
+        return []
+    try:
+        return json.loads(SEND_LOG.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def already_sent(campaign: str, to_email: str) -> list[dict]:
+    target = to_email.strip().lower()
+    return [
+        row
+        for row in load_send_log()
+        if row.get("campaign") == campaign and (row.get("to_email") or "").lower() == target
+    ]
+
+
+def append_send_log(entry: dict) -> None:
+    rows = load_send_log()
+    entry["logged_at"] = datetime.now(timezone.utc).isoformat()
+    rows.append(entry)
+    SEND_LOG.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
 
 
 def build_subject() -> str:
@@ -119,6 +151,7 @@ def send_resend(payload: dict) -> tuple[bool, str]:
 def main() -> int:
     dry_run = "--send" not in sys.argv and "--preview" not in sys.argv
     preview = "--preview" in sys.argv
+    force = "--force" in sys.argv
 
     to_email = STACIE_EMAIL
     if preview:
@@ -132,26 +165,47 @@ def main() -> int:
         print("RESEND_API_KEY missing in .env")
         return 1
 
-    subject = ("[Preview] " if preview else "") + build_subject()
+    subject = build_subject()
     html = build_html()
 
     if dry_run:
+        prior = already_sent(CAMPAIGN, to_email)
         preview_path = PROJECT_ROOT / "marketing/email-preview-stacie-comfort-keepers.html"
         preview_path.write_text(html, encoding="utf-8")
         print(f"[dry run] -> {to_email}")
-        print(f"Subject: {build_subject()}")
+        print(f"Subject: {subject}")
+        if prior:
+            print(f"DEDUPED: already sent {len(prior)} time(s); use --force to resend")
+            for row in prior:
+                print(f"  - {row.get('resend_email_id')} at {row.get('logged_at')}")
         print(f"Preview saved: {preview_path}")
         return 0
+
+    if not preview and not force:
+        prior = already_sent(CAMPAIGN, to_email)
+        if prior:
+            print(f"SKIP (dedupe): {CAMPAIGN} already sent to {to_email} ({len(prior)} time(s)).")
+            print("Use --force only if you intentionally need another send.")
+            return 0
 
     payload = {
         "from": FROM,
         "to": [to_email],
         "reply_to": REPLY_TO,
-        "subject": subject,
+        "subject": ("[Preview] " if preview else "") + subject,
         "html": html,
     }
     ok, detail = send_resend(payload)
     if ok:
+        if not preview:
+            append_send_log(
+                {
+                    "campaign": CAMPAIGN,
+                    "to_email": to_email,
+                    "subject": subject,
+                    "resend_email_id": detail,
+                }
+            )
         print(f"SENT -> {to_email}  from={FROM}  id={detail}")
         return 0
     print(f"FAIL: {detail}")
