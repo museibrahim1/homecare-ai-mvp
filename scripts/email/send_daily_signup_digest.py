@@ -40,6 +40,7 @@ REPORT_TO = [
     if e.strip()
 ]
 REPORT_FROM = "Muse Ibrahim <sales@send.palmtai.com>"
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) PalmSignupDigest/1.0"
 
 
 def fetch_stats(day: str | None) -> dict:
@@ -146,6 +147,7 @@ def send_email(subject: str, html: str) -> str:
         headers={
             "Authorization": f"Bearer {RESEND_API_KEY}",
             "Content-Type": "application/json",
+            "User-Agent": UA,
         },
     )
     try:
