@@ -1,0 +1,32 @@
+name: Daily signup digest
+
+# Morning summary: new agency signups + site traffic (US Eastern calendar day).
+
+on:
+  schedule:
+    - cron: "30 12 * * *"   # 8:30 AM ET (EDT, UTC-4)
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Report date YYYY-MM-DD (US Eastern), optional"
+        required: false
+        default: ""
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Send signup digest
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          ARGS="--send"
+          if [ -n "${{ github.event.inputs.day }}" ]; then
+            ARGS="$ARGS --day ${{ github.event.inputs.day }}"
+          fi
+          python scripts/email/send_daily_signup_digest.py $ARGS

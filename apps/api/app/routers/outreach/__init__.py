@@ -47,6 +47,7 @@ from .calls import router as _calls_router
 from .drafts import router as _drafts_router
 from .digest import router as _digest_router
 from .maintenance import router as _maintenance_router
+from .signup_stats import router as _signup_stats_router
 
 router = APIRouter()
 router.include_router(_plan_router)
@@ -54,3 +55,4 @@ router.include_router(_calls_router)
 router.include_router(_drafts_router)
 router.include_router(_digest_router)
 router.include_router(_maintenance_router)
+router.include_router(_signup_stats_router)

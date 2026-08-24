@@ -193,6 +193,7 @@ function RegisterForm() {
 
       const data = await res.json();
       trackFunnelStep(4, 'registration', { plan: selectedPlan });
+      trackFunnelStep(5, 'registration', { plan: selectedPlan, completed: true });
       try {
         trackSignUp({
           plan: selectedPlan,
