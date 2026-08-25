@@ -20,8 +20,10 @@ interface AuthUser {
   role: string;
   is_active: boolean;
   business_id?: string;
+  company_name?: string;
   agency_name?: string;
   business_name?: string;
+  agency_logo?: string;
   permissions?: string[];
   temp_password?: boolean;
   executive_title?: string;

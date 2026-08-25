@@ -64,7 +64,10 @@ export default function GlassRail() {
       .map((n) => n[0])
       .join('')
       .slice(0, 2)
-      .toUpperCase() || 'MS';
+      .toUpperCase() || '';
+
+  const agencyLabel =
+    user?.business_name || user?.agency_name || user?.company_name || '';
 
   const rail = (
     <aside className="glass-rail w-[240px] h-full flex flex-col justify-between py-7 px-5 overflow-hidden">
@@ -117,15 +120,23 @@ export default function GlassRail() {
 
       <div className="flex flex-col gap-3 shrink-0 pt-4">
         <div className="flex items-center py-2.5 px-3 rounded-2xl gap-2.5 bg-[#FFFFFF99] border border-[#FFFFFFE0]">
-          <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-primary-500">
-            <span className="text-sm font-bold text-white">{initials}</span>
-          </div>
+          {user?.agency_logo ? (
+            <img
+              src={user.agency_logo}
+              alt=""
+              className="w-10 h-10 shrink-0 rounded-full object-cover bg-white"
+            />
+          ) : (
+            <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-primary-500">
+              <span className="text-sm font-bold text-white">{initials || '—'}</span>
+            </div>
+          )}
           <div className="flex flex-col min-w-0 gap-0.5">
             <div className="text-sm font-semibold leading-[18px] text-[#10211F] truncate">
-              {user?.full_name || 'Maria Santos'}
+              {user?.full_name || ''}
             </div>
             <div className="text-xs font-medium leading-4 text-slate-500 truncate">
-              {(user as { business_name?: string })?.business_name || 'Sunrise Home Care'}
+              {agencyLabel}
             </div>
           </div>
         </div>

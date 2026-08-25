@@ -41,6 +41,8 @@ export const defaultAgency: AgencySettings = {
 };
 
 export const documentCategories = [
+  { id: 'contract_template', label: 'Service contract', icon: FileText },
+  { id: 'assessment_sheet', label: 'Care plan / assessment', icon: FileText },
   { id: 'policy', label: 'Policy Document', icon: FileText },
   { id: 'procedure', label: 'Procedure Manual', icon: File },
   { id: 'letterhead', label: 'Letterhead / Branding', icon: Image },

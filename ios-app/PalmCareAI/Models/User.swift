@@ -13,6 +13,20 @@ struct User: Codable, Identifiable {
     let temp_password: Bool?
     let needs_onboarding: Bool?
     let has_password: Bool?
+    let company_name: String?
+    let business_name: String?
+    let agency_name: String?
+    let agency_logo: String?
+
+    var displayAgencyName: String {
+        let candidates = [business_name, agency_name, company_name]
+        for name in candidates {
+            if let name, !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return name
+            }
+        }
+        return ""
+    }
 
     var isAdmin: Bool {
         role == "admin" || role == "admin_team"

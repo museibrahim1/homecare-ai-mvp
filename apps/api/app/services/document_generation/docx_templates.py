@@ -778,32 +778,31 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
 
 
 def generate_contract_from_uploaded_template(
-    client: Any, 
-    contract: Any, 
+    client: Any,
+    contract: Any,
     template_base64: str,
-    agency_settings: Optional[Any] = None
+    agency_settings: Optional[Any] = None,
+    field_mapping: Optional[Dict[str, str]] = None,
 ) -> bytes:
     """
-    Generate a contract DOCX by filling in an uploaded template.
-    
+    Fill the agency's uploaded DOCX in place (layout preserved).
+
     Args:
         client: Client model with name, address, etc.
         contract: Contract model with services, schedule, rates
         template_base64: Base64-encoded DOCX template
         agency_settings: Optional agency settings for agency info
-    
+        field_mapping: Optional OCR field_id → db path map
+
     Returns:
         DOCX file as bytes with placeholders replaced
     """
-    # Decode the template
     template_bytes = base64.b64decode(template_base64)
-    
-    # Get all placeholder values
     placeholders = get_template_placeholders(client, contract, agency_settings)
-    
-    # Fill the template
-    filled_doc = fill_docx_template(template_bytes, placeholders)
-    
-    return filled_doc
+    return fill_docx_template(
+        template_bytes,
+        placeholders,
+        template_field_mapping=field_mapping,
+    )
 
 

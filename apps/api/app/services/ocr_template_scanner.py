@@ -107,6 +107,16 @@ DB_FIELD_REGISTRY: dict[str, dict[str, str]] = {
     "mobility_status": {"path": "client.mobility_status", "type": "text", "category": "assessment"},
     "cognitive_status": {"path": "client.cognitive_status", "type": "text", "category": "assessment"},
     "living_situation": {"path": "client.living_situation", "type": "text", "category": "assessment"},
+    "care_plan": {"path": "client.care_plan", "type": "text", "category": "assessment"},
+    "care_plan_goals": {"path": "contract.schedule.care_plan_goals", "type": "list", "category": "assessment"},
+    "allergies": {"path": "client.allergies", "type": "text", "category": "assessment"},
+    "medications": {"path": "client.medications", "type": "text", "category": "assessment"},
+    "adl_needs": {"path": "contract.schedule.adl_needs", "type": "list", "category": "assessment"},
+    "iadl_needs": {"path": "contract.schedule.iadl_needs", "type": "list", "category": "assessment"},
+    "fall_risk": {"path": "contract.schedule.fall_risk", "type": "text", "category": "assessment"},
+    "assessment_date": {"path": "computed.today", "type": "date", "category": "assessment"},
+    "assessor_name": {"path": "agency.contact_person", "type": "text", "category": "assessment"},
+    "nurse_name": {"path": "agency.contact_person", "type": "text", "category": "assessment"},
 
     # Services
     "services": {"path": "contract.services", "type": "list", "category": "services"},

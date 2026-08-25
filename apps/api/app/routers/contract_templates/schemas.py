@@ -23,6 +23,7 @@ class TemplateResponse(BaseModel):
     description: Optional[str]
     is_active: bool
     file_type: str
+    doc_kind: str = "contract"
     detected_fields: list
     field_mapping: dict
     unmapped_fields: list
@@ -39,6 +40,7 @@ class TemplateListItem(BaseModel):
     version: int
     is_active: bool
     file_type: str
+    doc_kind: str = "contract"
     field_count: int
     unmapped_count: int
     created_at: str

@@ -17,6 +17,9 @@ class ContractTemplate(Base, TimestampMixin):
     description = Column(Text, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
 
+    # What this upload is for: contract | assessment | care_plan
+    doc_kind = Column(String(32), nullable=False, default="contract", server_default="contract")
+
     file_type = Column(String(20), nullable=False, default="pdf")
     file_url = Column(Text, nullable=True)
     file_hash = Column(String(64), nullable=True)

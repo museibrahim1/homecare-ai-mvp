@@ -219,8 +219,8 @@ async def export_contract_with_template(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export a contract as DOCX using the built-in PALM Paper template."""
-    from app.services.document_generation import generate_contract_docx
+    """Export a contract as DOCX using the agency's uploaded form when available."""
+    from app.services.agency_document_fill import DOC_KIND_CONTRACT, fill_agency_document
 
     contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
         Contract.id == contract_id,
@@ -233,7 +233,15 @@ async def export_contract_with_template(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    filled_docx = generate_contract_docx(client, contract)
+    filled_docx = fill_agency_document(
+        db,
+        current_user,
+        client,
+        contract,
+        doc_kind=DOC_KIND_CONTRACT,
+        template_id=template_id,
+        fallback_builtin=True,
+    )
     safe_name = (client.full_name or "contract").replace(" ", "_")
     filename = f"{safe_name}_Service_Agreement.docx"
 

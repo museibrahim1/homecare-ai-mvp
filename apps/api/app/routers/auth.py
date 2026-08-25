@@ -92,9 +92,16 @@ def _user_needs_onboarding(db: Session, user: User) -> bool:
 
 
 def _user_response(db: Session, user: User) -> UserResponse:
+    from app.services.agency_branding import resolve_agency_branding
+
     resp = UserResponse.model_validate(user)
     resp.needs_onboarding = _user_needs_onboarding(db, user)
     resp.has_password = bool(user.hashed_password)
+    branding = resolve_agency_branding(db, user)
+    resp.company_name = branding.get("company_name") or getattr(user, "company_name", None)
+    resp.business_name = branding.get("business_name")
+    resp.agency_name = branding.get("business_name")
+    resp.agency_logo = branding.get("agency_logo")
     return resp
 
 
