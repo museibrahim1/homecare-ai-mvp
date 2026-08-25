@@ -1,6 +1,7 @@
 import SwiftUI
 import LocalAuthentication
 import StoreKit
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var api: APIService
@@ -127,26 +128,40 @@ struct SettingsView: View {
                     .joined()
                     .uppercased()
 
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.palmPrimary, Color.palmTeal600],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Text(initials)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+                Group {
+                    if let logo = user?.agency_logo, let url = URL(string: logo), logo.hasPrefix("http") {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable().scaledToFill()
+                            default:
+                                profileInitialsCircle(initials)
+                            }
+                        }
+                    } else if let logo = user?.agency_logo, logo.hasPrefix("data:"),
+                              let data = Data(base64Encoded: logo.components(separatedBy: ",").last ?? ""),
+                              let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        profileInitialsCircle(initials)
+                    }
+                }
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(user?.full_name ?? "Loading...")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.palmInk)
                         .lineLimit(1)
+                    if let agency = user?.displayAgencyName, !agency.isEmpty {
+                        Text(agency)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.palmGlassMuted)
+                            .lineLimit(1)
+                    }
                     Text(user?.email ?? "")
                         .font(.system(size: 13))
                         .foregroundColor(.palmGlassMuted)
@@ -164,6 +179,22 @@ struct SettingsView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Edit profile")
+    }
+
+    private func profileInitialsCircle(_ initials: String) -> some View {
+        Circle()
+            .fill(
+                LinearGradient(
+                    colors: [Color.palmPrimary, Color.palmTeal600],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                Text(initials)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+            )
     }
 
     // MARK: - Preferences

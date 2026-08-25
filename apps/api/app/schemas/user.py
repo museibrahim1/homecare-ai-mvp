@@ -35,6 +35,11 @@ class UserResponse(UserBase):
     mfa_enabled: Optional[bool] = False
     google_calendar_connected: Optional[bool] = False
     executive_title: Optional[str] = None
+    # ORM column on users (set at signup / onboarding)
+    company_name: Optional[str] = None
     # Populated by /auth/me and /auth/social (not ORM columns)
     needs_onboarding: Optional[bool] = None
     has_password: Optional[bool] = None
+    business_name: Optional[str] = None
+    agency_name: Optional[str] = None
+    agency_logo: Optional[str] = None

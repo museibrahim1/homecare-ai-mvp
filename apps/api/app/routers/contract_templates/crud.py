@@ -37,13 +37,22 @@ async def upload_and_scan_template(
     file: UploadFile = File(...),
     name: str = Form(...),
     description: Optional[str] = Form(None),
+    doc_kind: str = Form("contract"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
-    Upload a contract template (PDF or DOCX), run OCR to extract text,
-    detect form fields via AI, and build the field mapping.
+    Upload a contract or assessment form (PDF or DOCX), run OCR to extract
+    text, detect form fields via AI, and store the original file so exports
+    can fill that document in place (replicate the agency's form).
     """
+    kind = (doc_kind or "contract").strip().lower()
+    if kind not in {"contract", "assessment", "care_plan"}:
+        raise HTTPException(
+            status_code=400,
+            detail="doc_kind must be contract, assessment, or care_plan",
+        )
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -59,27 +68,31 @@ async def upload_and_scan_template(
         raise HTTPException(status_code=400, detail="File too large (max 20MB)")
 
     file_hash = compute_file_hash(file_bytes)
+    owner_ids = visible_user_ids(db, current_user)
 
     existing = db.query(ContractTemplate).filter(
-        ContractTemplate.owner_id == current_user.id,
+        ContractTemplate.owner_id.in_(owner_ids),
         ContractTemplate.file_hash == file_hash,
+        ContractTemplate.doc_kind == kind,
     ).first()
     if existing:
         raise HTTPException(
             status_code=409,
-            detail=f"This file was already uploaded as template '{existing.name}' (v{existing.version})"
+            detail=f"This file was already uploaded as '{existing.name}' (v{existing.version})"
         )
 
     latest = db.query(ContractTemplate).filter(
-        ContractTemplate.owner_id == current_user.id,
+        ContractTemplate.owner_id.in_(owner_ids),
         ContractTemplate.name == name,
+        ContractTemplate.doc_kind == kind,
     ).order_by(ContractTemplate.version.desc()).first()
     next_version = (latest.version + 1) if latest else 1
 
     if latest:
         db.query(ContractTemplate).filter(
-            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.owner_id.in_(owner_ids),
             ContractTemplate.name == name,
+            ContractTemplate.doc_kind == kind,
             ContractTemplate.is_active == True,
         ).update({"is_active": False})
 
@@ -87,17 +100,20 @@ async def upload_and_scan_template(
     detected_fields = await detect_fields_with_ai(ocr_text, file.filename)
     field_mapping, unmapped_fields = build_field_mapping(detected_fields)
 
-    # AI second pass: try to map remaining unmapped fields
     if unmapped_fields:
         try:
             from app.services.ocr_template_scanner import ai_auto_map_unmapped
             extra_mapping, unmapped_fields = await ai_auto_map_unmapped(unmapped_fields, field_mapping)
             field_mapping.update(extra_mapping)
-            logger.info(f"AI auto-mapped {len(extra_mapping)} additional fields, {len(unmapped_fields)} still unmapped")
+            logger.info(
+                "AI auto-mapped %s additional fields, %s still unmapped",
+                len(extra_mapping),
+                len(unmapped_fields),
+            )
         except Exception as e:
             logger.warning(f"AI auto-mapping second pass failed: {e}")
 
-    file_url = f"data:{content_type};base64,{base64.b64encode(file_bytes).decode()}"
+    file_url = f"data:{content_type or 'application/octet-stream'};base64,{base64.b64encode(file_bytes).decode()}"
 
     template = ContractTemplate(
         owner_id=current_user.id,
@@ -105,6 +121,7 @@ async def upload_and_scan_template(
         version=next_version,
         description=description,
         is_active=True,
+        doc_kind=kind,
         file_type="pdf" if is_pdf else "docx",
         file_url=file_url,
         file_hash=file_hash,
@@ -124,15 +141,19 @@ async def upload_and_scan_template(
 @router.get("/", response_model=List[TemplateListItem])
 async def list_templates(
     active_only: bool = True,
+    doc_kind: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all contract templates for the current user."""
+    """List uploaded documents for the current agency."""
+    owner_ids = visible_user_ids(db, current_user)
     query = db.query(ContractTemplate).filter(
-        ContractTemplate.owner_id == current_user.id,
+        ContractTemplate.owner_id.in_(owner_ids),
     )
     if active_only:
         query = query.filter(ContractTemplate.is_active == True)
+    if doc_kind:
+        query = query.filter(ContractTemplate.doc_kind == doc_kind.strip().lower())
 
     templates = query.order_by(ContractTemplate.created_at.desc()).all()
 
@@ -143,6 +164,7 @@ async def list_templates(
             version=t.version,
             is_active=t.is_active,
             file_type=t.file_type,
+            doc_kind=getattr(t, "doc_kind", None) or "contract",
             field_count=len(t.detected_fields or []),
             unmapped_count=len(t.unmapped_fields or []),
             created_at=str(t.created_at),
@@ -202,15 +224,17 @@ async def preview_template_with_data(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
+    owner_ids = visible_user_ids(db, current_user)
     if template_id:
         template = db.query(ContractTemplate).filter(
             ContractTemplate.id == template_id,
-            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.owner_id.in_(owner_ids),
         ).first()
     else:
         template = db.query(ContractTemplate).filter(
-            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.owner_id.in_(owner_ids),
             ContractTemplate.is_active == True,
+            ContractTemplate.doc_kind == "contract",
         ).order_by(ContractTemplate.version.desc()).first()
 
     agency_settings = db.query(AgencySettings).filter(

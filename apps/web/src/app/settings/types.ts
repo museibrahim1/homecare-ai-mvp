@@ -4,7 +4,7 @@ export interface UploadedDocument {
   id: string;
   name: string;
   type: string;
-  category: 'contract_template' | 'policy' | 'procedure' | 'letterhead' | 'other';
+  category: 'contract_template' | 'assessment_sheet' | 'policy' | 'procedure' | 'letterhead' | 'other';
   content: string;
   uploaded_at: string;
 }

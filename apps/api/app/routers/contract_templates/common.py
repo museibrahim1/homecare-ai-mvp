@@ -25,6 +25,7 @@ def _template_to_response(template: ContractTemplate) -> TemplateResponse:
         description=template.description,
         is_active=template.is_active,
         file_type=template.file_type,
+        doc_kind=getattr(template, "doc_kind", None) or "contract",
         detected_fields=template.detected_fields or [],
         field_mapping=template.field_mapping or {},
         unmapped_fields=template.unmapped_fields or [],

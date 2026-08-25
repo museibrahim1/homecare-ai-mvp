@@ -239,6 +239,10 @@ class ApiClient {
       role: string;
       is_active: boolean;
       business_id?: string;
+      company_name?: string;
+      business_name?: string;
+      agency_name?: string;
+      agency_logo?: string;
       needs_onboarding?: boolean;
       has_password?: boolean;
     }>('/auth/me', {}, token);
@@ -409,10 +413,17 @@ class ApiClient {
   }
 
   // Contract Templates
-  async uploadContractTemplate(token: string, file: File, name: string, description?: string) {
+  async uploadContractTemplate(
+    token: string,
+    file: File,
+    name: string,
+    description?: string,
+    docKind: 'contract' | 'assessment' | 'care_plan' = 'contract',
+  ) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('name', name);
+    formData.append('doc_kind', docKind);
     if (description) formData.append('description', description);
 
     const controller = new AbortController();
@@ -439,8 +450,9 @@ class ApiClient {
     }
   }
 
-  async listContractTemplates(token: string) {
-    return this.request<any[]>('/contract-templates/', {}, token);
+  async listContractTemplates(token: string, docKind?: 'contract' | 'assessment' | 'care_plan') {
+    const q = docKind ? `?doc_kind=${docKind}` : '';
+    return this.request<any[]>(`/contract-templates/${q}`, {}, token);
   }
 
   async getContractTemplate(token: string, templateId: string) {

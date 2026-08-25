@@ -32,6 +32,11 @@ def test_get_me(client: TestClient, auth_headers):
     data = response.json()
     assert data["email"] == "admin@palmtai.com"
     assert data["role"] == "admin"
+    # Branding fields must be present so clients never fall back to demo names.
+    assert "company_name" in data
+    assert "business_name" in data
+    assert "agency_logo" in data
+    assert data.get("business_name") != "Sunrise Home Care"
 
 
 def test_get_me_unauthorized(client: TestClient):

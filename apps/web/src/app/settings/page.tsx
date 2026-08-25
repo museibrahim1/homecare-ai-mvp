@@ -45,7 +45,7 @@ type SettingsView = 'hub' | 'company' | 'documents' | 'plan' | 'profile' | 'team
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { token, isReady, logout, user } = useRequireAuth();
+  const { token, isReady, logout, user, setUser } = useRequireAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -335,6 +335,65 @@ export default function SettingsPage() {
 
     setUploadingDoc(true);
 
+    // Service contracts and assessment sheets go through the OCR replicator
+    // so exports fill the agency's own document instead of a PALM template.
+    const isReplicable =
+      selectedCategory === 'contract_template' || selectedCategory === 'assessment_sheet';
+
+    if (isReplicable && token) {
+      try {
+        const docKind =
+          selectedCategory === 'assessment_sheet' ? 'assessment' : 'contract';
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', file.name.replace(/\.[^.]+$/, '') || file.name);
+        formData.append('doc_kind', docKind);
+        formData.append(
+          'description',
+          docKind === 'assessment'
+            ? 'Agency care plan / assessment sheet'
+            : 'Agency service contract',
+        );
+
+        const res = await fetch(`${API_BASE}/contract-templates/upload`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(
+            typeof data.detail === 'string' ? data.detail : 'Upload failed',
+          );
+        }
+
+        const uploaded = await res.json();
+        const newDoc: UploadedDocument = {
+          id: uploaded.id || Date.now().toString(),
+          name: uploaded.name || file.name,
+          type: file.type,
+          category: selectedCategory as any,
+          content: '',
+          uploaded_at: new Date().toISOString(),
+        };
+        setAgency((prev) => ({
+          ...prev,
+          documents: [...prev.documents, newDoc],
+        }));
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        await extractCompanyInfoFromFile(file, selectedCategory);
+      } catch (err: any) {
+        setError(err?.message || 'Could not upload and scan this document.');
+      } finally {
+        setUploadingDoc(false);
+        if (docInputRef.current) docInputRef.current.value = '';
+      }
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
@@ -518,6 +577,16 @@ export default function SettingsPage() {
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        // Keep sidebar / profile card in sync with the saved agency name + logo.
+        if (token && setUser) {
+          try {
+            const { api } = await import('@/lib/api');
+            const me = await api.getMe(token);
+            setUser({ ...user, ...me } as any);
+          } catch {
+            /* non-fatal */
+          }
+        }
       } else {
         setError('Failed to save settings');
       }
@@ -628,12 +697,15 @@ export default function SettingsPage() {
 
   const showSave = view === 'hub' || view === 'company' || view === 'profile';
 
-  const initials = (user?.full_name || 'MS')
+  const initials = (user?.full_name || '')
     .split(' ')
     .map((n) => n[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
+
+  const agencyDisplayName =
+    agency.name || user?.business_name || user?.agency_name || user?.company_name || 'Your agency';
 
   const backButton = (
     <button
@@ -649,7 +721,7 @@ export default function SettingsPage() {
   return (
     <GlassShell
       title="Settings"
-      subtitle={agency.name || 'Your agency'}
+      subtitle={agencyDisplayName}
       action={
         showSave ? (
           <button
@@ -686,14 +758,22 @@ export default function SettingsPage() {
           <div className="space-y-6">
             {/* Profile card */}
             <div className="glass-card flex flex-col sm:flex-row sm:items-center gap-5 p-6">
-              <div className="w-16 h-16 shrink-0 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
-                {initials}
-              </div>
+              {logoPreview || user?.agency_logo ? (
+                <img
+                  src={logoPreview || user?.agency_logo || ''}
+                  alt=""
+                  className="w-16 h-16 shrink-0 rounded-full object-cover bg-white border border-[#10211F14]"
+                />
+              ) : (
+                <div className="w-16 h-16 shrink-0 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
+                  {initials || '—'}
+                </div>
+              )}
               <div className="flex flex-col gap-1 min-w-0 flex-1">
                 <p className="text-lg font-bold text-[#10211F]">{user?.full_name || 'Your profile'}</p>
                 <p className="text-sm font-medium text-[#64748B] truncate">{user?.email || ''}</p>
                 <p className="text-sm font-medium text-[#7A8C88]">
-                  {[user?.role || 'Admin', agency.name || 'Your agency', agency.state].filter(Boolean).join(' · ')}
+                  {[user?.role || 'Admin', agencyDisplayName, agency.state].filter(Boolean).join(' · ')}
                 </p>
               </div>
               <button
@@ -1344,7 +1424,9 @@ export default function SettingsPage() {
                 Upload documents
               </h2>
               <p className="text-slate-600 text-sm mb-4">
-                Upload your policies, procedures, and other business documents.
+                Upload your service contract and care plan assessment sheets as Word (.docx) files.
+                PALM reads the form with OCR and fills your original document for each client.
+                Policies and other files can be stored here too.
               </p>
 
               {/* Category selection */}

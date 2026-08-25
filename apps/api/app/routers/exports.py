@@ -26,6 +26,12 @@ from app.services.document_generation import (
     generate_note_docx,
     generate_contract_docx,
 )
+from app.services.agency_document_fill import (
+    DOC_KIND_ASSESSMENT,
+    DOC_KIND_CARE_PLAN,
+    DOC_KIND_CONTRACT,
+    fill_agency_document,
+)
 from app.services.email import get_email_service
 from app.services import email_sender
 
@@ -261,27 +267,86 @@ async def export_contract_from_template(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Export the PALM service agreement as DOCX (data isolation enforced).
-    Uses the built-in Paper PALM template only. OCR and uploaded Word
-    galleries are retired.
+    Export the service agreement as DOCX.
+
+    Prefer the agency's uploaded contract document (OCR-scanned and filled
+    in place so their layout and clauses are preserved). Fall back to the
+    built-in PALM agreement only when no Word upload is available.
     """
     visit = get_user_visit(db, visit_id, current_user)
-    
+
     contract = db.query(Contract).filter(
         Contract.client_id == visit.client_id
     ).order_by(Contract.created_at.desc()).first()
-    
+
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
 
-    # Built-in PALM Paper template only. OCR gallery and uploaded Word
-    # templates are retired.
-    docx_bytes = generate_contract_docx(visit.client, contract)
-    
+    docx_bytes = fill_agency_document(
+        db,
+        current_user,
+        visit.client,
+        contract,
+        doc_kind=DOC_KIND_CONTRACT,
+        fallback_builtin=True,
+    )
+
     return StreamingResponse(
         iter([docx_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": f"attachment; filename=contract_{contract.id}.docx"},
+    )
+
+
+@router.get("/visits/{visit_id}/assessment-sheet.docx")
+async def export_assessment_sheet(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Fill the agency's uploaded care-plan / assessment sheet with visit data."""
+    visit = get_user_visit(db, visit_id, current_user)
+
+    contract = db.query(Contract).filter(
+        Contract.client_id == visit.client_id
+    ).order_by(Contract.created_at.desc()).first()
+
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+
+    try:
+        docx_bytes = fill_agency_document(
+            db,
+            current_user,
+            visit.client,
+            contract,
+            doc_kind=DOC_KIND_ASSESSMENT,
+            fallback_builtin=False,
+        )
+    except ValueError as exc:
+        # Care-plan sheets share the same fill path; try that kind next.
+        try:
+            docx_bytes = fill_agency_document(
+                db,
+                current_user,
+                visit.client,
+                contract,
+                doc_kind=DOC_KIND_CARE_PLAN,
+                fallback_builtin=False,
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+
+    safe_name = (visit.client.full_name or "client").replace(" ", "_")
+    return StreamingResponse(
+        iter([docx_bytes]),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": f"attachment; filename={safe_name}_Assessment.docx"
+        },
     )
 
 
