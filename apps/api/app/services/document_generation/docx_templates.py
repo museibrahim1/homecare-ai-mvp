@@ -184,9 +184,11 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str], temp
             """
             Replace "Label:" patterns with values.  Handles:
             - "Label: ___________"  (underscores)
-            - "Label:  "           (just spaces)
-            - "Label:"             (nothing after, end of line)
+            - "Label:  "           (just spaces / end of line)
             - "City: State: Zip:"  (multiple labels on one line)
+
+            Does NOT re-fill labels that already have values (e.g. after
+            `{client_name}` was replaced into "Client Name: Ada Client").
             """
             if not text:
                 return text
@@ -201,6 +203,10 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str], temp
                     if start < re_ and end > rs:
                         return True
                 return False
+
+            def rest_starts_with_label(rest: str) -> bool:
+                rest_lower = rest.lower()
+                return any(rest_lower.startswith(lbl) for lbl, _ in LABEL_MAPPINGS)
 
             for label, pk in LABEL_MAPPINGS:
                 idx = text_lower.find(label)
@@ -221,32 +227,50 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str], temp
                 if not value:
                     continue
 
+                value_str = str(value)
+
+                # Already filled (placeholder replace landed the value here).
+                after_label = result[label_end:].lstrip(' \t')
+                if after_label.startswith(value_str):
+                    continue
+
                 # Find the span of underscores/spaces/$ after the label
                 span_end = label_end
                 while span_end < len(result) and result[span_end] in '_ \t$':
                     span_end += 1
 
                 span_content = result[label_end:span_end]
+                remainder = result[span_end:].strip()
 
                 should_fill = False
                 if span_content and any(c == '_' for c in span_content):
-                    should_fill = True
+                    # Underscore blanks: fill only when blank or next token is another label
+                    if not remainder or rest_starts_with_label(remainder):
+                        should_fill = True
                 elif span_end >= len(result):
                     should_fill = True
                 elif span_end == label_end:
-                    rest = result[label_end:].strip()
-                    if not rest:
+                    # Nothing after the colon
+                    if not remainder:
                         should_fill = True
                 else:
-                    if not span_content.strip() or span_content.strip() == '$':
+                    # Whitespace / $ only after the label. Fill only if the line
+                    # is otherwise empty or continues with another label.
+                    # This avoids "Client Name: Ada" → "Client Name: AdaAda".
+                    if (not span_content.strip() or span_content.strip() == '$') and (
+                        not remainder or rest_starts_with_label(remainder)
+                    ):
                         should_fill = True
 
                 if should_fill:
-                    insertion = ' ' + str(value)
-                    new_result = result[:label_end] + insertion + result[span_end:]
+                    insertion = ' ' + value_str
+                    suffix = result[span_end:]
+                    # Keep a gap when the next token on this line is another label
+                    # (e.g. "City: ______  State: ______").
+                    if suffix and not suffix[0].isspace() and rest_starts_with_label(suffix.lstrip()):
+                        insertion = insertion + ' '
+                    new_result = result[:label_end] + insertion + suffix
                     replaced_ranges.append((idx, label_end + len(insertion)))
-                    shift = len(new_result) - len(result)
-                    # Adjust existing ranges after this point
                     result = new_result
                     text_lower = result.lower()
 
