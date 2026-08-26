@@ -126,7 +126,7 @@
         "insights": {
           "data": [],
           "paging": {
-            "previous": "https://graph.facebook.com/v25.0/955150854358893/insights?access_token=EAAWV07Sff4IBR5zIU3WCIiVFXGgTJLO4dTmMdL890cJ9JKZCuoKVAnIxbZC7nqD6QJFQUnzWZA0JPjexJJJcntdMWss3cwiFXGQSGBBPpWBFPO8LTqkEIAUZClXRfpwt8pWHENFv8b1e6qmjcCtHEGUNJlusX8ogMjxiEr32DUOjaEVnWyOZA0LblZAbLtQdGuaswnUGoO&since=1786518000&until=1787122800&metric=page_views_total%2Cpage_post_engagements&period=day"
+            "previous": "[redacted_paging_url]"
           }
         },
         "insights_status": "ok"
@@ -261,7 +261,7 @@
               "before": "QVFIVE5ZATTk1YmJHa092V19jcjV6dFd6S1dnMTdkMGRJU2haem1vbGRlZA3JUbnNjdDlMOGdIMFFBcDFuVGZA6VGV0T1kxRklROU40Nk5PLTZAjR3c1V1Jzd2NR",
               "after": "QVFIVDdVUlFRLVZAsbE9kaEFUV184b1NUYzRFRldjMkNDRmlfbkxxQXhoNThQVTFaMXF5MUZAEbEx4aG9Sd0NlQU5KZA0FUd2hFS2tRUkttc2dPNVRRc3lmakR3"
             },
-            "next": "https://graph.threads.net/v1.0/17841443628511270/threads?fields=id%2Ctext%2Ctimestamp%2Cpermalink&limit=5&access_token=THABLWllJl8tBBYllMNTFkYU85bzE0MTZA0b19ldWpQY1VvWmJRSV9GNUZA1ZATJSaDR2TVVaNS1URG1tZAExSdmx3RlpBUkpXNVFSczNCNWswMXA0ZATZAZAYkd4RzJ4WVhOTDBwX2g2MlVSVjd6VlBHWktZAVldpRDBzb3A1RVNTUVAtY21SUQZDZD&after=QVFIVDdVUlFRLVZAsbE9kaEFUV184b1NUYzRFRldjMkNDRmlfbkxxQXhoNThQVTFaMXF5MUZAEbEx4aG9Sd0NlQU5KZA0FUd2hFS2tRUkttc2dPNVRRc3lmakR3"
+            "next": "[redacted_paging_url]"
           }
         },
         "status": "ok"

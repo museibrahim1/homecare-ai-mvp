@@ -15,14 +15,18 @@ import {
   Smartphone,
   Download,
   Building2,
-  ExternalLink,
+  CreditCard,
 } from 'lucide-react';
-import { useRequireAuth } from '@/lib/auth';
-import GlassShell from '@/components/GlassShell';
 
 const API_BASE = '/api';
-const APP_STORE_URL =
-  'https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988';
+import { useRequireAuth } from '@/lib/auth';
+import GlassShell from '@/components/GlassShell';
+import {
+  openAppleSubscriptions,
+  openPaywallInApp,
+  scrollToManageSubscription,
+  type BillingPlanKey,
+} from '@/lib/billingLinks';
 
 interface SubscriptionData {
   id: string;
@@ -33,6 +37,8 @@ interface SubscriptionData {
   cancelled_at: string | null;
   visits_this_month: number;
   storage_used_mb: number;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
 }
 
 interface PlanData {
@@ -79,6 +85,7 @@ export default function BillingPage() {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [planActionLoading, setPlanActionLoading] = useState<string | null>(null);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
@@ -158,6 +165,7 @@ export default function BillingPage() {
   const planCatalog = [
     {
       tier: 'mobile',
+      planKey: 'mobile' as BillingPlanKey,
       name: 'PalmCare Mobile',
       price: '$89.99',
       period: '/mo',
@@ -168,12 +176,11 @@ export default function BillingPage() {
         'Notes, billables, and contracts',
         '50-state compliance engine',
       ],
-      cta: 'Open App Store',
-      href: APP_STORE_URL,
-      external: true,
+      highlight: false,
     },
     {
       tier: 'starter',
+      planKey: 'platform' as BillingPlanKey,
       name: 'PalmCare Platform',
       price: '$199.99',
       period: '/mo',
@@ -184,12 +191,10 @@ export default function BillingPage() {
         'Team seats, pipeline, and calendar',
       ],
       highlight: true,
-      cta: 'Open App Store',
-      href: APP_STORE_URL,
-      external: true,
     },
     {
       tier: 'enterprise',
+      planKey: null,
       name: 'Enterprise',
       price: 'Custom',
       period: '',
@@ -199,9 +204,7 @@ export default function BillingPage() {
         'Custom caps, SSO, and success support',
         'Volume and formula pricing',
       ],
-      cta: 'Request a quote',
-      href: '/book-demo',
-      external: false,
+      highlight: false,
     },
   ];
 
@@ -223,6 +226,29 @@ export default function BillingPage() {
   const status = subscription?.status || 'none';
   const statusInfo = STATUS_CONFIG[status] || STATUS_CONFIG.none;
   const StatusIcon = statusInfo.icon;
+  const hasPaidSubscription = status === 'active' || status === 'trial';
+
+  const handleSubscribe = (planKey: BillingPlanKey) => {
+    setPlanActionLoading(planKey);
+    openPaywallInApp(planKey);
+    window.setTimeout(() => {
+      scrollToManageSubscription();
+      setPlanActionLoading(null);
+    }, 800);
+  };
+
+  const getPlanCta = (tier: string, planKey: BillingPlanKey | null) => {
+    if (isCurrentPlan(tier)) {
+      return { label: 'Current plan', kind: 'current' as const };
+    }
+    if (tier === 'enterprise') {
+      return { label: 'Request a quote', kind: 'quote' as const };
+    }
+    if (hasPaidSubscription) {
+      return { label: 'Change in Apple Subscriptions', kind: 'manage' as const };
+    }
+    return { label: 'Start free trial', kind: 'subscribe' as const, planKey };
+  };
 
   const hasVisitCap = !!plan && plan.max_visits_per_month > 0 && plan.max_visits_per_month < 99999;
   const usagePercent = hasVisitCap
@@ -236,10 +262,25 @@ export default function BillingPage() {
     ? Math.min(100, Math.round((seats!.current_users / seats!.max_users) * 100))
     : 0;
 
-  const changePlanAction = (
-    <a href="#plans" className="glass-btn-primary" style={{ borderRadius: 22, height: 44 }}>
-      Change plan
-    </a>
+  const changePlanAction = hasPaidSubscription ? (
+    <button
+      type="button"
+      onClick={() => openAppleSubscriptions()}
+      className="glass-btn-primary inline-flex items-center gap-2"
+      style={{ borderRadius: 22, height: 44 }}
+    >
+      <CreditCard className="w-4 h-4" />
+      Manage subscription
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={() => scrollToManageSubscription()}
+      className="glass-btn-primary"
+      style={{ borderRadius: 22, height: 44 }}
+    >
+      Subscribe
+    </button>
   );
 
   return (
@@ -318,11 +359,16 @@ export default function BillingPage() {
         <div id="plans">
           <h2 className="text-lg font-bold text-[#10211F] mb-1">Choose a plan</h2>
           <p className="text-[#4B6B66] text-sm mb-4">
-            Mobile and Platform are purchased in the PalmCare iPhone app. Enterprise is a sales quote.
+            New plans start in the PalmCare app with Apple In-App Purchase. Active subscribers change or cancel in Apple Subscriptions.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {planCatalog.map((p) => {
               const current = isCurrentPlan(p.tier);
+              const cta = getPlanCta(p.tier, p.planKey);
+              const loadingThis =
+                cta.kind === 'subscribe' &&
+                cta.planKey &&
+                planActionLoading === cta.planKey;
               const className = `w-full h-9 rounded-[10px] text-[13px] font-semibold transition-colors inline-flex items-center justify-center gap-1.5 ${
                 current
                   ? 'bg-primary-500 text-white cursor-default'
@@ -358,20 +404,38 @@ export default function BillingPage() {
                       </li>
                     ))}
                   </ul>
-                  {current ? (
+                  {cta.kind === 'current' ? (
                     <button type="button" disabled className={className}>
-                      Current plan
+                      {cta.label}
                     </button>
-                  ) : p.external ? (
-                    <a href={p.href} target="_blank" rel="noopener noreferrer" className={className}>
-                      {p.cta}
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ) : (
-                    <Link href={p.href} className={className}>
-                      {p.cta}
+                  ) : cta.kind === 'quote' ? (
+                    <Link href="/book-demo" className={className}>
+                      {cta.label}
                       <Building2 className="w-3.5 h-3.5" />
                     </Link>
+                  ) : cta.kind === 'manage' ? (
+                    <button
+                      type="button"
+                      onClick={() => openAppleSubscriptions()}
+                      className={className}
+                    >
+                      <CreditCard className="w-3.5 h-3.5" />
+                      {cta.label}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => cta.planKey && handleSubscribe(cta.planKey)}
+                      disabled={loadingThis}
+                      className={className}
+                    >
+                      {loadingThis ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Smartphone className="w-3.5 h-3.5" />
+                      )}
+                      {cta.label}
+                    </button>
                   )}
                 </div>
               );
@@ -434,39 +498,84 @@ export default function BillingPage() {
           )}
         </div>
 
-        {/* Manage subscription via Apple */}
-        <div className="glass-card p-6">
+        {/* Subscribe + manage via Apple */}
+        <div id="manage-subscription" className="glass-card p-6">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-[#10211F] flex items-center justify-center flex-shrink-0">
               <Apple className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-[#10211F]">Manage your subscription in the PalmCare app</h2>
+              <h2 className="font-semibold text-[#10211F]">Subscription and payment</h2>
               <p className="text-sm text-[#4B6B66] mt-0.5">
-                Plans, payments, upgrades, and cancellations are handled securely through your Apple ID.
+                PalmCare Mobile and Platform are billed through your Apple ID. Start a trial in the app, or manage an active subscription below.
               </p>
             </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mb-5">
+            {hasPaidSubscription ? (
+              <button
+                type="button"
+                onClick={() => openAppleSubscriptions()}
+                className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[10px] text-[13px] font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+              >
+                <CreditCard className="w-4 h-4" />
+                Open Apple Subscriptions
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleSubscribe('mobile')}
+                  disabled={planActionLoading === 'mobile'}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[10px] text-[13px] font-semibold bg-slate-100 text-slate-800 hover:bg-slate-200 transition-colors disabled:opacity-60"
+                >
+                  {planActionLoading === 'mobile' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Smartphone className="w-4 h-4" />
+                  )}
+                  Start Mobile trial in app
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSubscribe('platform')}
+                  disabled={planActionLoading === 'platform'}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[10px] text-[13px] font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-60"
+                >
+                  {planActionLoading === 'platform' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Smartphone className="w-4 h-4" />
+                  )}
+                  Start Platform trial in app
+                </button>
+              </>
+            )}
           </div>
 
           <ol className="space-y-3 text-sm text-[#334155]">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">1</span>
-              <span>Open the <span className="font-medium">PalmCare AI</span> app on your iPhone or iPad.</span>
+              <span>
+                {hasPaidSubscription
+                  ? 'Open Apple Subscriptions to change plans, update your payment method, or cancel renewal.'
+                  : 'Tap a plan above on your iPhone or iPad to open PalmCare and start the Apple payment sheet.'}
+              </span>
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">2</span>
-              <span>Go to <span className="font-medium">Settings → Subscription</span> to upgrade, downgrade, or start a plan.</span>
+              <span>
+                In the app, go to <span className="font-medium">Settings → Your Plan</span> if you need to pick Mobile or Platform again.
+              </span>
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">3</span>
-              <span>To cancel or change billing, open <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>.</span>
+              <span>
+                You can also manage billing from <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>.
+              </span>
             </li>
           </ol>
-
-          <div className="mt-5 flex items-center gap-2 text-xs text-[#4B6B66]">
-            <Smartphone className="w-4 h-4" />
-            Don&apos;t have the app yet? Search &quot;PalmCare AI&quot; on the App Store.
-          </div>
         </div>
       </div>
     </GlassShell>
