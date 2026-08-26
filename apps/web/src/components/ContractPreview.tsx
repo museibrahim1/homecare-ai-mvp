@@ -41,6 +41,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       try {
         const response = await fetch(`${API_BASE}/agency`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          credentials: 'include',
         });
         if (response.ok) {
           const data = await response.json();
@@ -66,19 +67,11 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             contract_template_name: contractTemplateName,
             contract_template_type: contractTemplateType,
           });
-        } else {
-          const savedSettings = localStorage.getItem('agencySettings');
-          if (savedSettings) {
-            const parsed = JSON.parse(savedSettings);
-            setAgency({ ...defaultAgency, ...parsed });
-          }
         }
-      } catch (err) {
-        const savedSettings = localStorage.getItem('agencySettings');
-        if (savedSettings) {
-          const parsed = JSON.parse(savedSettings);
-          setAgency({ ...defaultAgency, ...parsed });
-        }
+        // Do not fall back to localStorage agencySettings — that key is not
+        // user-scoped and can render another agency's identity on a shared browser.
+      } catch {
+        // Keep defaultAgency; server is the source of truth for tenant identity.
       }
     };
     loadAgencySettings();

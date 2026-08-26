@@ -61,8 +61,12 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
   }, [dismiss]);
 
   const handlePrimaryAction = () => {
-    dismiss();
-    window.setTimeout(() => router.push(release.ctaHref), EXIT_MS);
+    if (phase === 'exit') return;
+    setPhase('exit');
+    window.setTimeout(() => {
+      onClose();
+      router.push(release.ctaHref);
+    }, EXIT_MS);
   };
 
   const panelClass =
@@ -85,7 +89,7 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
 
       <div
         role="dialog"
-        aria-modal="false"
+        aria-modal="true"
         aria-labelledby="whats-new-title"
         className={`fixed bottom-5 right-5 z-[101] w-[min(100vw-2.5rem,380px)] overflow-hidden rounded-2xl border border-white/10 bg-[#121212] shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${panelClass}`}
         onClick={(event) => event.stopPropagation()}

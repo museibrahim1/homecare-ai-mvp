@@ -115,9 +115,18 @@ const PUBLIC_EXACT_ROUTES = new Set([
   '/status',
   '/unsubscribe',
   '/app',
+  '/welcome',
 ]);
 
-const PUBLIC_ROUTE_PREFIXES = ['/blog', '/a/'] as const;
+const PUBLIC_ROUTE_PREFIXES = [
+  '/blog',
+  '/a/',
+  '/oauth/',
+  '/register/',
+  '/verification-status/',
+  '/compare/',
+  '/alternatives/',
+] as const;
 
 export function isLoggedInAppRoute(pathname: string): boolean {
   if (PUBLIC_EXACT_ROUTES.has(pathname)) return false;
@@ -126,8 +135,23 @@ export function isLoggedInAppRoute(pathname: string): boolean {
   );
 }
 
+/**
+ * Desktop web only. Never show on phone-sized viewports.
+ * iOS Safari / WebViews report Darwin + Mobile; those stay excluded even if
+ * matchMedia later flips (e.g. iPad "Request Desktop Website").
+ */
+export function isDesktopWebClient(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/PalmCareAI|PalmCare/i.test(ua)) return false;
+  if (/iPhone|iPod/i.test(ua)) return false;
+  if (/Android/i.test(ua) && /Mobile/i.test(ua)) return false;
+  return window.matchMedia('(min-width: 768px)').matches;
+}
+
 export function canShowWhatsNew(pathname: string, token: string | null | undefined): boolean {
   if (!token) return false;
   if (!isLoggedInAppRoute(pathname)) return false;
+  if (!isDesktopWebClient()) return false;
   return shouldShowWhatsNew();
 }

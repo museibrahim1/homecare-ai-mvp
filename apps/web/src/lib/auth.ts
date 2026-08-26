@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { clearSharedClientCaches } from '@/lib/clearSharedClientCaches';
 
 // HIPAA Compliance: Session timeout after 15 minutes of inactivity
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -63,6 +64,9 @@ const useAuthStore = create<AuthState>()(
         // (refresh token, integrations) stays on the explicit /auth/logout.
         if (typeof window !== 'undefined') {
           fetch('/api/auth/session/clear', { method: 'POST', credentials: 'include' }).catch(() => {});
+          // Drop unscoped browser caches so the next login on this device
+          // cannot inherit agency name, schedule, or notification state.
+          clearSharedClientCaches();
         }
         set({ token: null, user: null, lastActivity: null });
       },
