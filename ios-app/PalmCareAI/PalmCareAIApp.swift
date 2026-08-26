@@ -88,6 +88,9 @@ struct PalmCareAIApp: App {
                 PaywallView(isRequired: false, allowsNotNow: true)
                     .environmentObject(api)
             }
+            .onOpenURL { url in
+                handleBillingDeepLink(url)
+            }
             .onChange(of: api.needsOnboarding) { needs in
                 // After agency setup finishes, soft-prompt subscribe once.
                 if !needs && api.isAuthenticated {
@@ -216,6 +219,28 @@ struct PalmCareAIApp: App {
             api.logout()
         }
         registerInteraction()
+    }
+
+    private func handleBillingDeepLink(_ url: URL) {
+        guard url.scheme == "com.palmcareai.app" else { return }
+
+        if url.host == "subscriptions" {
+            if let subsURL = URL(string: "https://apps.apple.com/account/subscriptions") {
+                UIApplication.shared.open(subsURL)
+            }
+            return
+        }
+
+        guard url.host == "paywall" else { return }
+
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let product = components.queryItems?.first(where: { $0.name == "product" })?.value,
+           !product.isEmpty {
+            UserDefaults.standard.set(product, forKey: "deepLinkPaywallProduct")
+        }
+
+        guard api.isAuthenticated else { return }
+        showAuthPaywall = true
     }
 
     private func promptAuthPaywallIfNeeded() {

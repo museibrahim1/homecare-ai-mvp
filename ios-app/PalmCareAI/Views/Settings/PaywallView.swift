@@ -110,7 +110,11 @@ struct PaywallView: View {
                     dismiss()
                     return
                 }
-                if let first = store.products.first {
+                if let deepLinkProduct = UserDefaults.standard.string(forKey: "deepLinkPaywallProduct"),
+                   store.products.contains(where: { $0.id == deepLinkProduct }) {
+                    selectedProductID = deepLinkProduct
+                    UserDefaults.standard.removeObject(forKey: "deepLinkPaywallProduct")
+                } else if let first = store.products.first {
                     selectedProductID = first.id
                 }
             }
