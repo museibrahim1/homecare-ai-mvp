@@ -76,9 +76,9 @@ PalmCare AI drafts billable items from the recorded assessment alongside the car
   },
   {
     slug: 'paperless-home-care-contracts',
-    title: 'Paperless Home Care Contracts for Agencies',
+    title: 'Paperless Home Care Contracts: How Agencies Go Digital',
     description:
-      'How to make a home care agency paperless: move service agreements from printed stacks to digital drafts, review, and e-signature without losing state-specific clauses.',
+      'Go paperless on home care contracts without losing state rules. Draft the service agreement from the assessment, review on screen, then collect an e-signature.',
     date: '2026-08-15',
     readTime: '7 min read',
     category: 'Operations',
@@ -87,7 +87,7 @@ Paperless home care contracts replace printed service agreements with digital dr
 
 ## How to make my home care agency paperless
 
-Start with intake paperwork, not every form in the office. Agencies that go paperless successfully usually:
+Start with intake paperwork, not every form in the office. Agencies that go paperless on contracts successfully usually:
 
 1. Record the assessment instead of handwriting a notepad that someone retypes later.
 2. Draft the care plan, billables, and service agreement from that same visit.

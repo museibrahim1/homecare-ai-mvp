@@ -34,8 +34,8 @@ From Performance (3 months): **1.25K impressions**, **36 clicks**, **2.9% CTR**,
 | Query | Impr. | Clicks | Action | Status (2026-08-25) |
 |-------|------:|-------:|--------|---------------------|
 | palmcare | 173 | 6 | Brand OK; keep homepage title strong | OK |
-| paperless contracts home care | 88 | 0 | Title + H2 on `/blog/paperless-home-care-contracts` | Done |
-| make my home care agency paperless | 35 | 0 | New H2 on paperless post + homepage commercial links | Done |
+| paperless contracts home care | 132 | 0 | Title + H2 on `/blog/paperless-home-care-contracts` | CTR rewrite 2026-08-25 |
+| make my home care agency paperless | 58 | 0 | H2 + title/meta rewrite on paperless post | CTR rewrite 2026-08-25 |
 | ai oasis documentation | 16 | 0 | Dedicated OASIS clarifier on `/compare` | Done |
 | hospice ai documentation | 13 | 0 | Optional later; stay honest about non-medical focus | Later |
 
@@ -86,6 +86,9 @@ When GSC Performance shows queries with impressions and low CTR:
 - **2026-08-25:** Rewrote `/blog/ai-home-care-documentation-tools-2026` title/meta after 450 imps / 0.4% CTR.
   - Title: `AI Documentation for Home Care Agencies: What to Buy`
   - Meta clarifies care plans/contracts vs OASIS-only scribes.
+- **2026-08-25:** Rewrote `/blog/paperless-home-care-contracts` title/meta after 148 imps / 0% CTR (+344% impressions).
+  - Title: `Paperless Home Care Contracts: How Agencies Go Digital`
+  - Meta leads with go-paperless + state rules + e-signature.
 - Rewrite title tags to match the query intent.  
 - Keep brand at the end: `Keyword phrase | PalmCare AI`.
 
