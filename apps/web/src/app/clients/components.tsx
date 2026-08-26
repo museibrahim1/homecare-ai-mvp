@@ -324,7 +324,7 @@ export function ClientAvatar({ name, size = 'md' }: { name?: string | null; size
 export function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.active;
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
+    <span className={`inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium ${config.bgColor} ${config.color}`}>
       {config.label}
     </span>
   );
@@ -407,28 +407,28 @@ export function ClientRow({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center h-16 shrink-0 pr-[18px] rounded-[14px] overflow-hidden gap-3 bg-[#FFFFFFB8] border border-[#FFFFFFE0] shadow-[0_8px_20px_#0D948814] cursor-pointer group transition-opacity hover:opacity-95 ${
+      className={`flex items-center h-12 shrink-0 pr-3.5 rounded-xl overflow-hidden gap-2.5 bg-white/75 border border-white/90 shadow-sm cursor-pointer group transition-all duration-200 hover:bg-white hover:shadow-[0_8px_20px_#0D948818] hover:-translate-y-0.5 hover:border-primary-200/50 ${
         isConfirmingDelete ? 'ring-1 ring-red-300' : ''
       }`}
     >
-      <div className="w-1 self-stretch shrink-0" style={{ background: bar }} />
-      <div className="flex items-center w-[min(304px,32%)] shrink-0 gap-3 min-w-0">
+      <div className="w-0.5 self-stretch shrink-0" style={{ background: bar }} />
+      <div className="flex items-center w-[min(280px,34%)] shrink-0 gap-2.5 min-w-0 pl-1">
         <ClientAvatar name={client.full_name} size="sm" />
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <p className="text-sm font-semibold leading-[18px] text-[#10211F] truncate">{client.full_name}</p>
-          <p className="text-xs font-medium leading-4 text-[#64748B] truncate">{insuranceLabel}</p>
+        <div className="flex flex-col min-w-0">
+          <p className="text-[13px] font-semibold leading-4 text-[#10211F] truncate">{client.full_name}</p>
+          <p className="text-[11px] font-medium leading-4 text-[#64748B] truncate">{insuranceLabel}</p>
         </div>
       </div>
       
-      <div className="w-[140px] shrink-0">
+      <div className="w-[120px] shrink-0">
         <StatusBadge status={status} />
       </div>
       
-      <div className="w-[140px] shrink-0 text-[13px] font-medium leading-4 text-[#4B6B66]">
-        {client.phone || '—'}
+      <div className="w-[120px] shrink-0 text-xs font-medium leading-4 text-[#4B6B66]">
+        {client.phone || '-'}
       </div>
       
-      <div className="grow min-w-0 text-[13px] font-medium leading-4 text-[#4B6B66] truncate">
+      <div className="grow min-w-0 text-xs font-medium leading-4 text-[#4B6B66] truncate">
         {client.primary_diagnosis || 'General Care'}
       </div>
 

@@ -40,25 +40,25 @@ export default function GlassShell({
     >
       <GlassRail />
       <main
-        className={`flex-1 min-w-0 flex flex-col px-5 sm:px-8 lg:px-12 pt-16 md:pt-8 lg:pt-11 pb-14 lg:pb-16 gap-6 ${
+        className={`flex-1 min-w-0 flex flex-col px-4 sm:px-6 lg:px-10 pt-14 md:pt-6 lg:pt-8 pb-10 lg:pb-12 gap-4 ${
           fill ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'
         }`}
       >
         <div
-          className={`w-full mx-auto flex flex-col gap-6 flex-1 min-w-0 ${
+          className={`w-full mx-auto flex flex-col gap-4 flex-1 min-w-0 ${
             wide ? 'max-w-none' : 'max-w-[1200px]'
           } ${fill ? 'min-h-0 overflow-hidden' : ''}`}
         >
           {(title || action) && (
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 shrink-0">
-              <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 shrink-0">
+              <div className="flex flex-col gap-0.5 min-w-0">
                 {title && (
-                  <h1 className="text-[32px] sm:text-[40px] font-bold tracking-tight leading-tight text-[#10211F]">
+                  <h1 className="text-[26px] sm:text-[32px] font-bold tracking-tight leading-tight text-[#10211F]">
                     {title}
                   </h1>
                 )}
                 {subtitle && (
-                  <p className="text-[15px] font-medium leading-6 text-[#64748B]">{subtitle}</p>
+                  <p className="text-sm font-medium leading-5 text-[#64748B]">{subtitle}</p>
                 )}
               </div>
               {action && (

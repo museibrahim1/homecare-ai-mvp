@@ -41,11 +41,11 @@ import { QuickAddModal, ClientAvatar, StatusBadge, InsuranceBadge, ClientRow } f
 
 function GlassBoardHeader() {
   return (
-    <div className="flex items-center h-7 px-[18px] gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] min-w-[720px]">
-      <div className="w-1 shrink-0" />
-      <div className="w-[min(304px,32%)] shrink-0">Client</div>
-      <div className="w-[140px] shrink-0">Visit Status</div>
-      <div className="w-[140px] shrink-0">Phone</div>
+    <div className="flex items-center h-6 px-3.5 gap-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] min-w-[720px]">
+      <div className="w-0.5 shrink-0" />
+      <div className="w-[min(280px,34%)] shrink-0 pl-1">Client</div>
+      <div className="w-[120px] shrink-0">Visit Status</div>
+      <div className="w-[120px] shrink-0">Phone</div>
       <div className="grow">Care Specialty</div>
       <div className="w-4 shrink-0" />
     </div>
@@ -550,16 +550,16 @@ export default function ClientsPage() {
           ) : viewMode === 'table' ? (
             /* Table View - Grouped by Status */
             <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain pb-2">
-            <div className="flex flex-col gap-5 min-w-[720px]">
+            <div className="flex flex-col gap-3.5 min-w-[720px]">
+              {filteredClients.length > 0 && <GlassBoardHeader />}
               {/* Intake Queue Section */}
               {intakeClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#0D9488]">Intake queue</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({intakeClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#0D9488]">Intake queue</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({intakeClients.length})</span>
                   </div>
-                  <GlassBoardHeader />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {intakeClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -576,13 +576,12 @@ export default function ClientsPage() {
 
               {/* Assessment Section */}
               {assessmentClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#7C3AED]">In Assessment</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({assessmentClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#7C3AED]">In Assessment</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({assessmentClients.length})</span>
                   </div>
-                  <GlassBoardHeader />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {assessmentClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -599,13 +598,12 @@ export default function ClientsPage() {
 
               {/* Proposal Sent Section */}
               {proposalClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#EA580C]">Awaiting signature</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({proposalClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#EA580C]">Awaiting signature</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({proposalClients.length})</span>
                   </div>
-                  <GlassBoardHeader />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {proposalClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -622,13 +620,12 @@ export default function ClientsPage() {
 
               {/* Assigned to Care Team Section */}
               {assignedClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#059669]">Active clients</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({assignedClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#059669]">Active clients</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({assignedClients.length})</span>
                   </div>
-                  <GlassBoardHeader />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {assignedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -645,13 +642,12 @@ export default function ClientsPage() {
 
               {/* Follow-up Section */}
               {followUpClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#7C3AED]">Follow-up required</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({followUpClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#7C3AED]">Follow-up required</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({followUpClients.length})</span>
                   </div>
-                  <GlassBoardHeader />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {followUpClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -668,12 +664,12 @@ export default function ClientsPage() {
 
               {/* Ungrouped Clients (catch-all for unexpected statuses) */}
               {ungroupedClients.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 px-1">
-                    <h2 className="text-sm font-bold leading-[18px] text-[#64748B]">Other Clients</h2>
-                    <span className="text-xs font-medium text-[#94A3B8]">({ungroupedClients.length})</span>
+                    <h2 className="text-xs font-bold leading-4 text-[#64748B]">Other Clients</h2>
+                    <span className="text-[11px] font-medium text-[#94A3B8]">({ungroupedClients.length})</span>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {ungroupedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -690,14 +686,14 @@ export default function ClientsPage() {
 
               {/* Empty State */}
               {filteredClients.length === 0 && (
-                <div className="glass-panel p-12 text-center">
-                  <div className="w-16 h-16 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-[#94A3B8]" />
+                <div className="glass-panel p-8 text-center">
+                  <div className="w-12 h-12 bg-white/60 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Users className="w-6 h-6 text-[#94A3B8]" />
                   </div>
-                  <h3 className="text-lg font-semibold text-[#10211F] mb-2">
+                  <h3 className="text-base font-semibold text-[#10211F] mb-1">
                     {searchQuery ? 'No clients found' : 'No clients yet'}
                   </h3>
-                  <p className="text-[#64748B] mb-4">
+                  <p className="text-sm text-[#64748B] mb-3">
                     {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
                   </p>
                   {!searchQuery && (

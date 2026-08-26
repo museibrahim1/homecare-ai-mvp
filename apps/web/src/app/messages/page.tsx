@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import GlassShell from '@/components/GlassShell';
-import { MessageSquare, Search, Send, Paperclip, Phone, Video, MessagesSquare, Plus, Loader2, Users, X } from 'lucide-react';
+import { MessageSquare, Search, Send, MessagesSquare, Plus, Loader2, Users, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = '/api';
@@ -231,16 +231,7 @@ export default function MessagesPage() {
                   </div>
                   <div>
                     <h2 className="font-medium text-slate-800">{selectedConversation.name}</h2>
-                    <span className="text-xs text-emerald-600">Online</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
-                    <Phone className="w-5 h-5 text-slate-500" />
-                  </button>
-                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
-                    <Video className="w-5 h-5 text-slate-500" />
-                  </button>
                 </div>
               </div>
 
@@ -277,9 +268,6 @@ export default function MessagesPage() {
               {/* Message Input */}
               <div className="p-4 border-t border-slate-200">
                 <div className="flex items-center gap-3">
-                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
-                    <Paperclip className="w-5 h-5 text-slate-500" />
-                  </button>
                   <input
                     type="text"
                     value={newMessage}

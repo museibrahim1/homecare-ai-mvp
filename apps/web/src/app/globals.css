@@ -1148,18 +1148,20 @@ html {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 18px;
+  height: 40px;
+  padding: 0 16px;
   border-radius: 12px;
   background: #0D9488;
   color: #FFFFFF !important;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 8px 18px #0D948833;
-  transition: background 0.15s ease;
+  box-shadow: 0 6px 14px #0D948828;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .glass-btn-primary:hover {
   background: #0F766E;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px #0D948833;
 }
 /* Segmented tab track: gray rail with white active pill */
 .glass-tabs {

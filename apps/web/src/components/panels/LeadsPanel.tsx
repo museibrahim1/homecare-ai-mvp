@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Phone, Mail, Search, Filter, X, User, Globe, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight } from 'lucide-react';
+import { Plus, Phone, Mail, Search, X, User, Globe, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { migrateLocalCrmToServer } from '@/lib/crmMigrate';
@@ -159,48 +159,44 @@ export default function LeadsPanel() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Leads</h2>
-          <p className="text-slate-500 text-sm">Manage and track potential clients</p>
+          <h2 className="text-base font-bold text-slate-900">Leads</h2>
+          <p className="text-slate-500 text-xs mt-0.5">Manage and track potential clients</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="glass-btn-primary"
+          className="glass-btn-primary h-9 text-sm"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4" />
           Add Lead
         </button>
       </div>
 
-      {/* Search & Filter */}
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+      {/* Search */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search leads..."
-            className="w-full pl-10 pr-4 py-2.5 glass-card text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+            className="w-full h-9 pl-9 pr-4 glass-card text-sm text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 glass-card text-slate-600 hover:text-slate-900 transition-colors">
-          <Filter className="w-5 h-5" />
-          Filter
-        </button>
       </div>
 
       {leads.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <UserPlus className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">No Leads Yet</h3>
-          <p className="text-slate-500 mb-6">Start tracking potential clients by adding your first lead</p>
+        <div className="glass-card p-8 text-center">
+          <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-slate-900 mb-1">No Leads Yet</h3>
+          <p className="text-sm text-slate-500 mb-4">Start tracking potential clients by adding your first lead</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="glass-btn-primary mx-auto"
+            className="glass-btn-primary h-9 text-sm mx-auto"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Add Your First Lead
           </button>
         </div>
@@ -209,58 +205,61 @@ export default function LeadsPanel() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-200/70">
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Name</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Contact</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Source</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Created</th>
-                <th className="px-6 py-4"></th>
+                <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Name</th>
+                <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Contact</th>
+                <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Source</th>
+                <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Created</th>
+                <th className="px-4 py-2.5"></th>
               </tr>
             </thead>
             <tbody>
               {filteredLeads.map(lead => (
                 <tr
                   key={lead.id}
-                  className="border-b border-slate-200/40 hover:bg-white/40 transition-colors cursor-pointer"
+                  className="border-b border-slate-200/40 hover:bg-white/60 transition-colors cursor-pointer"
                   onClick={() => { setSelectedLead(lead); setShowDetailModal(true); }}
                 >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
-                        <span className="text-primary-400 font-medium">{lead.name.charAt(0)}</span>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
+                        <span className="text-primary-500 text-xs font-semibold">{lead.name.charAt(0)}</span>
                       </div>
-                      <span className="font-medium text-slate-800">{lead.name}</span>
+                      <span className="text-sm font-medium text-slate-800">{lead.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Mail className="w-4 h-4" />
+                  <td className="px-4 py-2.5">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                        <Mail className="w-3.5 h-3.5" />
                         {lead.email || 'No email'}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Phone className="w-4 h-4" />
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <Phone className="w-3.5 h-3.5" />
                         {lead.phone || 'No phone'}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-600">{lead.source}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || 'bg-slate-100 text-slate-600'}`}>
+                  <td className="px-4 py-2.5 text-xs text-slate-600">{lead.source}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${statusColors[lead.status] || 'bg-slate-100 text-slate-600'}`}>
                       {lead.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-sm">{lead.created}</td>
-                  <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-4 py-2.5 text-slate-500 text-xs">{lead.created}</td>
+                  <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() => handleDeleteLead(lead.id)}
+                      onClick={() => {
+                        if (window.confirm(`Delete lead ${lead.name}?`)) handleDeleteLead(lead.id);
+                      }}
                       disabled={deletingId === lead.id}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete lead"
                     >
                       {deletingId === lead.id ? (
-                        <Loader2 className="w-5 h-5 text-red-600 animate-spin" />
+                        <Loader2 className="w-4 h-4 text-red-600 animate-spin" />
                       ) : (
-                        <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-600" />
+                        <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-600" />
                       )}
                     </button>
                   </td>

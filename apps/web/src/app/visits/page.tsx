@@ -431,7 +431,7 @@ export default function VisitsPage() {
                   <p className={`font-medium ${usage.upgrade_required ? 'text-amber-600' : 'text-slate-800'}`}>
                     {usage.upgrade_required 
                       ? 'Free Plan Limit Reached' 
-                      : `Free Plan — ${usage.total_assessments}/${usage.max_allowed} assessments used`
+                      : `Free Plan · ${usage.total_assessments}/${usage.max_allowed} assessments used`
                     }
                   </p>
                   <p className="text-slate-500 text-sm">
@@ -468,38 +468,38 @@ export default function VisitsPage() {
           )}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {[
               { label: 'Total Visits', value: visits.length, textClass: 'text-accent-primary' },
               { label: 'Pending Review', value: visits.filter(v => v.status === 'pending_review').length, textClass: 'text-accent-orange' },
               { label: 'Approved', value: visits.filter(v => v.status === 'approved').length, textClass: 'text-accent-green' },
               { label: 'Today', value: visits.filter(v => v.scheduled_start && formatLocalDate(new Date(v.scheduled_start)) === formatLocalDate(new Date())).length, textClass: 'text-accent-cyan' },
             ].map((stat, i) => (
-              <div key={i} className="card p-5">
-                <p className="text-slate-500 text-sm mb-1">{stat.label}</p>
-                <p className={`text-3xl font-bold ${stat.textClass}`}>{stat.value}</p>
+              <div key={i} className="glass-card p-3.5 hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                <p className="text-slate-500 text-xs mb-0.5">{stat.label}</p>
+                <p className={`text-2xl font-bold tabular-nums ${stat.textClass}`}>{stat.value}</p>
               </div>
             ))}
           </div>
 
           {/* Filters */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex gap-3 mb-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search visits..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-dark w-full pl-12"
+                className="input-dark w-full pl-10 h-9 text-sm"
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-slate-500" />
+              <Filter className="w-4 h-4 text-slate-500" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="input-dark min-w-[180px]"
+                className="input-dark min-w-[160px] h-9 text-sm"
               >
                 <option value="">All statuses</option>
                 <option value="scheduled">Scheduled</option>
@@ -513,59 +513,42 @@ export default function VisitsPage() {
 
           {/* Visits List */}
           {loading ? (
-            <div className="card p-12 text-center">
-              <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-slate-500">Loading assessments...</p>
+            <div className="glass-card p-8 text-center">
+              <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-slate-500 text-sm">Loading assessments...</p>
             </div>
           ) : filteredVisits.length === 0 ? (
-            <div className="space-y-6">
-              {/* Demo CTA Card */}
-              <div className="card p-8 border border-primary-200 bg-primary-50/40">
-                <div className="flex items-center gap-6">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Try a Sample Assessment</h3>
-                    <p className="text-slate-600 mb-4">
-                      See how PalmCare AI turns a care assessment into a proposal-ready contract in minutes.
-                    </p>
-                    <button 
-                      onClick={createSampleAssessment}
-                      disabled={creatingDemo}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {creatingDemo ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Creating Sample Assessment...
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-5 h-5" />
-                          Create Sample Assessment
-                        </>
-                      )}
-                    </button>
-                  </div>
+              <div className="glass-card p-8 text-center border border-primary-200/60 bg-primary-50/30">
+                <div className="w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-primary-500" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-900 mb-1">No assessments yet</h3>
+                <p className="text-sm text-slate-600 mb-4 max-w-md mx-auto">
+                  Create a new assessment or try a sample to see how PalmCare turns a visit into a contract.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    onClick={createSampleAssessment}
+                    disabled={creatingDemo}
+                    className="glass-btn-primary h-9 text-sm disabled:opacity-50"
+                  >
+                    {creatingDemo ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
+                    ) : (
+                      <><Play className="w-4 h-4" /> Try sample</>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => router.push('/visits/new')}
+                    className="h-9 px-4 rounded-xl text-sm font-semibold text-primary-700 bg-white border border-primary-200 hover:bg-primary-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 inline mr-1" />
+                    New Assessment
+                  </button>
                 </div>
               </div>
-              
-              {/* Empty State */}
-              <div className="card p-12 text-center">
-                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-slate-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No assessments yet</h3>
-                <p className="text-slate-500 mb-4">Create a new assessment or try the demo above</p>
-                <button 
-                  onClick={() => router.push('/visits/new')}
-                  className="btn-primary"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Assessment
-                </button>
-              </div>
-            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filteredVisits.map((visit) => {
                 const statusConfig = getStatusConfig(visit.status);
                 const StatusIcon = statusConfig.icon;
@@ -574,7 +557,7 @@ export default function VisitsPage() {
                   <div
                     key={visit.id}
                     onClick={() => router.push(`/visits/${visit.id}`)}
-                    className="card card-hover p-5 cursor-pointer group"
+                    className="glass-card p-3.5 cursor-pointer group hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                   >
                     <div className="flex items-center gap-4">
                       {/* Status indicator */}

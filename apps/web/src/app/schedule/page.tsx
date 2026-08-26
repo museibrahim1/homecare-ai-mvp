@@ -608,7 +608,7 @@ function ScheduleContent() {
   const dateLabel = view === 'day'
     ? format(selectedDate, 'EEEE, MMMM d, yyyy')
     : view === 'week'
-    ? `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`
+    ? `${format(weekStart, 'MMM d')} to ${format(weekEnd, 'MMM d, yyyy')}`
     : format(selectedDate, 'MMMM yyyy');
 
   /* ─── Month calendar generation ─── */

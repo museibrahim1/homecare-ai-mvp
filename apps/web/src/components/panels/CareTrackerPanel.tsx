@@ -300,14 +300,14 @@ export default function CareTrackerPanel() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">Post-Visit Care Tracker</h2>
-          <p className="text-slate-500 text-sm">Track follow-ups, care plan reviews, and ongoing client coordination</p>
+          <h2 className="text-base font-bold text-slate-900">Post-Visit Care Tracker</h2>
+          <p className="text-slate-500 text-xs mt-0.5">Track follow-ups, care plan reviews, and ongoing client coordination</p>
         </div>
         <button
           onClick={() => { setFormData(emptyForm()); setShowAdd(true); }}
-          className="glass-btn-primary h-11 text-sm shrink-0"
+          className="glass-btn-primary h-9 text-sm shrink-0"
         >
           <Plus className="w-4 h-4" />
           Add Care Entry
@@ -315,7 +315,7 @@ export default function CareTrackerPanel() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-4">
         {[
           { label: 'Total Tracking', value: items.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: overdueCount > 0 ? 'text-red-600' : 'text-slate-500', bg: overdueCount > 0 ? 'bg-red-50' : 'bg-slate-100' },
@@ -323,31 +323,49 @@ export default function CareTrackerPanel() {
           { label: 'High Priority', value: criticalCount, icon: Heart, color: criticalCount > 0 ? 'text-orange-600' : 'text-slate-500', bg: criticalCount > 0 ? 'bg-orange-50' : 'bg-slate-100' },
           { label: 'No Contact 7d+', value: noContactCount, icon: Phone, color: noContactCount > 0 ? 'text-amber-600' : 'text-slate-500', bg: noContactCount > 0 ? 'bg-amber-50' : 'bg-slate-100' },
         ].map((s, i) => (
-          <div key={i} className="glass-card p-3 lg:p-4 flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
-            <div><p className="text-xs text-slate-500">{s.label}</p><p className={`text-lg font-bold ${s.color}`}>{s.value}</p></div>
+          <div
+            key={i}
+            className="glass-card px-3 py-2.5 flex items-center gap-2.5 hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+          >
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${s.bg}`}><s.icon className={`w-3.5 h-3.5 ${s.color}`} /></div>
+            <div className="min-w-0"><p className="text-[10px] text-slate-500 truncate">{s.label}</p><p className={`text-base font-bold tabular-nums leading-5 ${s.color}`}>{s.value}</p></div>
           </div>
         ))}
       </div>
 
+      {/* Empty state only (avoid empty board + empty CTA stacking) */}
+      {items.length === 0 ? (
+        <div className="glass-card p-8 text-center">
+          <div className="w-11 h-11 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <UserCheck className="w-5 h-5 text-slate-500" />
+          </div>
+          <h3 className="text-base font-semibold text-slate-900 mb-1">No care tracking entries yet</h3>
+          <p className="text-slate-500 text-sm mb-3 max-w-md mx-auto">Start tracking post-visit follow-ups, care plan reviews, and ongoing client coordination</p>
+          <button onClick={() => { setFormData(emptyForm()); setShowAdd(true); }} className="glass-btn-primary h-9 text-sm mx-auto">
+            <Plus className="w-4 h-4" />
+            Add First Entry
+          </button>
+        </div>
+      ) : (
+        <>
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-1 bg-white/50 rounded-xl p-1 border border-white/70">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mb-3">
+        <div className="flex items-center gap-1 bg-white/50 rounded-xl p-0.5 border border-white/70 h-9">
           {[
             { key: 'board' as const, label: 'Board', icon: CalendarDays },
             { key: 'timeline' as const, label: 'Timeline', icon: Activity },
           ].map(v => (
-            <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-slate-50 text-slate-800' : 'text-slate-500 hover:text-slate-900'}`}>
+            <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}>
               <v.icon className="w-3.5 h-3.5" />{v.label}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-            <input type="text" placeholder="Search clients..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-48 pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-primary-500" />
+            <input type="text" placeholder="Search clients..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full sm:w-48 h-9 pl-8 pr-3 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-primary-500" />
           </div>
-          <select value={stageFilter} onChange={e => setStageFilter(e.target.value as any)} className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs focus:outline-none focus:border-primary-500">
+          <select value={stageFilter} onChange={e => setStageFilter(e.target.value as any)} className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs focus:outline-none focus:border-primary-500">
             <option value="all">All Stages</option>
             {Object.entries(STAGE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
@@ -356,19 +374,19 @@ export default function CareTrackerPanel() {
 
       {/* Timeline View */}
       {view === 'timeline' && (
-        <div className="space-y-6">
+        <div className="space-y-3">
           {(Object.entries(STAGE_CONFIG) as [CareStage, typeof STAGE_CONFIG[CareStage]][]).map(([stage, cfg]) => {
             const stageItems = grouped[stage] || [];
             if (stageFilter !== 'all' && stageFilter !== stage) return null;
             return (
               <div key={stage} className="glass-card overflow-hidden">
-                <div className="flex items-center gap-3 px-4 lg:px-5 py-3 border-b border-slate-200/70">
-                  <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
-                  <h3 className={`text-sm font-semibold ${cfg.color}`}>{cfg.label}</h3>
-                  <span className="text-xs text-slate-400">({stageItems.length})</span>
+                <div className="flex items-center gap-2.5 px-3.5 py-2 border-b border-slate-200/70">
+                  <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                  <h3 className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</h3>
+                  <span className="text-[11px] text-slate-400">({stageItems.length})</span>
                 </div>
                 {stageItems.length === 0 ? (
-                  <div className="px-5 py-6 text-center text-slate-400 text-xs">No clients in this stage</div>
+                  <div className="px-4 py-4 text-center text-slate-400 text-xs">No clients in this stage</div>
                 ) : (
                   <div className="divide-y divide-slate-200/40">
                     {stageItems.map(item => {
@@ -377,8 +395,8 @@ export default function CareTrackerPanel() {
                       const noContact = daysAgo(item.lastContact) > 7;
                       const followUpOverdue = item.nextFollowUp && daysUntil(item.nextFollowUp) < 0;
                       return (
-                        <div key={item.id} className="flex items-center gap-3 lg:gap-4 px-4 lg:px-5 py-3 hover:bg-white/40 transition-colors group">
-                          <div className="w-44 lg:w-56 shrink-0 flex items-center gap-2.5">
+                        <div key={item.id} className="flex items-center gap-3 px-3.5 py-2 hover:bg-white/50 transition-colors group">
+                          <div className="w-40 lg:w-52 shrink-0 flex items-center gap-2">
                             <Avatar name={item.clientName} />
                             <div className="min-w-0">
                               <p className="text-xs font-medium text-slate-900 truncate">{item.clientName}</p>
@@ -411,7 +429,7 @@ export default function CareTrackerPanel() {
 
       {/* Board View */}
       {view === 'board' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {(Object.entries(STAGE_CONFIG) as [CareStage, typeof STAGE_CONFIG[CareStage]][]).map(([stage, cfg]) => {
             const stageItems = grouped[stage] || [];
             const isOver = dragOverStage === stage;
@@ -423,17 +441,17 @@ export default function CareTrackerPanel() {
                 onDrop={e => { e.preventDefault(); setDragOverStage(null); if (draggedId) { handleMoveStage(draggedId, stage); setDraggedId(null); } }}
                 className={`rounded-xl border overflow-hidden transition-all ${isOver ? `border-2 ${cfg.border} bg-slate-50/20` : 'border-slate-200 bg-white'}`}
               >
-                <div className={`h-1 ${cfg.headerBg}`} />
-                <div className="px-3 py-2.5 border-b border-slate-200">
+                <div className={`h-0.5 ${cfg.headerBg}`} />
+                <div className="px-2.5 py-2 border-b border-slate-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                      <h3 className="font-semibold text-sm text-slate-500">{cfg.label}</h3>
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                      <h3 className="font-semibold text-xs text-slate-600">{cfg.label}</h3>
                     </div>
-                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${cfg.color} bg-slate-100`}>{stageItems.length}</span>
+                    <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${cfg.color} bg-slate-100`}>{stageItems.length}</span>
                   </div>
                 </div>
-                <div className="p-2 space-y-2 max-h-[65vh] overflow-y-auto">
+                <div className="p-1.5 space-y-1.5 max-h-[55vh] overflow-y-auto">
                   {stageItems.map(item => {
                     const pCfg = PRIORITY_CONFIG[item.priority];
                     const isDragging = draggedId === item.id;
@@ -444,13 +462,13 @@ export default function CareTrackerPanel() {
                         draggable
                         onDragStart={() => setDraggedId(item.id)}
                         onDragEnd={() => { setDraggedId(null); setDragOverStage(null); }}
-                        className={`p-3 bg-white rounded-lg border-l-[3px] ${
+                        className={`p-2.5 bg-white rounded-lg border-l-[3px] ${
                           item.priority === 'critical' ? 'border-l-red-500' :
                           item.priority === 'high' ? 'border-l-orange-500' :
                           item.priority === 'moderate' ? 'border-l-yellow-500' : 'border-l-green-400'
-                        } border border-slate-200 cursor-grab active:cursor-grabbing hover:border-slate-300 transition-all group ${isDragging ? 'opacity-40 scale-95' : ''}`}
+                        } border border-slate-200 cursor-grab active:cursor-grabbing hover:border-slate-300 hover:shadow-sm transition-all group ${isDragging ? 'opacity-40 scale-95' : ''}`}
                       >
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-medium text-slate-900 truncate">{item.clientName}</p>
                           <div className="flex items-center gap-1">
                             {overdue && <AlertCircle className="w-3 h-3 text-red-600" />}
@@ -460,7 +478,7 @@ export default function CareTrackerPanel() {
                             <button onClick={() => setEditItem({ ...item })} className="p-0.5 text-slate-300 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-all"><Pencil className="w-3 h-3" /></button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 mb-2">
+                        <div className="flex items-center gap-1.5 mb-1.5">
                           <div className={`w-1 h-3 rounded-full ${pCfg.bar}`} />
                           <span className={`text-[10px] font-medium ${pCfg.color}`}>{pCfg.label}</span>
                         </div>
@@ -479,7 +497,7 @@ export default function CareTrackerPanel() {
                     );
                   })}
                   {stageItems.length === 0 && (
-                    <div className={`text-center py-8 text-slate-400 text-xs rounded-lg border border-dashed transition-colors ${isOver ? cfg.border : 'border-slate-200/60'}`}>
+                    <div className={`text-center py-5 text-slate-400 text-xs rounded-lg border border-dashed transition-colors ${isOver ? cfg.border : 'border-slate-200/60'}`}>
                       {isOver ? 'Drop here' : 'No clients'}
                     </div>
                   )}
@@ -489,19 +507,7 @@ export default function CareTrackerPanel() {
           })}
         </div>
       )}
-
-      {/* Empty state */}
-      {items.length === 0 && (
-        <div className="glass-card p-12 text-center mt-4">
-          <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <UserCheck className="w-7 h-7 text-slate-500" />
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">No care tracking entries yet</h3>
-          <p className="text-slate-500 text-sm mb-4">Start tracking post-visit follow-ups, care plan reviews, and ongoing client coordination</p>
-          <button onClick={() => { setFormData(emptyForm()); setShowAdd(true); }} className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors">
-            <Plus className="w-4 h-4 inline mr-1" />Add First Entry
-          </button>
-        </div>
+        </>
       )}
 
       {showAdd && (

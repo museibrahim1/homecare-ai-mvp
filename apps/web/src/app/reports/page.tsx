@@ -654,36 +654,18 @@ export default function ReportsPage() {
               <h3 className="text-lg font-semibold text-slate-900">Weekly Activity</h3>
             </div>
             {(overviewStats?.assessments_this_week || 0) > 0 ? (
-              <>
-                <div className="h-64 flex items-end justify-between gap-2 px-4">
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
-                    // Show minimal placeholder bars - real chart data requires analytics endpoint
-                    const barHeight = 20;
-                    return (
-                      <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full relative">
-                          <div 
-                            className="w-full bg-gradient-to-t from-primary-500/80 to-primary-400/40 rounded-t-lg transition-all duration-500 hover:from-primary-400/90 hover:to-primary-300/50"
-                            style={{ height: `${barHeight}px` }}
-                          />
-                        </div>
-                        <span className="text-slate-500 text-xs">{day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-primary-500 rounded" />
-                    <span className="text-slate-500 text-sm">Assessments Completed</span>
-                  </div>
-                </div>
-              </>
+              <div className="py-8 text-center">
+                <p className="text-3xl font-bold text-primary-600 tabular-nums">
+                  {overviewStats?.assessments_this_week}
+                </p>
+                <p className="text-sm text-slate-500 mt-1">Assessments completed this week</p>
+                <p className="text-xs text-slate-400 mt-3">Daily breakdown coming soon</p>
+              </div>
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center">
-                <BarChart3 className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-slate-500">No activity data yet</p>
-                <p className="text-slate-400 text-sm mt-1">Complete assessments to see your weekly activity</p>
+              <div className="h-40 flex flex-col items-center justify-center">
+                <BarChart3 className="w-10 h-10 text-slate-300 mb-2" />
+                <p className="text-slate-500 text-sm">No activity data yet</p>
+                <p className="text-slate-400 text-xs mt-1">Complete assessments to see your weekly activity</p>
               </div>
             )}
           </div>

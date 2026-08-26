@@ -545,7 +545,7 @@ export default function DocumentsPage() {
               ) : (
                 <Cloud className="w-4 h-4" />
               )}
-              {driveConnected ? 'Drive' : 'Drive'}
+              {driveConnected ? 'Drive connected' : 'Connect Drive'}
             </button>
           </div>
         </div>
