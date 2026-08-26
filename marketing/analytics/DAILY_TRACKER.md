@@ -17,17 +17,17 @@ python3.11 scripts/analytics/daily_report.py --days 7
 # Snapshot lands in marketing/analytics/daily/YYYY-MM-DD.json
 ```
 
-## Source status (2026-08-25)
+## Source status (2026-08-25 evening browser pull)
 
 | Source | Status | Notes |
 |--------|--------|-------|
-| **PostHog** | Live via Cursor MCP | Best web + channel + landing page source today. Add `POSTHOG_PERSONAL_API_KEY` to automate the puller. |
+| **PostHog** | Live via Cursor MCP | Best web + channel source. 367 visitors / 1,129 views (7d). Add `POSTHOG_PERSONAL_API_KEY` to automate the puller. |
+| **Google Search Console** | Live via browser | 3mo: 42 clicks, 1.74K imps, 2.4% CTR, pos 14.4. Snapshot: `marketing/analytics/daily/2026-08-25-browser.json`. Wire API later for automation. |
+| **App Store Connect** | Live via browser | Last 7d ~Aug 24: 8 first downloads, 451 impressions, 2.93% conv, 58 product-page views. |
+| **GA4 UI** | Undercounting | Only 2 active users / 63 views vs PostHog 367. Fix tag before trusting GA. |
 | **Threads** | Live | Profile views + recent posts via Graph API. |
-| **App Store Connect** | Request created | ONGOING analytics request `2400a8e7-…`. First report instances still empty (Apple usually fills in 1–2 days). |
-| **Cloudflare** | Blocked | Token lacks `Zone Analytics Read`. Fix in Cloudflare → API Tokens. |
-| **Meta FB/IG insights** | Blocked | Need `pages_read_engagement` / `instagram_manage_insights`. Profile works (IG @palmcareai, 10 followers). Paid FB traffic still visible in PostHog UTMs. |
-| **Google Search Console** | Not wired | Need service account or OAuth refresh token on the property. |
-| **Google Analytics 4** | Not wired | Same Google auth. Historical snapshot exists in `palmcareai-ga-strategy.canvas.tsx`. |
+| **Cloudflare** | Blocked | Token lacks `Zone Analytics Read`. |
+| **Meta FB/IG insights** | Blocked | Need `pages_read_engagement` / `instagram_manage_insights`. Paid FB still in PostHog UTMs. |
 
 ## What “good” looks like each day
 

@@ -83,6 +83,9 @@ Do **not** mass-generate thin state pages. If we build state pages, each needs u
 
 ### 6. On-page CTR once impressions exist
 When GSC Performance shows queries with impressions and low CTR:
+- **2026-08-25:** Rewrote `/blog/ai-home-care-documentation-tools-2026` title/meta after 450 imps / 0.4% CTR.
+  - Title: `AI Documentation for Home Care Agencies: What to Buy`
+  - Meta clarifies care plans/contracts vs OASIS-only scribes.
 - Rewrite title tags to match the query intent.  
 - Keep brand at the end: `Keyword phrase | PalmCare AI`.
 
