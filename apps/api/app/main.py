@@ -645,46 +645,49 @@ async def seed_database():
             import json as _json
 
             # Single $199/month plan (Apple IAP com.palmcareai.app.starter.monthly).
-            # Legacy Growth / Professional / Enterprise rows stay inactive so
+            # Legacy Growth / Professional rows stay inactive so
             # existing subscription rows keep resolving.
-            _unlimited = _json.dumps([
-                "Unlimited AI assessments", "Unlimited team members",
-                "AI voice to contract", "Smart SOAP notes",
-                "Advanced analytics and reporting", "Custom contract templates",
-                "50 state compliance engine", "HIPAA BAA included",
-                "Priority support", "250 GB storage", "30 day free trial",
-            ])
             _mobile = _json.dumps([
-                "Unlimited AI assessments on iPhone", "AI voice to contract",
-                "Smart SOAP notes and billables", "50 state compliance engine",
-                "HIPAA BAA included", "iPhone app access", "30 day free trial",
+                "15 AI assessments per month", "Lite web CRM (30 clients)",
+                "AI voice to contract", "Smart SOAP notes and billables",
+                "50 state compliance engine", "HIPAA BAA included",
+                "iPhone app access", "30 day free trial",
+            ])
+            _platform = _json.dumps([
+                "30 AI assessments per month", "Web CRM (150 clients)",
+                "Everything in Mobile", "Team seats and pipeline",
+                "Custom contract templates", "Priority support",
+                "250 GB storage", "30 day free trial",
             ])
             _plan_defs = [
                 dict(name="PalmCare Mobile", tier=PlanTier.MOBILE,
-                     description="Assessments on iPhone. Record the visit and PALM writes notes, billables, and the contract.",
-                     monthly_price=80, annual_price=0, max_users=1, max_clients=50,
-                     max_visits_per_month=99999, max_storage_gb=50, is_active=True, is_contact_sales=False,
+                     description="Assessments plus lite web CRM. 15 assessments and 30 clients per month.",
+                     monthly_price=89.99, annual_price=0, max_users=1, max_clients=30,
+                     max_visits_per_month=15, max_storage_gb=50, is_active=True, is_contact_sales=False,
                      features=_mobile),
                 dict(name="PalmCare Platform", tier=PlanTier.STARTER,
-                     description="Full platform: web CRM, team seats, analytics, and unlimited assessments on iPhone and web.",
-                     monthly_price=199, annual_price=0, max_users=999, max_clients=9999,
-                     max_visits_per_month=99999, max_storage_gb=250, is_active=True, is_contact_sales=False,
-                     features=_unlimited),
+                     description="Full platform CRM with team seats. 30 assessments and 150 clients per month.",
+                     monthly_price=199.99, annual_price=0, max_users=999, max_clients=150,
+                     max_visits_per_month=30, max_storage_gb=250, is_active=True, is_contact_sales=False,
+                     features=_platform),
                 dict(name="Growth", tier=PlanTier.GROWTH,
-                     description="Legacy plan. Replaced by the single PalmCare AI plan.",
+                     description="Legacy plan. Replaced by PalmCare Platform.",
                      monthly_price=199, annual_price=0, max_users=20, max_clients=200,
                      max_visits_per_month=75, max_storage_gb=50, is_active=False, is_contact_sales=False,
                      features=_json.dumps([])),
                 dict(name="Professional", tier=PlanTier.PROFESSIONAL,
-                     description="Legacy plan.",
-                     monthly_price=199, annual_price=0, max_users=999, max_clients=500,
-                     max_visits_per_month=75, max_storage_gb=50, is_active=False, is_contact_sales=False,
+                     description="Legacy plan. Replaced by Enterprise quote.",
+                     monthly_price=0, annual_price=0, max_users=999, max_clients=500,
+                     max_visits_per_month=75, max_storage_gb=50, is_active=False, is_contact_sales=True,
                      features=_json.dumps([])),
                 dict(name="Enterprise", tier=PlanTier.ENTERPRISE,
-                     description="Legacy plan. Replaced by the single PalmCare AI plan.",
-                     monthly_price=199, annual_price=0, max_users=999, max_clients=9999,
-                     max_visits_per_month=99999, max_storage_gb=250, is_active=False, is_contact_sales=False,
-                     features=_json.dumps([])),
+                     description="Custom formula pricing and features. Request a quote.",
+                     monthly_price=0, annual_price=0, max_users=9999, max_clients=99999,
+                     max_visits_per_month=99999, max_storage_gb=1000, is_active=True, is_contact_sales=True,
+                     features=_json.dumps([
+                         "Custom assessment and client caps", "SSO",
+                         "Dedicated success manager", "Volume and formula pricing",
+                     ])),
             ]
             for pd in _plan_defs:
                 existing = db.query(Plan).filter(Plan.tier == pd["tier"]).first()

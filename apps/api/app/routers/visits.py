@@ -6,7 +6,12 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.core.demo_accounts import is_demo_email
-from app.core.plan_access import is_ios_client, is_mobile_only_tier, tier_has_web_platform
+from app.core.plan_access import (
+    get_tier_limits,
+    is_mobile_only_tier,
+    month_start_utc,
+    tier_has_web_platform,
+)
 from app.core.deps import get_db, get_current_user
 from app.core.tenancy import get_user_visit, owned_by_visible_users, iter_visible_client_ids, visible_user_ids
 from app.models.user import User
@@ -70,9 +75,22 @@ def _get_user_subscription(db: Session, user: User):
                     "plan_name": sub.plan.name,
                     "tier": plan_tier,
                     "max_visits": sub.plan.max_visits_per_month,
+                    "max_clients": sub.plan.max_clients,
                 }
     
     return {"has_paid_plan": False, "plan_name": "Free", "tier": "free"}
+
+
+def _count_visits_this_month(db: Session, user: User) -> int:
+    return (
+        db.query(Visit)
+        .join(Client, Visit.client_id == Client.id)
+        .filter(
+            owned_by_visible_users(db, user),
+            Visit.created_at >= month_start_utc(),
+        )
+        .count()
+    )
 
 
 @router.get("/usage")
@@ -95,12 +113,13 @@ async def get_usage(
     ).filter(
         owned_by_visible_users(db, current_user),
     ).count()
-    
+
+    visits_this_month = _count_visits_this_month(db, current_user)
+    limits = get_tier_limits(db, current_user)
     sub_info = _get_user_subscription(db, current_user)
-    
+    max_allowed = limits["max_visits_per_month"]
     if sub_info["has_paid_plan"]:
-        max_allowed = sub_info.get("max_visits", 999)
-        can_create = True
+        can_create = visits_this_month < max_allowed
     else:
         max_allowed = FREE_ASSESSMENT_LIMIT
         can_create = total_visits < FREE_ASSESSMENT_LIMIT
@@ -109,14 +128,18 @@ async def get_usage(
     return {
         "completed_assessments": completed_count,
         "total_assessments": total_visits,
+        "visits_this_month": visits_this_month,
         "max_allowed": max_allowed,
+        "max_clients": limits["max_clients"],
         "can_create": can_create,
         "plan_name": sub_info["plan_name"],
         "plan_tier": tier,
         "has_paid_plan": sub_info["has_paid_plan"],
         "upgrade_required": not can_create,
+        # Mobile includes lite web CRM; keep flag false so the web gate stays open.
         "mobile_only": is_mobile_only_tier(tier),
         "web_platform_access": tier_has_web_platform(tier),
+        "lite_crm": (tier or "").lower() == "mobile",
     }
 
 
@@ -171,20 +194,21 @@ async def create_visit(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new visit (data isolation enforced)."""
-    # Check free tier limit
     sub_info = _get_user_subscription(db, current_user)
-    if is_mobile_only_tier(sub_info.get("tier")) and not is_ios_client(
-        request.headers.get("User-Agent"),
-        request.headers.get("X-Palm-Client"),
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                "PalmCare Mobile includes assessments on iPhone. "
-                "Upgrade to PalmCare Platform in the app for web assessments."
-            ),
-        )
-    if not sub_info["has_paid_plan"]:
+    limits = get_tier_limits(db, current_user)
+    visits_this_month = _count_visits_this_month(db, current_user)
+
+    if sub_info["has_paid_plan"]:
+        max_visits = limits["max_visits_per_month"]
+        if visits_this_month >= max_visits:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=(
+                    f"Monthly assessment limit reached ({max_visits}/month on your plan). "
+                    "Upgrade to PalmCare Platform for a higher cap, or wait until next month."
+                ),
+            )
+    else:
         total_visits = db.query(Visit).join(
             Client, Visit.client_id == Client.id
         ).filter(
@@ -193,7 +217,7 @@ async def create_visit(
         if total_visits >= FREE_ASSESSMENT_LIMIT:
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                detail="Free plan limit reached. You've used your 2 free assessments. Please upgrade to continue.",
+                detail="Free plan limit reached. Subscribe in the iPhone app to continue.",
             )
     
     # Verify client exists AND belongs to current user

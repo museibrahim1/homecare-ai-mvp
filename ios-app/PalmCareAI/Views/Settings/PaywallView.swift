@@ -24,9 +24,10 @@ struct PaywallView: View {
     private let planInfoByProductID: [String: PlanInfo] = [
         "com.palmcareai.app.mobile.monthly": PlanInfo(
             title: "PalmCare Mobile",
-            subtitle: "Unlimited assessments on iPhone",
+            subtitle: "15 assessments/mo · lite CRM (30 clients)",
             highlights: [
                 "AI voice to contract",
+                "Lite web CRM included",
                 "Smart SOAP notes and billables",
                 "50-state compliance engine",
                 "HIPAA BAA included",
@@ -35,11 +36,11 @@ struct PaywallView: View {
         ),
         "com.palmcareai.app.starter.monthly": PlanInfo(
             title: "PalmCare Platform",
-            subtitle: "Mobile + web CRM and team seats",
+            subtitle: "30 assessments/mo · CRM (150 clients)",
             highlights: [
                 "Everything in Mobile",
-                "Web dashboard and analytics",
-                "Unlimited team members",
+                "Higher monthly caps",
+                "Web dashboard and team seats",
                 "Custom contract templates",
                 "Priority support",
             ],

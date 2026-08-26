@@ -344,7 +344,7 @@ struct SettingsView: View {
                         Text(usage?.has_paid_plan == true ? "Manage Plan" : "View Plan")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.palmText)
-                        Text("$89.99 Mobile · $199.99 Platform")
+                        Text("$89.99 Mobile (lite CRM) · $199.99 Platform")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
                     }

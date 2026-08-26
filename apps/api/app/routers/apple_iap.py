@@ -63,8 +63,8 @@ router = APIRouter()
 # Must stay in sync with the iOS `StoreKitService.productIDs` list.
 #
 # iOS sells two monthly plans (must match StoreKitService.productIDs):
-#   mobile   $80/mo  — iPhone assessments only
-#   starter $199/mo  — full web + mobile platform
+#   mobile  $89.99/mo — assessments + lite web CRM (15/mo, 30 clients)
+#   starter $199.99/mo — full platform CRM (30/mo, 150 clients)
 # Legacy Growth / Pro product IDs are no longer accepted.
 APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
     "com.palmcareai.app.mobile.monthly": PlanTier.MOBILE,

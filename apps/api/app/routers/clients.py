@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from app.core.deps import get_db, get_current_user
+from app.core.plan_access import get_tier_limits
 from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.client import Client
@@ -51,6 +52,22 @@ async def create_client(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new client (associated with the current user)."""
+    limits = get_tier_limits(db, current_user)
+    max_clients = limits["max_clients"]
+    current_count = (
+        db.query(Client)
+        .filter(owned_by_visible_users(db, current_user))
+        .count()
+    )
+    if current_count >= max_clients:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=(
+                f"Client limit reached ({max_clients} on your plan). "
+                "Upgrade to PalmCare Platform for up to 150 clients, or contact sales for Enterprise."
+            ),
+        )
+
     client_data = client_in.model_dump(exclude_unset=True)
     client_data['created_by'] = current_user.id
     client = Client(**client_data)

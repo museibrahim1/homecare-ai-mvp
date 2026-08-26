@@ -40,9 +40,10 @@ const PLANS: PlanCard[] = [
     priceSuffix: '/mo',
     icon: Smartphone,
     description:
-      'iPhone assessments only. Record the visit and PALM writes notes, billables, and a state-ready service agreement.',
+      'Assessments on iPhone plus lite web CRM. 15 assessments and 30 clients each month.',
     features: [
-      'Unlimited AI assessments on iPhone',
+      '15 AI assessments per month',
+      'Lite web CRM (up to 30 clients)',
       'AI voice to contract',
       'SOAP notes and billables',
       '50-state compliance engine',
@@ -50,7 +51,7 @@ const PLANS: PlanCard[] = [
     ],
     cta: 'Start free trial',
     href: '/register',
-    note: 'Subscribe in the iOS app after you create your account.',
+    note: 'Subscribe in the iOS app after you create your account. 30-day free trial.',
   },
   {
     id: 'platform',
@@ -60,18 +61,18 @@ const PLANS: PlanCard[] = [
     icon: Zap,
     highlight: true,
     description:
-      'Full agency stack: web CRM, team seats, analytics, and unlimited assessments on iPhone and web.',
+      'Full agency stack: web CRM, team seats, and higher monthly caps on assessments and clients.',
     features: [
-      'Everything in Mobile',
-      'Web CRM, pipeline, and calendar',
-      'Unlimited team seats',
+      '30 AI assessments per month',
+      'Web CRM (up to 150 clients)',
+      'Team seats, pipeline, and calendar',
       'Custom contract templates',
       'Priority support',
       '250 GB storage',
     ],
     cta: 'Start free trial',
     href: '/register',
-    note: 'Subscribe in the iOS app after you create your account.',
+    note: 'Subscribe in the iOS app after you create your account. 30-day free trial.',
   },
   {
     id: 'enterprise',
@@ -79,13 +80,13 @@ const PLANS: PlanCard[] = [
     priceLabel: 'Custom',
     icon: Building2,
     description:
-      'Multi-location agencies that need custom limits, SSO, dedicated onboarding, and a signed quote.',
+      'Multi-location agencies that need a custom mix of limits, SSO, onboarding, and pricing.',
     features: [
       'Everything in Platform',
-      'Custom assessment and seat limits',
+      'Custom assessment and client caps',
       'SSO and advanced admin controls',
       'Dedicated success manager',
-      'Volume pricing',
+      'Volume and formula pricing',
     ],
     cta: 'Request a quote',
     href: '/book-demo',
@@ -100,11 +101,11 @@ const FAQS = [
   },
   {
     q: 'What is the difference between Mobile and Platform?',
-    a: 'Mobile ($89.99/mo) is iPhone assessments only. Platform ($199.99/mo) adds the web CRM, team seats, analytics, and assessments on web and iPhone. Enterprise is quote-based for larger agencies.',
+    a: 'Mobile ($89.99/mo) includes assessments plus lite web CRM with 15 assessments and 30 clients per month. Platform ($199.99/mo) raises those caps to 30 assessments and 150 clients, and adds team seats and fuller CRM tools. Enterprise is a custom quote.',
   },
   {
     q: 'Can Mobile subscribers use the web CRM?',
-    a: 'No. Mobile includes the iPhone app only. Billing and account settings stay available on the web. Upgrade to Platform in the app to unlock the CRM.',
+    a: 'Yes. Mobile includes lite web CRM with caps (15 assessments and 30 clients per month). Upgrade to Platform in the app for higher limits and team features.',
   },
   {
     q: 'How do subscriptions and payments work?',

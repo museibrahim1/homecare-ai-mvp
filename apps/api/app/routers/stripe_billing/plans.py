@@ -69,37 +69,39 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     import json
 
     # Two self-serve plans + Enterprise quote:
-    # Mobile ($89.99, iPhone assessments) and Platform ($199.99, web CRM + mobile).
+    # Mobile ($89.99, lite CRM) and Platform ($199.99, higher caps).
     # Apple IAP product IDs must match apple_iap.py.
     MOBILE_FEATURES = json.dumps([
-        "Unlimited AI assessments on iPhone", "AI voice to contract",
-        "Smart SOAP notes and billables", "50 state compliance engine",
-        "HIPAA BAA included", "iPhone app access", "30 day free trial",
+        "15 AI assessments per month", "Lite web CRM (30 clients)",
+        "AI voice to contract", "Smart SOAP notes and billables",
+        "50 state compliance engine", "HIPAA BAA included",
+        "iPhone app access", "30 day free trial",
     ])
     PLATFORM_FEATURES = json.dumps([
-        "Everything in Mobile", "Web CRM and pipeline", "Unlimited team seats",
+        "30 AI assessments per month", "Web CRM (150 clients)",
+        "Everything in Mobile", "Team seats and pipeline",
         "Custom contract templates", "Priority support", "250 GB storage",
         "30 day free trial",
     ])
     ENTERPRISE_FEATURES = json.dumps([
-        "Everything in Platform", "Custom assessment and seat limits",
+        "Everything in Platform", "Custom assessment and client caps",
         "SSO and advanced admin controls", "Dedicated success manager",
-        "Volume pricing",
+        "Volume and formula pricing",
     ])
     PLANS = [
         {
             "name": "PalmCare Mobile",
             "tier": PlanTier.MOBILE,
             "description": (
-                "Assessments on iPhone. Record the visit and PALM writes the "
-                "notes, billables, and a state compliant service agreement."
+                "Assessments plus lite web CRM. 15 assessments and 30 clients "
+                "per month."
             ),
             "monthly_price": 89.99,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 1,
-            "max_clients": 50,
-            "max_visits_per_month": 99999,
+            "max_clients": 30,
+            "max_visits_per_month": 15,
             "max_storage_gb": 50,
             "is_contact_sales": False,
             "is_active": True,
@@ -109,15 +111,15 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "name": "PalmCare Platform",
             "tier": PlanTier.STARTER,
             "description": (
-                "Full platform: web CRM, team seats, analytics, and unlimited "
-                "assessments on iPhone and web. Includes a 30 day free trial."
+                "Full platform CRM with team seats. 30 assessments and 150 "
+                "clients per month. Includes a 30 day free trial."
             ),
             "monthly_price": 199.99,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 999,
-            "max_clients": 9999,
-            "max_visits_per_month": 99999,
+            "max_clients": 150,
+            "max_visits_per_month": 30,
             "max_storage_gb": 250,
             "is_contact_sales": False,
             "is_active": True,
@@ -156,11 +158,11 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
         {
             "name": "Enterprise",
             "tier": PlanTier.ENTERPRISE,
-            "description": "Custom quote for multi-location agencies. Contact sales.",
+            "description": "Custom formula pricing and features. Request a quote.",
             "monthly_price": 0,
             "annual_price": 0,
             "setup_fee": 0,
-            "max_users": 999,
+            "max_users": 9999,
             "max_clients": 99999,
             "max_visits_per_month": 99999,
             "max_storage_gb": 1000,

@@ -8,27 +8,29 @@
 
 | Plan | Price | How sold | Includes |
 |------|-------|----------|----------|
-| **PalmCare Mobile** | $89.99/mo | Apple IAP `com.palmcareai.app.mobile.monthly` | Unlimited assessments on iPhone only |
-| **PalmCare Platform** | $199.99/mo | Apple IAP `com.palmcareai.app.starter.monthly` | Mobile + web CRM, team seats, analytics |
-| **Enterprise** | Custom | Request a quote (`/book-demo`) | Custom limits, SSO, dedicated success |
+| **PalmCare Mobile** | $89.99/mo | Apple IAP `com.palmcareai.app.mobile.monthly` | Assessments + lite web CRM. **15 assessments/mo**, **30 clients** |
+| **PalmCare Platform** | $199.99/mo | Apple IAP `com.palmcareai.app.starter.monthly` | Full CRM + team tools. **30 assessments/mo**, **150 clients** |
+| **Enterprise** | Custom | Request a quote (`/book-demo`) | Custom mix of limits, SSO, success support, formula pricing |
 
 Mobile and Platform include a **30-day Apple introductory free trial** when configured in App Store Connect. Enterprise is not an in-app purchase.
+
+CRM add-ons are deferred until the team defines which features sit outside these two self-serve tiers.
 
 ## Feature access
 
 | Surface | Mobile | Platform | Enterprise |
 |---------|--------|----------|------------|
-| iOS Record / assessments | Yes | Yes | Yes |
-| Web CRM (clients, pipeline, schedule, care tracker) | No | Yes | Yes |
+| iOS Record / assessments | Yes (15/mo) | Yes (30/mo) | Custom |
+| Lite web CRM (clients, pipeline basics) | Yes (30 clients) | Yes (150 clients) | Custom |
+| Team seats / full CRM tools | Limited | Yes | Custom |
 | Web billing / settings | Yes | Yes | Yes |
-| API CRM routes (`/crm/*`) | Blocked | Allowed | Allowed |
 
 ## Why this model
 
 1. Apple Guideline 3.1.1: iOS digital subscriptions go through IAP.
-2. Mobile is the lower entry point for solo caregivers on iPhone.
-3. Platform unlocks the agency CRM on web.
-4. Enterprise stays quote-based so large agencies get custom contracts.
+2. Mobile is the entry plan with lite CRM so solo users can work on phone and web.
+3. Platform raises caps and unlocks fuller agency CRM.
+4. Enterprise stays quote-based for custom formulas and contracts.
 
 ## Customer path
 
