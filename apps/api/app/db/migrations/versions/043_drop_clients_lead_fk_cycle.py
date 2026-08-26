@@ -1,7 +1,7 @@
 """Drop circular FK clients.converted_from_lead_id -> agency_leads
 
-Revision ID: 042
-Revises: 041
+Revision ID: 043
+Revises: 042
 Create Date: 2026-08-25
 
 clients.converted_from_lead_id stays as a plain UUID; agency_leads.converted_client_id
@@ -9,8 +9,8 @@ keeps the FK to clients. Avoids circular DROP issues in tests and migrations.
 """
 from alembic import op
 
-revision = "042"
-down_revision = "041"
+revision = "043"
+down_revision = "042"
 branch_labels = None
 depends_on = None
 
