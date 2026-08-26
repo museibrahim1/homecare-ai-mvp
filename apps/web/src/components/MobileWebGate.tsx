@@ -15,7 +15,7 @@ interface MobileWebGateProps {
 }
 
 /**
- * Blocks the web CRM for PalmCare Mobile subscribers ($80/iPhone plan).
+ * Blocks the web CRM for PalmCare Mobile subscribers ($89.99/iPhone plan).
  * They can still open billing and settings; assessments stay on iPhone.
  */
 export default function MobileWebGate({ children }: MobileWebGateProps) {

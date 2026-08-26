@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing — One Plan for Every Home Care Agency',
+  title: 'Pricing — Mobile, Platform, and Enterprise',
   description:
-    'Simple pricing for PalmCare AI. One plan, $199/mo, everything included: unlimited assessments, unlimited team members, 50 state contracts. 30-day free trial via Apple In-App Purchase.',
+    'PalmCare AI pricing: Mobile $89.99/mo for iPhone assessments, Platform $199.99/mo for web CRM plus mobile, Enterprise by quote. 30-day free trial via Apple In-App Purchase.',
   alternates: { canonical: 'https://palmcareai.com/pricing' },
   openGraph: {
-    title: 'PalmCare AI Pricing — One Plan, $199/mo',
+    title: 'PalmCare AI Pricing — Mobile, Platform, Enterprise',
     description:
-      'Start a 30-day free trial in the iOS app. Everything included for a flat $199 a month after.',
+      'Mobile $89.99, Platform $199.99, or request an Enterprise quote. Start a 30-day free trial in the iOS app.',
   },
 };
 

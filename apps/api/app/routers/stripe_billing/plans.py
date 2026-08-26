@@ -19,9 +19,14 @@ router = APIRouter()
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
     try:
+        from app.models.subscription import PlanTier
+
         plans = (
             db.query(Plan)
-            .filter(Plan.is_active.is_(True))
+            .filter(
+                Plan.is_active.is_(True),
+                Plan.tier.in_([PlanTier.MOBILE, PlanTier.STARTER, PlanTier.ENTERPRISE]),
+            )
             .order_by(Plan.monthly_price)
             .all()
         )
@@ -63,19 +68,23 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     from app.models.subscription import PlanTier
     import json
 
-    # Two active plans: Mobile ($80, iPhone assessments) and Platform ($199,
-    # full web + mobile). Apple IAP product IDs must match apple_iap.py.
+    # Two self-serve plans + Enterprise quote:
+    # Mobile ($89.99, iPhone assessments) and Platform ($199.99, web CRM + mobile).
+    # Apple IAP product IDs must match apple_iap.py.
     MOBILE_FEATURES = json.dumps([
         "Unlimited AI assessments on iPhone", "AI voice to contract",
         "Smart SOAP notes and billables", "50 state compliance engine",
         "HIPAA BAA included", "iPhone app access", "30 day free trial",
     ])
-    UNLIMITED_FEATURES = json.dumps([
-        "Unlimited AI assessments", "Unlimited team members",
-        "AI voice to contract", "Smart SOAP notes",
-        "Advanced analytics and reporting", "Custom contract templates",
-        "50 state compliance engine", "HIPAA BAA included",
-        "Priority support", "250 GB storage", "30 day free trial",
+    PLATFORM_FEATURES = json.dumps([
+        "Everything in Mobile", "Web CRM and pipeline", "Unlimited team seats",
+        "Custom contract templates", "Priority support", "250 GB storage",
+        "30 day free trial",
+    ])
+    ENTERPRISE_FEATURES = json.dumps([
+        "Everything in Platform", "Custom assessment and seat limits",
+        "SSO and advanced admin controls", "Dedicated success manager",
+        "Volume pricing",
     ])
     PLANS = [
         {
@@ -85,7 +94,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
                 "Assessments on iPhone. Record the visit and PALM writes the "
                 "notes, billables, and a state compliant service agreement."
             ),
-            "monthly_price": 80,
+            "monthly_price": 89.99,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 1,
@@ -103,7 +112,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
                 "Full platform: web CRM, team seats, analytics, and unlimited "
                 "assessments on iPhone and web. Includes a 30 day free trial."
             ),
-            "monthly_price": 199,
+            "monthly_price": 199.99,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 999,
@@ -112,13 +121,12 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 250,
             "is_contact_sales": False,
             "is_active": True,
-            "features": UNLIMITED_FEATURES,
+            "features": PLATFORM_FEATURES,
         },
         {
-            # Legacy tier kept inactive for existing rows.
             "name": "Growth",
             "tier": PlanTier.GROWTH,
-            "description": "Legacy plan, replaced by the single PalmCare AI plan.",
+            "description": "Legacy plan. Replaced by PalmCare Platform.",
             "monthly_price": 199,
             "annual_price": 0,
             "setup_fee": 0,
@@ -128,39 +136,37 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 250,
             "is_contact_sales": False,
             "is_active": False,
-            "features": UNLIMITED_FEATURES,
+            "features": PLATFORM_FEATURES,
         },
         {
-            # Legacy tier kept inactive for existing rows.
             "name": "Professional",
             "tier": PlanTier.PROFESSIONAL,
-            "description": "Legacy plan, replaced by the single PalmCare AI plan.",
-            "monthly_price": 199,
+            "description": "Legacy plan. Replaced by Enterprise quote.",
+            "monthly_price": 0,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 999,
             "max_clients": 9999,
             "max_visits_per_month": 99999,
             "max_storage_gb": 250,
-            "is_contact_sales": False,
+            "is_contact_sales": True,
             "is_active": False,
-            "features": UNLIMITED_FEATURES,
+            "features": ENTERPRISE_FEATURES,
         },
         {
-            # Legacy tier kept inactive for existing rows.
             "name": "Enterprise",
             "tier": PlanTier.ENTERPRISE,
-            "description": "Legacy plan, replaced by the single PalmCare AI plan.",
-            "monthly_price": 199,
+            "description": "Custom quote for multi-location agencies. Contact sales.",
+            "monthly_price": 0,
             "annual_price": 0,
             "setup_fee": 0,
             "max_users": 999,
-            "max_clients": 9999,
+            "max_clients": 99999,
             "max_visits_per_month": 99999,
-            "max_storage_gb": 250,
-            "is_contact_sales": False,
-            "is_active": False,
-            "features": UNLIMITED_FEATURES,
+            "max_storage_gb": 1000,
+            "is_contact_sales": True,
+            "is_active": True,
+            "features": ENTERPRISE_FEATURES,
         },
     ]
 

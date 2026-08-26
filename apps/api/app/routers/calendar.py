@@ -15,9 +15,10 @@ import urllib.parse
 from app.core.deps import get_db, get_current_user
 from app.core.config import settings
 from app.core.oauth import validate_oauth_redirect_uri
+from app.core.plan_access import require_web_platform
 from app.models.user import User
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_web_platform)])
 
 
 class GoogleTokenRequest(BaseModel):

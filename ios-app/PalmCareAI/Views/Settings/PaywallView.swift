@@ -1,7 +1,7 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: Mobile ($80) and Platform ($199) auto-renewing plans.
+/// Subscription paywall: Mobile ($89.99) and Platform ($199.99) auto-renewing plans.
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
@@ -308,7 +308,7 @@ struct PaywallView: View {
             .accessibilityLabel(selectedHasTrial ? "Start 30 day free trial" : "Subscribe to the plan")
 
             Text(selectedHasTrial
-                 ? "30 days free, then \(selectedProduct?.displayPrice ?? "$80")/month. Charged to your Apple ID. Auto-renews until you cancel in Settings → Apple ID → Subscriptions."
+                 ? "30 days free, then \(selectedProduct?.displayPrice ?? "$89.99")/month. Charged to your Apple ID. Auto-renews until you cancel in Settings → Apple ID → Subscriptions."
                  : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings.")
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
@@ -339,6 +339,11 @@ struct PaywallView: View {
             }
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(.palmSecondary)
+
+            Link("Need Enterprise? Request a quote", destination: URL(string: "https://palmcareai.com/book-demo")!)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.palmPrimary)
+                .padding(.top, 4)
         }
         .padding(.top, 4)
     }

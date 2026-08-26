@@ -14,11 +14,12 @@ from sqlalchemy import desc, or_, and_
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.plan_access import require_web_platform
 from app.models.user import User
 from app.models.messaging import Channel, Message, Notification
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_web_platform)])
 
 
 def _is_platform_admin(user: User) -> bool:

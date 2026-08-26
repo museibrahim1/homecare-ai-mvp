@@ -17,6 +17,7 @@ import csv
 
 from app.core.deps import get_db, get_current_user
 from app.core.tenancy import owned_by_visible_users
+from app.core.plan_access import require_web_platform
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -24,7 +25,7 @@ from app.models.billable_item import BillableItem
 from app.models.contract import Contract
 from app.models.caregiver import Caregiver
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_web_platform)])
 
 
 # ============ Response Models ============

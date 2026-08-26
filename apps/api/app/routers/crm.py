@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.plan_access import require_web_platform
 from app.core.tenancy import owned_by_visible_users
 from app.models.user import User
 from app.models.client import Client
@@ -33,7 +34,7 @@ from app.services.client_activity import log_client_activity
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_web_platform)])
 
 
 def _normalize_lead_status(raw: Optional[str]) -> str:

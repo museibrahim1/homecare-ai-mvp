@@ -15,13 +15,15 @@ re-exported so `from app.routers.contract_templates import router`
 (mounted at /contract-templates) keeps working unchanged.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app.core.plan_access import require_web_platform
 
 from .crud import router as _crud_router
 from .gallery import router as _gallery_router
 from .detail import router as _detail_router
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_web_platform)])
 router.include_router(_crud_router)
 router.include_router(_gallery_router)
 router.include_router(_detail_router)

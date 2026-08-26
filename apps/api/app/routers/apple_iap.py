@@ -20,8 +20,8 @@ Set up in App Store Connect:
   2. Add two auto-renewing monthly subscriptions (must match
      `APPLE_PRODUCT_TIER_MAP` below), each with a 30 day introductory
      free-trial offer:
-        com.palmcareai.app.mobile.monthly   ($79.99 USA, ~$80)
-        com.palmcareai.app.starter.monthly  ($199)
+        com.palmcareai.app.mobile.monthly   ($89.99 USA)
+        com.palmcareai.app.starter.monthly  ($199.99 USA, sold as PalmCare Platform)
   3. Add the same product to the App Store Connect API Issuer with a
      "Customer Communications" key so refund / cancel webhooks work.
 

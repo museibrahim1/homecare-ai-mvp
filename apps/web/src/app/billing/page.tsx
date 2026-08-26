@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   CheckCircle2,
   AlertCircle,
@@ -13,11 +14,15 @@ import {
   Apple,
   Smartphone,
   Download,
+  Building2,
+  ExternalLink,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import GlassShell from '@/components/GlassShell';
 
 const API_BASE = '/api';
+const APP_STORE_URL =
+  'https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988';
 
 interface SubscriptionData {
   id: string;
@@ -152,36 +157,67 @@ export default function BillingPage() {
 
   const planCatalog = [
     {
-      tier: 'starter',
-      name: 'Starter',
-      price: '$199',
+      tier: 'mobile',
+      name: 'PalmCare Mobile',
+      price: '$89.99',
       period: '/mo',
-      blurb: 'For solo owners and small teams getting started.',
-      features: ['15 AI assessments per month', 'Care plans, billables and contracts', '50-state contract rules'],
+      blurb: 'Unlimited assessments on iPhone. No web CRM.',
+      features: [
+        'Unlimited AI assessments on iPhone',
+        'Notes, billables, and contracts',
+        '50-state compliance engine',
+      ],
+      cta: 'Open App Store',
+      href: APP_STORE_URL,
+      external: true,
     },
     {
-      tier: 'growth',
-      name: 'Growth',
-      price: '$699',
+      tier: 'starter',
+      name: 'PalmCare Platform',
+      price: '$199.99',
       period: '/mo',
-      blurb: 'For growing agencies running weekly intakes.',
-      features: ['40 AI assessments per month', 'Team chat and Gmail sync', 'Priority processing'],
+      blurb: 'Full CRM on web plus unlimited assessments on iPhone.',
+      features: [
+        'Everything in Mobile',
+        'Web CRM, pipeline, and calendar',
+        'Unlimited team seats',
+      ],
       highlight: true,
+      cta: 'Open App Store',
+      href: APP_STORE_URL,
+      external: true,
     },
     {
       tier: 'enterprise',
       name: 'Enterprise',
-      price: '$1,199.99',
-      period: '/mo',
-      blurb: 'For multi-location agencies at scale.',
-      features: ['120 AI assessments per month', 'Unlimited team members', 'Dedicated support'],
+      price: 'Custom',
+      period: '',
+      blurb: 'Multi-location agencies. Custom limits and a signed quote.',
+      features: [
+        'Everything in Platform',
+        'Custom limits and SSO',
+        'Dedicated success manager',
+      ],
+      cta: 'Request a quote',
+      href: '/book-demo',
+      external: false,
     },
   ];
 
   const currentTier = (plan?.tier || '').toLowerCase();
   const currentName = (plan?.name || '').toLowerCase();
-  const isCurrentPlan = (tier: string) =>
-    currentTier === tier || currentTier === (tier === 'enterprise' ? 'pro' : tier) || currentName.includes(tier);
+  const isCurrentPlan = (tier: string) => {
+    if (tier === 'starter') {
+      return ['starter', 'platform', 'complete'].includes(currentTier) || currentName.includes('platform');
+    }
+    if (tier === 'mobile') {
+      return currentTier === 'mobile' || currentName.includes('mobile');
+    }
+    if (tier === 'enterprise') {
+      return ['enterprise', 'pro', 'professional'].includes(currentTier) || currentName.includes('enterprise');
+    }
+    return currentTier === tier;
+  };
 
   const status = subscription?.status || 'none';
   const statusInfo = STATUS_CONFIG[status] || STATUS_CONFIG.none;
@@ -280,17 +316,28 @@ export default function BillingPage() {
         {/* Choose a plan */}
         <div id="plans">
           <h2 className="text-lg font-bold text-[#10211F] mb-1">Choose a plan</h2>
-          <p className="text-[#4B6B66] text-sm mb-4">Pick the tier that fits your agency. Purchases and changes are completed in the PalmCare app.</p>
+          <p className="text-[#4B6B66] text-sm mb-4">
+            Mobile and Platform are purchased in the PalmCare iPhone app. Enterprise is a sales quote.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {planCatalog.map((p) => {
               const current = isCurrentPlan(p.tier);
+              const className = `w-full h-9 rounded-[10px] text-[13px] font-semibold transition-colors inline-flex items-center justify-center gap-1.5 ${
+                current
+                  ? 'bg-primary-500 text-white cursor-default'
+                  : p.highlight
+                    ? 'bg-primary-500 text-white hover:bg-primary-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`;
               return (
                 <div
                   key={p.tier}
                   className={`glass-card p-5 flex flex-col ${current || p.highlight ? 'ring-2 ring-primary-500' : ''}`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`text-[13px] font-semibold uppercase tracking-[0.06em] ${current || p.highlight ? 'text-primary-500' : 'text-[#4B6B66]'}`}>{p.name}</span>
+                    <span className={`text-[13px] font-semibold uppercase tracking-[0.06em] ${current || p.highlight ? 'text-primary-500' : 'text-[#4B6B66]'}`}>
+                      {p.name}
+                    </span>
                     {current ? (
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-600">Current</span>
                     ) : p.highlight ? (
@@ -299,7 +346,7 @@ export default function BillingPage() {
                   </div>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="text-[32px] leading-9 font-bold tracking-tight text-[#10211F]">{p.price}</span>
-                    <span className="text-[13px] text-[#4B6B66]">{p.period}</span>
+                    {p.period ? <span className="text-[13px] text-[#4B6B66]">{p.period}</span> : null}
                   </div>
                   <p className="text-xs text-[#4B6B66] mb-4">{p.blurb}</p>
                   <ul className="space-y-2 mb-5 flex-1">
@@ -310,16 +357,21 @@ export default function BillingPage() {
                       </li>
                     ))}
                   </ul>
-                  <button
-                    disabled={current}
-                    className={`w-full h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
-                      current
-                        ? 'bg-primary-500 text-white cursor-default'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {current ? 'Manage in App Store' : 'Choose in app'}
-                  </button>
+                  {current ? (
+                    <button type="button" disabled className={className}>
+                      Current plan
+                    </button>
+                  ) : p.external ? (
+                    <a href={p.href} target="_blank" rel="noopener noreferrer" className={className}>
+                      {p.cta}
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <Link href={p.href} className={className}>
+                      {p.cta}
+                      <Building2 className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
                 </div>
               );
             })}
