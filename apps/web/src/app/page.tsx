@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
-import ChatWidget from '@/components/ChatWidget';
 import {
   Mic,
   FileText,
@@ -18,6 +18,11 @@ import {
 import GlassLandingHero from '@/components/glass/GlassLandingHero';
 import { FaqItem } from '@/components/landing/FaqItem';
 import { FEATURES_TABS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
+
+const ChatWidget = dynamic(() => import('@/components/ChatWidget'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const SOCIAL_LINKS = [
   {
@@ -209,6 +214,7 @@ export default function LandingPage() {
                     fill
                     className="object-cover object-top"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    loading="lazy"
                   />
                 </div>
                 <div className="flex items-center gap-2.5 mb-2">

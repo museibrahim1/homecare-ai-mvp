@@ -56,13 +56,13 @@ export default function GlassLandingHero() {
         <div className="hidden md:flex items-center gap-3.5">
           <Link
             href="/login"
-            className="py-2.5 px-5 rounded-full text-[15px] font-semibold text-[#4B6B66] hover:text-[#10211F]"
+            className="py-2.5 px-5 rounded-full text-[15px] font-semibold text-[#4B6B66] hover:text-[#10211F] transition-colors"
           >
             Sign in
           </Link>
           <Link
             href="/register"
-            className="py-2.5 px-[22px] rounded-full bg-primary-500 text-[15px] font-semibold text-white hover:bg-primary-600"
+            className="py-2.5 px-[22px] rounded-full bg-primary-500 text-[15px] font-semibold text-white hover:bg-primary-600 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
           >
             Get started
           </Link>
@@ -134,7 +134,7 @@ export default function GlassLandingHero() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-2">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-3 py-4 px-7 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-[17px] font-bold shadow-[0_12px_26px_#0D948852]"
+              className="inline-flex items-center justify-center gap-3 py-4 px-7 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-[17px] font-bold shadow-[0_12px_26px_#0D948852] hover:shadow-[0_16px_32px_#0D948860] hover:-translate-y-0.5 transition-all duration-200"
             >
               <span className="flex items-end gap-[3px] h-7" aria-hidden>
                 <span className="w-[3px] h-[10px] rounded-sm bg-white" />
@@ -147,7 +147,7 @@ export default function GlassLandingHero() {
             </Link>
             <Link
               href="/book-demo"
-              className="inline-flex items-center justify-center py-4 px-[26px] rounded-full border-[1.5px] border-primary-500 text-primary-500 text-[17px] font-semibold hover:bg-white/40"
+              className="inline-flex items-center justify-center py-4 px-[26px] rounded-full border-[1.5px] border-primary-500 text-primary-500 text-[17px] font-semibold hover:bg-white/60 hover:-translate-y-0.5 transition-all duration-200"
             >
               Book a demo
             </Link>
