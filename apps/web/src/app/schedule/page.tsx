@@ -9,7 +9,9 @@ import {
   LayoutGrid, List, Sun, Users, FileText, Video
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { formatLocalDate } from '@/lib/api';
+import { api, formatLocalDate } from '@/lib/api';
+import { migrateLocalCrmToServer } from '@/lib/crmMigrate';
+import { appointmentFromApi, appointmentToApi } from '@/lib/crmAdapters';
 import { format, startOfWeek, endOfWeek, addDays, addWeeks, subWeeks, isSameDay, isToday, isBefore, parseISO } from 'date-fns';
 
 /* ─── Types ─── */
@@ -48,21 +50,6 @@ const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
 const DURATION_OPTIONS = ['30 min', '45 min', '1 hour', '1.5 hours', '2 hours'];
 
 const API_URL = '/api';
-const STORAGE_KEY = 'palmcare-schedule';
-
-/* ─── Persistence ─── */
-function loadAppointments(): Appointment[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function saveAppointments(apts: Appointment[]) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(apts));
-}
 
 function getDurationMinutes(d: string): number {
   if (d.includes('2')) return 120;
@@ -388,7 +375,7 @@ function WeekView({
 
 /* ─── Main Schedule Content ─── */
 function ScheduleContent() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<'day' | 'week' | 'month'>('month');
@@ -409,13 +396,18 @@ function ScheduleContent() {
 
   const [formData, setFormData] = useState<Omit<Appointment, 'id'>>(emptyForm());
 
-  // Load from localStorage
-  useEffect(() => { setAppointments(loadAppointments()); }, []);
+  const reloadAppointments = useCallback(async () => {
+    if (!token) return;
+    try {
+      if (user?.id) await migrateLocalCrmToServer(token, user.id);
+      const rows = await api.getAppointments(token);
+      setAppointments((rows || []).map((r: Record<string, unknown>) => appointmentFromApi(r) as Appointment));
+    } catch (err) {
+      console.error('Failed to load appointments:', err);
+    }
+  }, [token, user?.id]);
 
-  const persist = useCallback((updated: Appointment[]) => {
-    setAppointments(updated);
-    saveAppointments(updated);
-  }, []);
+  useEffect(() => { reloadAppointments(); }, [reloadAppointments]);
 
   // Google status check
   useEffect(() => {
@@ -463,7 +455,8 @@ function ScheduleContent() {
 
   /* ─── CRUD handlers ─── */
   const handleAdd = async () => {
-    const apt: Appointment = { id: Date.now().toString(), ...formData };
+    if (!token) return;
+    const apt: Appointment = { id: 'pending', ...formData };
     if (googleConnected && token) {
       setSyncing(true);
       try {
@@ -472,19 +465,26 @@ function ScheduleContent() {
         const res = await fetch(`${API_URL}/calendar/events`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ title: `${formData.title} - ${formData.client}`, description: formData.notes, start_time: start.toISOString(), end_time: end.toISOString(), location: formData.location }),
         });
         if (res.ok) { const d = await res.json(); apt.googleEventId = d.event_id; }
       } catch {}
       setSyncing(false);
     }
-    persist([...appointments, apt]);
+    try {
+      const created = await api.createAppointment(token, appointmentToApi(formData));
+      await reloadAppointments();
+    } catch (err) {
+      console.error('Failed to create appointment:', err);
+      setError('Failed to save appointment');
+    }
     setFormData(emptyForm());
     setShowAddModal(false);
   };
 
   const handleUpdate = async () => {
-    if (!editingAppointment) return;
+    if (!editingAppointment || !token) return;
     setSyncing(true);
     if (googleConnected && token && editingAppointment.googleEventId) {
       try {
@@ -493,22 +493,34 @@ function ScheduleContent() {
         await fetch(`${API_URL}/calendar/events`, {
           method: 'PUT',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ event_id: editingAppointment.googleEventId, title: `${editingAppointment.title} - ${editingAppointment.client}`, description: editingAppointment.notes, start_time: start.toISOString(), end_time: end.toISOString(), location: editingAppointment.location }),
         });
       } catch {}
     }
-    persist(appointments.map(a => a.id === editingAppointment.id ? editingAppointment : a));
+    try {
+      await api.updateAppointment(token, editingAppointment.id, appointmentToApi(editingAppointment));
+      await reloadAppointments();
+    } catch (err) {
+      console.error('Failed to update appointment:', err);
+    }
     setSyncing(false);
     setShowEditModal(false);
     setEditingAppointment(null);
   };
 
   const handleDelete = async (apt: Appointment) => {
+    if (!token) return;
     setDeleting(apt.id);
     if (googleConnected && token && apt.googleEventId) {
-      try { await fetch(`${API_URL}/calendar/events/${apt.googleEventId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); } catch {}
+      try { await fetch(`${API_URL}/calendar/events/${apt.googleEventId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }, credentials: 'include' }); } catch {}
     }
-    persist(appointments.filter(a => a.id !== apt.id));
+    try {
+      await api.deleteAppointment(token, apt.id);
+      await reloadAppointments();
+    } catch (err) {
+      console.error('Failed to delete appointment:', err);
+    }
     setDeleting(null);
   };
 
@@ -565,8 +577,16 @@ function ScheduleContent() {
             notes: ev.description || '', googleEventId: ev.id,
           };
         });
-        const local = appointments.filter(a => !a.googleEventId);
-        persist([...local, ...synced]);
+        const existing = await api.getAppointments(token);
+        const knownGoogleIds = new Set(
+          (existing || []).map((a: { google_event_id?: string }) => a.google_event_id).filter(Boolean)
+        );
+        for (const apt of synced) {
+          if (apt.googleEventId && !knownGoogleIds.has(apt.googleEventId)) {
+            await api.createAppointment(token, appointmentToApi(apt));
+          }
+        }
+        await reloadAppointments();
       }
     } catch {}
     setSyncing(false);

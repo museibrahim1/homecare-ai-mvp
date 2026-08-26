@@ -521,6 +521,18 @@ async def email_contract(
     }
     flag_modified(visit, "agreement_send")
 
+    from app.services.client_activity import log_client_activity
+    if visit.client_id:
+        log_client_activity(
+            db,
+            client_id=visit.client_id,
+            activity_type="agreement_sent",
+            title="Agreement sent",
+            description=str(email_request.recipient_email),
+            created_by=current_user.id,
+            metadata={"visit_id": str(visit.id), "status": "sent"},
+        )
+
     # Auto-move client to "proposal" status when contract/proposal is emailed
     try:
         if client.status not in ('proposal', 'active', 'assigned'):

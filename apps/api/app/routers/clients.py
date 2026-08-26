@@ -17,8 +17,12 @@ from app.models.diarization_turn import DiarizationTurn
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.audio_asset import AudioAsset
+from app.models.client_activity import ClientActivity
+from app.models.appointment import Appointment
+from app.models.care_tracker_entry import CareTrackerEntry
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 from app.services.email import get_email_service
+from app.services.client_activity import log_client_activity
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +100,37 @@ async def update_client(
     
     # Track status change for notification
     old_status = client.status
+    old_follow_up_at = client.follow_up_at
     
     update_data = client_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(client, field, value)
+    
+    db.flush()
+    
+    new_status = client.status
+    if old_status != new_status and new_status:
+        log_client_activity(
+            db,
+            client_id=client.id,
+            activity_type="status_changed",
+            title=f"Status changed to {new_status.replace('_', ' ').title()}",
+            description=f"From {old_status or 'none'}",
+            created_by=current_user.id,
+            metadata={"from": old_status, "to": new_status},
+        )
+    
+    if "follow_up_at" in update_data or "follow_up_note" in update_data:
+        if client.follow_up_at and client.follow_up_at != old_follow_up_at:
+            log_client_activity(
+                db,
+                client_id=client.id,
+                activity_type="follow_up_set",
+                title="Follow-up scheduled",
+                description=client.follow_up_note,
+                created_by=current_user.id,
+                metadata={"follow_up_at": client.follow_up_at.isoformat() if client.follow_up_at else None},
+            )
     
     db.commit()
     db.refresh(client)
@@ -149,6 +180,11 @@ async def delete_client(
     
     # Delete contracts for this client
     db.query(Contract).filter(Contract.client_id == client_id).delete(synchronize_session=False)
+    
+    # Delete CRM records for this client
+    db.query(ClientActivity).filter(ClientActivity.client_id == client_id).delete(synchronize_session=False)
+    db.query(CareTrackerEntry).filter(CareTrackerEntry.client_id == client_id).delete(synchronize_session=False)
+    db.query(Appointment).filter(Appointment.client_id == client_id).delete(synchronize_session=False)
     
     db.delete(client)
     db.commit()

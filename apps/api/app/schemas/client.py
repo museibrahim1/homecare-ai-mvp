@@ -58,6 +58,7 @@ class ClientBase(BaseModel):
     
     # Status
     status: Optional[str] = "active"
+    estimated_monthly_value: Optional[int] = None
     intake_date: Optional[date] = None
     discharge_date: Optional[date] = None
     
@@ -117,6 +118,7 @@ class ClientUpdate(BaseModel):
     preferred_days: Optional[str] = None
     preferred_times: Optional[str] = None
     status: Optional[str] = None
+    estimated_monthly_value: Optional[int] = None
     intake_date: Optional[date] = None
     discharge_date: Optional[date] = None
     notes: Optional[str] = None

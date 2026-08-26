@@ -10,6 +10,17 @@ import GlassTabs from '@/components/GlassTabs';
 import LeadsPanel from '@/components/panels/LeadsPanel';
 import FollowUpNoteModal, { FollowUpClient } from '@/components/FollowUpNoteModal';
 import { upsertFollowUp, removeFollowUp } from '@/lib/followUpSync';
+import {
+  PIPELINE_KANBAN_STAGES,
+  resolveStageFromStatus,
+  resolveStatusFromStage,
+  resolvePipelineValue,
+  resolveAgreementStatus,
+  AGREEMENT_STATUS_LABELS,
+  type PipelineStageId,
+} from '@/lib/pipelineStages';
+
+const stages = PIPELINE_KANBAN_STAGES;
 
 type Deal = {
   id: string;
@@ -25,15 +36,8 @@ type Deal = {
   visitId?: string;
   followUpNote?: string | null;
   followUpAt?: string | null;
+  agreementStatus?: string | null;
 };
-
-const stages = [
-  { id: 'intake', name: 'Intake', color: 'bg-blue-500', statuses: ['intake', 'new'] },
-  { id: 'assessment', name: 'Assessment', color: 'bg-purple-500', statuses: ['assessment', 'pending'] },
-  { id: 'proposal', name: 'Proposal Sent', color: 'bg-orange-500', statuses: ['proposal', 'pending_review'] },
-  { id: 'active', name: 'Active Client', color: 'bg-green-500', statuses: ['active', 'assigned'] },
-  { id: 'follow_up', name: 'Follow-up', color: 'bg-yellow-500', statuses: ['follow_up', 'review'] },
-];
 
 export default function PipelinePage() {
   const { token, isReady } = useRequireAuth();
@@ -136,25 +140,11 @@ export default function PipelinePage() {
         )[0];
         
         // Determine pipeline stage from client status
-        let stage = 'intake';
-        const status = (client.status || '').toLowerCase();
+        const stage = resolveStageFromStatus(client.status);
         
-        if (['active', 'assigned'].includes(status)) {
-          stage = 'active';
-        } else if (['assessment', 'pending'].includes(status)) {
-          stage = 'assessment';
-        } else if (['proposal', 'pending_review'].includes(status)) {
-          stage = 'proposal';
-        } else if (['follow_up', 'review'].includes(status)) {
-          stage = 'follow_up';
-        } else {
-          stage = 'intake';
-        }
-        
-        // Check if client has a contract with value
         const hasContract = latestVisit?.pipeline_state?.contract?.status === 'completed';
-        const contractValue = latestVisit?.pipeline_state?.contract?.monthly_value || 
-                             (client.care_level === 'HIGH' ? 4500 : client.care_level === 'MODERATE' ? 3200 : 2000);
+        const contractValue = resolvePipelineValue(client, latestVisit);
+        const agreementStatus = resolveAgreementStatus(latestVisit?.agreement_send);
         
         // Calculate days in stage
         const updatedAt = client.updated_at ? new Date(client.updated_at) : new Date();
@@ -174,6 +164,7 @@ export default function PipelinePage() {
           visitId: latestVisit?.id,
           followUpNote: client.follow_up_note ?? null,
           followUpAt: client.follow_up_at ?? null,
+          agreementStatus,
         };
       });
       
@@ -197,8 +188,9 @@ export default function PipelinePage() {
         full_name: newDeal.name,
         email: newDeal.email,
         phone: newDeal.phone,
-        status: newDeal.stage,
+        status: resolveStatusFromStage(newDeal.stage as PipelineStageId),
         notes: newDeal.notes,
+        estimated_monthly_value: newDeal.value ? parseInt(newDeal.value, 10) : undefined,
       });
       
       // Reload pipeline data
@@ -215,8 +207,9 @@ export default function PipelinePage() {
     
     try {
       // Update client status
+      const clientStatus = resolveStatusFromStage(newStage as PipelineStageId);
       await api.updateClient(token, deal.clientId, {
-        status: newStage,
+        status: clientStatus,
       });
 
       // Keep Calendar in sync with the follow-up stage.
@@ -432,6 +425,11 @@ export default function PipelinePage() {
                           <div className="mt-2 flex items-center gap-1 text-xs text-primary-400">
                             <FileText className="w-3 h-3" />
                             Contract Ready
+                          </div>
+                        )}
+                        {deal.agreementStatus && (
+                          <div className="mt-1 text-[11px] text-teal-700">
+                            Agreement: {AGREEMENT_STATUS_LABELS[deal.agreementStatus] || deal.agreementStatus}
                           </div>
                         )}
                       </div>

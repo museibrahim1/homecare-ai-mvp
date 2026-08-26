@@ -113,6 +113,7 @@ from app.routers import (
     scheduler,
     support,
     notifications,
+    crm,
 )
 
 @asynccontextmanager
@@ -221,6 +222,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(mfa.router, prefix="/auth/mfa", tags=["MFA"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(clients.router, prefix="/clients", tags=["Clients"])
+app.include_router(crm.router, prefix="/crm", tags=["Agency CRM"])
 app.include_router(visits.router, prefix="/visits", tags=["Visits"])
 app.include_router(uploads.router, prefix="/uploads", tags=["Uploads"])
 app.include_router(live_transcribe.router, prefix="/live", tags=["Live Transcription"])

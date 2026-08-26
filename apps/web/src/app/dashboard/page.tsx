@@ -18,25 +18,12 @@ import DonutChart from '@/components/charts/DonutChart';
 import BarChart from '@/components/charts/BarChart';
 import Sparkline from '@/components/charts/Sparkline';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek } from 'date-fns';
-
-const API_BASE = '/api';
-
-/* ─── Pipeline stage config ─── */
-const PIPELINE_STAGES = [
-  { key: 'intake', label: 'Intake', color: '#3b82f6', statuses: ['intake', 'pending'] },
-  { key: 'assessment', label: 'Assessment', color: '#8b5cf6', statuses: ['assessment'] },
-  { key: 'proposal', label: 'Proposal', color: '#f59e0b', statuses: ['proposal', 'pending_review'] },
-  { key: 'active', label: 'Active', color: '#10b981', statuses: ['active', 'assigned'] },
-  { key: 'follow_up', label: 'Follow-up', color: '#ef4444', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
-];
-
-const PIPELINE_BG: Record<string, string> = {
-  intake: 'bg-blue-50 text-blue-600',
-  assessment: 'bg-purple-50 text-purple-600',
-  proposal: 'bg-amber-50 text-amber-600',
-  active: 'bg-emerald-50 text-emerald-600',
-  follow_up: 'bg-red-50 text-red-600',
-};
+import {
+  PIPELINE_KANBAN_STAGES as PIPELINE_STAGES,
+  PIPELINE_BG,
+  resolveStageFromStatus,
+  resolveAgreementStatus,
+} from '@/lib/pipelineStages';
 
 /* ─── Task types ─── */
 interface Task {
@@ -56,23 +43,20 @@ const TASK_CATEGORIES = [
   { value: 'general', label: 'General', bg: 'bg-slate-100', text: 'text-slate-600' },
 ];
 
-const TASK_STORAGE_KEY = 'palmcare-tasks';
-
-function loadTasks(): Task[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const data = localStorage.getItem(TASK_STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch { return []; }
-}
-
-function saveTasks(tasks: Task[]) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
+function mapApiTask(row: any): Task {
+  const status = row.status === 'done' ? 'completed' : row.status;
+  return {
+    id: row.id,
+    title: row.title,
+    status: (status === 'cancelled' ? 'completed' : status) as Task['status'],
+    category: row.priority || 'general',
+    dueDate: row.due_date || undefined,
+    createdAt: row.created_at,
+  };
 }
 
 /* ─── Tasks Widget ─── */
-function TasksWidget() {
+function TasksWidget({ token }: { token: string | null }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -80,26 +64,61 @@ function TasksWidget() {
   const [newDueDate, setNewDueDate] = useState('');
   const [filter, setFilter] = useState<'all' | 'todo' | 'in_progress' | 'completed'>('all');
 
-  useEffect(() => { setTasks(loadTasks()); }, []);
+  useEffect(() => {
+    if (!token) return;
+    api.getTasks(token).then((rows) => {
+      setTasks((rows || []).map(mapApiTask).filter((t) => t.status !== 'completed' || true));
+    }).catch(() => {});
+  }, [token]);
 
-  const updateTasks = (updated: Task[]) => { setTasks(updated); saveTasks(updated); };
-
-  const addTask = () => {
-    if (!newTitle.trim()) return;
-    const task: Task = { id: Date.now().toString(), title: newTitle.trim(), status: 'todo', category: newCategory, dueDate: newDueDate || undefined, createdAt: new Date().toISOString() };
-    updateTasks([task, ...tasks]);
-    setNewTitle(''); setNewCategory('general'); setNewDueDate(''); setShowAddForm(false);
+  const refreshTasks = async () => {
+    if (!token) return;
+    const rows = await api.getTasks(token);
+    setTasks((rows || []).map(mapApiTask));
   };
 
-  const toggleStatus = (id: string) => {
-    updateTasks(tasks.map(t => {
-      if (t.id !== id) return t;
-      const next = t.status === 'todo' ? 'in_progress' : t.status === 'in_progress' ? 'completed' : 'todo';
-      return { ...t, status: next };
-    }));
+  const addTask = async () => {
+    if (!newTitle.trim() || !token) return;
+    try {
+      await api.createTask(token, {
+        title: newTitle.trim(),
+        status: 'todo',
+        priority: newCategory === 'general' ? 'medium' : newCategory,
+        due_date: newDueDate || null,
+      });
+      await refreshTasks();
+      setNewTitle(''); setNewCategory('general'); setNewDueDate(''); setShowAddForm(false);
+    } catch (err) {
+      console.error('Failed to create task:', err);
+    }
   };
 
-  const deleteTask = (id: string) => updateTasks(tasks.filter(t => t.id !== id));
+  const toggleStatus = async (id: string) => {
+    if (!token) return;
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+    const next = task.status === 'todo' ? 'in_progress' : task.status === 'in_progress' ? 'completed' : 'todo';
+    try {
+      if (next === 'completed') {
+        await api.completeTask(token, id);
+      } else {
+        await api.updateTask(token, id, { status: next });
+      }
+      await refreshTasks();
+    } catch (err) {
+      console.error('Failed to update task:', err);
+    }
+  };
+
+  const deleteTask = async (id: string) => {
+    if (!token) return;
+    try {
+      await api.deleteTask(token, id);
+      await refreshTasks();
+    } catch (err) {
+      console.error('Failed to delete task:', err);
+    }
+  };
 
   const filtered = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);
   const todoCount = tasks.filter(t => t.status === 'todo').length;
@@ -108,7 +127,7 @@ function TasksWidget() {
   const getCategoryConfig = (cat?: string) => TASK_CATEGORIES.find(c => c.value === cat) || TASK_CATEGORIES[4];
 
   return (
-    <div data-tour="tasks" className="bg-white border border-slate-200 rounded-lg p-5">
+    <div data-tour="tasks" className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-primary-500" />
@@ -189,6 +208,7 @@ interface WidgetDef {
 
 const ALL_WIDGETS: WidgetDef[] = [
   { id: 'stats', label: 'Stats Cards', description: 'Key metrics at a glance with trends', size: 'full' },
+  { id: 'work-queue', label: 'Your Queue', description: 'Processing, signatures, and follow-ups', size: 'half' },
   { id: 'assessments-chart', label: 'Assessments Trend', description: 'Area chart of assessments over time', size: 'half' },
   { id: 'pipeline-chart', label: 'Pipeline Breakdown', description: 'Donut chart of client stages', size: 'half' },
   { id: 'weekly-bar', label: 'Weekly Activity', description: 'Bar chart of daily activity this week', size: 'half' },
@@ -200,7 +220,7 @@ const ALL_WIDGETS: WidgetDef[] = [
   { id: 'usage', label: 'My Activity', description: 'Your engagement trends', size: 'full' },
 ];
 
-const DEFAULT_ORDER = ['stats', 'assessments-chart', 'pipeline-chart', 'weekly-bar', 'conversion', 'proposals', 'activity', 'tasks', 'quick-actions', 'usage'];
+const DEFAULT_ORDER = ['stats', 'work-queue', 'assessments-chart', 'pipeline-chart', 'weekly-bar', 'conversion', 'proposals', 'activity', 'tasks', 'quick-actions', 'usage'];
 const WIDGET_PREFS_KEY = 'palmcare-dashboard-widgets-v2';
 
 interface WidgetPrefs { order: string[]; hidden: string[]; }
@@ -224,6 +244,7 @@ function saveWidgetPrefs(prefs: WidgetPrefs) {
 }
 
 const WIDGET_ICONS: Record<string, typeof CheckCircle2> = {
+  'work-queue': Zap,
   tasks: CheckCircle2,
   stats: BarChart3,
   'assessments-chart': TrendingUp,
@@ -330,7 +351,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { token, isReady, user } = useRequireAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
-  interface DashboardVisit { id: string; created_at?: string; scheduled_start?: string; status?: string; client_name?: string; client?: { full_name?: string }; contract_generated?: boolean; note_generated?: boolean; }
+  interface DashboardVisit { id: string; created_at?: string; scheduled_start?: string; status?: string; client_name?: string; client?: { full_name?: string }; contract_generated?: boolean; note_generated?: boolean; agreement_send?: Record<string, unknown>; pipeline_state?: Record<string, unknown>; }
   interface DashboardClient { id: string; full_name: string; status?: string; updated_at?: string; }
   const [recentVisits, setRecentVisits] = useState<DashboardVisit[]>([]);
   const [allVisits, setAllVisits] = useState<DashboardVisit[]>([]);
@@ -393,11 +414,27 @@ export default function DashboardPage() {
   /* ─── Chart data: Pipeline donut ─── */
   const pipelineSegments = useMemo(() => {
     return PIPELINE_STAGES.map(stage => ({
-      label: stage.label,
-      value: allClients.filter(c => stage.statuses.includes(c.status || 'active')).length,
-      color: stage.color,
+      label: stage.name,
+      value: allClients.filter(c => stage.statuses.includes((c.status || 'active').toLowerCase())).length,
+      color: stage.barColor,
     }));
   }, [allClients]);
+
+  const workQueueBuckets = useMemo(() => {
+    const processing = allVisits.filter((v) => v.status === 'processing' || v.status === 'uploaded').length;
+    const awaitingSignature = allVisits.filter((v) => {
+      const s = resolveAgreementStatus(v.agreement_send);
+      return s === 'sent' || s === 'delivered' || s === 'opened';
+    }).length;
+    const followUp = allClients.filter((c) => ['follow_up', 'review'].includes((c.status || '').toLowerCase())).length;
+    const failed = allVisits.filter((v) => v.status === 'failed').length;
+    return [
+      { label: 'Processing', count: processing, href: '/visits?status=processing' },
+      { label: 'Awaiting signature', count: awaitingSignature, href: '/pipeline?tab=deals' },
+      { label: 'Follow-up', count: followUp, href: '/clients?section=clients' },
+      { label: 'Failed', count: failed, href: '/visits?status=failed' },
+    ];
+  }, [allVisits, allClients]);
 
   /* ─── Chart data: Weekly activity bar chart ─── */
   const weeklyBarData = useMemo(() => {
@@ -454,7 +491,7 @@ export default function DashboardPage() {
     setUpdatingClientId(clientId);
     try {
       await api.updateClient(token, clientId, { status: action });
-      if (action === 'active') { try { await fetch(`${API_BASE}/clients/${clientId}/activate-policy`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); } catch {} }
+      if (action === 'active') { try { await fetch(`/api/clients/${clientId}/activate-policy`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, credentials: 'include' }); } catch {} }
       setProposalClients(prev => prev.filter(c => c.id !== clientId));
       setStats(prev => ({ ...prev, pendingReview: prev.pendingReview - 1 }));
     } catch { setError('Failed to update client status.'); }
@@ -650,7 +687,7 @@ export default function DashboardPage() {
 
       case 'activity':
         return (
-          <div key="activity" data-tour="quick-actions" className="bg-white border border-slate-200 rounded-lg p-5">
+          <div key="activity" data-tour="quick-actions" className="glass-card p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-primary-500" />
@@ -694,12 +731,34 @@ export default function DashboardPage() {
           </div>
         );
 
+      case 'work-queue':
+        return (
+          <div key="work-queue" className="glass-card p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-primary-500" />
+              <h2 className="text-sm font-semibold text-slate-800">Your Queue</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {workQueueBuckets.map((bucket) => (
+                <button
+                  key={bucket.label}
+                  onClick={() => router.push(bucket.href)}
+                  className="text-left p-3 rounded-xl bg-white/60 border border-white/80 hover:bg-white/90 transition-colors"
+                >
+                  <p className="text-[11px] text-slate-500">{bucket.label}</p>
+                  <p className="text-lg font-bold text-slate-900">{bucket.count}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'tasks':
-        return <TasksWidget key="tasks" />;
+        return <TasksWidget key="tasks" token={token} />;
 
       case 'quick-actions':
         return (
-          <div key="quick-actions" className="bg-white border border-slate-200 rounded-lg p-5">
+          <div key="quick-actions" className="glass-card p-5">
             <div className="flex items-center gap-2 mb-4">
               <ArrowRight className="w-4 h-4 text-slate-500" />
               <h2 className="text-sm font-semibold text-slate-800">Quick Actions</h2>

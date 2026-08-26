@@ -32,7 +32,8 @@ import {
   Check,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
-import { bearerHeaders } from '@/lib/api';
+import { api, bearerHeaders } from '@/lib/api';
+import { resolveAgreementStatus, AGREEMENT_STATUS_LABELS } from '@/lib/pipelineStages';
 import { stripSeparators } from '@/lib/formatText';
 import GlassRail from '@/components/GlassRail';
 import GlassTabs from '@/components/GlassTabs';
@@ -350,6 +351,7 @@ export default function ClientDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [activities, setActivities] = useState<Array<{ id: string; title: string; description?: string; activity_type: string; created_at: string }>>([]);
 
   useEffect(() => {
     if (token && clientId) {
@@ -398,6 +400,14 @@ export default function ClientDetailPage() {
       if (contractsRes && contractsRes.ok) {
         const contractsData = await contractsRes.json();
         setContracts(Array.isArray(contractsData) ? contractsData : []);
+      }
+      if (token) {
+        try {
+          const activityRows = await api.getClientActivities(token, clientId);
+          setActivities(activityRows || []);
+        } catch {
+          setActivities([]);
+        }
       }
     } catch (err: any) {
       const message =
@@ -877,10 +887,39 @@ export default function ClientDetailPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
+                            {resolveAgreementStatus((visit as any).agreement_send) && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-50 text-teal-700">
+                                {AGREEMENT_STATUS_LABELS[resolveAgreementStatus((visit as any).agreement_send)!]}
+                              </span>
+                            )}
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visit.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : visit.status === 'processing' ? 'bg-amber-50 text-amber-600' : visit.status === 'failed' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
                               {(visit.status || 'pending').replace(/_/g, ' ')}
                             </span>
                             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Activity timeline */}
+                <div className="glass-panel p-5">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary-400" />
+                    Activity
+                  </h3>
+                  {activities.length === 0 ? (
+                    <p className="text-sm text-slate-500">Status changes, follow-ups, and agreement updates will show here.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {activities.map((item) => (
+                        <div key={item.id} className="flex gap-3 text-sm">
+                          <div className="w-2 h-2 rounded-full bg-primary-400 mt-1.5 shrink-0" />
+                          <div>
+                            <p className="text-slate-900 font-medium">{item.title}</p>
+                            {item.description && <p className="text-slate-500 text-xs mt-0.5">{item.description}</p>}
+                            <p className="text-[11px] text-slate-400 mt-1">{new Date(item.created_at).toLocaleString()}</p>
                           </div>
                         </div>
                       ))}

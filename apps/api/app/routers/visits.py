@@ -291,6 +291,24 @@ async def update_agreement_send_status(
         send["bounced_at"] = now
     visit.agreement_send = send
     flag_modified(visit, "agreement_send")
+
+    from app.services.client_activity import log_client_activity
+    activity_map = {
+        "signed": ("agreement_signed", "Agreement signed"),
+        "bounced": ("agreement_bounced", "Agreement bounced"),
+        "sent": ("agreement_sent", "Agreement sent"),
+    }
+    act_type, act_title = activity_map[status_value]
+    if visit.client_id:
+        log_client_activity(
+            db,
+            client_id=visit.client_id,
+            activity_type=act_type,
+            title=act_title,
+            created_by=current_user.id,
+            metadata={"visit_id": str(visit.id), "status": status_value},
+        )
+
     db.commit()
     db.refresh(visit)
 

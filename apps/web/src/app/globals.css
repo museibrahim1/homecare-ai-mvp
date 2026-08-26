@@ -466,6 +466,87 @@ html {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* What's New corner panel (Cursor-style) */
+@keyframes whats-new-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes whats-new-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+}
+
+@keyframes whats-new-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes whats-new-backdrop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes whats-new-hero-zoom {
+  from { transform: scale(1.12); }
+  to { transform: scale(1); }
+}
+
+@keyframes whats-new-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-whats-new-panel-in {
+  animation: whats-new-panel-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom right;
+}
+
+.animate-whats-new-panel-out {
+  animation: whats-new-panel-out 0.26s cubic-bezier(0.4, 0, 1, 1) both;
+  transform-origin: bottom right;
+}
+
+.animate-whats-new-backdrop-in {
+  animation: whats-new-backdrop-in 0.3s ease both;
+}
+
+.animate-whats-new-backdrop-out {
+  animation: whats-new-backdrop-out 0.26s ease both;
+}
+
+.animate-whats-new-hero-zoom {
+  animation: whats-new-hero-zoom 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-whats-new-label,
+.animate-whats-new-title,
+.animate-whats-new-feature,
+.animate-whats-new-footer {
+  animation: whats-new-stagger-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-whats-new-label { animation-delay: 120ms; }
+.animate-whats-new-title { animation-delay: 180ms; }
+
 @keyframes fade-in-down {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }

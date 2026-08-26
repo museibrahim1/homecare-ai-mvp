@@ -746,6 +746,80 @@ class ApiClient {
       // Silently fail - activity tracking shouldn't block the user
     }
   }
+
+  // Agency CRM — Leads
+  async getLeads(token: string) {
+    return this.request<any[]>('/crm/leads', {}, token);
+  }
+
+  async createLead(token: string, data: Record<string, unknown>) {
+    return this.request<any>('/crm/leads', { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async updateLead(token: string, leadId: string, data: Record<string, unknown>) {
+    return this.request<any>(`/crm/leads/${leadId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+  }
+
+  async deleteLead(token: string, leadId: string) {
+    return this.request<void>(`/crm/leads/${leadId}`, { method: 'DELETE' }, token);
+  }
+
+  async convertLead(token: string, leadId: string, data: Record<string, unknown>) {
+    return this.request<any>(`/crm/leads/${leadId}/convert`, { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  // Agency CRM — Appointments
+  async getAppointments(token: string, params?: { start?: string; end?: string; client_id?: string; is_follow_up?: boolean }) {
+    const q = new URLSearchParams();
+    if (params?.start) q.set('start', params.start);
+    if (params?.end) q.set('end', params.end);
+    if (params?.client_id) q.set('client_id', params.client_id);
+    if (params?.is_follow_up != null) q.set('is_follow_up', String(params.is_follow_up));
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.request<any[]>(`/crm/appointments${suffix}`, {}, token);
+  }
+
+  async createAppointment(token: string, data: Record<string, unknown>) {
+    return this.request<any>('/crm/appointments', { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async updateAppointment(token: string, appointmentId: string, data: Record<string, unknown>) {
+    return this.request<any>(`/crm/appointments/${appointmentId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+  }
+
+  async deleteAppointment(token: string, appointmentId: string) {
+    return this.request<void>(`/crm/appointments/${appointmentId}`, { method: 'DELETE' }, token);
+  }
+
+  // Agency CRM — Care tracker
+  async getCareTrackerEntries(token: string) {
+    return this.request<any[]>('/crm/care-tracker', {}, token);
+  }
+
+  async createCareTrackerEntry(token: string, data: Record<string, unknown>) {
+    return this.request<any>('/crm/care-tracker', { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async updateCareTrackerEntry(token: string, entryId: string, data: Record<string, unknown>) {
+    return this.request<any>(`/crm/care-tracker/${entryId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+  }
+
+  async deleteCareTrackerEntry(token: string, entryId: string) {
+    return this.request<void>(`/crm/care-tracker/${entryId}`, { method: 'DELETE' }, token);
+  }
+
+  // Agency CRM — Client activity
+  async getClientActivities(token: string, clientId: string) {
+    return this.request<any[]>(`/crm/clients/${clientId}/activities`, {}, token);
+  }
+
+  async migrateLocalCrm(token: string, data: Record<string, unknown>) {
+    return this.request<{ leads_imported: number; appointments_imported: number; care_tracker_imported: number }>(
+      '/crm/migrate-local',
+      { method: 'POST', body: JSON.stringify(data) },
+      token
+    );
+  }
 }
 
 export const api = new ApiClient();

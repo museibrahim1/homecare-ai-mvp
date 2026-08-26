@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Date, DateTime, Text, Index, Boolean, ForeignKey
+from sqlalchemy import Column, String, Date, DateTime, Text, Index, Boolean, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -66,6 +66,8 @@ class Client(Base, TimestampMixin):
     
     # === STATUS ===
     status = Column(String(50), default='active')  # active, inactive, discharged, pending
+    estimated_monthly_value = Column(Integer, nullable=True)  # USD/month for pipeline reporting
+    converted_from_lead_id = Column(UUID(as_uuid=True), nullable=True)  # agency_leads.id, no FK (avoids cycle with converted_client_id)
     intake_date = Column(Date, nullable=True)
     discharge_date = Column(Date, nullable=True)
     

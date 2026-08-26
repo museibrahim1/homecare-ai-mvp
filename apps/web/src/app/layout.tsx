@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/lib/theme';
 import { NotificationProvider } from '@/lib/notifications';
 import ReminderPoller from '@/components/ReminderPoller';
 import SiteAnalytics from '@/components/SiteAnalytics';
+import WhatsNewPoller from '@/components/WhatsNewPoller';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -203,6 +204,7 @@ export default function RootLayout({
           <NotificationProvider>
             {children}
             <ReminderPoller />
+            <WhatsNewPoller />
             <SiteAnalytics />
           </NotificationProvider>
         </ThemeProvider>

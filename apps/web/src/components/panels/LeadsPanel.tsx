@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Phone, Mail, Search, Filter, X, User, Globe, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { api } from '@/lib/api';
+import { migrateLocalCrmToServer } from '@/lib/crmMigrate';
+import { leadFromApi, leadToApi } from '@/lib/crmAdapters';
 
 const API_URL = '/api';
 
@@ -31,8 +34,8 @@ const statuses = ['New', 'Contacted', 'Qualified'];
 
 /**
  * Leads management surface (list, add, convert to client). Shared between the
- * Sales page (Leads tab) and the Clients page (Leads tab). Leads persist in
- * localStorage keyed by the signed-in user id, matching the original page.
+ * Sales page (Leads tab) and the Clients page (Leads tab). Persists to the
+ * agency CRM API; migrates legacy localStorage on first load.
  */
 export default function LeadsPanel() {
   const router = useRouter();
@@ -47,67 +50,75 @@ export default function LeadsPanel() {
   const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '', insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private', insurance_id: '' });
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
-  const [convertData, setConvertData] = useState({ insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private', insurance_id: '', care_level: '' });
+  const [convertData, setConvertData] = useState({ insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private', insurance_id: '', care_level: '', estimated_monthly_value: '' });
 
-  const getStorageKey = useCallback(() => {
-    return user?.id ? `palmcare_leads_${user.id}` : null;
-  }, [user?.id]);
-
-  useEffect(() => {
-    const storageKey = getStorageKey();
-    if (!storageKey) {
+  const loadLeads = useCallback(async () => {
+    if (!token || !user?.id) {
       setLoading(false);
       return;
     }
+    setLoading(true);
     try {
-      const savedLeads = localStorage.getItem(storageKey);
-      if (savedLeads) setLeads(JSON.parse(savedLeads));
+      await migrateLocalCrmToServer(token, user.id);
+      const rows = await api.getLeads(token);
+      setLeads((rows || []).map((r: Record<string, unknown>) => leadFromApi(r)));
     } catch (error) {
       console.error('Failed to load leads:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [getStorageKey]);
+  }, [token, user?.id]);
 
   useEffect(() => {
-    const storageKey = getStorageKey();
-    if (!storageKey || loading) return;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(leads));
-    } catch (error) {
-      console.error('Failed to save leads:', error);
-    }
-  }, [leads, getStorageKey, loading]);
+    loadLeads();
+  }, [loadLeads]);
 
   const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddLead = () => {
-    if (!newLead.name) return;
-    const lead: Lead = { id: `lead_${Date.now()}`, ...newLead, created: 'Just now' };
-    setLeads([lead, ...leads]);
-    setNewLead({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '', insurance_type: '', insurance_id: '' });
-    setShowAddModal(false);
+  const handleAddLead = async () => {
+    if (!newLead.name || !token) return;
+    try {
+      const created = await api.createLead(token, leadToApi(newLead));
+      setLeads([leadFromApi(created), ...leads]);
+      setNewLead({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '', insurance_type: '', insurance_id: '' });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Failed to add lead:', error);
+      alert('Failed to save lead. Please try again.');
+    }
   };
 
-  const handleUpdateStatus = (leadId: string, newStatus: string) => {
-    setLeads(leads.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+  const handleUpdateStatus = async (leadId: string, newStatus: string) => {
+    if (!token) return;
+    try {
+      const updated = await api.updateLead(token, leadId, { status: newStatus.toLowerCase() });
+      setLeads(leads.map(l => l.id === leadId ? leadFromApi(updated) : l));
+    } catch (error) {
+      console.error('Failed to update lead status:', error);
+    }
   };
 
-  const handleDeleteLead = (leadId: string) => {
+  const handleDeleteLead = async (leadId: string) => {
+    if (!token) return;
     setDeletingId(leadId);
-    setTimeout(() => {
+    try {
+      await api.deleteLead(token, leadId);
       setLeads(leads.filter(l => l.id !== leadId));
-      setDeletingId(null);
       setShowDetailModal(false);
       setSelectedLead(null);
-    }, 300);
+    } catch (error) {
+      console.error('Failed to delete lead:', error);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleConvertToDeal = (lead: Lead) => {
     setSelectedLead(lead);
-    setConvertData({ insurance_type: lead.insurance_type || '', insurance_id: lead.insurance_id || '', care_level: '' });
+    setConvertData({ insurance_type: lead.insurance_type || '', insurance_id: lead.insurance_id || '', care_level: '', estimated_monthly_value: '' });
     setShowDetailModal(false);
     setShowConvertModal(true);
   };
@@ -116,29 +127,14 @@ export default function LeadsPanel() {
     if (!selectedLead || !token) return;
     setConverting(true);
     try {
-      const clientData: any = {
-        full_name: selectedLead.name,
-        email: selectedLead.email || null,
-        phone: selectedLead.phone || null,
-        status: 'intake',
-        notes: selectedLead.notes,
+      await api.convertLead(token, selectedLead.id, {
+        insurance_type: convertData.insurance_type || null,
+        insurance_id: convertData.insurance_id || null,
         care_level: convertData.care_level || null,
-      };
-      if (convertData.insurance_type === 'medicaid') {
-        clientData.medicaid_id = convertData.insurance_id || 'PENDING';
-      } else if (convertData.insurance_type === 'medicare') {
-        clientData.medicare_id = convertData.insurance_id || 'PENDING';
-      } else if (convertData.insurance_type === 'private') {
-        clientData.insurance_provider = convertData.insurance_id || 'Private Insurance';
-      }
-
-      const response = await fetch(`${API_URL}/clients`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(clientData),
+        estimated_monthly_value: convertData.estimated_monthly_value
+          ? parseInt(convertData.estimated_monthly_value, 10)
+          : null,
       });
-      if (!response.ok) throw new Error('Failed to create client');
-      await response.json();
 
       setLeads(leads.filter(l => l.id !== selectedLead.id));
       setShowConvertModal(false);

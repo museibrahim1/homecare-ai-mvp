@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api, formatLocalDate } from '@/lib/api';
+import { migrateLocalCrmToServer } from '@/lib/crmMigrate';
+import { careEntryFromApi, careEntryToApi } from '@/lib/crmAdapters';
 
 /* ─── Types ─── */
 type CareStage = 'follow_up' | 'plan_review' | 'ongoing';
@@ -26,6 +28,7 @@ interface CareItem {
   nextFollowUp: string;
   notes: string;
   phone?: string;
+  caregiverId?: string;
 }
 
 const STAGE_CONFIG: Record<CareStage, { label: string; color: string; bg: string; border: string; dot: string; headerBg: string }> = {
@@ -41,16 +44,15 @@ const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: stri
   routine:  { label: 'Routine',  color: 'text-emerald-600',  bg: 'bg-emerald-50',  bar: 'bg-green-400' },
 };
 
-const STORAGE_KEY = 'palmcare-care-tracker';
 const CARE_SPECIALTIES = ['General Care', 'Dementia Care', 'Post-Surgery', 'Cardiac Care', 'Diabetes Management', 'Hospice Support', 'Physical Therapy', 'Wound Care', 'Respiratory Care'];
 
-function loadItems(): CareItem[] {
-  if (typeof window === 'undefined') return [];
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
-}
-function saveItems(items: CareItem[]) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+function enrichCareItems(items: CareItem[], clients: Array<{ id: string; full_name: string; phone?: string }>): CareItem[] {
+  const byId = Object.fromEntries(clients.map((c) => [c.id, c]));
+  return items.map((item) => ({
+    ...item,
+    clientName: byId[item.clientId]?.full_name || item.clientName || 'Unknown client',
+    phone: item.phone || byId[item.clientId]?.phone,
+  }));
 }
 
 function daysBetween(a: string, b: string): number {
@@ -168,10 +170,10 @@ function CareItemForm({
 /**
  * Post-visit care tracker board and timeline. Extracted from the standalone
  * /care-tracker route (now redirected) so it can live as a tab on the Clients
- * page. Entries persist in localStorage under the shared care-tracker key.
+ * page. Entries persist to the agency CRM API.
  */
 export default function CareTrackerPanel() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [items, setItems] = useState<CareItem[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [view, setView] = useState<'timeline' | 'board'>('board');
@@ -191,12 +193,31 @@ export default function CareTrackerPanel() {
   }), [today]);
 
   const [formData, setFormData] = useState<Omit<CareItem, 'id'>>(emptyForm());
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { setItems(loadItems()); }, []);
-  useEffect(() => {
-    if (token) api.getClients(token).then(setClients).catch(() => {});
-  }, [token]);
-  const persist = useCallback((updated: CareItem[]) => { setItems(updated); saveItems(updated); }, []);
+  const loadEntries = useCallback(async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      if (user?.id) await migrateLocalCrmToServer(token, user.id);
+      const [rows, clientRows] = await Promise.all([
+        api.getCareTrackerEntries(token),
+        api.getClients(token),
+      ]);
+      setClients(clientRows || []);
+      const mapped = (rows || []).map((r: Record<string, unknown>) => careEntryFromApi(r)) as CareItem[];
+      setItems(enrichCareItems(mapped, clientRows || []));
+    } catch (error) {
+      console.error('Failed to load care tracker:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, user?.id]);
+
+  useEffect(() => { loadEntries(); }, [loadEntries]);
 
   const filtered = useMemo(() => {
     let list = items;
@@ -221,19 +242,60 @@ export default function CareTrackerPanel() {
   const noContactCount = items.filter(i => daysAgo(i.lastContact) > 7).length;
   const overdueFollowUpCount = items.filter(i => i.nextFollowUp && daysUntil(i.nextFollowUp) < 0).length;
 
-  const handleAdd = () => {
-    const item: CareItem = { id: Date.now().toString(), ...formData };
-    persist([...items, item]);
-    setFormData(emptyForm());
-    setShowAdd(false);
+  const handleAdd = async () => {
+    if (!token || !formData.clientId) return;
+    try {
+      const created = await api.createCareTrackerEntry(token, careEntryToApi(formData as unknown as Record<string, unknown>, clients));
+      const item = careEntryFromApi(created) as CareItem;
+      const enriched = enrichCareItems([item], clients)[0];
+      setItems([...items, enriched]);
+      setFormData(emptyForm());
+      setShowAdd(false);
+    } catch (error) {
+      console.error('Failed to add care entry:', error);
+      alert('Failed to save care entry.');
+    }
   };
-  const handleUpdate = () => {
-    if (!editItem) return;
-    persist(items.map(i => i.id === editItem.id ? editItem : i));
-    setEditItem(null);
+  const handleUpdate = async () => {
+    if (!editItem || !token) return;
+    try {
+      const updated = await api.updateCareTrackerEntry(token, editItem.id, careEntryToApi(editItem as unknown as Record<string, unknown>, clients));
+      const mapped = enrichCareItems([careEntryFromApi(updated) as CareItem], clients)[0];
+      setItems(items.map(i => i.id === editItem.id ? mapped : i));
+      setEditItem(null);
+    } catch (error) {
+      console.error('Failed to update care entry:', error);
+    }
   };
-  const handleDelete = (id: string) => persist(items.filter(i => i.id !== id));
-  const handleMoveStage = (id: string, newStage: CareStage) => persist(items.map(i => i.id === id ? { ...i, stage: newStage } : i));
+  const handleDelete = async (id: string) => {
+    if (!token) return;
+    try {
+      await api.deleteCareTrackerEntry(token, id);
+      setItems(items.filter(i => i.id !== id));
+    } catch (error) {
+      console.error('Failed to delete care entry:', error);
+    }
+  };
+  const handleMoveStage = async (id: string, newStage: CareStage) => {
+    if (!token) return;
+    const current = items.find((i) => i.id === id);
+    if (!current) return;
+    try {
+      const updated = await api.updateCareTrackerEntry(token, id, { stage: newStage });
+      const mapped = enrichCareItems([careEntryFromApi(updated) as CareItem], clients)[0];
+      setItems(items.map(i => i.id === id ? mapped : i));
+    } catch (error) {
+      console.error('Failed to move care stage:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-slate-500 text-sm">
+        Loading care tracker…
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -270,7 +332,7 @@ export default function CareTrackerPanel() {
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-slate-200">
+        <div className="flex items-center gap-1 bg-white/50 rounded-xl p-1 border border-white/70">
           {[
             { key: 'board' as const, label: 'Board', icon: CalendarDays },
             { key: 'timeline' as const, label: 'Timeline', icon: Activity },

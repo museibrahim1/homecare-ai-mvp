@@ -20,6 +20,10 @@ from app.models.smart_note import SmartNote
 from app.models.task import Task
 from app.models.reminder import Reminder
 from app.models.messaging import Channel, Message, Notification
+from app.models.agency_lead import AgencyLead
+from app.models.appointment import Appointment
+from app.models.care_tracker_entry import CareTrackerEntry
+from app.models.client_activity import ClientActivity
 
 __all__ = [
     "User",
@@ -50,4 +54,8 @@ __all__ = [
     "Channel",
     "Message",
     "Notification",
+    "AgencyLead",
+    "Appointment",
+    "CareTrackerEntry",
+    "ClientActivity",
 ]

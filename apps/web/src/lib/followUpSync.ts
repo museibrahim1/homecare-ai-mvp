@@ -2,30 +2,13 @@
 //
 // When a client is moved to the follow_up stage (pipeline or clients board), or
 // a follow-up note is saved next to a client, we upsert a matching calendar
-// follow-up so Visits + Calendar stay in sync. The Calendar page (`/schedule`)
-// reads the same local appointment store, so follow-ups appear there next to
-// visits. When Google Calendar is connected for the user, we also mirror the
-// follow-up to Google via the existing calendar events API.
+// follow-up via the CRM appointments API. When Google Calendar is connected,
+// we also mirror the follow-up to Google.
 
-import { formatLocalDate } from '@/lib/api';
+import { api, formatLocalDate } from '@/lib/api';
+import { appointmentToApi } from '@/lib/crmAdapters';
 
 const API_BASE = '/api';
-const STORAGE_KEY = 'palmcare-schedule';
-
-// Mirrors the Appointment shape used by apps/web/src/app/schedule/page.tsx.
-type AppointmentType = 'assessment' | 'review' | 'meeting' | 'visit';
-interface Appointment {
-  id: string;
-  title: string;
-  client: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
-  duration: string;
-  location: string;
-  type: AppointmentType;
-  notes: string;
-  googleEventId?: string;
-}
 
 export interface FollowUpInput {
   clientId: string;
@@ -38,30 +21,6 @@ export interface FollowUpInput {
   googleConnected?: boolean;
 }
 
-function loadAppointments(): Appointment[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Appointment[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveAppointments(apts: Appointment[]) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apts));
-  } catch {
-    /* storage full or unavailable — nothing else to do */
-  }
-}
-
-/** Stable id so repeated saves update the same calendar follow-up. */
-function followUpId(clientId: string): string {
-  return `followup-${clientId}`;
-}
-
 /** YYYY-MM-DD one week from today in the local timezone. */
 export function defaultFollowUpDate(): string {
   const d = new Date();
@@ -70,38 +29,32 @@ export function defaultFollowUpDate(): string {
 }
 
 /**
- * Create or update the calendar follow-up for a client. Writes to the local
- * appointment store the Calendar page reads, and mirrors to Google Calendar
- * when connected. Safe to call from any board; never throws.
+ * Create or update the server-backed calendar follow-up for a client.
+ * Safe to call from any board; never throws.
  */
 export async function upsertFollowUp(input: FollowUpInput): Promise<void> {
   if (typeof window === 'undefined') return;
   const { clientId, clientName, note, token, googleConnected } = input;
-  if (!clientId) return;
+  if (!clientId || !token) return;
 
   const date = input.date || defaultFollowUpDate();
   const time = input.time || '09:00';
-  const id = followUpId(clientId);
   const title = `Follow-up: ${clientName || 'Client'}`;
   const notes = (note || '').trim();
 
-  const appointments = loadAppointments();
-  const existing = appointments.find((a) => a.id === id);
+  let googleEventId: string | undefined;
+  let existingId: string | undefined;
 
-  const appointment: Appointment = {
-    id,
-    title,
-    client: clientName || '',
-    date,
-    time,
-    duration: '30 min',
-    location: '',
-    type: 'review',
-    notes,
-    googleEventId: existing?.googleEventId,
-  };
+  try {
+    const existing = await api.getAppointments(token, { client_id: clientId, is_follow_up: true });
+    if (existing?.length) {
+      existingId = existing[0].id;
+      googleEventId = existing[0].google_event_id || undefined;
+    }
+  } catch {
+    /* continue with create */
+  }
 
-  // Mirror to Google Calendar when connected (platform-admin calendars today).
   if (googleConnected && token) {
     try {
       const start = new Date(`${date}T${time}:00`);
@@ -113,12 +66,12 @@ export async function upsertFollowUp(input: FollowUpInput): Promise<void> {
         end_time: end.toISOString(),
         location: '',
       };
-      if (appointment.googleEventId) {
+      if (googleEventId) {
         await fetch(`${API_BASE}/calendar/events`, {
           method: 'PUT',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ event_id: appointment.googleEventId, ...body }),
+          body: JSON.stringify({ event_id: googleEventId, ...body }),
         });
       } else {
         const res = await fetch(`${API_BASE}/calendar/events`, {
@@ -129,18 +82,40 @@ export async function upsertFollowUp(input: FollowUpInput): Promise<void> {
         });
         if (res.ok) {
           const d = await res.json();
-          appointment.googleEventId = d.event_id;
+          googleEventId = d.event_id;
         }
       }
     } catch {
-      /* Google sync is best-effort; the local follow-up still persists */
+      /* Google sync is best-effort */
     }
   }
 
-  const next = existing
-    ? appointments.map((a) => (a.id === id ? appointment : a))
-    : [...appointments, appointment];
-  saveAppointments(next);
+  const payload = appointmentToApi(
+    {
+      title,
+      client: clientName || '',
+      date,
+      time,
+      duration: '30 min',
+      location: '',
+      type: 'review',
+      notes,
+      googleEventId,
+      clientId,
+      isFollowUp: true,
+    },
+    { clientId, isFollowUp: true }
+  );
+
+  try {
+    if (existingId) {
+      await api.updateAppointment(token, existingId, payload);
+    } else {
+      await api.createAppointment(token, payload);
+    }
+  } catch {
+    /* best-effort */
+  }
 }
 
 /** Remove a client's calendar follow-up (best-effort; also clears Google). */
@@ -148,23 +123,27 @@ export async function removeFollowUp(
   clientId: string,
   opts?: { token?: string | null; googleConnected?: boolean }
 ): Promise<void> {
-  if (typeof window === 'undefined' || !clientId) return;
-  const id = followUpId(clientId);
-  const appointments = loadAppointments();
-  const existing = appointments.find((a) => a.id === id);
-  if (!existing) return;
+  if (typeof window === 'undefined' || !clientId || !opts?.token) return;
 
-  if (opts?.googleConnected && opts.token && existing.googleEventId) {
-    try {
-      await fetch(`${API_BASE}/calendar/events/${existing.googleEventId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${opts.token}` },
-        credentials: 'include',
-      });
-    } catch {
-      /* best-effort */
+  try {
+    const existing = await api.getAppointments(opts.token, { client_id: clientId, is_follow_up: true });
+    const row = existing?.[0];
+    if (!row) return;
+
+    if (opts.googleConnected && row.google_event_id) {
+      try {
+        await fetch(`${API_BASE}/calendar/events/${row.google_event_id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${opts.token}` },
+          credentials: 'include',
+        });
+      } catch {
+        /* best-effort */
+      }
     }
-  }
 
-  saveAppointments(appointments.filter((a) => a.id !== id));
+    await api.deleteAppointment(opts.token, row.id);
+  } catch {
+    /* best-effort */
+  }
 }

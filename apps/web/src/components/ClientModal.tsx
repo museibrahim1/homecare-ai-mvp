@@ -541,9 +541,6 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="External ID" field="external_id" placeholder="CRM-12345" />
                 <SelectField label="External Source" field="external_source" options={[
-                  { value: 'monday', label: 'Monday.com' },
-                  { value: 'salesforce', label: 'Salesforce' },
-                  { value: 'hubspot', label: 'HubSpot' },
                   { value: 'csv', label: 'CSV Import' },
                   { value: 'manual', label: 'Manual Entry' },
                 ]} />
