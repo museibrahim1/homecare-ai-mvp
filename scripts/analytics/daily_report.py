@@ -335,6 +335,46 @@ def pull_google(env: dict, days: int) -> dict:
 # --- Main -----------------------------------------------------------------------
 
 
+
+def strip_secrets(obj):
+    """Remove tokens from Meta Graph paging URLs before writing snapshots to git."""
+    secret_keys = {"access_token", "token", "api_key", "apikey", "client_secret", "refresh_token"}
+
+    def scrub_url(s: str) -> str:
+        if "access_token=" not in s and "token=" not in s.lower():
+            return s
+        try:
+            parts = urllib.parse.urlsplit(s)
+            if not parts.query:
+                return s
+            kept = [
+                (k, v)
+                for k, v in urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
+                if k.lower() not in secret_keys
+            ]
+            return urllib.parse.urlunsplit(
+                (parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(kept), parts.fragment)
+            )
+        except Exception:
+            return "[redacted_url]"
+
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            if k in ("previous", "next") and isinstance(v, str) and (
+                "access_token=" in v or "graph.facebook.com" in v or "graph.threads.net" in v
+            ):
+                out[k] = "[redacted_paging_url]"
+            else:
+                out[k] = strip_secrets(v)
+        return out
+    if isinstance(obj, list):
+        return [strip_secrets(v) for v in obj]
+    if isinstance(obj, str):
+        return scrub_url(obj)
+    return obj
+
+
 def build_report(days: int) -> dict:
     env = load_env()
     generated = datetime.now(timezone.utc).isoformat()
@@ -374,11 +414,12 @@ def main() -> int:
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    report = build_report(args.days)
+    report = strip_secrets(build_report(args.days))
+    payload = json.dumps(report, indent=2) + "\n"
     out_path = OUT_DIR / f"{report['reportDate']}.json"
-    out_path.write_text(json.dumps(report, indent=2) + "\n")
+    out_path.write_text(payload)
     latest = OUT_DIR / "latest.json"
-    latest.write_text(json.dumps(report, indent=2) + "\n")
+    latest.write_text(payload)
 
     print(f"Wrote {out_path}")
     print("OK:", ", ".join(report["summary"]["ok"]) or "(none)")
