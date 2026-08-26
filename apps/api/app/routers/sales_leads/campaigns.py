@@ -24,6 +24,7 @@ from .common import (
     REENGAGE_DAILY_CAP, MARKETING_RESEND_TAG,
     _auto_start_sequence, render_email,
 )
+from .unsubscribe import allows_marketing
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
     LeadStats, ImportRequest, CampaignSendRequest, SequenceLaunchRequest,
@@ -75,6 +76,11 @@ async def send_campaign(
     errors = []
 
     for lead in leads:
+        if not allows_marketing(db, lead.contact_email, "outreach"):
+            failed += 1
+            errors.append({"lead": lead.provider_name, "error": "unsubscribed"})
+            continue
+
         data = {
             "provider_name": lead.provider_name,
             "city": lead.city or "your area",
@@ -247,6 +253,10 @@ async def launch_email_sequence(
     failed = 0
 
     for lead in leads:
+        if not allows_marketing(db, lead.contact_email, "outreach"):
+            failed += 1
+            continue
+
         data = {
             "provider_name": lead.provider_name,
             "city": lead.city or "your area",
@@ -335,6 +345,16 @@ def _process_due_sequence_emails(db: Session) -> dict:
     completed = 0
 
     for lead in due:
+        if not allows_marketing(db, lead.contact_email, "outreach"):
+            lead.unsubscribed = True
+            lead.unsubscribed_at = now
+            lead.sequence_completed = True
+            lead.next_email_scheduled_at = None
+            if lead.status not in ("converted", "responded"):
+                lead.status = "not_interested"
+            skipped += 1
+            continue
+
         step = lead.sequence_step or 1
 
         # Never send the same template twice to a lead, no matter which engine
@@ -483,6 +503,10 @@ def _process_opened_reengagement(db: Session) -> dict:
         if sent >= REENGAGE_DAILY_CAP:
             break
 
+        if not allows_marketing(db, lead.contact_email, "outreach"):
+            skipped += 1
+            continue
+
         sent_ids = _reengage_templates_sent(lead.id, db)
         template_id = _next_reengage_template(sent_ids)
         if not template_id:
@@ -602,6 +626,10 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
     for lead in candidates:
         if sent >= limit:
             break
+
+        if not allows_marketing(db, lead.contact_email, "outreach"):
+            skipped += 1
+            continue
 
         template_id = _next_reengage_template(_marketing_templates_sent(lead.id, db))
         if not template_id:

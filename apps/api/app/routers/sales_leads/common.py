@@ -671,6 +671,13 @@ def _auto_start_sequence(lead: SalesLead, campaign_name: str, db: Session):
         return
     if getattr(lead, "unsubscribed", False):
         return
+    # Respect email_preferences even if the CRM row was re-imported.
+    try:
+        from .unsubscribe import allows_marketing
+        if lead.contact_email and not allows_marketing(db, lead.contact_email, "outreach"):
+            return
+    except Exception:
+        pass
 
     now = datetime.now(timezone.utc)
     lead.sequence_step = 1

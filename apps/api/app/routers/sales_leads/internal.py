@@ -22,6 +22,7 @@ from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
     _auto_start_sequence, render_email,
 )
+from .unsubscribe import allows_marketing
 from .schemas import (
     LeadSummary, LeadDetail, LeadUpdate, LeadEmailRequest, BulkStatusUpdate,
     LeadStats, ImportRequest, CampaignSendRequest, SequenceLaunchRequest,
@@ -502,7 +503,13 @@ async def internal_add_lead_and_email(
             db.add(lead)
             db.flush()
 
-        if item.send_email and lead.contact_email and not lead.unsubscribed:
+        from .unsubscribe import allows_marketing
+        if (
+            item.send_email
+            and lead.contact_email
+            and not lead.unsubscribed
+            and allows_marketing(db, lead.contact_email, "outreach")
+        ):
             data = {
                 "provider_name": lead.provider_name,
                 "city": lead.city or "your area",

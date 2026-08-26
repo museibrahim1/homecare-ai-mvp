@@ -68,43 +68,28 @@ def allows_marketing(db: Session, email: str | None, category: str = "outreach")
 
 
 def _apply_lead_unsubscribe(db: Session, email: str) -> int:
-    """Mark outreach leads unsubscribed when outreach is opted out."""
+    """Remove opted-out addresses from the sales CRM and stop every sequence.
+
+    Preference rows stay so a later CMS re-import cannot email them again.
+    """
     leads = db.query(SalesLead).filter(
         func.lower(SalesLead.contact_email) == email
     ).all()
-    now = datetime.now(timezone.utc)
-    updated = 0
+    removed = 0
     for lead in leads:
-        if not lead.unsubscribed:
-            updated += 1
-        lead.unsubscribed = True
-        lead.unsubscribed_at = now
-        lead.sequence_completed = True
-        lead.next_email_scheduled_at = None
-        if lead.status not in ("converted", "responded"):
-            lead.status = "not_interested"
-        activity = lead.activity_log or []
-        activity.append({"action": "Unsubscribed (preferences)", "at": now.isoformat()})
-        lead.activity_log = activity
-    return updated
+        logger.info(
+            "Removing unsubscribed lead from CRM: %s <%s>",
+            lead.provider_name,
+            lead.contact_email,
+        )
+        db.delete(lead)
+        removed += 1
+    return removed
 
 
 def _clear_lead_unsubscribe(db: Session, email: str) -> int:
-    """Re-enable outreach for leads when outreach is opted back in."""
-    leads = db.query(SalesLead).filter(
-        func.lower(SalesLead.contact_email) == email,
-        SalesLead.unsubscribed.is_(True),
-    ).all()
-    updated = 0
-    now = datetime.now(timezone.utc)
-    for lead in leads:
-        lead.unsubscribed = False
-        lead.unsubscribed_at = None
-        activity = lead.activity_log or []
-        activity.append({"action": "Re-subscribed outreach (preferences)", "at": now.isoformat()})
-        lead.activity_log = activity
-        updated += 1
-    return updated
+    """No-op for CRM rows: unsubscribes delete the lead. Prefs alone gate re-import."""
+    return 0
 
 
 def _prefs_payload(pref: EmailPreference) -> dict[str, Any]:

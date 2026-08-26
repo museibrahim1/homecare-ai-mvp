@@ -281,6 +281,12 @@ class EmailService:
                 "to": recipients,
                 "subject": subject,
                 "html": html,
+                # Open/click pixels come from the domain (open_tracking/click_tracking).
+                # Tags keep campaign attribution in Resend + our webhook handlers.
+                "tags": [
+                    {"name": "product", "value": "palmcare"},
+                    {"name": "channel", "value": "sales_outreach"},
+                ],
             }
 
             if text:

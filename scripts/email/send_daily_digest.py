@@ -23,7 +23,7 @@ CEO_EMAIL = "musajama89@gmail.com"
 CEO_WORK_EMAIL = "museibrahim@palmtai.com"
 API_BASE = "https://api-production-a0a2.up.railway.app"
 
-EMAILS_PER_DAY = 50
+EMAILS_PER_DAY = 100
 INVESTORS_PER_DAY = 10
 CALLS_PER_DAY = 10
 FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]

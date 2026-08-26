@@ -309,7 +309,7 @@ Founder & CEO, Palm Technologies Inc.
 
 # ─── Daily quotas, launch date & call-ordering by timezone ───
 
-EMAILS_PER_DAY = 50
+EMAILS_PER_DAY = 100
 INVESTORS_PER_DAY = 10
 CALLS_PER_DAY = 25
 FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
