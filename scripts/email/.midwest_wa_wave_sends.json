@@ -1,0 +1,569 @@
+[
+  {
+    "email": "seattle@abc-seniors.com",
+    "provider": "Always Best Care Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "71b9783b-1b61-456a-9ac8-23a24e522da5",
+    "subject": "Always Best Care Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@assistinghands.com",
+    "provider": "Assisting Hands Home Care Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "c0e169dd-9812-4a9f-8620-abbdb5c17010",
+    "subject": "Assisting Hands Home Care Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@comfortkeepers.com",
+    "provider": "Comfort Keepers Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "c7c06bd0-583f-4253-bd93-87073bbf49e4",
+    "subject": "Comfort Keepers Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@fedeltahomecare.com",
+    "provider": "Fedelta Home Care",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "2f13f518-8662-4607-9a83-5680c4408900",
+    "subject": "Fedelta Home Care: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@firstlighthomecare.com",
+    "provider": "FirstLight HomeCare of Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "e3f50bf2-13e3-4ce1-bb1d-0e869ce1e943",
+    "subject": "FirstLight HomeCare of Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@homeinstead.com",
+    "provider": "Home Instead Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "426cadcc-438d-4e22-af65-037000f602cc",
+    "subject": "Home Instead Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "emilyc@klinegalland.org",
+    "provider": "Kline Galland Home Health",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "996fc8b4-1cc1-4667-adcf-63f3b849738c",
+    "subject": "Kline Galland Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@rightathome.net",
+    "provider": "Right at Home Seattle King County",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "058c47c4-5933-4524-8743-e0f8504a511c",
+    "subject": "Right at Home Seattle King County: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "customerservice@seamar.com",
+    "provider": "Sea Mar Home Health",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "9e66a6c5-0b15-4608-846f-271461ab2acc",
+    "subject": "Sea Mar Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@seniorhelpers.com",
+    "provider": "Senior Helpers Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "d5f75656-126f-4487-a4e2-3a21881af62e",
+    "subject": "Senior Helpers Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@synergyhomecare.com",
+    "provider": "Synergy HomeCare of Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "f3264f04-1941-492a-afa0-5ada115a11a2",
+    "subject": "Synergy HomeCare of Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "seattle@visitingangels.com",
+    "provider": "Visiting Angels Seattle",
+    "state": "WA",
+    "city": "Seattle",
+    "resend_id": "7ac941f3-670b-405c-a383-a3833c7e73f6",
+    "subject": "Visiting Angels Seattle: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "careagecare@gmail.com",
+    "provider": "Careage Home Health",
+    "state": "WA",
+    "city": "Bellevue",
+    "resend_id": "650a85b5-1d9a-4213-bb58-2ee30bd7dd7b",
+    "subject": "Careage Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "mediarelations@centerwell.com",
+    "provider": "Centerwell Health Services",
+    "state": "WA",
+    "city": "Spokane",
+    "resend_id": "e7d15396-e053-42cd-9818-e272f2e7bb8c",
+    "subject": "Centerwell Health Services: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@columbiariverhh.com",
+    "provider": "Columbia River Home Health",
+    "state": "WA",
+    "city": "Kennewick",
+    "resend_id": "da57a8c1-97fe-44af-9755-c03c6d3d51a2",
+    "subject": "Columbia River Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "hello@thekey.care",
+    "provider": "Elite Home Health",
+    "state": "WA",
+    "city": "Clarkston",
+    "resend_id": "ade3c81f-653b-45c4-97dd-328c1d2641d6",
+    "subject": "Elite Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "voe@encompasshealth.com",
+    "provider": "Encompass Health Home Health",
+    "state": "WA",
+    "city": "Omak",
+    "resend_id": "5181f967-5ca6-4c35-a424-3168e398bd57",
+    "subject": "Encompass Health Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "homecare@evergreenhealth.com",
+    "provider": "EvergreenHealth Home Care",
+    "state": "WA",
+    "city": "Kirkland",
+    "resend_id": "ee43f5ac-89af-438e-9c08-cbfe3766d7e3",
+    "subject": "EvergreenHealth Home Care: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "mike@harrison.com",
+    "provider": "Harrison Home Health",
+    "state": "WA",
+    "city": "Bremerton",
+    "resend_id": "a32cec9b-cffe-43e6-b3e5-ebb297cefc4d",
+    "subject": "Harrison Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@havenhealth.org",
+    "provider": "Haven Home Health Care",
+    "state": "WA",
+    "city": "Federal Way",
+    "resend_id": "2d80a5a9-17f7-4167-bc17-730911e38a23",
+    "subject": "Haven Home Health Care: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@mountainview.com",
+    "provider": "Mountainview Home Health",
+    "state": "WA",
+    "city": "Yakima",
+    "resend_id": "cd055d38-553f-461d-9a02-82b54fd39024",
+    "subject": "Mountainview Home Health: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "homeservices@providence.org",
+    "provider": "Providence Home Services King County",
+    "state": "WA",
+    "city": "Tukwila",
+    "resend_id": "4d8f8c02-4602-437c-b48d-219e7f2e8ba8",
+    "subject": "Providence Home Services King County: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@signatureathome.com",
+    "provider": "Signature Healthcare at Home Bellevue",
+    "state": "WA",
+    "city": "Bellevue",
+    "resend_id": "08f91b47-1cd4-4773-a37f-7d8946da721a",
+    "subject": "Signature Healthcare at Home Bellevue: in-person PalmCare demo in Seattle on Sept 3",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "contact@amana-care.com",
+    "provider": "AmanaCare",
+    "state": "NE",
+    "city": "Omaha",
+    "resend_id": "937544a0-1e13-49a5-bb57-55a216740f55",
+    "subject": "AmanaCare: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "lincolnne@cornerstonecaregiving.com",
+    "provider": "Cornerstone Caregiving Lincoln",
+    "state": "NE",
+    "city": "Lincoln",
+    "resend_id": "29de58b7-db15-4992-89ad-0b7d19fa66a4",
+    "subject": "Cornerstone Caregiving Lincoln: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@doenahearthomehealth.com",
+    "provider": "Doena Heart Home Health",
+    "state": "NE",
+    "city": "Omaha",
+    "resend_id": "68566744-5fe9-4258-809c-7406912f7367",
+    "subject": "Doena Heart Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@freedominhome.com",
+    "provider": "Freedom In Home Services, Llc",
+    "state": "NE",
+    "city": "Omaha",
+    "resend_id": "067b30b2-a90a-428f-a6b8-7b8a5fbe2843",
+    "subject": "Freedom In Home Services, Llc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "wehearyou@interimhealthcare.com",
+    "provider": "Interim Healthcare Lincoln",
+    "state": "NE",
+    "city": "Lincoln",
+    "resend_id": "69022993-97ed-4632-a2c2-2d9149875254",
+    "subject": "Interim Healthcare Lincoln: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@lovingheartsandhelpinghands.com",
+    "provider": "Loving Hearts And Helping Hands",
+    "state": "NE",
+    "city": "Omaha",
+    "resend_id": "2f69b796-528f-42de-ad36-7dc9d2637eab",
+    "subject": "Loving Hearts And Helping Hands: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@tabitha.com",
+    "provider": "Tabitha Home Health Care",
+    "state": "NE",
+    "city": "Lincoln",
+    "resend_id": "79eed543-1ad6-4967-934e-77ca2efeeaaf",
+    "subject": "Tabitha Home Health Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "unityhomeomaha@gmail.com",
+    "provider": "Unity Home Care LLC",
+    "state": "NE",
+    "city": "Omaha",
+    "resend_id": "3011384b-f4cc-45b5-bda9-d588d11e6d0b",
+    "subject": "Unity Home Care LLC: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "omahane@cornerstonecaregiving.com",
+    "provider": "Cornerstone Caregiving Omaha",
+    "state": "NE",
+    "city": "Elkhorn",
+    "resend_id": "b491a596-ff76-4ada-bbae-568e8c51b845",
+    "subject": "Cornerstone Caregiving Omaha: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "hello@advancedcarehh.com",
+    "provider": "Advanced Home Health Care Inc",
+    "state": "IA",
+    "city": "Burlington",
+    "resend_id": "def3940f-49cc-4923-8c4b-e4478b3a2007",
+    "subject": "Advanced Home Health Care Inc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@angelscarehealth.com",
+    "provider": "Angels Care Home Health Of Iowa",
+    "state": "IA",
+    "city": "Council Bluffs",
+    "resend_id": "08e43538-f61c-4214-bac6-c9f787204e04",
+    "subject": "Angels Care Home Health Of Iowa: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "compliance@aveanna.com",
+    "provider": "Aveanna Home Health",
+    "state": "IA",
+    "city": "Council Bluffs",
+    "resend_id": "88589e2a-8d9a-46f5-b2ad-a98ea44e62fe",
+    "subject": "Aveanna Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "alana.clark@spencerhospital.org",
+    "provider": "Avera At Home Of Spencer Hospital",
+    "state": "IA",
+    "city": "Spencer",
+    "resend_id": "332f3612-c495-47c6-85d9-9b2bef98e0d6",
+    "subject": "Avera At Home Of Spencer Hospital: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "burgess@burgesshc.org",
+    "provider": "Burgess Home Health",
+    "state": "IA",
+    "city": "Onawa",
+    "resend_id": "9dd6d253-bd07-462e-a68a-b73497a02bf8",
+    "subject": "Burgess Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "filler@godaddy.com",
+    "provider": "CARE4U Home Care LLC",
+    "state": "IA",
+    "city": "Sioux City",
+    "resend_id": "a6ff7ecf-d13a-464b-a3bf-93697b617b37",
+    "subject": "CARE4U Home Care LLC: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "intake@canshomehealth.com",
+    "provider": "Carroll Area Nursing Services",
+    "state": "IA",
+    "city": "Carroll",
+    "resend_id": "9faf6a0f-4a87-4de1-a458-940e8f7d880b",
+    "subject": "Carroll Area Nursing Services: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@cherokeermc.org",
+    "provider": "Cherokee Regional Home Health",
+    "state": "IA",
+    "city": "Cherokee",
+    "resend_id": "c67368fc-e904-4204-92b5-7c3298d5ec3a",
+    "subject": "Cherokee Regional Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "communications@childserve.org",
+    "provider": "Childserve Home Care Inc",
+    "state": "IA",
+    "city": "Johnston",
+    "resend_id": "2a12499b-5be0-4e43-8f7a-4c1e655c9916",
+    "subject": "Childserve Home Care Inc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@elara.com",
+    "provider": "Elara Caring",
+    "state": "IA",
+    "city": "Centerville",
+    "resend_id": "2abac035-1c60-46cc-8cea-643b0ad2b15e",
+    "subject": "Elara Caring: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "domains@brannans.com",
+    "provider": "Faith Home Health Care",
+    "state": "IA",
+    "city": "West Des Moines",
+    "resend_id": "b8c6acae-8bb8-4228-8d9c-22120ce3d2da",
+    "subject": "Faith Home Health Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@fcsqc.com",
+    "provider": "Family Care Solutions Llc",
+    "state": "IA",
+    "city": "Davenport",
+    "resend_id": "f9df5062-07cb-4049-8a64-4393c61cfa98",
+    "subject": "Family Care Solutions Llc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "user@domain.com",
+    "provider": "Friendship Haven Home Health Care",
+    "state": "IA",
+    "city": "Fort Dodge",
+    "resend_id": "da53fb9f-a1de-4236-8c31-969e02053620",
+    "subject": "Friendship Haven Home Health Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "agustinamingote@gmail.com",
+    "provider": "Greenbelt Home Care",
+    "state": "IA",
+    "city": "Eldora",
+    "resend_id": "57ca4efe-652e-4792-87e1-8b4d01edea25",
+    "subject": "Greenbelt Home Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "media@heartland.com",
+    "provider": "Heartland Home Care",
+    "state": "IA",
+    "city": "Oskaloosa",
+    "resend_id": "1aa868c7-04d9-4768-a8ff-b85997106352",
+    "subject": "Heartland Home Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "reach@yourheights.com",
+    "provider": "Heights Home Health, Inc",
+    "state": "IA",
+    "city": "Mapleton",
+    "resend_id": "e659f37a-7704-401a-94df-094c4fcb5dcd",
+    "subject": "Heights Home Health, Inc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "support@livingroomideas.com",
+    "provider": "Home Sweet Home Care",
+    "state": "IA",
+    "city": "Atlantic",
+    "resend_id": "72014056-cb2e-446d-8c89-1860b5ec6d16",
+    "subject": "Home Sweet Home Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "contactus@iowahomecare.com",
+    "provider": "Iowa Home Care",
+    "state": "IA",
+    "city": "Des Moines",
+    "resend_id": "f6990d4e-0537-4d19-aa0c-6aec35ae21ba",
+    "subject": "Iowa Home Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "clementss@vnaic.org",
+    "provider": "Johnson County Visiting Nurse Association",
+    "state": "IA",
+    "city": "Iowa City",
+    "resend_id": "8d9cece5-5bba-4d1b-b61b-de2f4ba93d1a",
+    "subject": "Johnson County Visiting Nurse Association: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "impallari@gmail.com",
+    "provider": "Keystone Home Health",
+    "state": "IA",
+    "city": "Keystone",
+    "resend_id": "bae073dc-663c-451c-b3dc-769a4f8ee828",
+    "subject": "Keystone Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "srmc-childbirth-education-classes@mercy.com",
+    "provider": "Mercy Home Care",
+    "state": "IA",
+    "city": "Cedar Rapids",
+    "resend_id": "ab4a7966-2373-4ebc-b6d2-b5210e7c9d9a",
+    "subject": "Mercy Home Care: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "newchoices@newchoicesinc.com",
+    "provider": "New Choices Inc",
+    "state": "IA",
+    "city": "Bettendorf",
+    "resend_id": "586e116b-ca33-4ad0-a516-d94db809e6ec",
+    "subject": "New Choices Inc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@optimaelifeservices.com",
+    "provider": "Optimae Home Health Services",
+    "state": "IA",
+    "city": "Fairfield",
+    "resend_id": "36d63ba1-2b65-4f23-b54a-be5f5bbc92a6",
+    "subject": "Optimae Home Health Services: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "email@email.com",
+    "provider": "Senior Helpers Northeast Iowa",
+    "state": "IA",
+    "city": "Waterloo",
+    "resend_id": "0e76c7a6-38a3-46ed-a57a-e8f185776003",
+    "subject": "Senior Helpers Northeast Iowa: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "info@skylinecenter.org",
+    "provider": "Skyline Center Inc Home Health",
+    "state": "IA",
+    "city": "Clinton",
+    "resend_id": "8f42266e-0c75-4718-8cd7-bb8c13dcfe6f",
+    "subject": "Skyline Center Inc Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "publicrelations@greatriverhealth.org",
+    "provider": "Southeast Iowa Regional Home Health",
+    "state": "IA",
+    "city": "West Burlington",
+    "resend_id": "297b1df7-f1e1-47e0-a62f-bed7bcdc8ec5",
+    "subject": "Southeast Iowa Regional Home Health: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "snowak@therapysolutionshh.com",
+    "provider": "Therapy Solutions Inc",
+    "state": "IA",
+    "city": "Cedar Rapids",
+    "resend_id": "b741ed9e-264a-449f-8d04-dda3f70ad47b",
+    "subject": "Therapy Solutions Inc: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "lee.coffee@torescue.com",
+    "provider": "To The Rescue",
+    "state": "IA",
+    "city": "Cedar Rapids",
+    "resend_id": "1fcfe31a-d956-4c74-8a07-0b2143069e23",
+    "subject": "To The Rescue: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "myunitypointsupport@unitypoint.org",
+    "provider": "Unitypoint At Home",
+    "state": "IA",
+    "city": "Fort Dodge",
+    "resend_id": "41c317f9-077e-42d1-bf64-3c90300ec0b5",
+    "subject": "Unitypoint At Home: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "admin@whhredoak.com",
+    "provider": "Wel-Home Health Of Red Oak",
+    "state": "IA",
+    "city": "Red Oak",
+    "resend_id": "87c0a4f6-f7f5-45c9-8053-073ace06c4a9",
+    "subject": "Wel-Home Health Of Red Oak: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  },
+  {
+    "email": "admin@whhsgtbluff.com",
+    "provider": "Wel-Home Health Of Sergeant Bluff",
+    "state": "IA",
+    "city": "Sergeant Bluff",
+    "resend_id": "921823f9-d255-48cb-8e31-bd9638cc9543",
+    "subject": "Wel-Home Health Of Sergeant Bluff: PalmCare demo + App Store download",
+    "at": "2026-08-26T04:09:54.281501+00:00"
+  }
+]
