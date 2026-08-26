@@ -365,10 +365,11 @@ export default function BillingPage() {
             {planCatalog.map((p) => {
               const current = isCurrentPlan(p.tier);
               const cta = getPlanCta(p.tier, p.planKey);
-              const loadingThis =
+              const loadingThis = Boolean(
                 cta.kind === 'subscribe' &&
-                cta.planKey &&
-                planActionLoading === cta.planKey;
+                  cta.planKey &&
+                  planActionLoading === cta.planKey,
+              );
               const className = `w-full h-9 rounded-[10px] text-[13px] font-semibold transition-colors inline-flex items-center justify-center gap-1.5 ${
                 current
                   ? 'bg-primary-500 text-white cursor-default'
