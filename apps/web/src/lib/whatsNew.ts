@@ -90,39 +90,44 @@ export function markWhatsNewSeen(version: string = CURRENT_WHATS_NEW_VERSION): v
   localStorage.setItem(WHATS_NEW_STORAGE_KEY, version);
 }
 
-/** Logged-in product routes only — never marketing, auth, or landing pages. */
-const APP_ROUTE_PREFIXES = [
-  '/dashboard',
-  '/clients',
-  '/pipeline',
-  '/schedule',
-  '/visits',
-  '/caregivers',
-  '/documents',
-  '/settings',
-  '/billing',
-  '/messages',
-  '/reports',
-  '/contracts',
-  '/proposals',
-  '/policies',
-  '/integrations',
-  '/notes',
-  '/activity',
-  '/care-tracker',
-  '/leads',
-  '/team-chat',
-  '/admin',
-] as const;
+/** Marketing, auth, and legal pages — never show What's New here. */
+const PUBLIC_EXACT_ROUTES = new Set([
+  '/',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/pricing',
+  '/features',
+  '/mobile-app',
+  '/about',
+  '/contact',
+  '/faq',
+  '/terms',
+  '/privacy',
+  '/book-demo',
+  '/compare',
+  '/alternatives',
+  '/roi-calculator',
+  '/home-care-documentation-software',
+  '/beta',
+  '/status',
+  '/unsubscribe',
+  '/app',
+]);
+
+const PUBLIC_ROUTE_PREFIXES = ['/blog', '/a/'] as const;
 
 export function isLoggedInAppRoute(pathname: string): boolean {
-  return APP_ROUTE_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  if (PUBLIC_EXACT_ROUTES.has(pathname)) return false;
+  return !PUBLIC_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix),
   );
 }
 
-export function canShowWhatsNew(pathname: string, isAuthenticated: boolean): boolean {
-  if (!isAuthenticated) return false;
+export function canShowWhatsNew(pathname: string, token: string | null | undefined): boolean {
+  if (!token) return false;
   if (!isLoggedInAppRoute(pathname)) return false;
   return shouldShowWhatsNew();
 }

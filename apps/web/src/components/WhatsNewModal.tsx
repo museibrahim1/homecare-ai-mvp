@@ -77,7 +77,7 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
       <button
         type="button"
         aria-label="Dismiss what's new"
-        className={`fixed inset-0 z-[88] cursor-default bg-transparent ${
+        className={`fixed inset-0 z-[100] cursor-default bg-transparent ${
           phase === 'exit' ? 'animate-whats-new-backdrop-out' : 'animate-whats-new-backdrop-in'
         }`}
         onClick={dismiss}
@@ -87,7 +87,7 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
         role="dialog"
         aria-modal="false"
         aria-labelledby="whats-new-title"
-        className={`fixed bottom-4 right-4 z-[89] w-[min(100vw-2rem,380px)] overflow-hidden rounded-2xl border border-white/10 bg-[#121212] shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${panelClass}`}
+        className={`fixed bottom-5 right-5 z-[101] w-[min(100vw-2.5rem,380px)] overflow-hidden rounded-2xl border border-white/10 bg-[#121212] shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${panelClass}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="relative h-[148px] w-full overflow-hidden">

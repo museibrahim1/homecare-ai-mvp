@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
@@ -11,37 +11,42 @@ import {
 } from '@/lib/whatsNew';
 import WhatsNewModal from '@/components/WhatsNewModal';
 
+const OPEN_DELAYS_MS = [400, 1200, 2800];
+
 /**
  * Corner "What's New" panel for logged-in app users only.
  * Shows once per release when there is a new update they have not seen.
  */
 export default function WhatsNewPoller() {
   const pathname = usePathname();
-  const { token, user, hydrated } = useAuth();
+  const { token, hydrated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const openedRef = useRef(false);
   const release = getCurrentRelease();
 
-  const isAuthenticated = Boolean(token && user);
-
   useEffect(() => {
-    if (!hydrated || !release) {
-      setIsOpen(false);
-      return;
-    }
+    if (!hydrated || !release || openedRef.current) return;
 
-    if (!canShowWhatsNew(pathname, isAuthenticated)) {
-      setIsOpen(false);
-      return;
-    }
+    const tryOpen = () => {
+      if (openedRef.current) return true;
+      if (!canShowWhatsNew(pathname, token)) return false;
+      openedRef.current = true;
+      setIsOpen(true);
+      return true;
+    };
 
-    const timer = window.setTimeout(() => {
-      if (canShowWhatsNew(pathname, isAuthenticated)) {
-        setIsOpen(true);
-      }
-    }, 900);
+    if (tryOpen()) return;
 
-    return () => window.clearTimeout(timer);
-  }, [hydrated, pathname, isAuthenticated, release]);
+    const timers = OPEN_DELAYS_MS.map((delay) =>
+      window.setTimeout(() => {
+        tryOpen();
+      }, delay),
+    );
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [hydrated, pathname, token, release]);
 
   const handleClose = () => {
     markWhatsNewSeen(CURRENT_WHATS_NEW_VERSION);
