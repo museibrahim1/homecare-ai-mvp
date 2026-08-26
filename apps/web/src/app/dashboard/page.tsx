@@ -930,9 +930,9 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex min-h-screen glass-page">
+      <div className="flex min-h-dvh glass-page">
         <GlassRail />
-        <div className="flex-1 min-w-0 flex flex-col relative overflow-x-hidden">
+        <div className="flex-1 min-w-0 flex flex-col relative overflow-x-hidden overflow-y-auto">
           {showCustomize && (
             <CustomizePanel
               prefs={widgetPrefs}

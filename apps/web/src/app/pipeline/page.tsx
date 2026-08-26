@@ -276,6 +276,7 @@ export default function PipelinePage() {
     <GlassShell
       title="Sales"
       subtitle="Track deals through the care process and manage new leads"
+      wide={activeTab === 'deals'}
       action={
         activeTab === 'deals' ? (
           <>
@@ -314,34 +315,34 @@ export default function PipelinePage() {
         ) : (
         <>
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="glass-card p-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="glass-card p-4 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <Target className="w-5 h-5 text-blue-600" />
-              <span className="text-slate-500 text-sm">Total Pipeline</span>
+              <Target className="w-5 h-5 text-blue-600 shrink-0" />
+              <span className="text-slate-500 text-sm truncate">Total Pipeline</span>
             </div>
-            <p className="text-2xl font-bold text-slate-900">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-slate-900 tabular-nums">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <Clock className="w-5 h-5 text-amber-600" />
-              <span className="text-slate-500 text-sm">In Progress</span>
+              <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+              <span className="text-slate-500 text-sm truncate">In Progress</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage !== 'active').length}</p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
-              <span className="text-slate-500 text-sm">Active Clients</span>
+              <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span className="text-slate-500 text-sm truncate">Active Clients</span>
             </div>
             <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage === 'active').length}</p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-emerald-600" />
-              <span className="text-slate-500 text-sm">Avg Deal Value</span>
+              <DollarSign className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span className="text-slate-500 text-sm truncate">Avg Deal Value</span>
             </div>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-slate-900 tabular-nums">
               ${deals.length > 0 ? Math.round(deals.reduce((s, d) => s + d.value, 0) / deals.length).toLocaleString() : 0}
             </p>
           </div>
@@ -366,12 +367,13 @@ export default function PipelinePage() {
           </div>
         </div>
 
-        {/* Kanban Board */}
-        <div className="flex gap-3 overflow-x-auto pb-4">
+        {/* Kanban Board — min-w-0 keeps overflow-x scroll inside the shell (not clipped) */}
+        <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain pb-4 -mx-1 px-1">
+          <div className="flex gap-3 w-max min-w-full">
           {stages.map(stage => (
-            <div key={stage.id} className="flex-shrink-0 w-72">
+            <div key={stage.id} className="kanban-col shrink-0 w-[272px] sm:w-72 flex flex-col">
               <div 
-                className={`p-3 rounded-[18px] border transition-all min-h-[400px] ${
+                className={`p-3 rounded-[18px] border transition-all flex flex-col min-h-[320px] max-h-[min(68dvh,720px)] ${
                   dragOverStage === stage.id 
                     ? 'border-2 border-primary-500 bg-primary-50/60' 
                     : 'border-[#FFFFFFE0] bg-[#FFFFFFB3] shadow-[0_10px_26px_#0D948814]'
@@ -380,19 +382,19 @@ export default function PipelinePage() {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, stage.id)}
               >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
-                    <span className="font-bold text-[13px] text-[#10211F]">{stage.name}</span>
-                    <span className="text-xs bg-white/70 text-slate-600 px-2 py-0.5 rounded-full">
+                <div className="flex items-center justify-between mb-1.5 shrink-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${stage.color}`} />
+                    <span className="font-bold text-[13px] text-[#10211F] truncate">{stage.name}</span>
+                    <span className="text-xs bg-white/70 text-slate-600 px-2 py-0.5 rounded-full shrink-0">
                       {getDealsForStage(stage.id).length}
                     </span>
                   </div>
                 </div>
-                <div className="text-xs font-medium text-[#4B6B66] mb-3">
+                <div className="text-xs font-medium text-[#4B6B66] mb-3 shrink-0">
                   ${getStageValue(stage.id).toLocaleString()} total
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-y-auto overscroll-y-contain flex-1 min-h-0 pr-0.5">
                   {getDealsForStage(stage.id).map(deal => {
                     // Find next stage for quick-advance button
                     const currentStageIdx = stages.findIndex(s => s.id === stage.id);
@@ -415,11 +417,11 @@ export default function PipelinePage() {
                       >
                         <div className="flex items-start gap-2">
                           <GripVertical className="w-4 h-4 text-slate-400 group-hover:text-slate-600 flex-shrink-0 mt-0.5" />
-                          <h3 className="font-semibold text-sm text-[#10211F] mb-2 flex-1">{deal.name}</h3>
+                          <h3 className="font-semibold text-sm text-[#10211F] mb-2 flex-1 min-w-0 break-words">{deal.name}</h3>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[13px] font-bold text-primary-600">${deal.value.toLocaleString()}/mo</span>
-                          <span className="text-xs text-slate-400">{deal.daysInStage}d</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[13px] font-bold text-primary-600 tabular-nums">${deal.value.toLocaleString()}/mo</span>
+                          <span className="text-xs text-slate-400 shrink-0">{deal.daysInStage}d</span>
                         </div>
                         {deal.hasContract && (
                           <div className="mt-2 flex items-center gap-1 text-xs text-primary-400">
@@ -435,7 +437,7 @@ export default function PipelinePage() {
                       </div>
                       
                       {/* Quick Stage Move Buttons */}
-                      <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200/70">
+                      <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200/70 min-w-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleOpenFollowUp(deal); }}
                           className={`shrink-0 px-2 py-1.5 text-xs rounded transition-colors ${
@@ -450,7 +452,7 @@ export default function PipelinePage() {
                         {prevStage && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, prevStage.id); }}
-                            className="flex-1 px-2 py-1.5 text-xs bg-slate-100 hover:bg-slate-100 text-slate-600 rounded transition-colors"
+                            className="flex-1 min-w-0 px-1.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-100 text-slate-600 rounded transition-colors truncate"
                             title={`Move to ${prevStage.name}`}
                           >
                             ← {prevStage.name.split(' ')[0]}
@@ -459,7 +461,7 @@ export default function PipelinePage() {
                         {nextStage && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, nextStage.id); }}
-                            className={`flex-1 px-2 py-1.5 text-xs rounded transition-colors ${
+                            className={`flex-1 min-w-0 px-1.5 py-1.5 text-xs rounded transition-colors truncate ${
                               nextStage.id === 'active' 
                                 ? 'bg-emerald-50 hover:bg-green-500/30 text-emerald-600' 
                                 : 'bg-primary-50 hover:bg-primary-500/30 text-primary-400'
@@ -481,6 +483,7 @@ export default function PipelinePage() {
               </div>
             </div>
           ))}
+          </div>
         </div>
         </>
         )}

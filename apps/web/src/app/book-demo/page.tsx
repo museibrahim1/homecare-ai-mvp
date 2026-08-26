@@ -9,6 +9,21 @@ import WaveField from '@/components/glass/WaveField';
 
 const API = '/api';
 
+const REFERRAL_SOURCES = [
+  { value: 'google', label: 'Google search' },
+  { value: 'bing', label: 'Bing or other search' },
+  { value: 'ai_assistant', label: 'ChatGPT or another AI assistant' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'facebook_instagram', label: 'Facebook or Instagram' },
+  { value: 'threads', label: 'Threads' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'app_store', label: 'App Store' },
+  { value: 'referral', label: 'Referral from a colleague or friend' },
+  { value: 'email', label: 'An email from us' },
+  { value: 'event', label: 'Industry conference or event' },
+  { value: 'other', label: 'Other' },
+];
+
 interface ScheduleSlot {
   time: string;
   available: boolean;
@@ -41,6 +56,7 @@ export default function BookDemoPage() {
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [phone, setPhone] = useState('');
+  const [referralSource, setReferralSource] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [viewMonth, setViewMonth] = useState(() => {
@@ -51,10 +67,14 @@ export default function BookDemoPage() {
   const [done, setDone] = useState(false);
   const [result, setResult] = useState<BookingResult | null>(null);
   const [error, setError] = useState('');
+  const [slotsError, setSlotsError] = useState('');
 
   useEffect(() => {
     fetch(`${API}/demos/slots`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error('Could not load available times');
+        return r.json();
+      })
       .then((d) => {
         setSlotData(d);
         setLoadingSlots(false);
@@ -63,9 +83,14 @@ export default function BookDemoPage() {
           setSelectedDate(first);
           const [y, m] = first.split('-').map(Number);
           setViewMonth(new Date(y, m - 1, 1));
+        } else {
+          setSlotsError('No open demo times right now. Email demo@palmtai.com and we will set one up.');
         }
       })
-      .catch(() => setLoadingSlots(false));
+      .catch(() => {
+        setLoadingSlots(false);
+        setSlotsError('Calendar is temporarily unavailable. Email demo@palmtai.com to book, or try again in a minute.');
+      });
   }, []);
 
   const availableDates = useMemo(() => {
@@ -120,6 +145,7 @@ export default function BookDemoPage() {
     email.trim() &&
     email.includes('@') &&
     company.trim() &&
+    referralSource &&
     selectedDate &&
     selectedTime;
 
@@ -138,6 +164,7 @@ export default function BookDemoPage() {
           phone: phone.trim() || undefined,
           date: selectedDate,
           time_slot: selectedTime,
+          referral_source: referralSource,
         }),
       });
       const data = await res.json();
@@ -145,7 +172,11 @@ export default function BookDemoPage() {
       setResult(data);
       setDone(true);
       try {
-        trackGenerateLead({ lead_type: 'demo_booking', company: company.trim() || undefined });
+        trackGenerateLead({
+          lead_type: 'demo_booking',
+          company: company.trim() || undefined,
+          referral_source: referralSource,
+        });
       } catch {
         /* analytics must never break booking */
       }
@@ -213,9 +244,29 @@ export default function BookDemoPage() {
                     rel="noreferrer"
                     className="text-sm font-semibold text-primary-600 hover:underline"
                   >
-                    Open meeting link
+                    Open Google Meet link
                   </a>
                 )}
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <Link
+                    href="/pricing"
+                    className="py-2.5 px-4 rounded-full bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600"
+                  >
+                    See pricing
+                  </Link>
+                  <Link
+                    href="/features"
+                    className="py-2.5 px-4 rounded-full border border-[#10211F1A] text-sm font-semibold text-[#10211F] hover:border-primary-500/40"
+                  >
+                    Product overview
+                  </Link>
+                  <Link
+                    href="/home-care-documentation-software"
+                    className="py-2.5 px-4 rounded-full border border-[#10211F1A] text-sm font-semibold text-[#10211F] hover:border-primary-500/40"
+                  >
+                    How documentation works
+                  </Link>
+                </div>
                 <Link href="/" className="text-sm font-medium text-[#8AA09B] hover:text-primary-600">
                   Back to home
                 </Link>
@@ -231,13 +282,41 @@ export default function BookDemoPage() {
                   </h1>
                   <p className="text-[15px] leading-[22px] text-[#5B736F]">
                     We will walk through a real assessment on PalmCare AI. You leave with a clear
-                    picture of fit for your agency.
+                    picture of fit for your agency. Prefer email? Write{' '}
+                    <a href="mailto:demo@palmtai.com" className="text-primary-600 font-medium">
+                      demo@palmtai.com
+                    </a>
+                    .
                   </p>
                 </div>
 
                 {loadingSlots ? (
                   <div className="flex justify-center py-16">
                     <Loader2 className="w-7 h-7 text-primary-500 animate-spin" />
+                  </div>
+                ) : slotsError ? (
+                  <div className="rounded-2xl border border-[#10211F1A] bg-[#FFFFFFA6] px-5 py-6 flex flex-col gap-4">
+                    <p className="text-[15px] leading-[22px] text-[#10211F]">{slotsError}</p>
+                    <div className="flex flex-wrap gap-3">
+                      <a
+                        href="mailto:demo@palmtai.com?subject=PalmCare%20demo%20request"
+                        className="h-11 inline-flex items-center px-5 rounded-[14px] bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600"
+                      >
+                        Email demo@palmtai.com
+                      </a>
+                      <Link
+                        href="/register"
+                        className="h-11 inline-flex items-center px-5 rounded-[14px] border border-[#10211F1A] text-sm font-semibold text-[#10211F]"
+                      >
+                        Start free trial instead
+                      </Link>
+                      <Link
+                        href="/pricing"
+                        className="h-11 inline-flex items-center px-5 text-sm font-semibold text-primary-600"
+                      >
+                        View pricing
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col lg:flex-row items-start gap-6">
@@ -353,7 +432,8 @@ export default function BookDemoPage() {
                   </div>
                 )}
 
-                {/* Contact fields */}
+                {/* Contact fields — only when a calendar slot can be chosen */}
+                {!loadingSlots && !slotsError && (
                 <div className="flex flex-col gap-3 pt-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
@@ -407,6 +487,28 @@ export default function BookDemoPage() {
                       placeholder="(555) 123-4567"
                     />
                   </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className={labelClass} htmlFor="demo-found-us">
+                      Where did you find us? <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="demo-found-us"
+                      className={inputClass}
+                      value={referralSource}
+                      onChange={(e) => setReferralSource(e.target.value)}
+                      required
+                      aria-required="true"
+                    >
+                      <option value="" disabled>
+                        Select one
+                      </option>
+                      {REFERRAL_SOURCES.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
                   {error && (
                     <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
@@ -428,6 +530,19 @@ export default function BookDemoPage() {
                       demo@palmtai.com
                     </a>
                   </p>
+                </div>
+                )}
+
+                <div className="pt-2 border-t border-[#10211F12] flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  <Link href="/compare" className="text-primary-600 font-medium hover:underline">
+                    Compare options
+                  </Link>
+                  <Link href="/pricing" className="text-primary-600 font-medium hover:underline">
+                    Pricing
+                  </Link>
+                  <Link href="/home-care-documentation-software" className="text-primary-600 font-medium hover:underline">
+                    Documentation software
+                  </Link>
                 </div>
               </>
             )}

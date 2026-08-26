@@ -1,0 +1,313 @@
+{
+  "generatedAt": "2026-08-26T01:27:21.645488+00:00",
+  "reportDate": "2026-08-25",
+  "lookbackDays": 7,
+  "summary": {
+    "ok": [
+      "posthog",
+      "meta"
+    ],
+    "partial": [],
+    "blocked": [
+      "cloudflare",
+      "app_store_connect",
+      "google"
+    ]
+  },
+  "sources": {
+    "posthog": {
+      "source": "posthog",
+      "status": "ok_via_mcp",
+      "note": "Pulled via Cursor PostHog MCP on 2026-08-25 (no POSTHOG_PERSONAL_API_KEY in .env yet)",
+      "days": 7,
+      "digest": {
+        "visitors": 368,
+        "visitorsPrev": 311,
+        "visitorsChangePct": 18,
+        "pageviews": 1127,
+        "pageviewsPrev": 601,
+        "pageviewsChangePct": 88,
+        "sessions": 432,
+        "bounceRate": 43.1,
+        "avgSessionDuration": "2m 36s",
+        "channels": [
+          {
+            "name": "Email",
+            "visitors": 173
+          },
+          {
+            "name": "Direct",
+            "visitors": 89
+          },
+          {
+            "name": "Paid Social",
+            "visitors": 82
+          },
+          {
+            "name": "Organic Social",
+            "visitors": 12
+          },
+          {
+            "name": "Organic Search",
+            "visitors": 10
+          },
+          {
+            "name": "Referral",
+            "visitors": 2
+          },
+          {
+            "name": "AI",
+            "visitors": 1
+          }
+        ],
+        "topPages": [
+          {
+            "path": "/",
+            "visitors": 176
+          },
+          {
+            "path": "/unsubscribe",
+            "visitors": 147
+          },
+          {
+            "path": "/app",
+            "visitors": 44
+          },
+          {
+            "path": "/register",
+            "visitors": 39
+          },
+          {
+            "path": "/privacy",
+            "visitors": 38
+          },
+          {
+            "path": "/pricing",
+            "visitors": 25
+          }
+        ],
+        "referrers": [
+          {
+            "name": "$direct",
+            "visitors": 259
+          },
+          {
+            "name": "m.facebook.com",
+            "visitors": 73
+          },
+          {
+            "name": "palmcareai.com",
+            "visitors": 20
+          },
+          {
+            "name": "www.google.com",
+            "visitors": 9
+          }
+        ]
+      }
+    },
+    "cloudflare": {
+      "source": "cloudflare",
+      "status": "permission_denied",
+      "error": "Actor 'com.cloudflare.api.token.9083febe260d45b33f899add35fdfee7' does not have permission 'com.cloudflare.api.account.zone.analytics.read' for zone c31e75a3222c31617b96caa0ef1a1d56",
+      "note": "Add Zone Analytics Read to CF_API_TOKEN in Cloudflare dashboard"
+    },
+    "meta": {
+      "source": "meta",
+      "status": "ok",
+      "facebook": {
+        "profile": {
+          "name": "Palm Technologies ",
+          "fan_count": 1,
+          "followers_count": 1,
+          "link": "https://www.facebook.com/955150854358893",
+          "id": "955150854358893"
+        },
+        "insights": {
+          "data": [],
+          "paging": {
+            "previous": "https://graph.facebook.com/v25.0/955150854358893/insights?access_token=EAAWV07Sff4IBR5zIU3WCIiVFXGgTJLO4dTmMdL890cJ9JKZCuoKVAnIxbZC7nqD6QJFQUnzWZA0JPjexJJJcntdMWss3cwiFXGQSGBBPpWBFPO8LTqkEIAUZClXRfpwt8pWHENFv8b1e6qmjcCtHEGUNJlusX8ogMjxiEr32DUOjaEVnWyOZA0LblZAbLtQdGuaswnUGoO&since=1786518000&until=1787122800&metric=page_views_total%2Cpage_post_engagements&period=day"
+          }
+        },
+        "insights_status": "ok"
+      },
+      "instagram": {
+        "profile": {
+          "username": "palmcareai",
+          "followers_count": 10,
+          "media_count": 97,
+          "id": "17841444951983973"
+        }
+      },
+      "threads": {
+        "views": {
+          "data": [
+            {
+              "id": "17841443628511270/insights/views/day",
+              "name": "views",
+              "period": "day",
+              "values": [
+                {
+                  "value": 14,
+                  "end_time": "2026-08-24T07:00:00+0000"
+                },
+                {
+                  "value": 11,
+                  "end_time": "2026-08-25T07:00:00+0000"
+                }
+              ],
+              "title": "views",
+              "description": "The number of times your profile was viewed."
+            }
+          ],
+          "paging": {
+            "previous": "/v1.0/user/27968324992825390/threads_insights?since=1787534842&until=1787621242&metric=views&period=day",
+            "next": "/v1.0/user/27968324992825390/threads_insights?since=1787707644&until=1787794044&metric=views&period=day"
+          }
+        },
+        "engagement": {
+          "data": [
+            {
+              "id": "17841443628511270/insights/likes/day",
+              "name": "likes",
+              "period": "day",
+              "title": "likes",
+              "description": "The number of likes on your posts.",
+              "total_value": {
+                "value": 0
+              }
+            },
+            {
+              "id": "17841443628511270/insights/replies/day",
+              "name": "replies",
+              "period": "day",
+              "title": "replies",
+              "description": "The number of replies on your posts.",
+              "total_value": {
+                "value": 0
+              }
+            },
+            {
+              "id": "17841443628511270/insights/reposts/day",
+              "name": "reposts",
+              "period": "day",
+              "title": "reposts",
+              "description": "The number of times your posts were reposted.",
+              "total_value": {
+                "value": 0
+              }
+            },
+            {
+              "id": "17841443628511270/insights/quotes/day",
+              "name": "quotes",
+              "period": "day",
+              "title": "quotes",
+              "description": "The number of times your posts were quoted.",
+              "total_value": {
+                "value": 0
+              }
+            },
+            {
+              "id": "17841443628511270/insights/followers_count/day",
+              "name": "followers_count",
+              "period": "day",
+              "title": "followers_count",
+              "description": "This is your total number of followers on Threads.",
+              "total_value": {
+                "value": 2
+              }
+            }
+          ],
+          "paging": {
+            "previous": "/v1.0/user/27968324992825390/threads_insights?since=1787534842&until=1787621242&metric=likes%2Creplies%2Creposts%2Cquotes%2Cfollowers_count&period=day",
+            "next": "/v1.0/user/27968324992825390/threads_insights?since=1787707644&until=1787794044&metric=likes%2Creplies%2Creposts%2Cquotes%2Cfollowers_count&period=day"
+          }
+        },
+        "recent": {
+          "data": [
+            {
+              "id": "17965007364150983",
+              "text": "iPhone app with the real screens.\n\nScan the QR or tap: palmcareai.com/a/meta\nhomecare #iosapp",
+              "timestamp": "2026-08-25T22:57:01+0000",
+              "permalink": "https://www.threads.com/@palmcareai/post/DcewvZXH0Zl"
+            },
+            {
+              "id": "18121163590915759",
+              "text": "Reassessments create the same paperwork pile as first visits.\n\nPALM treats them the same way. Record once. Draft the updated plan, billables, and contract. You approve.\n\nBook a demo if you run multiple locations: palmcareai.com/d/meta\nApp: palmcareai.com/a/meta\nhomecare #homecareagency #agencyowner",
+              "timestamp": "2026-08-25T16:08:39+0000",
+              "permalink": "https://www.threads.com/@palmcareai/post/DceCBFkm5om"
+            },
+            {
+              "id": "18375683317238126",
+              "text": "Built from what was actually said.\n\nFeatures: palmcareai.com/w/meta\nApp: palmcareai.com/a/meta\nhomecare #AIsafety",
+              "timestamp": "2026-08-24T22:55:16+0000",
+              "permalink": "https://www.threads.com/@palmcareai/post/DccLvwbkRML"
+            },
+            {
+              "id": "17986449141053105",
+              "text": "Most agencies copy an old service agreement and hope the state rules still match.\n\nWe wrote a plain checklist for what belongs in a home care service agreement.\n\nRead it: palmcareai.com/blog/how-to-write-home-care-service-agreement\n\nOr let PALM draft yours from the visit: palmcareai.com/r/meta\nhomecare #homecareagency #compliance",
+              "timestamp": "2026-08-24T16:03:28+0000",
+              "permalink": "https://www.threads.com/@palmcareai/post/DcbcnkZGgME"
+            },
+            {
+              "id": "17918323377221688",
+              "text": "Intake day is loud. The paperwork after it does not have to be.\n\nRecord the assessment. PALM drafts the packet while you move to the next family.\n\nReview. Send. Sign.\n\nTry one intake this week: palmcareai.com/a/meta\nhomecare #homecareagency #caregiverlife",
+              "timestamp": "2026-08-23T15:45:14+0000",
+              "permalink": "https://www.threads.com/@palmcareai/post/DcY1u-qlRkG"
+            }
+          ],
+          "paging": {
+            "cursors": {
+              "before": "QVFIVE5ZATTk1YmJHa092V19jcjV6dFd6S1dnMTdkMGRJU2haem1vbGRlZA3JUbnNjdDlMOGdIMFFBcDFuVGZA6VGV0T1kxRklROU40Nk5PLTZAjR3c1V1Jzd2NR",
+              "after": "QVFIVDdVUlFRLVZAsbE9kaEFUV184b1NUYzRFRldjMkNDRmlfbkxxQXhoNThQVTFaMXF5MUZAEbEx4aG9Sd0NlQU5KZA0FUd2hFS2tRUkttc2dPNVRRc3lmakR3"
+            },
+            "next": "https://graph.threads.net/v1.0/17841443628511270/threads?fields=id%2Ctext%2Ctimestamp%2Cpermalink&limit=5&access_token=THABLWllJl8tBBYllMNTFkYU85bzE0MTZA0b19ldWpQY1VvWmJRSV9GNUZA1ZATJSaDR2TVVaNS1URG1tZAExSdmx3RlpBUkpXNVFSczNCNWswMXA0ZATZAZAYkd4RzJ4WVhOTDBwX2g2MlVSVjd6VlBHWktZAVldpRDBzb3A1RVNTUVAtY21SUQZDZD&after=QVFIVDdVUlFRLVZAsbE9kaEFUV184b1NUYzRFRldjMkNDRmlfbkxxQXhoNThQVTFaMXF5MUZAEbEx4aG9Sd0NlQU5KZA0FUd2hFS2tRUkttc2dPNVRRc3lmakR3"
+          }
+        },
+        "status": "ok"
+      },
+      "note": "FB/IG insights need pages_read_engagement + instagram_manage_insights. Threads works today."
+    },
+    "app_store_connect": {
+      "source": "app_store_connect",
+      "status": "waiting_for_first_dump",
+      "reportRequestId": "2400a8e7-f7c3-43af-a44f-4d0d00629172",
+      "focusReports": [
+        {
+          "name": "App Downloads Standard",
+          "reportId": "r3-2400a8e7-f7c3-43af-a44f-4d0d00629172",
+          "instances": []
+        },
+        {
+          "name": "App Sessions Standard",
+          "reportId": "r8-2400a8e7-f7c3-43af-a44f-4d0d00629172",
+          "instances": []
+        },
+        {
+          "name": "App Store Discovery and Engagement Standard",
+          "reportId": "r14-2400a8e7-f7c3-43af-a44f-4d0d00629172",
+          "instances": []
+        },
+        {
+          "name": "App Store Installation and Deletion Standard",
+          "reportId": "r6-2400a8e7-f7c3-43af-a44f-4d0d00629172",
+          "instances": []
+        },
+        {
+          "name": "App Crashes",
+          "reportId": "r2-2400a8e7-f7c3-43af-a44f-4d0d00629172",
+          "instances": []
+        }
+      ],
+      "instancesReady": 0,
+      "note": "ONGOING request 2400a8e7-f7c3-43af-a44f-4d0d00629172 is live but instances are empty. Apple usually fills the first dump within 1\u20132 days."
+    },
+    "google": {
+      "source": "google",
+      "status": "missing_credentials",
+      "note": "Need a service account JSON path (GOOGLE_SERVICE_ACCOUNT_JSON) with GSC + GA4 access, or OAuth refresh token (GSC_REFRESH_TOKEN) plus GOOGLE_CLIENT_ID/SECRET. Site property: sc-domain:palmcareai.com (or URL-prefix)."
+    }
+  },
+  "reviewPrompt": "Open the daily canvas, compare channel mix vs prior day, check organic search landing pages, GSC query gaps (manual until Google API is wired), and pick one SEO action.",
+  "enrichedAt": "2026-08-26T01:27:26.893396+00:00"
+}

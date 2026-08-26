@@ -535,7 +535,6 @@ export default function ReportsPage() {
 
   return (
     <GlassShell title="Reports" subtitle="Generate and export reports">
-        <div className="max-w-6xl mx-auto w-full">
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
@@ -706,7 +705,6 @@ export default function ReportsPage() {
               </div>
             )}
           </div>
-        </div>
     </GlassShell>
   );
 }

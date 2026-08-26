@@ -9,6 +9,7 @@ import WaveField from './WaveField';
 const NAV = [
   { href: '/features', label: 'Product' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/compare', label: 'Compare' },
   { href: '/#how-it-works', label: 'How it works' },
 ];
 
@@ -145,10 +146,10 @@ export default function GlassLandingHero() {
               Palm It
             </Link>
             <Link
-              href="/#how-it-works"
+              href="/book-demo"
               className="inline-flex items-center justify-center py-4 px-[26px] rounded-full border-[1.5px] border-primary-500 text-primary-500 text-[17px] font-semibold hover:bg-white/40"
             >
-              Watch how it works
+              Book a demo
             </Link>
           </div>
         </div>

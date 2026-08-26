@@ -148,9 +148,17 @@ export default function HomeCareDocumentationSoftwarePage() {
               <Link href="/compare" className="text-primary-700 font-medium underline underline-offset-2">
                 comparison page
               </Link>
-              , or browse{' '}
+              , browse{' '}
               <Link href="/alternatives" className="text-primary-700 font-medium underline underline-offset-2">
                 documentation alternatives
+              </Link>
+              , or read the{' '}
+              <Link href="/blog/paperless-home-care-contracts" className="text-primary-700 font-medium underline underline-offset-2">
+                paperless home care contracts
+              </Link>
+              {' '}guide and the{' '}
+              <Link href="/blog/home-care-billables-checklist-after-intake" className="text-primary-700 font-medium underline underline-offset-2">
+                billables checklist after intake
               </Link>
               .
             </p>

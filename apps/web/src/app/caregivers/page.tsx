@@ -281,6 +281,7 @@ export default function CaregiversPage() {
     <GlassShell
       title="Team"
       subtitle="Manage your caregiver team and chat with staff"
+      fill={activeTab === 'chat'}
       action={
         activeTab === 'members' ? (
           <>
@@ -312,9 +313,8 @@ export default function CaregiversPage() {
         ) : undefined
       }
     >
-        <div className="max-w-6xl mx-auto w-full">
           {/* Tabs */}
-          <div className="mb-6">
+          <div className={`mb-6 ${activeTab === 'chat' ? 'shrink-0' : ''}`}>
             <GlassTabs
               tabs={[
                 { key: 'members', label: 'Caregivers', icon: Users },
@@ -327,7 +327,9 @@ export default function CaregiversPage() {
           </div>
 
           {activeTab === 'chat' ? (
-            <TeamChatPanel />
+            <div className="flex-1 min-h-0 min-w-0">
+              <TeamChatPanel />
+            </div>
           ) : activeTab === 'staff' ? (
           <>
           {error && (
@@ -605,7 +607,6 @@ export default function CaregiversPage() {
           )}
           </>
           )}
-        </div>
     </GlassShell>
 
       {/* Caregiver Modal */}

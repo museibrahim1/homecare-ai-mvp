@@ -455,7 +455,7 @@ export default function TeamChatPanel() {
   const displayEmails = gmailConnected ? emails : [];
 
   return (
-    <div className="flex glass-card overflow-hidden" style={{ height: 'calc(100vh - 230px)', minHeight: '520px' }}>
+    <div className="flex glass-card overflow-hidden h-full min-h-[480px]">
       {/* Channels & Team */}
       <div className="w-64 border-r border-slate-200/70 flex flex-col">
         <div className="flex border-b border-slate-200/70">

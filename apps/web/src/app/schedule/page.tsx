@@ -722,7 +722,7 @@ function ScheduleContent() {
       {view === 'day' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Timeline */}
-          <div className="lg:col-span-2 glass-card p-4 lg:p-5 overflow-auto max-h-[calc(100vh-320px)]">
+          <div className="lg:col-span-2 glass-card p-4 lg:p-5 overflow-auto max-h-[min(60dvh,640px)]">
             {todayApts.length === 0 && (
               <div className="text-center py-8 mb-4 bg-slate-50/20 rounded-xl">
                 <CalendarDays className="w-8 h-8 text-slate-300 mx-auto mb-2" />
@@ -736,7 +736,7 @@ function ScheduleContent() {
           {/* Sidebar: upcoming */}
           <div className="glass-card p-4 lg:p-5">
             <h3 className="text-sm font-semibold text-slate-900 mb-3">Upcoming</h3>
-            <div className="space-y-2 max-h-[calc(100vh-380px)] overflow-y-auto">
+            <div className="space-y-2 max-h-[min(60dvh,640px)] overflow-y-auto">
               {appointments
                 .filter(a => a.date >= formatLocalDate(new Date()))
                 .sort((a, b) => a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date))
@@ -946,7 +946,7 @@ function ScheduleContent() {
 export default function SchedulePage() {
   return (
     <GlassShell>
-      <div className="max-w-6xl mx-auto w-full">
+      <div className="w-full min-w-0">
         <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 text-primary-400 animate-spin" /></div>}>
           <ScheduleContent />
         </Suspense>

@@ -408,7 +408,6 @@ export default function VisitsPage() {
         </div>
       }
     >
-        <div className="max-w-6xl mx-auto w-full">
           {/* Error Banner */}
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
@@ -638,7 +637,6 @@ export default function VisitsPage() {
               })}
             </div>
           )}
-        </div>
     </GlassShell>
 
       {/* Upgrade Modal */}

@@ -12,17 +12,91 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    slug: 'paperless-home-care-contracts',
-    title: 'Paperless Home Care Contracts: How Agencies Go Digital',
+    slug: 'home-care-billables-checklist-after-intake',
+    title: 'Home Care Billables Checklist After Intake',
     description:
-      'How home care agencies move from paper service agreements to paperless contracts without losing state-specific clauses, signatures, or audit trails.',
+      'A practical checklist of billable items to capture after a home care intake assessment, so rates, hours, and services match the care plan and service agreement.',
+    date: '2026-08-25',
+    readTime: '6 min read',
+    category: 'Billing',
+    content: `
+A home care billables checklist after intake is the short list of chargeable services, hours, and add-ons you lock in before the first shift. Agencies lose money when the assessment conversation covers care needs but the billable line items stay vague until payroll week.
+
+## What is a home care billables checklist?
+
+It is a structured capture of what the client will be charged for: service types, estimated weekly hours, rate basis, travel or live-in differentials, and any one-time fees. It sits beside the care plan and the service agreement so the three documents say the same thing.
+
+## Checklist to run before the family leaves
+
+### Services sold
+- [ ] Personal care (bathing, dressing, toileting, transfers)
+- [ ] Homemaking and meals
+- [ ] Companionship and safety checks
+- [ ] Transportation or errands (if offered)
+- [ ] Live-in or overnight coverage (if offered)
+
+### Hours and schedule
+- [ ] Days of week and start/end times discussed
+- [ ] Estimated hours per week written down
+- [ ] Holiday or weekend differentials explained
+- [ ] Who approves overtime or extra hours
+
+### Rates and billing
+- [ ] Hourly or package rate for each service type
+- [ ] Deposit or first-week payment terms
+- [ ] Invoice timing (weekly, biweekly)
+- [ ] Responsible party for payment named
+
+### Alignment checks
+- [ ] Every billable service appears on the care plan
+- [ ] The service agreement lists the same rates and hours
+- [ ] Start date matches when billing begins
+- [ ] Non-billable goodwill tasks are labeled so staff do not invent charges later
+
+## Common misses that create disputes
+
+- Recording "help as needed" without an hour estimate.
+- Promising medication reminders without clarifying whether that is in scope and priced.
+- Leaving travel time out of the quote when the route is long.
+- Updating the care plan after week one without updating the billables list.
+
+## How PalmCare AI helps
+
+PalmCare AI drafts billable items from the recorded assessment alongside the care plan, visit notes, and state-specific service contract. A reviewer still confirms rates and hours before anything is sent.
+
+## Related reading
+
+- [Private duty care plan checklist](/blog/private-duty-care-plan-checklist)
+- [How to write a home care service agreement](/blog/how-to-write-home-care-service-agreement)
+- [Home care documentation software](/home-care-documentation-software)
+- [Compare documentation options](/compare)
+
+[Start a free trial](/register) or [book a demo](/book-demo).
+`,
+  },
+  {
+    slug: 'paperless-home-care-contracts',
+    title: 'Paperless Home Care Contracts for Agencies',
+    description:
+      'How to make a home care agency paperless: move service agreements from printed stacks to digital drafts, review, and e-signature without losing state-specific clauses.',
     date: '2026-08-15',
     readTime: '7 min read',
     category: 'Operations',
     content: `
 Paperless home care contracts replace printed service agreements with digital drafts, review, and e-signature. The goal is not a prettier PDF. The goal is a signed agreement that matches the assessment, the care plan, and the state rules, without a stack of paper on the kitchen table.
 
-## What “paperless contracts” means for home care
+## How to make my home care agency paperless
+
+Start with intake paperwork, not every form in the office. Agencies that go paperless successfully usually:
+
+1. Record the assessment instead of handwriting a notepad that someone retypes later.
+2. Draft the care plan, billables, and service agreement from that same visit.
+3. Review on screen, then collect a digital signature.
+4. Store the signed file with the client record.
+
+That path answers the real question behind “make my home care agency paperless”: remove retyping between the visit and the signed contract.
+
+## What paperless contracts means for home care
 
 For non-medical agencies, a paperless contract workflow usually includes:
 
@@ -52,9 +126,11 @@ PalmCare AI drafts a state-specific service contract from the recorded assessmen
 
 ## Related reading
 
+- [Home care billables checklist after intake](/blog/home-care-billables-checklist-after-intake)
 - [Home care service agreement requirements by state](/blog/home-care-service-agreement-requirements-by-state)
 - [How to write a home care service agreement](/blog/how-to-write-home-care-service-agreement)
 - [Compare documentation options](/compare)
+- [Home care documentation software](/home-care-documentation-software)
 
 To try a voice-to-contract path, [start a free trial](/register) or [book a demo](/book-demo).
 `,

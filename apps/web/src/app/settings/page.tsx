@@ -741,7 +741,7 @@ export default function SettingsPage() {
         ) : undefined
       }
     >
-      <div className="max-w-5xl mx-auto w-full space-y-6">
+      <div className="w-full min-w-0 space-y-6 pb-4">
         {/* Error banner (shown across all views) */}
         {error && (
           <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
@@ -1271,12 +1271,14 @@ export default function SettingsPage() {
                         const next = arr.includes(ps.id) ? arr.filter((x: string) => x !== ps.id) : [...arr, ps.id];
                         setAgency({ ...agency, pay_sources: next, [ps.flag]: next.includes(ps.id) } as any);
                       }}
-                      className={`flex items-center gap-2 p-3 rounded-lg border text-sm transition ${
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-sm transition w-full min-w-0 justify-start text-left ${
                         isActive ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'
                       }`}
                     >
-                      {isActive && <CheckCircle2 className="w-4 h-4" />}
-                      {ps.label}
+                      <span className="w-4 h-4 shrink-0 flex items-center justify-center">
+                        {isActive ? <CheckCircle2 className="w-4 h-4" /> : null}
+                      </span>
+                      <span className="truncate">{ps.label}</span>
                     </button>
                   );
                 })}

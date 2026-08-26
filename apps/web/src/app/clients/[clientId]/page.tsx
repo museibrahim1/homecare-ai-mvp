@@ -565,15 +565,15 @@ export default function ClientDetailPage() {
   ];
 
   return (
-    <div className="flex min-h-screen glass-page">
+    <div className="flex min-h-dvh glass-page">
       <GlassRail />
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-w-0 overflow-auto pt-14 md:pt-0">
         {/* ─── Top Bar ─── */}
         <div className="sticky top-0 z-20 bg-[#FFFFFFB8] backdrop-blur-xl border-b border-[#10211F12]">
-          <div className="max-w-7xl mx-auto px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4">
+            <div className="flex items-center justify-between gap-3 min-w-0">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 <button
                   onClick={() => { if (isEditing) { cancelEditing(); } router.push('/clients'); }}
                   className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500 hover:text-slate-900"
@@ -668,7 +668,7 @@ export default function ClientDetailPage() {
 
         {/* Error banner */}
         {error && client && (
-          <div className="max-w-7xl mx-auto px-8 pt-4">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-4">
             <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
@@ -678,7 +678,7 @@ export default function ClientDetailPage() {
         )}
 
         {/* ─── Pipeline Progress Bar ─── */}
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6">
           <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Client Pipeline</h3>
@@ -715,7 +715,7 @@ export default function ClientDetailPage() {
         </div>
 
         {/* ─── Tab Navigation ─── */}
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <GlassTabs
             tabs={tabs.map((tab) => ({
               key: tab.id,
@@ -729,7 +729,7 @@ export default function ClientDetailPage() {
         </div>
 
         {/* ─── Main Content ─── */}
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6">
 
           {/* ════════ OVERVIEW TAB ════════ */}
           {activeTab === 'overview' && (
@@ -1221,7 +1221,7 @@ export default function ClientDetailPage() {
         {/* ─── Floating Save Bar (visible when editing) ─── */}
         {isEditing && (
           <div className="sticky bottom-0 z-20 bg-[#FFFFFFB8] backdrop-blur-xl border-t border-[#10211F12]">
-            <div className="max-w-7xl mx-auto px-8 py-3 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">
               <p className="text-sm text-slate-500">
                 <Edit3 className="w-4 h-4 inline mr-1" />
                 You are editing this client&apos;s information

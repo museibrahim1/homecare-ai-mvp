@@ -148,8 +148,8 @@ export default function MessagesPage() {
   }
 
   return (
-    <GlassShell>
-      <div className="flex h-[calc(100vh-8rem)] glass-card overflow-hidden">
+    <GlassShell fill>
+      <div className="flex h-full min-h-0 glass-card overflow-hidden">
         {/* Conversations List */}
         <div className="w-80 border-r border-slate-200 flex flex-col">
           <div className="p-4 border-b border-slate-200">

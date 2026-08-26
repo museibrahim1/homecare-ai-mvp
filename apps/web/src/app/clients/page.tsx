@@ -41,7 +41,7 @@ import { QuickAddModal, ClientAvatar, StatusBadge, InsuranceBadge, ClientRow } f
 
 function GlassBoardHeader() {
   return (
-    <div className="flex items-center h-7 px-[18px] gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+    <div className="flex items-center h-7 px-[18px] gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] min-w-[720px]">
       <div className="w-1 shrink-0" />
       <div className="w-[min(304px,32%)] shrink-0">Client</div>
       <div className="w-[140px] shrink-0">Visit Status</div>
@@ -549,7 +549,8 @@ export default function ClientsPage() {
             </div>
           ) : viewMode === 'table' ? (
             /* Table View - Grouped by Status */
-            <div className="flex flex-col gap-5">
+            <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain pb-2">
+            <div className="flex flex-col gap-5 min-w-[720px]">
               {/* Intake Queue Section */}
               {intakeClients.length > 0 && (
                 <div className="flex flex-col gap-2">
@@ -708,9 +709,11 @@ export default function ClientsPage() {
                 </div>
               )}
             </div>
+            </div>
           ) : viewMode === 'pipeline' ? (
             /* Pipeline / Kanban View — Drag & Drop */
-            <div className="grid grid-cols-5 gap-3 items-start">
+            <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain pb-2">
+            <div className="grid grid-cols-5 gap-3 items-start min-w-[1100px]">
               {pipelineColumns.map((col) => {
                 const columnClients = getPipelineClients(col.statuses);
                 const colorMap: Record<string, { header: string; headerBorder: string; text: string; dot: string }> = {
@@ -831,16 +834,17 @@ export default function ClientsPage() {
                 );
               })}
             </div>
+            </div>
           ) : (
             /* Forecast View */
             <div className="space-y-6">
-              <div className="grid grid-cols-4 gap-4">
-                <div className="card p-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="card p-6 min-w-0">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
                       <Users className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm text-slate-500">Total Clients</p>
                       <p className="text-2xl font-bold text-slate-900">{clients.length}</p>
                     </div>

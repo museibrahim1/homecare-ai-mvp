@@ -31,13 +31,21 @@ Indexing requests submitted for: documentation software, compare, alternatives, 
 ### 0. GSC query gaps already showing impressions (act now)
 From Performance (3 months): **1.25K impressions**, **36 clicks**, **2.9% CTR**, avg position **13.8**.
 
-| Query | Impr. | Clicks | Action |
-|-------|------:|-------:|--------|
-| palmcare | 173 | 6 | Brand OK; keep homepage title strong |
-| paperless contracts home care | 88 | 0 | New post shipped: `/blog/paperless-home-care-contracts` |
-| make my home care agency paperless | 35 | 0 | Link from paperless post + homepage compare |
-| ai oasis documentation | 16 | 0 | Clarify we are NOT OASIS (Medicare home health) on compare page |
-| hospice ai documentation | 13 | 0 | Optional later post; stay honest about non-medical focus |
+| Query | Impr. | Clicks | Action | Status (2026-08-25) |
+|-------|------:|-------:|--------|---------------------|
+| palmcare | 173 | 6 | Brand OK; keep homepage title strong | OK |
+| paperless contracts home care | 88 | 0 | Title + H2 on `/blog/paperless-home-care-contracts` | Done |
+| make my home care agency paperless | 35 | 0 | New H2 on paperless post + homepage commercial links | Done |
+| ai oasis documentation | 16 | 0 | Dedicated OASIS clarifier on `/compare` | Done |
+| hospice ai documentation | 13 | 0 | Optional later; stay honest about non-medical focus | Later |
+
+### Shipped 2026-08-25 (daily analytics follow-up)
+- `/book-demo`: calendar failure fallback, email CTA, post-booking links (cut dead-end bounce), metadata fixed to 30 min
+- Nav + marketing footer: Compare + documentation / alternatives links
+- Homepage AEO block links money pages
+- New post: `/blog/home-care-billables-checklist-after-intake`
+- Keywords expanded for paperless / billables intents
+
 
 ### 1. Indexation (this week)
 - Re-check GSC Pages in 3 to 7 days. Goal: indexed count rising past 20.  

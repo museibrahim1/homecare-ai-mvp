@@ -435,7 +435,7 @@ export default function VisitDetailPage() {
   return (
     <>
     <GlassShell>
-      <div className="max-w-6xl mx-auto w-full flex flex-col gap-6">
+      <div className="w-full min-w-0 flex flex-col gap-6">
         {/* Paper Header: back + avatar + name/subtitle + ready pill + actions */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <button

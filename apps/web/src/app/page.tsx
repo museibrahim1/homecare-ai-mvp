@@ -113,13 +113,21 @@ export default function LandingPage() {
             agreement in minutes instead of hours.
           </p>
           <p className="text-sm text-slate-500 mt-5">
-            New here? See{' '}
-            <Link href="/blog/ai-home-care-documentation-tools-2026" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
-              how PalmCare AI compares to AI scribes and contract templates
+            New here? Read{' '}
+            <Link href="/home-care-documentation-software" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              home care documentation software
+            </Link>
+            ,{' '}
+            <Link href="/compare" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              compare PalmCare to scribes and templates
+            </Link>
+            ,{' '}
+            <Link href="/alternatives" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              alternatives to typing assessments
             </Link>
             , or{' '}
             <Link href="/pricing" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
-              view simple, transparent pricing
+              view pricing
             </Link>
             .
           </p>
@@ -335,8 +343,8 @@ export default function LandingPage() {
               <Link href="/register" data-track="final-cta-trial" className="btn-primary inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base">
                 Start free trial <ArrowRight className="w-4 h-4 shrink-0" />
               </Link>
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base font-medium rounded-lg text-white border border-white/25 hover:border-white/50 transition">
-                Talk to us
+              <Link href="/book-demo" className="inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base font-medium rounded-lg text-white border border-white/25 hover:border-white/50 transition">
+                Book a demo
               </Link>
             </div>
             <p className="text-slate-400 text-sm mt-6">HIPAA compliant &middot; 30-day free trial via Apple &middot; Auto-renews after trial</p>
@@ -427,6 +435,7 @@ export default function LandingPage() {
               <ul className="space-y-2.5 text-slate-500 text-sm">
                 <li><Link href="/about" className="hover:text-slate-900 transition inline-block py-0.5">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-slate-900 transition inline-block py-0.5">Contact</Link></li>
+                <li><Link href="/book-demo" className="hover:text-slate-900 transition inline-block py-0.5">Book a demo</Link></li>
                 <li><Link href="/status" className="hover:text-slate-900 transition inline-block py-0.5">System Status</Link></li>
               </ul>
             </div>

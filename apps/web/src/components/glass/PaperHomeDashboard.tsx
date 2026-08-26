@@ -87,7 +87,7 @@ export default function PaperHomeDashboard({
   }
 
   return (
-    <div className="relative flex-1 min-w-0 flex flex-col py-8 lg:py-11 px-5 sm:px-8 lg:px-12 gap-8 overflow-x-hidden">
+    <div className="relative flex-1 min-w-0 flex flex-col pt-16 md:pt-8 lg:pt-11 pb-14 lg:pb-16 px-5 sm:px-8 lg:px-12 gap-8 overflow-x-hidden">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-8 relative min-w-0">
       {/* Ambient glows */}
       <div

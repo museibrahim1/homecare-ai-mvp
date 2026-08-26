@@ -59,7 +59,23 @@ DEMO_SLOTS = [
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/Chicago")
 DEMO_TIMEZONE_LABEL = "Central Time"
 SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
-ZOOM_MEETING_LINK = os.getenv("ZOOM_MEETING_LINK", "")
+
+# Allowed "Where did you find us?" values (SEO / attribution). Required on book.
+REFERRAL_SOURCE_LABELS = {
+    "google": "Google search",
+    "bing": "Bing or other search",
+    "ai_assistant": "ChatGPT or another AI assistant",
+    "linkedin": "LinkedIn",
+    "facebook_instagram": "Facebook or Instagram",
+    "threads": "Threads",
+    "youtube": "YouTube",
+    "app_store": "App Store",
+    "referral": "Referral from a colleague or friend",
+    "email": "An email from us",
+    "event": "Industry conference or event",
+    "other": "Other",
+}
+ALLOWED_REFERRAL_SOURCES = frozenset(REFERRAL_SOURCE_LABELS.keys())
 
 
 def _day_schedule() -> list[dict]:
@@ -82,7 +98,7 @@ class DemoBookingRequest(BaseModel):
     services: Optional[list[str]] = None
     estimated_clients: Optional[str] = None
     current_software: Optional[str] = None
-    referral_source: Optional[str] = None  # How did you hear about us?
+    referral_source: str  # Required: where did you find us (SEO attribution)
 
 
 class DemoBookingResponse(BaseModel):
@@ -193,14 +209,11 @@ async def _create_calendar_event(
     end_iso: str,
     attendee_email: str,
 ) -> dict:
-    """Create a Google Calendar event with Google Meet conferencing."""
+    """Create a Google Calendar event with a Google Meet link."""
     attendees = [
         {"email": attendee_email},
         {"email": SALES_EMAIL},
     ]
-    zoom_link = ZOOM_MEETING_LINK
-    if zoom_link:
-        description = f"{description}\n\nJoin via Zoom: {zoom_link}"
 
     event_body: dict = {
         "summary": summary,
@@ -208,6 +221,12 @@ async def _create_calendar_event(
         "start": {"dateTime": start_iso, "timeZone": DEMO_TIMEZONE},
         "end": {"dateTime": end_iso, "timeZone": DEMO_TIMEZONE},
         "attendees": attendees,
+        "conferenceData": {
+            "createRequest": {
+                "requestId": str(uuid4()),
+                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+            }
+        },
         "reminders": {
             "useDefault": False,
             "overrides": [
@@ -219,25 +238,11 @@ async def _create_calendar_event(
         "sendUpdates": "all",
     }
 
-    if zoom_link:
-        event_body["location"] = zoom_link
-    else:
-        event_body["conferenceData"] = {
-            "createRequest": {
-                "requestId": str(uuid4()),
-                "conferenceSolutionKey": {"type": "hangoutsMeet"},
-            }
-        }
-
-    params: dict = {"sendUpdates": "all"}
-    if not zoom_link:
-        params["conferenceDataVersion"] = 1
-
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             headers={"Authorization": f"Bearer {access_token}"},
-            params=params,
+            params={"sendUpdates": "all", "conferenceDataVersion": 1},
             json=event_body,
         )
 
@@ -246,6 +251,15 @@ async def _create_calendar_event(
             raise RuntimeError(f"Calendar API error: {resp.status_code}")
 
         return resp.json()
+
+
+def _meet_link_from_event(event: dict) -> Optional[str]:
+    conf = event.get("conferenceData") or {}
+    for ep in conf.get("entryPoints") or []:
+        if ep.get("entryPointType") == "video" and ep.get("uri"):
+            return ep["uri"]
+    # Hangouts Meet sometimes only appears on hangoutLink
+    return event.get("hangoutLink") or None
 
 
 @router.get("/slots")
@@ -284,9 +298,17 @@ async def book_demo(
     booking: DemoBookingRequest,
     db: Session = Depends(get_db),
 ):
-    """Book a product demo — auto-schedules via Google Calendar when connected."""
+    """Book a product demo — auto-schedules via Google Calendar + Meet when connected."""
     client_ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip() or "unknown"
     _check_demo_rate_limit(client_ip)
+
+    source_key = (booking.referral_source or "").strip().lower()
+    if source_key not in ALLOWED_REFERRAL_SOURCES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please tell us where you found us (required).",
+        )
+    referral_label = REFERRAL_SOURCE_LABELS[source_key]
 
     has_schedule = booking.date and booking.time_slot
     meeting_link = None
@@ -340,22 +362,16 @@ async def book_demo(
                 f"Services: {', '.join(booking.services or []) or 'N/A'}\n"
                 f"Estimated Clients: {booking.estimated_clients or 'N/A'}\n"
                 f"Current Software: {booking.current_software or 'N/A'}\n"
+                f"Where they found us: {referral_label}\n"
             )
             event = await _create_calendar_event(
                 access_token=token, summary=summary, description=description,
                 start_iso=start_dt.isoformat(), end_iso=end_dt.isoformat(),
                 attendee_email=booking.email,
             )
-            if ZOOM_MEETING_LINK:
-                meeting_link = ZOOM_MEETING_LINK
-            else:
-                conf = event.get("conferenceData", {})
-                for ep in conf.get("entryPoints", []):
-                    if ep.get("entryPointType") == "video":
-                        meeting_link = ep.get("uri")
-                        break
+            meeting_link = _meet_link_from_event(event)
             calendar_created = True
-            logger.info(f"Demo booked on {formatted_date} at {formatted_time} for {booking.email}")
+            logger.info(f"Demo booked on {formatted_date} at {formatted_time} for {booking.email} (Meet)")
         except Exception as e:
             logger.error(f"Failed to create calendar event: {e}")
             if not booking.date:
@@ -372,7 +388,13 @@ async def book_demo(
             state=booking.state or "NA",
             source="demo_request",
             status="new",
-            notes=f"Role: {booking.role or 'N/A'}\nServices: {', '.join(booking.services or [])}\nClients: {booking.estimated_clients or 'N/A'}\nCurrent Software: {booking.current_software or 'N/A'}\nHeard About Us: {booking.referral_source or 'N/A'}",
+            notes=(
+                f"Role: {booking.role or 'N/A'}\n"
+                f"Services: {', '.join(booking.services or [])}\n"
+                f"Clients: {booking.estimated_clients or 'N/A'}\n"
+                f"Current Software: {booking.current_software or 'N/A'}\n"
+                f"Where they found us: {referral_label} ({source_key})"
+            ),
         )
         db.add(lead)
         db.commit()
@@ -393,7 +415,7 @@ async def book_demo(
     phone_e = html_lib.escape(booking.phone or "") or "N/A"
     state_e = html_lib.escape(booking.state or "") or "N/A"
     clients_e = html_lib.escape(str(booking.estimated_clients or "")) or "N/A"
-    referral_e = html_lib.escape(booking.referral_source or "") or "N/A"
+    referral_e = html_lib.escape(referral_label)
     services_list = html_lib.escape(', '.join(booking.services or [])) or 'Not specified'
 
     # Confirmation email to prospect
@@ -425,10 +447,10 @@ async def book_demo(
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Time</td>
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_time} {DEMO_TIMEZONE_LABEL} (US and Canada)</td>
                         </tr>
-                        {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">{"Zoom Link" if ZOOM_MEETING_LINK else "Meeting Link"}</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
+                        {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Google Meet</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">Join with Google Meet</a></td></tr>' if meeting_link else ''}
                     </table>
                     <div style="text-align: center; margin: 30px 0 20px;">
-                        <a href="{meeting_link or 'https://palmcareai.com'}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">{'Join Zoom Meeting' if ZOOM_MEETING_LINK else 'Join Demo'}</a>
+                        <a href="{meeting_link or 'https://palmcareai.com'}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">{'Join Google Meet' if meeting_link else 'Visit PalmCare AI'}</a>
                     </div>
                     <p style="margin: 24px 0 0 0; font-size: 14px; color: #747487; line-height: 1.5;">Thank you for choosing PalmCare AI.<br>-The PalmCare Team</p>
                 </div>
@@ -514,13 +536,13 @@ async def book_demo(
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{clients_e}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Heard About Us</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Where they found us</td>
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{referral_e}</td>
                         </tr>
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' CT</td></tr>' if has_schedule else ''}
-                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Zoom Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
+                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Google Meet</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">Join with Google Meet</a></td></tr>' if meeting_link else ''}
                     </table>
-                    {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Start Zoom Meeting</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}
+                    {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Join Google Meet</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}
                 </div>
                 <div style="text-align: center; padding-top: 24px;">
                     <p style="margin: 0; font-size: 12px; color: #aaaaaa;">Copyright &copy; 2026 Palm Technologies, INC. All rights reserved.</p>

@@ -9,6 +9,7 @@ import WaveField from './WaveField';
 const NAV = [
   { href: '/features', label: 'Product' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/compare', label: 'Compare' },
   { href: '/#how-it-works', label: 'How it works' },
 ];
 
@@ -17,7 +18,11 @@ const FOOTER = {
     { href: '/features', label: 'Features' },
     { href: '/mobile-app', label: 'Mobile App' },
     { href: '/pricing', label: 'Pricing' },
+    { href: '/home-care-documentation-software', label: 'Documentation software' },
+    { href: '/compare', label: 'Compare options' },
+    { href: '/alternatives', label: 'Alternatives' },
     { href: '/roi-calculator', label: 'ROI Calculator' },
+    { href: '/blog', label: 'Blog' },
     { href: '/faq', label: 'FAQ' },
     { href: '/login', label: 'Sign in' },
   ],

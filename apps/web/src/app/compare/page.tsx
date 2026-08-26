@@ -4,7 +4,7 @@ import GlassMarketingShell from '@/components/glass/GlassMarketingShell';
 
 const TITLE = 'Compare Home Care Documentation Options';
 const DESCRIPTION =
-  'Compare PalmCare AI with AI clinical scribes, contract templates, and manual paperwork. See what each option produces after a home care assessment.';
+  'Compare PalmCare AI with AI clinical scribes, OASIS tools, contract templates, and manual paperwork. PalmCare is for non-medical home care contracts and care plans, not Medicare OASIS.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -101,7 +101,7 @@ export default function ComparePage() {
                 <strong className="text-[#10211F]">Choose PalmCare AI</strong> when the job is non-medical home care intake: care plan, billables, visit notes, and a state-specific service contract from the same recording.
               </p>
               <p>
-                <strong className="text-[#10211F]">Choose an AI clinical scribe</strong> when the job is Medicare home health charting, OASIS documentation, or clinical notes. Scribes do not produce client service agreements. PalmCare AI is built for non-medical home care contracts and care plans, not OASIS.
+                <strong className="text-[#10211F]">Choose an AI clinical scribe</strong> when the job is Medicare home health charting, OASIS documentation, or clinical notes. Scribes do not produce client service agreements.
               </p>
               <p>
                 <strong className="text-[#10211F]">Choose templates</strong> when volume is low and someone on staff will keep state clauses current by hand.
@@ -110,6 +110,13 @@ export default function ComparePage() {
                 <strong className="text-[#10211F]">Choose manual paperwork</strong> only when you accept re-keying the same assessment into multiple documents every visit.
               </p>
             </div>
+          </section>
+
+          <section className="mt-14 max-w-3xl glass-card p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-[#10211F] mb-4">Is PalmCare AI for OASIS or AI OASIS documentation?</h2>
+            <p className="text-[#4B6B66] leading-relaxed">
+              No. PalmCare AI is built for <strong className="text-[#10211F]">non-medical and private-duty home care</strong> agencies that need care plans, billables, visit notes, and state-specific service contracts. It is not an OASIS tool and it is not a Medicare home health clinical scribe. If your search was for OASIS or hospice clinical AI documentation, use a clinical scribe product instead. If your bottleneck is intake paperwork and signed service agreements, PalmCare is the fit.
+            </p>
           </section>
 
           <section className="mt-14 max-w-3xl">
@@ -123,6 +130,16 @@ export default function ComparePage() {
               <li>
                 <Link href="/alternatives" className="underline underline-offset-2">
                   Alternatives to typing assessments after every visit
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog/home-care-billables-checklist-after-intake" className="underline underline-offset-2">
+                  Home care billables checklist after intake
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog/paperless-home-care-contracts" className="underline underline-offset-2">
+                  Paperless home care contracts
                 </Link>
               </li>
               <li>

@@ -1237,10 +1237,10 @@ html, body {
   .page-header { flex-wrap: wrap; gap: 0.5rem; }
   .period-selector { flex-wrap: wrap; }
 
-  /* Prevent fixed-width dropdowns from overflowing */
-  [class*="w-[520px]"],
-  [class*="w-72"],
-  [class*="w-64"] {
+  /* Prevent fixed-width panels from blowing past the viewport.
+     Skip kanban columns (.kanban-col) so horizontal boards can scroll. */
+  [class*="w-[520px]"]:not(.kanban-col),
+  [class*="w-64"]:not(.kanban-col) {
     max-width: calc(100vw - 2rem) !important;
   }
 
