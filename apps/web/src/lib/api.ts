@@ -23,6 +23,32 @@ export function bearerHeaders(token?: string | null): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
+/**
+ * A non-2xx response from the API. `message` carries the server's `detail`, so
+ * UI that only reads `error.message` keeps working; `status` lets callers tell
+ * an expired session (401) or a plan gate (403) apart from a server fault.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+/** The server's explanation for a failed call, or `fallback` if it sent none. */
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  const message = err instanceof Error ? err.message.trim() : '';
+  return message || fallback;
+}
+
+/** True when the API refused because the account's plan does not include this. */
+export function isPlanGateError(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 403;
+}
+
 class ApiClient {
   private static readonly TIMEOUT_MS = 30000;
   private static readonly MAX_RETRIES = 1;
@@ -95,14 +121,15 @@ class ApiClient {
             errorMessage = error.message;
           }
 
-          // Only retry on 5xx server errors, not client errors
-          if (response.status >= 500 && attempt < ApiClient.MAX_RETRIES) {
-            lastError = new Error(errorMessage);
+          // Retry 5xx only for GET. Replaying a POST/PUT that the server may
+          // have already committed is how one "Add Lead" click becomes two rows.
+          if (response.status >= 500 && isGet && attempt < ApiClient.MAX_RETRIES) {
+            lastError = new ApiError(errorMessage, response.status);
             await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
             continue;
           }
 
-          throw new Error(errorMessage);
+          throw new ApiError(errorMessage, response.status);
         }
 
         const data = await response.json();
@@ -110,6 +137,11 @@ class ApiClient {
         return data as T;
       } catch (err: any) {
         clearTimeout(timeout);
+        // A response we already decided not to retry (any 4xx, or a write that
+        // must not be replayed). Surface the server's message as-is.
+        if (err instanceof ApiError) {
+          throw err;
+        }
         // If it's an abort error, convert to a friendlier message
         if (err.name === 'AbortError') {
           lastError = new Error('Request timed out. Please check your connection and try again.');
