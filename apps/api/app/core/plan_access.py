@@ -55,11 +55,28 @@ def is_ios_client(user_agent: Optional[str], palm_client: Optional[str]) -> bool
     return "palmc" in ua or "palmcare" in ua or ua.startswith("com.palmcareai")
 
 
+def active_subscription(db: Session, user: User):
+    """The live (active or trialing) Subscription for this user's agency."""
+    from app.core.tenancy import resolve_business_id
+    from app.models.subscription import Subscription, SubscriptionStatus
+
+    business_id = resolve_business_id(db, user)
+    if not business_id:
+        return None
+
+    return (
+        db.query(Subscription)
+        .filter(
+            Subscription.business_id == business_id,
+            Subscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]),
+        )
+        .first()
+    )
+
+
 def resolve_user_tier(db: Session, user: User) -> str:
     """Best-effort tier string for capability checks."""
     from app.core.demo_accounts import is_demo_email
-    from app.models.business import BusinessUser
-    from app.models.subscription import Subscription, SubscriptionStatus
     from app.core.config import settings
 
     if is_demo_email(getattr(user, "email", None)):
@@ -71,18 +88,7 @@ def resolve_user_tier(db: Session, user: User) -> str:
     if role == "admin" and email.endswith("@palmtai.com"):
         return "enterprise"
 
-    business_user = db.query(BusinessUser).filter(BusinessUser.email == user.email).first()
-    if not business_user:
-        return "free"
-
-    sub = (
-        db.query(Subscription)
-        .filter(
-            Subscription.business_id == business_user.business_id,
-            Subscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]),
-        )
-        .first()
-    )
+    sub = active_subscription(db, user)
     if sub and sub.plan is not None:
         tier = sub.plan.tier.value if hasattr(sub.plan.tier, "value") else str(sub.plan.tier)
         return (tier or "free").lower()
@@ -91,24 +97,10 @@ def resolve_user_tier(db: Session, user: User) -> str:
 
 def get_tier_limits(db: Session, user: User) -> dict:
     """Return max_visits_per_month and max_clients for the user's plan."""
-    from app.models.business import BusinessUser
-    from app.models.subscription import Subscription, SubscriptionStatus
-
     tier = resolve_user_tier(db, user)
     defaults = TIER_DEFAULT_LIMITS.get(tier, TIER_DEFAULT_LIMITS["free"]).copy()
 
-    business_user = db.query(BusinessUser).filter(BusinessUser.email == user.email).first()
-    if not business_user:
-        return {"tier": tier, **defaults}
-
-    sub = (
-        db.query(Subscription)
-        .filter(
-            Subscription.business_id == business_user.business_id,
-            Subscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]),
-        )
-        .first()
-    )
+    sub = active_subscription(db, user)
     if sub and sub.plan is not None:
         plan = sub.plan
         visits = getattr(plan, "max_visits_per_month", None)

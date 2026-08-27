@@ -20,7 +20,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.business import BusinessUser
+from app.models.business import Business, BusinessUser
 from app.models.caregiver import Caregiver
 from app.models.client import Client
 from app.models.user import User
@@ -29,6 +29,46 @@ from app.models.visit import Visit
 
 def normalize_email(email: str | None) -> str:
     return (email or "").strip().lower()
+
+
+def resolve_business_id(db: Session, user: User | None) -> UUID | None:
+    """The `businesses.id` this account belongs to, or None.
+
+    Two shapes of account map to the same agency:
+
+    * Owners registered through `/auth/business/register` get a `business_users`
+      row. Emails are stored lowercase there, but a `users.email` can differ in
+      case (social sign-in, older rows), so match case-insensitively.
+    * Team invites create a `users` row carrying `company_name` and no
+      `business_users` row at all, so fall back to the agency of that name.
+
+    Callers that skip the fallback silently treat paying teammates as if they
+    had no subscription.
+    """
+    if user is None:
+        return None
+
+    email = normalize_email(getattr(user, "email", None))
+    if email:
+        business_user = (
+            db.query(BusinessUser)
+            .filter(func.lower(BusinessUser.email) == email)
+            .first()
+        )
+        if business_user:
+            return business_user.business_id
+
+    company = (getattr(user, "company_name", None) or "").strip()
+    if company:
+        business = (
+            db.query(Business)
+            .filter(func.lower(Business.name) == company.lower())
+            .first()
+        )
+        if business:
+            return business.id
+
+    return None
 
 
 def find_users_by_email(db: Session, email: str | None) -> list[User]:
