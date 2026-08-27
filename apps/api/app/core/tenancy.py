@@ -20,7 +20,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.business import Business, BusinessUser
+from app.models.business import BusinessUser
 from app.models.caregiver import Caregiver
 from app.models.client import Client
 from app.models.user import User
@@ -39,11 +39,13 @@ def resolve_business_id(db: Session, user: User | None) -> UUID | None:
     * Owners registered through `/auth/business/register` get a `business_users`
       row. Emails are stored lowercase there, but a `users.email` can differ in
       case (social sign-in, older rows), so match case-insensitively.
-    * Team invites create a `users` row carrying `company_name` and no
-      `business_users` row at all, so fall back to the agency of that name.
+    * Team invites create a `users` row carrying only `company_name`, with no
+      `business_users` row, so reach the agency through a teammate that has one.
 
-    Callers that skip the fallback silently treat paying teammates as if they
-    had no subscription.
+    The teammate hop deliberately never matches on `businesses.name` directly:
+    signup rejects a `company_name` another account already holds, so going
+    through a real teammate keeps a stranger from naming an agency to inherit
+    its plan. Callers that skip this hop treat paying teammates as unsubscribed.
     """
     if user is None:
         return None
@@ -58,15 +60,26 @@ def resolve_business_id(db: Session, user: User | None) -> UUID | None:
         if business_user:
             return business_user.business_id
 
-    company = (getattr(user, "company_name", None) or "").strip()
+    company = (getattr(user, "company_name", None) or "").strip().lower()
     if company:
-        business = (
-            db.query(Business)
-            .filter(func.lower(Business.name) == company.lower())
-            .first()
-        )
-        if business:
-            return business.id
+        teammate_emails = [
+            normalize_email(row[0])
+            for row in db.query(User.email)
+            .filter(
+                func.lower(User.company_name) == company,
+                User.id != user.id,
+            )
+            .all()
+            if row[0]
+        ]
+        if teammate_emails:
+            business_user = (
+                db.query(BusinessUser)
+                .filter(func.lower(BusinessUser.email).in_(teammate_emails))
+                .first()
+            )
+            if business_user:
+                return business_user.business_id
 
     return None
 
