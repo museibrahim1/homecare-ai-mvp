@@ -5,9 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.core.internal_auth import require_internal_key
-from app.models.subscription import Plan, PlanTier
-
-from .common import STRIPE_PRICE_MAP
+from app.models.subscription import Plan
 
 logger = logging.getLogger(__name__)
 
@@ -125,9 +123,6 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 250,
             "is_contact_sales": False,
             "is_active": True,
-            "stripe_product_id": STRIPE_PRICE_MAP["starter"]["product_id"],
-            "stripe_price_id_monthly": STRIPE_PRICE_MAP["starter"]["monthly"],
-            "stripe_price_id_annual": STRIPE_PRICE_MAP["starter"]["annual"],
             "features": PLATFORM_FEATURES,
         },
         {
