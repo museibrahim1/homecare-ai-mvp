@@ -47,18 +47,39 @@ def _check_demo_rate_limit(ip: str) -> None:
 DEMO_DURATION_MINUTES = 30
 
 # Morning hours stay on the picker as unavailable so the calendar looks busy.
-# Bookable window: 1:00 PM – 6:00 PM Central.
+# Muse's real availability (Central):
+#   Mon / Wed / Thu: 1:00 PM – 6:00 PM
+#   Tue:             1:30 PM – 6:00 PM
+#   Fri / weekends:  not available (blacked out)
 DEMO_MORNING_DISPLAY = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
 ]
-DEMO_SLOTS = [
+DEMO_SLOTS_FULL = [
     "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00", "17:30", "18:00",
 ]
+DEMO_SLOTS_TUESDAY = [
+    "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00",
+]
+# Keep alias for older call sites / tests that expect DEMO_SLOTS.
+DEMO_SLOTS = DEMO_SLOTS_FULL
+# weekday(): Mon=0 … Fri=4
+DEMO_OPEN_WEEKDAYS = {0, 1, 2, 3}  # Mon–Thu; Friday closed
 
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/Chicago")
 DEMO_TIMEZONE_LABEL = "Central Time"
 SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
+
+
+def _slots_for_weekday(weekday: int) -> list[str]:
+    """Return bookable HH:MM slots for a Python weekday, or [] if closed."""
+    if weekday not in DEMO_OPEN_WEEKDAYS:
+        return []
+    if weekday == 1:  # Tuesday starts at 1:30 PM
+        return DEMO_SLOTS_TUESDAY.copy()
+    return DEMO_SLOTS_FULL.copy()
+
 
 # Allowed "Where did you find us?" values (SEO / attribution). Required on book.
 REFERRAL_SOURCE_LABELS = {
@@ -78,10 +99,13 @@ REFERRAL_SOURCE_LABELS = {
 ALLOWED_REFERRAL_SOURCES = frozenset(REFERRAL_SOURCE_LABELS.keys())
 
 
-def _day_schedule() -> list[dict]:
-    """Full day view: morning marked unavailable, afternoon bookable."""
+def _day_schedule(bookable: list[str]) -> list[dict]:
+    """Full day view: morning marked unavailable; afternoon per Muse's hours."""
+    bookable_set = set(bookable)
     rows = [{"time": t, "available": False} for t in DEMO_MORNING_DISPLAY]
-    rows.extend({"time": t, "available": True} for t in DEMO_SLOTS)
+    # Show the full afternoon grid so Tue 1:00 PM appears blocked, not missing.
+    for t in DEMO_SLOTS_FULL:
+        rows.append({"time": t, "available": t in bookable_set})
     return rows
 
 
@@ -264,10 +288,11 @@ def _meet_link_from_event(event: dict) -> Optional[str]:
 
 @router.get("/slots")
 async def get_available_slots():
-    """Return demo slots for the next 14 weekdays (1–6pm Central bookable).
+    """Return demo slots for the next 14 open days (Central).
 
-    `slots` lists bookable times only. `schedule` includes morning times marked
-    unavailable so the UI can show early hours as booked.
+    Open: Mon/Wed/Thu 1–6pm, Tue 1:30–6pm. Friday and weekends are omitted
+    so the calendar blacks them out. `schedule` still shows morning + any
+    blocked afternoon times (e.g. Tue 1:00 PM) as unavailable.
     """
     slots = {}
     schedule = {}
@@ -275,11 +300,13 @@ async def get_available_slots():
 
     days_added = 0
     current = today + timedelta(days=1)  # start from tomorrow
-    while days_added < 14:
-        if current.weekday() < 5:  # Mon-Fri
+    # Scan enough calendar days to collect 14 open ones (skip Fri/weekend).
+    while days_added < 14 and (current - today).days < 60:
+        bookable = _slots_for_weekday(current.weekday())
+        if bookable:
             key = current.isoformat()
-            slots[key] = DEMO_SLOTS.copy()
-            schedule[key] = _day_schedule()
+            slots[key] = bookable
+            schedule[key] = _day_schedule(bookable)
             days_added += 1
         current += timedelta(days=1)
 
@@ -319,16 +346,20 @@ async def book_demo(
     admin_user = _find_calendar_admin(db)
 
     if has_schedule:
-        if booking.time_slot not in DEMO_SLOTS:
-            raise HTTPException(status_code=400, detail="Invalid time slot")
         try:
             selected_date = datetime.strptime(booking.date, "%Y-%m-%d").date()
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid date format (use YYYY-MM-DD)")
         if selected_date <= datetime.now(timezone.utc).date():
             raise HTTPException(status_code=400, detail="Date must be in the future")
-        if selected_date.weekday() >= 5:
-            raise HTTPException(status_code=400, detail="Demos are only available on weekdays")
+        open_slots = _slots_for_weekday(selected_date.weekday())
+        if not open_slots:
+            raise HTTPException(
+                status_code=400,
+                detail="Demos are available Monday–Thursday only (Friday is unavailable)",
+            )
+        if booking.time_slot not in open_slots:
+            raise HTTPException(status_code=400, detail="Invalid time slot for that day")
 
         hour, minute = map(int, booking.time_slot.split(":"))
         start_dt = datetime(selected_date.year, selected_date.month, selected_date.day, hour, minute)
@@ -337,12 +368,18 @@ async def book_demo(
         formatted_time = start_dt.strftime("%I:%M %p")
 
     elif admin_user:
-        # Auto-pick the next weekday at the first afternoon slot (1:00 PM CT)
+        # Auto-pick the next open day at its first bookable slot (Central)
         today = datetime.now(timezone.utc).date()
         candidate = today + timedelta(days=1)
-        while candidate.weekday() >= 5:
+        open_slots: list[str] = []
+        for _ in range(60):
+            open_slots = _slots_for_weekday(candidate.weekday())
+            if open_slots:
+                break
             candidate += timedelta(days=1)
-        auto_slot = DEMO_SLOTS[0]
+        if not open_slots:
+            raise HTTPException(status_code=503, detail="No demo times available right now")
+        auto_slot = open_slots[0]
         hour, minute = map(int, auto_slot.split(":"))
         start_dt = datetime(candidate.year, candidate.month, candidate.day, hour, minute)
         end_dt = start_dt + timedelta(minutes=DEMO_DURATION_MINUTES)
