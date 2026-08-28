@@ -11,7 +11,9 @@ import {
   Check,
   Mic,
   FileText,
-  Upload
+  Upload,
+  Plus,
+  X,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -26,8 +28,25 @@ interface Client {
   full_name: string;
 }
 
+interface TimeFrame {
+  start: string; // HH:mm
+  end: string;   // HH:mm
+}
+
 type Step = 'details' | 'source' | 'audio' | 'transcript' | 'complete';
 type SourceType = 'audio' | 'transcript';
+
+function defaultFrames(): TimeFrame[] {
+  const now = new Date();
+  const start = format(now, 'HH:mm');
+  const endDate = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const end = format(endDate, 'HH:mm');
+  return [{ start, end }];
+}
+
+function combineDateAndTime(date: string, time: string): Date {
+  return new Date(`${date}T${time}:00`);
+}
 
 export default function NewVisitPage() {
   const router = useRouter();
@@ -40,27 +59,21 @@ export default function NewVisitPage() {
   const [error, setError] = useState<string | null>(null);
   const [audioProcessing, setAudioProcessing] = useState(false);
   
-  // Form state
   const [selectedClient, setSelectedClient] = useState<string>('');
-  const [scheduledStart, setScheduledStart] = useState<string>(
-    format(new Date(), "yyyy-MM-dd'T'HH:mm")
+  const [assessmentDate, setAssessmentDate] = useState<string>(
+    format(new Date(), 'yyyy-MM-dd')
   );
-  const [scheduledEnd, setScheduledEnd] = useState<string>(
-    format(new Date(Date.now() + 2 * 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm")
-  );
+  const [timeFrames, setTimeFrames] = useState<TimeFrame[]>(defaultFrames);
   const [notes, setNotes] = useState<string>('');
   
-  // Created visit
   const [createdVisit, setCreatedVisit] = useState<any>(null);
   
-  // Usage / upgrade
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [usage, setUsage] = useState<any>(null);
 
   useEffect(() => {
     if (token) {
       loadClients();
-      // Check usage limits
       api.getUsage(token).then(data => {
         setUsage(data);
         if (data.upgrade_required) {
@@ -82,16 +95,60 @@ export default function NewVisitPage() {
     }
   };
 
+  const updateFrame = (index: number, key: 'start' | 'end', value: string) => {
+    setTimeFrames((frames) =>
+      frames.map((frame, i) => (i === index ? { ...frame, [key]: value } : frame))
+    );
+  };
+
+  const addSecondFrame = () => {
+    if (timeFrames.length >= 2) return;
+    setTimeFrames((frames) => [...frames, { start: '13:00', end: '15:00' }]);
+  };
+
+  const removeFrame = (index: number) => {
+    if (timeFrames.length <= 1) return;
+    setTimeFrames((frames) => frames.filter((_, i) => i !== index));
+  };
+
   const handleCreateVisit = async () => {
     if (!selectedClient) {
       setError('Please select a client');
       return;
     }
 
-    // Validate scheduled times
-    if (scheduledStart && scheduledEnd && new Date(scheduledEnd) <= new Date(scheduledStart)) {
-      setError('End time must be after start time');
+    if (!assessmentDate) {
+      setError('Please pick an assessment date');
       return;
+    }
+
+    for (let i = 0; i < timeFrames.length; i++) {
+      const frame = timeFrames[i];
+      if (!frame.start || !frame.end) {
+        setError(`Time frame ${i + 1} needs a start and end time`);
+        return;
+      }
+      const start = combineDateAndTime(assessmentDate, frame.start);
+      const end = combineDateAndTime(assessmentDate, frame.end);
+      if (end <= start) {
+        setError(`Time frame ${i + 1}: end must be after start`);
+        return;
+      }
+    }
+
+    const starts = timeFrames.map((f) => combineDateAndTime(assessmentDate, f.start));
+    const ends = timeFrames.map((f) => combineDateAndTime(assessmentDate, f.end));
+    const scheduledStart = new Date(Math.min(...starts.map((d) => d.getTime())));
+    const scheduledEnd = new Date(Math.max(...ends.map((d) => d.getTime())));
+
+    let visitNotes = notes.trim() || null;
+    if (timeFrames.length === 2) {
+      const frameSummary = timeFrames
+        .map((f, i) => `Frame ${i + 1}: ${f.start} to ${f.end}`)
+        .join('; ');
+      visitNotes = visitNotes
+        ? `${visitNotes}\n\nTime frames: ${frameSummary}`
+        : `Time frames: ${frameSummary}`;
     }
 
     setLoading(true);
@@ -101,9 +158,9 @@ export default function NewVisitPage() {
       const visit = await api.createVisit(token!, {
         client_id: selectedClient,
         caregiver_id: user?.id,
-        scheduled_start: new Date(scheduledStart).toISOString(),
-        scheduled_end: new Date(scheduledEnd).toISOString(),
-        notes: notes || null,
+        scheduled_start: scheduledStart.toISOString(),
+        scheduled_end: scheduledEnd.toISOString(),
+        notes: visitNotes,
       });
       
       setCreatedVisit(visit);
@@ -120,10 +177,9 @@ export default function NewVisitPage() {
     }
   };
 
-  const handleUploadComplete = async (audioAsset: any) => {
+  const handleUploadComplete = async (_audioAsset: any) => {
     setStep('complete');
     
-    // Auto-navigate to visit after a short delay
     setTimeout(() => {
       router.push(`/visits/${createdVisit.id}`);
     }, 2000);
@@ -158,7 +214,6 @@ export default function NewVisitPage() {
   return (
     <GlassShell>
       <div className="max-w-2xl mx-auto w-full">
-          {/* Header */}
           <div className="mb-8">
             <button
               onClick={() => router.push('/visits')}
@@ -171,7 +226,6 @@ export default function NewVisitPage() {
             <p className="text-slate-600">Create an assessment and add an intake call or transcript</p>
           </div>
 
-          {/* Progress Steps */}
           <div className="flex items-center gap-4 mb-8">
             {[
               { id: 'details', label: 'Assessment Details', icon: Calendar },
@@ -212,13 +266,11 @@ export default function NewVisitPage() {
             })}
           </div>
 
-          {/* Step Content */}
           {step === 'details' && (
             <div className="card p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-6">Assessment Details</h2>
               
               <div className="space-y-5">
-                {/* Client Selection */}
                 <div>
                   <label className="block text-slate-600 text-sm font-medium mb-2">
                     <User className="w-4 h-4 inline mr-2" />
@@ -249,35 +301,88 @@ export default function NewVisitPage() {
                   )}
                 </div>
 
-                {/* Scheduled Start */}
+                <div>
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Assessment date
+                  </label>
+                  <input
+                    type="date"
+                    value={assessmentDate}
+                    onChange={(e) => setAssessmentDate(e.target.value)}
+                    className="input-dark w-full"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    One day only. Time frames below stay on this date.
+                  </p>
+                </div>
+
                 <div>
                   <label className="block text-slate-600 text-sm font-medium mb-2">
                     <Clock className="w-4 h-4 inline mr-2" />
-                    Start Time
+                    Time frames
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={scheduledStart}
-                    onChange={(e) => setScheduledStart(e.target.value)}
-                    className="input-dark w-full"
-                  />
+                  <div className="space-y-3">
+                    {timeFrames.map((frame, index) => (
+                      <div
+                        key={index}
+                        className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-primary-600">
+                            Frame {index + 1}
+                            {index === 1 ? ' · optional' : ''}
+                          </span>
+                          {index > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => removeFrame(index)}
+                              className="text-slate-400 hover:text-slate-700 transition"
+                              aria-label="Remove time frame"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                              From
+                            </label>
+                            <input
+                              type="time"
+                              value={frame.start}
+                              onChange={(e) => updateFrame(index, 'start', e.target.value)}
+                              className="input-dark w-full"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                              To
+                            </label>
+                            <input
+                              type="time"
+                              value={frame.end}
+                              onChange={(e) => updateFrame(index, 'end', e.target.value)}
+                              className="input-dark w-full"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {timeFrames.length < 2 && (
+                      <button
+                        type="button"
+                        onClick={addSecondFrame}
+                        className="flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add second time frame
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Scheduled End */}
-                <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
-                    <Clock className="w-4 h-4 inline mr-2" />
-                    End Time
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={scheduledEnd}
-                    onChange={(e) => setScheduledEnd(e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
-
-                {/* Notes */}
                 <div>
                   <label className="block text-slate-600 text-sm font-medium mb-2">
                     Notes (optional)
@@ -438,7 +543,6 @@ export default function NewVisitPage() {
           )}
         </div>
 
-      {/* Upgrade Modal */}
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => {
