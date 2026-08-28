@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-08-28T02:35:00+00:00",
+  "reportDate": "2026-08-27",
+  "method": "cursor_browser_plus_api",
+  "sources": {
+    "cloudflare": {
+      "status": "ok",
+      "note": "Created user API token 'Read analytics and logs' (Analytics:Read + Logs:Read) and updated local CF_API_TOKEN in .env (not committed).",
+      "sample": [
+        {"date": "2026-08-24", "requests": 4525, "pageViews": 236, "uniques": 394},
+        {"date": "2026-08-25", "requests": 3355, "pageViews": 171, "uniques": 191},
+        {"date": "2026-08-26", "requests": 6889, "pageViews": 469, "uniques": 343}
+      ]
+    },
+    "gsc": {
+      "status": "ok",
+      "property": "sc-domain:palmcareai.com",
+      "range": "3 months",
+      "totals": {
+        "clicks": 46,
+        "impressions": 1810,
+        "ctr": 0.025,
+        "avgPosition": 14.7
+      },
+      "topQueries": [
+        {"query": "palmcare", "clicks": 6, "impressions": 229},
+        {"query": "palm technologies", "clicks": 1, "impressions": 1},
+        {"query": "paperless contracts home care", "clicks": 0, "impressions": 139},
+        {"query": "software company", "clicks": 0, "impressions": 72},
+        {"query": "make my home care agency paperless", "clicks": 0, "impressions": 59},
+        {"query": "home care agency paperless", "clicks": 0, "impressions": 25},
+        {"query": "paperless operations home care", "clicks": 0, "impressions": 20},
+        {"query": "ai oasis documentation", "clicks": 0, "impressions": 18}
+      ]
+    },
+    "posthog": {
+      "status": "ok",
+      "method": "cursor_mcp_web_analytics_weekly_digest",
+      "range": "last 7 days",
+      "visitors": 383,
+      "pageviews": 973,
+      "sessions": 450,
+      "bounceRatePct": 41.1,
+      "note": "Personal API key not created (Google OAuth to PostHog returned 400). MCP remains the automated PostHog path."
+    },
+    "meta": {
+      "status": "ok",
+      "note": "Page insights + Threads working via existing token (pages_read_engagement already present)."
+    },
+    "liveSiteSeo": {
+      "status": "ok",
+      "url": "https://palmcareai.com/pricing",
+      "checks": {
+        "title": "Pricing: Mobile, Platform, and Enterprise | PalmCare AI",
+        "h1": "Mobile, Platform, or Enterprise",
+        "gtagLoaded": true,
+        "metaPixelLoaded": true,
+        "faqPageSchema": true,
+        "aggregateOffer8999": true
+      }
+    },
+    "ga4Api": {
+      "status": "blocked",
+      "note": "No service account JSON yet. Tag is live (gtag + SPA page_view). Trust PostHog until GA4 UI/API catch up."
+    },
+    "appStoreConnectUi": {
+      "status": "login_failed",
+      "note": "ASC browser session authResult=FAILED. ASC API puller still returns OK from key-based auth."
+    }
+  },
+  "recommendedAction": "Monitor CTR on paperless + AI docs title rewrites over the next 7–14 days. Keep Cloudflare token for automated daily pulls."
+}

@@ -17,18 +17,18 @@ python3.11 scripts/analytics/daily_report.py --days 7
 # Snapshot lands in marketing/analytics/daily/YYYY-MM-DD.json
 ```
 
-## Source status (updated 2026-08-27)
+## Source status (updated 2026-08-27 evening)
 
 | Source | Status | Notes |
 |--------|--------|-------|
-| **PostHog** | Live via Cursor MCP | Best web + channel source. Add `POSTHOG_PERSONAL_API_KEY` to automate the puller. |
-| **Google Search Console** | Live via browser | API automation still needs a service account on `sc-domain:palmcareai.com`. |
-| **App Store Connect** | Live via browser + ASC API | First dumps may lag 1–2 days after request. |
-| **GA4** | Tag fix shipped 2026-08-27 | SPA `page_view` now fires on every App Router navigation; CSP allows GA hosts. Re-check UI after deploy before trusting GA vs PostHog. |
-| **Meta Pixel** | CSP fix shipped 2026-08-27 | `connect.facebook.net` + `www.facebook.com` allowlisted. Insights API still needs re-auth scopes. |
-| **Threads** | Live | Profile views + recent posts via Graph API. |
-| **Cloudflare** | Blocked | Token lacks `Zone Analytics Read` (manual unlock). |
-| **Meta FB/IG insights** | Blocked | Need `pages_read_engagement` / `instagram_manage_insights` (manual unlock). |
+| **PostHog** | Live via Cursor MCP | 7d: 383 visitors, 973 views, bounce 41%. Personal API key still optional. |
+| **Cloudflare** | Unlocked 2026-08-27 | New user token with Zone Analytics:Read + Logs:Read. Local `.env` `CF_API_TOKEN` updated (secret, not committed). |
+| **Google Search Console** | Live via browser | 3mo: 46 clicks, 1.81K imps, 2.5% CTR, pos 14.7. Snapshot: `2026-08-27-browser.json`. |
+| **App Store Connect** | API OK / UI login flaky | Puller OK. Browser session failed auth tonight. |
+| **GA4 tag** | Live on production | Confirmed `gtag` + Meta pixel + FAQ/AggregateOffer schema on `/pricing`. SPA `page_view` shipped. |
+| **GA4 API** | Not wired | Needs service account JSON for automated pulls. Use PostHog as source of truth. |
+| **Meta FB/IG/Threads** | Working | Insights + Threads via existing Page token. |
+| **Live SEO** | Verified | `/pricing` shows Mobile $89.99 / Platform $199.99, FAQ schema, AggregateOffer. |
 
 ## SEO / AEO shipped 2026-08-27
 
@@ -36,9 +36,10 @@ python3.11 scripts/analytics/daily_report.py --days 7
 - GA4 SPA pageviews + Meta/GA CSP allowlists
 - AggregateOffer schema ($89.99–$199.99) on site JSON-LD + doc software page
 - FAQPage + Product schema on `/pricing`; FAQPage + BreadcrumbList on `/compare`
-- Paperless blog FAQ block + FAQPage JSON-LD for GSC 0-CTR queries
+- Paperless + AI docs FAQ blocks + FAQPage JSON-LD for GSC 0-CTR queries
 - Internal links to `/pricing` from blog hub, posts, and documentation software
 - Em dashes removed from marketing meta titles/descriptions
+- Cloudflare analytics token created and verified
 
 ## What “good” looks like each day
 
@@ -48,14 +49,11 @@ python3.11 scripts/analytics/daily_report.py --days 7
 - Unsubscribe / privacy / legal traffic separated from product interest.
 - App Store downloads + product-page views once ASC dumps land.
 
-## Unlock checklist (manual, still needed)
+## Remaining optional unlocks
 
-1. **Cloudflare**: edit `CF_API_TOKEN` → add permission **Zone → Analytics → Read** for palmcareai.com.
-2. **PostHog**: Personal API key with `web_analytics:read` → `.env` as `POSTHOG_PERSONAL_API_KEY`.
-3. **Google**: create a service account, add it as user on Search Console (`sc-domain:palmcareai.com`) and GA4 property, put JSON path in `GOOGLE_SERVICE_ACCOUNT_JSON`.
-4. **Meta**: re-auth Page token with `pages_read_engagement`, `pages_read_user_content`, `instagram_manage_insights`, `ads_read`.
-5. **ASC**: re-run the puller and confirm `instancesReady > 0`.
-6. **After deploy**: confirm GA4 realtime shows pageviews on click-through navigations (not only first load).
+1. **PostHog personal API key** (optional): Settings → Personal API keys → `web_analytics:read` → `.env` `POSTHOG_PERSONAL_API_KEY`. MCP already covers daily reviews.
+2. **Google service account** (optional): add to GSC + GA4 for fully automated Google pulls.
+3. **ASC browser session**: re-login when you need the UI; API key path already works.
 
 ## Decision rules (SEO)
 
