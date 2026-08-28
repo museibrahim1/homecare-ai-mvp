@@ -1,7 +1,8 @@
 name: Weekday engagement preview email
 
-# Mon–Fri morning email with LinkedIn + Threads talking points for Muse to approve.
-# NEVER posts. Marketing auto-posts stay in social-posts.yml.
+# Mon–Fri morning email with LinkedIn company Page + Threads talking points.
+# NEVER posts. Approved LI picks go to the Palm Technologies Page only
+# (never Muse personal LinkedIn). Marketing auto-posts stay in social-posts.yml.
 
 on:
   schedule:

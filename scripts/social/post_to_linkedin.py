@@ -6,7 +6,10 @@ Uses credentials in the repo .env:
   LINKEDIN_PERSON_ID          -> OpenID `sub` of the member (fallback / comments)
   LINKEDIN_ORGANIZATION_ID    -> numeric company Page id (urn:li:organization:<id>)
 
-Default author is the company Page. Pass --as-person to post on Muse's profile
+Default author is the company Page (Palm Technologies). Pass --as-person only
+for rare non-PalmCare posts Muse explicitly wants on his personal profile.
+PalmCare engagement picks and marketing MUST stay on the company Page.
+Never use --as-person for engagement approvals or product creatives.
 instead. First comments use the same author as the post.
 
 Two media modes:
@@ -290,12 +293,25 @@ def main() -> int:
     ap.add_argument("--document", help="PDF filename/path (document carousel)")
     ap.add_argument("--title", default="", help="Title for a document post")
     ap.add_argument("--comment", help="Text posted as the first comment (put the link here)")
-    ap.add_argument("--as-person", action="store_true", help="Post to Muse's personal profile instead of the company Page")
+    ap.add_argument(
+        "--as-person",
+        action="store_true",
+        help=(
+            "Post to Muse's personal profile. Do NOT use for PalmCare engagement "
+            "or marketing (those stay on the company Page)."
+        ),
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     global _FORCE_PERSON
     _FORCE_PERSON = bool(args.as_person)
+    if _FORCE_PERSON:
+        print(
+            "WARNING: posting as PERSON (personal LinkedIn). "
+            "PalmCare engagement and marketing should use the company Page "
+            "(omit --as-person)."
+        )
     require_env()
     chosen = [m for m in (args.image, args.video, args.document) if m]
     if len(chosen) > 1:

@@ -1,11 +1,14 @@
-"""Engagement talking points for LinkedIn + Threads.
+"""Engagement talking points for LinkedIn company Page + Threads.
 
 APPROVAL ONLY. Never auto-post.
 
-LinkedIn length matches Muse's real posts: multi-paragraph, personal,
+LinkedIn destination: Palm Technologies company Page only
+(LINKEDIN_ORGANIZATION_ID). Never Muse's personal profile.
+Personal LinkedIn is for Muse's own non-PalmCare credibility posts.
+
+LinkedIn length: multi-paragraph, founder-voice for the brand Page,
 specific refusals and product facts, one real question at the end.
-Studied from Muse's LinkedIn (agency interviews, Anthropic/build story,
-caregiver replacement objection) and the approved founder calendar copy.
+Studied from approved Palm founder calendar copy and Page voice.
 
 Threads stay shorter but still complete thoughts, not one-liners.
 """

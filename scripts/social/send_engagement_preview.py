@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Email Muse Mon–Fri engagement options for LinkedIn + Threads.
+"""Email Muse Mon–Fri engagement options for LinkedIn (company Page) + Threads.
 
 These are APPROVAL-ONLY. This script never posts.
-Marketing posts stay in run_scheduled_posts.py.
+Approved LinkedIn picks post to the Palm Technologies company Page only
+(LINKEDIN_ORGANIZATION_ID). Never Muse's personal profile.
+Personal LinkedIn is reserved for Muse's own non-PalmCare credibility posts.
+
+Marketing creatives stay in run_scheduled_posts.py.
 
 Usage:
   python3 scripts/social/send_engagement_preview.py
@@ -81,7 +85,7 @@ def build_html(date: str, picks: list[dict]) -> str:
         li_blocks += f"""
         <div style="border:1px solid #e2e8f0;border-radius:12px;margin:0 0 14px;overflow:hidden;">
           <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
-            <strong>LinkedIn option {letter}</strong>
+            <strong>LinkedIn Page option {letter}</strong>
             <span style="color:#0d9488;margin-left:8px;">{html.escape(row['topic'])}</span>
             <span style="color:#94a3b8;font-size:12px;margin-left:8px;">{html.escape(row['pillar'])} · {row['id']} · {li_words} words</span>
           </div>
@@ -101,23 +105,28 @@ def build_html(date: str, picks: list[dict]) -> str:
     <div style="font-family:'Segoe UI',-apple-system,Arial,sans-serif;max-width:680px;margin:0 auto;color:#0f172a;">
       <h2 style="color:#0d9488;margin-bottom:6px;">Engagement picks for {label}</h2>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
-        Full LinkedIn posts in your voice. Multi-paragraph. Specific. One real question at the end.
-        Modeled on your live LinkedIn writing, not short punchy captions.
+        These LinkedIn options are for the <strong>Palm Technologies company Page</strong> only
+        (not your personal LinkedIn). Founder-voice writing that still belongs on the brand Page.
+        Threads options go to <strong>@palmcareai</strong>.
         <strong>I will not post these unless you reply.</strong>
         Edit freely, or paste a rewrite and I will use your words.
       </p>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
+        Your personal LinkedIn stays yours for non-PalmCare topics that build credibility.
+        Do not approve these for personal posting.
+      </p>
+      <p style="font-size:14px;color:#475569;line-height:1.6;">
         Reply like this:<br>
-        <code>LI: A</code> or <code>LI: A,C</code><br>
+        <code>LI: A</code> or <code>LI: A,C</code> (company Page)<br>
         <code>TH: B</code> or <code>TH: none</code><br>
         Optional: paste a rewrite and I will use your words.
       </p>
       <p style="font-size:13px;color:#64748b;line-height:1.5;">
-        Product marketing creatives still auto-post on the Aug 14 to Sep 13 calendar.
-        This email is only for LinkedIn and Threads conversation posts.
+        Product marketing creatives still auto-post on the calendar to the company Page.
+        This email is only for LinkedIn Page and Threads conversation posts.
       </p>
 
-      <h3 style="margin-top:28px;">LinkedIn options</h3>
+      <h3 style="margin-top:28px;">LinkedIn company Page options</h3>
       {li_blocks}
 
       <h3 style="margin-top:28px;">Threads options</h3>
