@@ -9,7 +9,7 @@ import time
 import html as html_lib
 import logging
 from collections import defaultdict
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 from typing import Optional
 from uuid import uuid4
 
@@ -67,6 +67,13 @@ DEMO_SLOTS = DEMO_SLOTS_OPEN
 # weekday(): Mon=0 … Fri=4 — only Mon / Wed / Thu
 DEMO_OPEN_WEEKDAYS = {0, 2, 3}
 
+# One-off Seattle trip (Sept 2026): full day bookable, overrides Tue/Fri rules.
+DEMO_SPECIAL_ALL_DAY_DATES = frozenset({
+    date(2026, 9, 3),  # Thu
+    date(2026, 9, 4),  # Fri
+})
+DEMO_SLOTS_ALL_DAY = DEMO_MORNING_DISPLAY + DEMO_AFTERNOON_DISPLAY
+
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/Chicago")
 DEMO_TIMEZONE_LABEL = "Central Time"
 SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
@@ -77,6 +84,13 @@ def _slots_for_weekday(weekday: int) -> list[str]:
     if weekday not in DEMO_OPEN_WEEKDAYS:
         return []
     return DEMO_SLOTS_OPEN.copy()
+
+
+def _slots_for_date(day: date) -> list[str]:
+    """Bookable slots for a calendar day (special dates override weekday rules)."""
+    if day in DEMO_SPECIAL_ALL_DAY_DATES:
+        return DEMO_SLOTS_ALL_DAY.copy()
+    return _slots_for_weekday(day.weekday())
 
 
 # Allowed "Where did you find us?" values (SEO / attribution). Required on book.
@@ -289,8 +303,8 @@ async def get_available_slots():
     """Return demo slots for the next 14 open days (Central).
 
     Open: Mon/Wed/Thu 1:30–6pm. Tuesday, Friday, and weekends are omitted
-    so the calendar blacks them out. `schedule` still shows morning + any
-    blocked afternoon times (e.g. 1:00 PM) as unavailable.
+    except special all-day dates (e.g. Seattle trip Sept 3–4, 2026).
+    `schedule` still shows blocked afternoon times (e.g. 1:00 PM) on normal days.
     """
     slots = {}
     schedule = {}
@@ -300,7 +314,7 @@ async def get_available_slots():
     current = today + timedelta(days=1)  # start from tomorrow
     # Scan enough calendar days to collect 14 open ones (skip Fri/weekend).
     while days_added < 14 and (current - today).days < 60:
-        bookable = _slots_for_weekday(current.weekday())
+        bookable = _slots_for_date(current)
         if bookable:
             key = current.isoformat()
             slots[key] = bookable
@@ -350,7 +364,7 @@ async def book_demo(
             raise HTTPException(status_code=400, detail="Invalid date format (use YYYY-MM-DD)")
         if selected_date <= datetime.now(timezone.utc).date():
             raise HTTPException(status_code=400, detail="Date must be in the future")
-        open_slots = _slots_for_weekday(selected_date.weekday())
+        open_slots = _slots_for_date(selected_date)
         if not open_slots:
             raise HTTPException(
                 status_code=400,
@@ -371,7 +385,7 @@ async def book_demo(
         candidate = today + timedelta(days=1)
         open_slots: list[str] = []
         for _ in range(60):
-            open_slots = _slots_for_weekday(candidate.weekday())
+            open_slots = _slots_for_date(candidate)
             if open_slots:
                 break
             candidate += timedelta(days=1)
