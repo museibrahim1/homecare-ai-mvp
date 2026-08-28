@@ -644,24 +644,24 @@ async def seed_database():
             from app.models.subscription import Plan, PlanTier
             import json as _json
 
-            # Single $199/month plan (Apple IAP com.palmcareai.app.starter.monthly).
+            # Mobile ($89.99) + Platform ($199.99) + Enterprise quote.
             # Legacy Growth / Professional rows stay inactive so
             # existing subscription rows keep resolving.
             _mobile = _json.dumps([
-                "15 AI assessments per month", "Lite web CRM (30 clients)",
+                "15 AI assessments per month", "Web CRM for up to 30 clients",
                 "AI voice to contract", "Smart SOAP notes and billables",
                 "50 state compliance engine", "HIPAA BAA included",
                 "iPhone app access", "30 day free trial",
             ])
             _platform = _json.dumps([
-                "30 AI assessments per month", "Web CRM (150 clients)",
+                "30 AI assessments per month", "Web CRM for up to 150 clients",
                 "Everything in Mobile", "Team seats and pipeline",
                 "Custom contract templates", "Priority support",
                 "250 GB storage", "30 day free trial",
             ])
             _plan_defs = [
                 dict(name="PalmCare Mobile", tier=PlanTier.MOBILE,
-                     description="Assessments plus lite web CRM. 15 assessments and 30 clients per month.",
+                     description="Assessments plus web CRM. 15 assessments and 30 clients per month.",
                      monthly_price=89.99, annual_price=0, max_users=1, max_clients=30,
                      max_visits_per_month=15, max_storage_gb=50, is_active=True, is_contact_sales=False,
                      features=_mobile),
@@ -681,12 +681,12 @@ async def seed_database():
                      max_visits_per_month=75, max_storage_gb=50, is_active=False, is_contact_sales=True,
                      features=_json.dumps([])),
                 dict(name="Enterprise", tier=PlanTier.ENTERPRISE,
-                     description="Custom formula pricing and features. Request a quote.",
+                     description="Custom caps, SSO, and a signed quote.",
                      monthly_price=0, annual_price=0, max_users=9999, max_clients=99999,
                      max_visits_per_month=99999, max_storage_gb=1000, is_active=True, is_contact_sales=True,
                      features=_json.dumps([
                          "Custom assessment and client caps", "SSO",
-                         "Dedicated success manager", "Volume and formula pricing",
+                         "Dedicated success manager", "Volume pricing",
                      ])),
             ]
             for pd in _plan_defs:

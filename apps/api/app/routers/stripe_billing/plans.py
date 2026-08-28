@@ -69,16 +69,16 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     import json
 
     # Two self-serve plans + Enterprise quote:
-    # Mobile ($89.99, lite CRM) and Platform ($199.99, higher caps).
+    # Mobile ($89.99) and Platform ($199.99).
     # Apple IAP product IDs must match apple_iap.py.
     MOBILE_FEATURES = json.dumps([
-        "15 AI assessments per month", "Lite web CRM (30 clients)",
+        "15 AI assessments per month", "Web CRM for up to 30 clients",
         "AI voice to contract", "Smart SOAP notes and billables",
         "50 state compliance engine", "HIPAA BAA included",
         "iPhone app access", "30 day free trial",
     ])
     PLATFORM_FEATURES = json.dumps([
-        "30 AI assessments per month", "Web CRM (150 clients)",
+        "30 AI assessments per month", "Web CRM for up to 150 clients",
         "Everything in Mobile", "Team seats and pipeline",
         "Custom contract templates", "Priority support", "250 GB storage",
         "30 day free trial",
@@ -86,14 +86,14 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     ENTERPRISE_FEATURES = json.dumps([
         "Everything in Platform", "Custom assessment and client caps",
         "SSO and advanced admin controls", "Dedicated success manager",
-        "Volume and formula pricing",
+        "Volume pricing",
     ])
     PLANS = [
         {
             "name": "PalmCare Mobile",
             "tier": PlanTier.MOBILE,
             "description": (
-                "Assessments plus lite web CRM. 15 assessments and 30 clients "
+                "Assessments plus web CRM. 15 assessments and 30 clients "
                 "per month."
             ),
             "monthly_price": 89.99,
@@ -158,7 +158,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
         {
             "name": "Enterprise",
             "tier": PlanTier.ENTERPRISE,
-            "description": "Custom formula pricing and features. Request a quote.",
+            "description": "Custom caps, SSO, and a signed quote.",
             "monthly_price": 0,
             "annual_price": 0,
             "setup_fee": 0,

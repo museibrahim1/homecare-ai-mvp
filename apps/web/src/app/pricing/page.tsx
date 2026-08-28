@@ -40,10 +40,10 @@ const PLANS: PlanCard[] = [
     priceSuffix: '/mo',
     icon: Smartphone,
     description:
-      'Assessments on iPhone plus lite web CRM. 15 assessments and 30 clients each month.',
+      'iPhone assessments plus web CRM for smaller caseloads. 15 assessments and 30 clients per month.',
     features: [
       '15 AI assessments per month',
-      'Lite web CRM (up to 30 clients)',
+      'Web CRM for up to 30 clients',
       'AI voice to contract',
       'SOAP notes and billables',
       '50-state compliance engine',
@@ -61,10 +61,10 @@ const PLANS: PlanCard[] = [
     icon: Zap,
     highlight: true,
     description:
-      'Full agency stack: web CRM, team seats, and higher monthly caps on assessments and clients.',
+      'Full agency CRM with higher monthly caps. 30 assessments and 150 clients per month, plus team seats.',
     features: [
       '30 AI assessments per month',
-      'Web CRM (up to 150 clients)',
+      'Web CRM for up to 150 clients',
       'Team seats, pipeline, and calendar',
       'Custom contract templates',
       'Priority support',
@@ -80,13 +80,13 @@ const PLANS: PlanCard[] = [
     priceLabel: 'Custom',
     icon: Building2,
     description:
-      'Multi-location agencies that need a custom mix of limits, SSO, onboarding, and pricing.',
+      'Multi-location agencies that need custom caps, SSO, dedicated onboarding, and a signed quote.',
     features: [
       'Everything in Platform',
       'Custom assessment and client caps',
       'SSO and advanced admin controls',
       'Dedicated success manager',
-      'Volume and formula pricing',
+      'Volume pricing',
     ],
     cta: 'Request a quote',
     href: '/book-demo',
@@ -101,11 +101,11 @@ const FAQS = [
   },
   {
     q: 'What is the difference between Mobile and Platform?',
-    a: 'Mobile ($89.99/mo) includes assessments plus lite web CRM with 15 assessments and 30 clients per month. Platform ($199.99/mo) raises those caps to 30 assessments and 150 clients, and adds team seats and fuller CRM tools. Enterprise is a custom quote.',
+    a: 'Mobile ($89.99/mo) includes iPhone assessments and web CRM with 15 assessments and 30 clients per month. Platform ($199.99/mo) raises those caps to 30 assessments and 150 clients, and adds team seats plus fuller CRM tools. Enterprise is a custom quote.',
   },
   {
     q: 'Can Mobile subscribers use the web CRM?',
-    a: 'Yes. Mobile includes lite web CRM with caps (15 assessments and 30 clients per month). Upgrade to Platform in the app for higher limits and team features.',
+    a: 'Yes. Mobile includes web CRM with caps: 15 assessments and 30 clients per month. Upgrade to Platform in the app for higher limits and team features.',
   },
   {
     q: 'How do subscriptions and payments work?',
@@ -130,13 +130,15 @@ export default function PricingPage() {
     <GlassMarketingShell>
       <div className="max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 pt-10 sm:pt-16 pb-8 text-center">
         <h1 className="text-4xl sm:text-5xl font-bold text-[#10211F] tracking-tight mb-4">
-          Three options. Pay for what you use.
+          Mobile, Platform, or Enterprise
         </h1>
         <p className="text-lg text-[#4B6B66] max-w-2xl mx-auto mb-2">
-          Mobile for iPhone assessments. Platform for the full CRM. Enterprise when you need a custom quote.
+          Mobile for smaller caseloads on iPhone and web. Platform for full CRM and team seats.
+          Enterprise when you need a custom quote.
         </p>
         <p className="text-sm text-[#7A8C88] max-w-xl mx-auto">
-          Mobile and Platform include a 30-day free trial when you subscribe in the iOS app with your Apple ID.
+          Mobile and Platform include a 30-day free trial when you subscribe in the iOS app with your
+          Apple ID.
         </p>
       </div>
 
@@ -261,7 +263,7 @@ export default function PricingPage() {
               <Shield className="w-3.5 h-3.5" /> HIPAA Compliant
             </div>
             <div className="flex items-center gap-1.5">
-              <CreditCard className="w-3.5 h-3.5" /> Mobile & Platform via App Store
+              <CreditCard className="w-3.5 h-3.5" /> Mobile and Platform via App Store
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" /> Cancel anytime

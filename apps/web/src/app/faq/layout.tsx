@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'FAQ — Frequently Asked Questions',
+  title: 'FAQ: Frequently Asked Questions',
   description:
-    'Find answers to common questions about PalmCare AI — setup, pricing, HIPAA compliance, voice assessments, contract generation, and more.',
+    'Answers about PalmCare AI setup, pricing (Mobile, Platform, Enterprise), HIPAA, voice assessments, and contract generation.',
   alternates: { canonical: 'https://palmcareai.com/faq' },
   openGraph: {
     title: 'PalmCare AI FAQ',

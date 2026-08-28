@@ -909,7 +909,7 @@ This is where AI-native tools change the equation. PalmCare AI turns a recorded 
 
 ## See a Real Quote
 
-PalmCare AI offers transparent plans for solo, growing, and enterprise agencies, each with a 30-day free trial via Apple and no setup fee. [Book a demo](/) and we'll walk through a quote based on your client count. No guesswork.
+PalmCare AI publishes three options: Mobile at $89.99/mo (15 assessments, 30 clients), Platform at $199.99/mo (30 assessments, 150 clients), and Enterprise by quote. Mobile and Platform include a 30-day free trial via Apple. See [pricing](/pricing) or [book a demo](/book-demo).
 `,
   },
   {

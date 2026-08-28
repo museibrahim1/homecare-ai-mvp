@@ -23,7 +23,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: 'Do you offer a free trial?',
-        a: 'Yes. Every plan comes with a 30-day free trial when you subscribe in the PalmCare iOS app. An Apple ID payment method is required. You can also book a demo with our team before signing up.',
+        a: 'Yes. Mobile and Platform include a 30-day free trial when you subscribe in the PalmCare iOS app. An Apple ID payment method is required. You can also book a demo with our team before signing up.',
       },
       {
         q: 'What devices and browsers does PalmCare AI support?',
@@ -82,7 +82,7 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'How much does PalmCare AI cost?',
-        a: 'One plan, one price: $199 a month with everything included. Unlimited assessments, unlimited team members, AI voice to contract, SOAP notes, analytics, the 50 state compliance engine, and a HIPAA BAA. Start with a 30-day free trial in the iOS app.',
+        a: 'Three options. PalmCare Mobile is $89.99/mo with 15 assessments and 30 clients per month. PalmCare Platform is $199.99/mo with 30 assessments and 150 clients, plus team seats and fuller CRM. Enterprise is a custom quote. Mobile and Platform start with a 30-day free trial in the iOS app.',
       },
       {
         q: 'What support is included?',

@@ -432,7 +432,7 @@ export default function ClientsPage() {
     >
           {activeSection === 'leads' ? (
             <>
-              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+              <div className="glass-toolbar flex-wrap">
                 <GlassTabs
                   tabs={[
                     { key: 'clients', label: 'Clients', icon: Users },
@@ -449,7 +449,7 @@ export default function ClientsPage() {
             </>
           ) : activeSection === 'assessments' ? (
             <>
-              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+              <div className="glass-toolbar flex-wrap">
                 <GlassTabs
                   tabs={[
                     { key: 'clients', label: 'Clients', icon: Users },
@@ -466,7 +466,7 @@ export default function ClientsPage() {
             </>
           ) : activeSection === 'care' ? (
             <>
-              <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+              <div className="glass-toolbar flex-wrap">
                 <GlassTabs
                   tabs={[
                     { key: 'clients', label: 'Clients', icon: Users },
@@ -484,7 +484,7 @@ export default function ClientsPage() {
           ) : (
           <>
           {/* Insurance pills — Paper order: under header, above toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="glass-filter-row">
             {(
               [
                 { key: 'all' as const, label: 'All Clients', count: clients.length },
@@ -517,7 +517,7 @@ export default function ClientsPage() {
           )}
 
           {/* Paper glass toolbar: section tabs + search */}
-          <div className="glass-toolbar flex-wrap py-2 sm:py-0">
+          <div className="glass-toolbar flex-wrap">
             <GlassTabs
               tabs={[
                 { key: 'clients', label: 'Clients', icon: Users },

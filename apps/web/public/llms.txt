@@ -16,8 +16,10 @@ Workflow: Record. Transcribe. Contract.
 Owners and administrators of in-home care agencies, plus the caregivers and nurses who do assessments. Best for agencies losing hours each week to documentation, assessments, and manual contract writing.
 
 ## Pricing (summary; full machine-readable file at /pricing.md)
-- Website plan: $199/mo with everything included: unlimited assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, 50-state compliance engine, HIPAA BAA, priority support.
-- 14-day free trial. Subscriptions are purchased and billed via Apple In-App Purchase in the PalmCare iOS app.
+- PalmCare Mobile: $89.99/mo. 15 assessments and 30 clients per month. iPhone assessments plus web CRM within those caps.
+- PalmCare Platform: $199.99/mo. 30 assessments and 150 clients per month. Full CRM, team seats, higher caps.
+- Enterprise: custom quote for multi-location agencies.
+- 30-day free trial on Mobile and Platform via Apple In-App Purchase in the PalmCare iOS app.
 - Structured pricing for agents: https://palmcareai.com/pricing.md
 
 ## Key pages

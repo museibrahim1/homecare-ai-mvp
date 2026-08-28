@@ -200,15 +200,19 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'What support do you offer?',
-    a: 'All plans include email support with same-day response. Growth and Pro plans include priority live chat and phone support with average response times under 15 minutes. Enterprise customers get a dedicated account manager and custom SLA.',
+    a: 'All plans include email support. Platform and Enterprise get priority response. Enterprise customers can add a dedicated success contact as part of their quote.',
   },
   {
     q: 'Can caregivers use PalmCare AI on their phones?',
     a: 'Yes. Our companion mobile app lets caregivers clock in/out via GPS, log Activities of Daily Living (ADLs), view their schedule, and receive real-time updates. Agencies can track all caregiver activity from the admin dashboard.',
   },
   {
+    q: 'How much does PalmCare cost?',
+    a: 'PalmCare Mobile is $89.99/mo (15 assessments, 30 clients). PalmCare Platform is $199.99/mo (30 assessments, 150 clients, team CRM). Enterprise is a custom quote. Mobile and Platform include a 30-day free trial in the iOS app. Full details at palmcareai.com/pricing.',
+  },
+  {
     q: 'Do you offer a free trial?',
-    a: 'Yes. Eligible new subscribers get a 30-day free trial when they start the plan in the PalmCare iOS app through Apple. An Apple ID payment method is required. Unless you cancel before the trial ends, Apple automatically charges the monthly price and renews until you cancel.',
+    a: 'Yes. Eligible new subscribers get a 30-day free trial when they start Mobile or Platform in the PalmCare iOS app through Apple. An Apple ID payment method is required. Unless you cancel before the trial ends, Apple automatically charges the monthly price and renews until you cancel.',
   },
 ];
 

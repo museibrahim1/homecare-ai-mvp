@@ -70,8 +70,8 @@ export default function GlassShell({
             <div
               className={
                 fill
-                  ? 'flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden'
-                  : 'min-w-0 w-full'
+                  ? 'flex-1 min-h-0 min-w-0 flex flex-col gap-4 overflow-hidden'
+                  : 'min-w-0 w-full flex flex-col gap-4'
               }
             >
               {children}
