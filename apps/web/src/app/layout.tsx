@@ -14,7 +14,7 @@ const SITE_NAME = 'PalmCare AI';
 // Keyword-led title (category first, brand last) — like top competitors rank with.
 const SITE_TITLE = 'AI Home Care Documentation & Contract Software';
 const SITE_DESCRIPTION =
-  'AI documentation for home care agencies: turn a recorded assessment into a state-specific service contract, care plan, visit notes, and billables — automatically.';
+  'AI documentation for home care agencies: turn a recorded assessment into a state-specific service contract, care plan, visit notes, and billables automatically.';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} — Record. Transcribe. Contract. Palm It.`,
+        alt: `${SITE_NAME}: Record. Transcribe. Contract. Palm It.`,
       },
     ],
   },
@@ -145,10 +145,12 @@ const jsonLd = {
       operatingSystem: 'Web',
       description: SITE_DESCRIPTION,
       offers: {
-        '@type': 'Offer',
-        name: 'PalmCare AI',
-        price: '199',
+        '@type': 'AggregateOffer',
+        lowPrice: '89.99',
+        highPrice: '199.99',
         priceCurrency: 'USD',
+        offerCount: 3,
+        url: `${SITE_URL}/pricing`,
       },
       featureList: [
         'Voice-powered care assessments',
@@ -177,7 +179,7 @@ export default function RootLayout({
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGH98SJBTX" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TGH98SJBTX');`,
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TGH98SJBTX',{send_page_view:false});`,
           }}
         />
         {/* Meta Pixel — tracks PageView + ad attribution; conversions fire from ga.ts helpers */}

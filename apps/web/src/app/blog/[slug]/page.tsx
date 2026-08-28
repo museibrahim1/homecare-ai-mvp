@@ -134,6 +134,17 @@ export default async function BlogPostPage({ params }: Props) {
     });
   }
 
+  if (post.faq?.length) {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: post.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
+    });
+  }
+
   const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
   const htmlContent = markdownToHtml(post.content);
 
@@ -194,6 +205,20 @@ export default async function BlogPostPage({ params }: Props) {
 
           <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
 
+          {post.faq?.length ? (
+            <section className="mt-14 pt-10 border-t border-slate-200">
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Frequently asked questions</h2>
+              <div className="space-y-4">
+                {post.faq.map((item) => (
+                  <div key={item.q}>
+                    <h3 className="text-base font-semibold text-slate-900 mb-1">{item.q}</h3>
+                    <p className="text-slate-600 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <section className="mt-14 pt-10 border-t border-slate-200">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Keep reading</h2>
             <ul className="space-y-3">
@@ -213,6 +238,10 @@ export default async function BlogPostPage({ params }: Props) {
               Also see{' '}
               <Link href="/home-care-documentation-software" className="text-primary-700 underline underline-offset-2">
                 home care documentation software
+              </Link>
+              {', '}
+              <Link href="/pricing" className="text-primary-700 underline underline-offset-2">
+                pricing
               </Link>
               {', '}
               <Link href="/compare" className="text-primary-700 underline underline-offset-2">
@@ -240,6 +269,7 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">&copy; 2026 Palm Technologies, Inc. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-500 text-sm">
+            <Link href="/pricing" className="hover:text-slate-900 transition">Pricing</Link>
             <Link href="/home-care-documentation-software" className="hover:text-slate-900 transition">Documentation</Link>
             <Link href="/compare" className="hover:text-slate-900 transition">Compare</Link>
             <Link href="/blog" className="hover:text-slate-900 transition">Blog</Link>

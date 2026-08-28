@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Mobile App — Care Assessments in Your Palm',
+  title: 'Mobile App: Care Assessments in Your Palm',
   description:
-    'PalmCare AI mobile app for iOS: record patient assessments on-site, get instant AI transcription, generate care plans and contracts from your phone. Available for home care professionals.',
+    'Record home care assessments on iPhone. PalmCare AI turns the visit into a care plan, billables, notes, and a state-specific contract.',
   alternates: { canonical: 'https://palmcareai.com/mobile-app' },
   openGraph: {
-    title: 'PalmCare AI Mobile App — Assessments On the Go',
+    title: 'PalmCare AI Mobile App: Assessments On the Go',
     description:
-      'Record assessments on-site with your iPhone, get instant AI-generated care plans and service contracts. Built for home care agencies.',
+      'Record home care assessments on iPhone. PalmCare AI turns the visit into a care plan, billables, notes, and a state-specific contract.',
     url: 'https://palmcareai.com/mobile-app',
   },
 };

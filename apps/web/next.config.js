@@ -48,11 +48,11 @@ const nextConfig = {
             // Without these, login buttons fail with "Could not load … Sign In".
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us.i.posthog.com https://us-assets.i.posthog.com https://accounts.google.com https://appleid.cdn-apple.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://connect.facebook.net https://us.i.posthog.com https://us-assets.i.posthog.com https://accounts.google.com https://appleid.cdn-apple.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://www.googletagmanager.com https://formspree.io https://accounts.google.com https://appleid.apple.com https://appleid.cdn-apple.com https://api.qrserver.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com http://localhost:8000 http://localhost:3000",
+              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net https://formspree.io https://accounts.google.com https://appleid.apple.com https://appleid.cdn-apple.com https://api.qrserver.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com http://localhost:8000 http://localhost:3000",
               "frame-src 'self' https://accounts.google.com https://appleid.apple.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",

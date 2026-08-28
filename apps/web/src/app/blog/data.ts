@@ -8,6 +8,8 @@ export interface BlogPost {
   content: string;
   /** For listicles: the ranked items, emitted as ItemList JSON-LD for SEO/AEO. */
   listItems?: string[];
+  /** Optional FAQ block + FAQPage JSON-LD for AEO rich results. */
+  faq?: { q: string; a: string }[];
 }
 
 export const BLOG_POSTS: BlogPost[] = [
@@ -82,6 +84,24 @@ PalmCare AI drafts billable items from the recorded assessment alongside the car
     date: '2026-08-15',
     readTime: '7 min read',
     category: 'Operations',
+    faq: [
+      {
+        q: 'What are paperless home care contracts?',
+        a: 'Paperless home care contracts replace printed service agreements with digital drafts, on-screen review, and e-signature. The signed file still must match the assessment, care plan, and state rules.',
+      },
+      {
+        q: 'How do I make my home care agency paperless?',
+        a: 'Start with intake paperwork. Record the assessment, draft the care plan and service agreement from that visit, review on screen, collect a digital signature, and store the signed file with the client record.',
+      },
+      {
+        q: 'What does paperless operations mean for home care agencies?',
+        a: 'It means removing retyping between the visit and the signed contract. If staff still copy notes from a notepad into Word or print “the safe template,” the agency is only partly paperless.',
+      },
+      {
+        q: 'Does going paperless remove state contract requirements?',
+        a: 'No. State-specific disclosures and clauses still apply. A paperless workflow only works when the digital draft keeps those rules current for the jurisdiction where care is delivered.',
+      },
+    ],
     content: `
 Paperless home care contracts replace printed service agreements with digital drafts, review, and e-signature. The goal is not a prettier PDF. The goal is a signed agreement that matches the assessment, the care plan, and the state rules, without a stack of paper on the kitchen table.
 
@@ -556,7 +576,7 @@ Buy the tool that produces the thing you need finished, built for your industry,
     slug: 'what-is-ai-powered-home-care-software',
     title: 'What Is AI-Powered Home Care Software?',
     description:
-      'Learn how artificial intelligence is transforming home care documentation, from voice assessments to instant contract generation — and why agencies are switching.',
+      'Learn how artificial intelligence is transforming home care documentation, from voice assessments to instant contract generation. and why agencies are switching.',
     date: '2026-03-10',
     readTime: '6 min read',
     category: 'Industry',
@@ -653,7 +673,7 @@ The best way to understand voice-to-contract is to experience it. [Book a free 3
     slug: 'hipaa-compliance-guide-home-care-agencies-2026',
     title: 'HIPAA Compliance Guide for Home Care Agencies in 2026',
     description:
-      'A practical guide to HIPAA compliance for home care agencies — covering PHI handling, encryption requirements, staff training, and how technology can help.',
+      'A practical guide to HIPAA compliance for home care agencies. covering PHI handling, encryption requirements, staff training, and how technology can help.',
     date: '2026-03-05',
     readTime: '8 min read',
     category: 'Compliance',
@@ -777,7 +797,7 @@ If you recognized your agency in two or more of these signs, it's time. [Book a 
     slug: 'complete-guide-home-care-client-assessments',
     title: 'The Complete Guide to Home Care Client Assessments',
     description:
-      'Everything home care agencies need to know about conducting thorough client assessments — what to document, state requirements, and how AI is changing the process.',
+      'Everything home care agencies need to know about conducting thorough client assessments. what to document, state requirements, and how AI is changing the process.',
     date: '2026-02-25',
     readTime: '7 min read',
     category: 'Education',
@@ -869,7 +889,7 @@ If your agency is still using paper forms or typing notes after the fact, there'
     slug: 'how-much-does-home-care-software-cost',
     title: 'How Much Does Home Care Software Cost in 2026?',
     description:
-      'A plain-English breakdown of home care software pricing in 2026 — per-user fees, setup costs, what drives the price, and how to compare plans without surprises.',
+      'A plain-English breakdown of home care software pricing in 2026. per-user fees, setup costs, what drives the price, and how to compare plans without surprises.',
     date: '2026-06-23',
     readTime: '7 min read',
     category: 'Pricing',
@@ -916,7 +936,7 @@ PalmCare AI publishes three options: Mobile at $89.99/mo (15 assessments, 30 cli
     slug: 'how-to-write-home-care-service-agreement',
     title: 'How to Write a Home Care Service Agreement (Free Checklist)',
     description:
-      'What every home care service agreement should include to be clear, compliant, and protect your agency — plus how to generate one from a recorded assessment in seconds.',
+      'What every home care service agreement should include to be clear, compliant, and protect your agency. plus how to generate one from a recorded assessment in seconds.',
     date: '2026-06-23',
     readTime: '8 min read',
     category: 'Compliance',
@@ -966,6 +986,20 @@ This is exactly the work PalmCare AI was built to remove. Record the assessment,
     date: '2026-06-23',
     readTime: '7 min read',
     category: 'Comparison',
+    faq: [
+      {
+        q: 'What is AI documentation for home care agencies?',
+        a: 'AI documentation for home care agencies turns a recorded intake into paperwork staff can review the same day. Buy based on whether you need OASIS clinical notes for Medicare home health, or a private-duty care plan, billables list, and service contract.',
+      },
+      {
+        q: 'Are AxisCare, WellSky, or Sandata AI documentation tools?',
+        a: 'No. Scheduling and EVV platforms manage shifts and visit verification. They do not turn a recorded assessment into care plans or service contracts.',
+      },
+      {
+        q: 'Should I buy an AI clinical scribe or PalmCare AI?',
+        a: 'Buy a clinical scribe for Medicare home health OASIS charting. Buy PalmCare AI when the job is non-medical intake: care plan, billables, visit notes, and a state-specific service contract from one recording.',
+      },
+    ],
     content: `
 AI documentation for home care agencies turns a recorded intake into paperwork staff can review the same day. The right buy depends on whether you need OASIS clinical notes for Medicare home health, or a private-duty care plan, billables list, and service contract.
 
@@ -1021,7 +1055,7 @@ The AI scribe tools are strong at clinical OASIS notes for home health. The temp
     slug: 'how-to-do-home-care-client-assessment',
     title: 'How to Do a Home Care Client Assessment (Step-by-Step + Checklist)',
     description:
-      'A practical, step-by-step guide to conducting a non-medical home care client assessment — what to ask, what to document, and a free checklist you can follow on every visit.',
+      'A practical, step-by-step guide to conducting a non-medical home care client assessment. what to ask, what to document, and a free checklist you can follow on every visit.',
     date: '2026-06-24',
     readTime: '8 min read',
     category: 'Operations',

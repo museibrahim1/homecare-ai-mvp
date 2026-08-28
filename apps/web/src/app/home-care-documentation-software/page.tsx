@@ -57,9 +57,11 @@ export default function HomeCareDocumentationSoftwarePage() {
     url: 'https://palmcareai.com',
     description: DESCRIPTION,
     offers: {
-      '@type': 'Offer',
-      price: '199',
+      '@type': 'AggregateOffer',
+      lowPrice: '89.99',
+      highPrice: '199.99',
       priceCurrency: 'USD',
+      offerCount: 3,
       url: 'https://palmcareai.com/pricing',
     },
   };
@@ -180,7 +182,7 @@ export default function HomeCareDocumentationSoftwarePage() {
             <h2 className="text-xl font-bold text-slate-900 mb-2">Palm It</h2>
             <p className="text-slate-600 mb-5">
               Record the assessment. Review the drafts. Send the contract. Start at{' '}
-              <Link href="https://palmcareai.com" className="text-primary-700 font-medium underline underline-offset-2">
+              <Link href="/" className="text-primary-700 font-medium underline underline-offset-2">
                 palmcareai.com
               </Link>
               .
@@ -189,6 +191,12 @@ export default function HomeCareDocumentationSoftwarePage() {
               <Link href="/register" className="btn-primary py-3 px-5 text-sm">
                 Start free trial
               </Link>
+              <Link href="/pricing" className="inline-flex items-center text-sm font-semibold text-primary-700">
+                See pricing
+              </Link>
+              <Link href="/compare" className="inline-flex items-center text-sm font-semibold text-primary-700">
+                Compare options
+              </Link>
               <Link href="/features" className="inline-flex items-center text-sm font-semibold text-primary-700">
                 See features
               </Link>
@@ -196,6 +204,19 @@ export default function HomeCareDocumentationSoftwarePage() {
           </section>
         </article>
       </main>
+
+      <footer className="py-10 sm:py-12 px-4 sm:px-6 border-t border-slate-200 bg-white">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-slate-500 text-sm">&copy; 2026 Palm Technologies, Inc. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-500 text-sm">
+            <Link href="/pricing" className="hover:text-slate-900 transition">Pricing</Link>
+            <Link href="/compare" className="hover:text-slate-900 transition">Compare</Link>
+            <Link href="/blog" className="hover:text-slate-900 transition">Blog</Link>
+            <Link href="/privacy" className="hover:text-slate-900 transition">Privacy</Link>
+            <Link href="/contact" className="hover:text-slate-900 transition">Contact</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

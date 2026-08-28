@@ -6,6 +6,7 @@ import posthog from 'posthog-js';
 import { trackPageView, trackEvent, initClickTracking, initBeforeUnload } from '@/lib/analytics';
 import { captureAttribution, getAttribution } from '@/lib/attribution';
 import { trackMetaPageView } from '@/lib/meta-pixel';
+import '@/lib/ga'; // Window.gtag typing for SPA page_view
 
 let _initialized = false;
 let _posthogInitialized = false;
@@ -55,11 +56,20 @@ export default function SiteAnalytics() {
 
   useEffect(() => {
     trackPageView(pathname);
-    // Skip the first SPA tick — layout already fired Meta PageView on load.
+    // Skip the first SPA tick for Meta — layout already fired PageView on load.
     if (_metaPageViewReady) {
       trackMetaPageView();
     } else {
       _metaPageViewReady = true;
+    }
+    // Always send GA4 page_view (initial config uses send_page_view:false so
+    // App Router navigations are counted the same way as first load).
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', {
+        page_path: pathname,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
     }
     if (_posthogInitialized) {
       posthog.capture('$pageview', {

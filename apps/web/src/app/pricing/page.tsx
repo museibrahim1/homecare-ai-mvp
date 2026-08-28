@@ -133,12 +133,13 @@ export default function PricingPage() {
           Mobile, Platform, or Enterprise
         </h1>
         <p className="text-lg text-[#4B6B66] max-w-2xl mx-auto mb-2">
-          Mobile for smaller caseloads on iPhone and web. Platform for full CRM and team seats.
-          Enterprise when you need a custom quote.
+          PalmCare AI pricing has three options. Mobile is $89.99/mo for 15 assessments and 30 clients.
+          Platform is $199.99/mo for 30 assessments, 150 clients, and team CRM. Enterprise is a custom
+          quote. Mobile and Platform start with a 30-day free trial in the iOS app.
         </p>
         <p className="text-sm text-[#7A8C88] max-w-xl mx-auto">
-          Mobile and Platform include a 30-day free trial when you subscribe in the iOS app with your
-          Apple ID.
+          Subscribe in the PalmCare iOS app with your Apple ID. Creating a web account alone does not
+          start the trial.
         </p>
       </div>
 

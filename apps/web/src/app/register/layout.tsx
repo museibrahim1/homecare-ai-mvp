@@ -6,9 +6,9 @@ export const metadata: Metadata = {
     'Join the pros who Palm It. Create your account, then start a 30-day free trial in the iOS app via Apple. Auto-charges after the trial unless you cancel.',
   alternates: { canonical: 'https://palmcareai.com/register' },
   openGraph: {
-    title: 'Start Your Free Trial — PalmCare AI',
+    title: 'Start Your Free Trial: PalmCare AI',
     description:
-      'Palm It — record assessments, generate contracts in seconds. Built for care professionals.',
+      'Palm It. Record assessments, generate contracts in seconds. Built for care professionals.',
   },
 };
 

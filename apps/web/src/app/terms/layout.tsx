@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description:
-    'PalmCare AI terms of service — the legal agreement governing use of our home care documentation and CRM platform.',
+    'PalmCare AI terms of service. The legal agreement governing use of our home care documentation and CRM platform.',
   alternates: { canonical: 'https://palmcareai.com/terms' },
   robots: { index: true, follow: true },
 };

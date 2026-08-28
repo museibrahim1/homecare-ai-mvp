@@ -66,6 +66,10 @@ export default function BlogPage() {
                 documentation software
               </Link>
               {', '}
+              <Link href="/pricing" className="text-primary-700 underline underline-offset-2">
+                pricing
+              </Link>
+              {', '}
               <Link href="/compare" className="text-primary-700 underline underline-offset-2">
                 compare options
               </Link>

@@ -17,17 +17,28 @@ python3.11 scripts/analytics/daily_report.py --days 7
 # Snapshot lands in marketing/analytics/daily/YYYY-MM-DD.json
 ```
 
-## Source status (2026-08-25 evening browser pull)
+## Source status (updated 2026-08-27)
 
 | Source | Status | Notes |
 |--------|--------|-------|
-| **PostHog** | Live via Cursor MCP | Best web + channel source. 367 visitors / 1,129 views (7d). Add `POSTHOG_PERSONAL_API_KEY` to automate the puller. |
-| **Google Search Console** | Live via browser | 3mo: 42 clicks, 1.74K imps, 2.4% CTR, pos 14.4. Snapshot: `marketing/analytics/daily/2026-08-25-browser.json`. Wire API later for automation. |
-| **App Store Connect** | Live via browser | Last 7d ~Aug 24: 8 first downloads, 451 impressions, 2.93% conv, 58 product-page views. |
-| **GA4 UI** | Undercounting | Only 2 active users / 63 views vs PostHog 367. Fix tag before trusting GA. |
+| **PostHog** | Live via Cursor MCP | Best web + channel source. Add `POSTHOG_PERSONAL_API_KEY` to automate the puller. |
+| **Google Search Console** | Live via browser | API automation still needs a service account on `sc-domain:palmcareai.com`. |
+| **App Store Connect** | Live via browser + ASC API | First dumps may lag 1–2 days after request. |
+| **GA4** | Tag fix shipped 2026-08-27 | SPA `page_view` now fires on every App Router navigation; CSP allows GA hosts. Re-check UI after deploy before trusting GA vs PostHog. |
+| **Meta Pixel** | CSP fix shipped 2026-08-27 | `connect.facebook.net` + `www.facebook.com` allowlisted. Insights API still needs re-auth scopes. |
 | **Threads** | Live | Profile views + recent posts via Graph API. |
-| **Cloudflare** | Blocked | Token lacks `Zone Analytics Read`. |
-| **Meta FB/IG insights** | Blocked | Need `pages_read_engagement` / `instagram_manage_insights`. Paid FB still in PostHog UTMs. |
+| **Cloudflare** | Blocked | Token lacks `Zone Analytics Read` (manual unlock). |
+| **Meta FB/IG insights** | Blocked | Need `pages_read_engagement` / `instagram_manage_insights` (manual unlock). |
+
+## SEO / AEO shipped 2026-08-27
+
+- Homepage real `<h1>` (keyword sr-only + visual Palm It.)
+- GA4 SPA pageviews + Meta/GA CSP allowlists
+- AggregateOffer schema ($89.99–$199.99) on site JSON-LD + doc software page
+- FAQPage + Product schema on `/pricing`; FAQPage + BreadcrumbList on `/compare`
+- Paperless blog FAQ block + FAQPage JSON-LD for GSC 0-CTR queries
+- Internal links to `/pricing` from blog hub, posts, and documentation software
+- Em dashes removed from marketing meta titles/descriptions
 
 ## What “good” looks like each day
 
@@ -37,13 +48,14 @@ python3.11 scripts/analytics/daily_report.py --days 7
 - Unsubscribe / privacy / legal traffic separated from product interest.
 - App Store downloads + product-page views once ASC dumps land.
 
-## Unlock checklist (do once)
+## Unlock checklist (manual, still needed)
 
 1. **Cloudflare**: edit `CF_API_TOKEN` → add permission **Zone → Analytics → Read** for palmcareai.com.
 2. **PostHog**: Personal API key with `web_analytics:read` → `.env` as `POSTHOG_PERSONAL_API_KEY`.
 3. **Google**: create a service account, add it as user on Search Console (`sc-domain:palmcareai.com`) and GA4 property, put JSON path in `GOOGLE_SERVICE_ACCOUNT_JSON`.
-4. **Meta**: re-auth Page token with `pages_read_engagement`, `pages_read_user_content`, `instagram_manage_insights`, `ads_read` (for ad campaign names).
-5. **ASC**: already requested. Re-run the puller in 1–2 days and confirm `instancesReady > 0`.
+4. **Meta**: re-auth Page token with `pages_read_engagement`, `pages_read_user_content`, `instagram_manage_insights`, `ads_read`.
+5. **ASC**: re-run the puller and confirm `instancesReady > 0`.
+6. **After deploy**: confirm GA4 realtime shows pageviews on click-through navigations (not only first load).
 
 ## Decision rules (SEO)
 

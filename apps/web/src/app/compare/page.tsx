@@ -56,9 +56,49 @@ const ROWS = [
   },
 ];
 
+const COMPARE_FAQS = [
+  {
+    q: 'Is PalmCare AI for OASIS or AI OASIS documentation?',
+    a: 'No. PalmCare AI is built for non-medical and private-duty home care agencies that need care plans, billables, visit notes, and state-specific service contracts. It is not an OASIS tool and it is not a Medicare home health clinical scribe.',
+  },
+  {
+    q: 'When should I choose PalmCare AI instead of an AI clinical scribe?',
+    a: 'Choose PalmCare AI when the job is non-medical home care intake: care plan, billables, visit notes, and a state-specific service contract from the same recording. Choose a clinical scribe when the job is Medicare home health charting or OASIS documentation.',
+  },
+  {
+    q: 'How does PalmCare AI compare to contract templates?',
+    a: 'PalmCare AI drafts the care plan, billables, notes, and state-specific contract from a recorded assessment. Templates still require someone to retype the visit and keep state clauses current by hand.',
+  },
+];
+
 export default function ComparePage() {
+  const compareJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://palmcareai.com' },
+          { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://palmcareai.com/compare' },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: COMPARE_FAQS.map((item) => ({
+          '@type': 'Question',
+          name: item.q,
+          acceptedAnswer: { '@type': 'Answer', text: item.a },
+        })),
+      },
+    ],
+  };
+
   return (
     <GlassMarketingShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(compareJsonLd) }}
+      />
       <main className="px-5 sm:px-10 lg:px-16 py-10 sm:py-14 pb-20">
         <article className="max-w-5xl mx-auto">
           <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Comparison</p>
@@ -66,7 +106,10 @@ export default function ComparePage() {
             PalmCare AI vs AI scribes vs templates vs manual paperwork
           </h1>
           <p className="text-lg text-[#4B6B66] mt-5 leading-relaxed max-w-3xl">
-            After a home care assessment, agencies usually pick one of four paths. This page compares what each path actually produces. No invented rankings. Product facts only.
+            PalmCare AI is home care documentation software for non-medical agencies that need a care plan,
+            billables, visit notes, and a state-specific service contract from one recorded assessment. AI
+            clinical scribes, Word templates, and manual paperwork each solve a different job. Use the table
+            below to pick the path that matches what you must finish after intake.
           </p>
 
           <div className="mt-10 overflow-x-auto rounded-2xl glass-card">

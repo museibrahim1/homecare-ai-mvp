@@ -120,14 +120,23 @@ export default function GlassLandingHero() {
           <p className="text-[13px] tracking-[0.18em] font-semibold text-primary-500">
             HOME CARE DOCUMENTATION
           </p>
-          <div className="flex flex-col">
-            <span className="text-[72px] sm:text-[100px] lg:text-[132px] leading-[0.92] tracking-[-0.04em] font-extrabold text-[#10211F]">
+          <h1 className="flex flex-col m-0">
+            <span className="sr-only">
+              AI home care documentation software. Record the visit. Palm writes the contract.
+            </span>
+            <span
+              aria-hidden="true"
+              className="text-[72px] sm:text-[100px] lg:text-[132px] leading-[0.92] tracking-[-0.04em] font-extrabold text-[#10211F]"
+            >
               Palm
             </span>
-            <span className="text-[72px] sm:text-[100px] lg:text-[132px] leading-[0.94] tracking-[-0.04em] font-extrabold text-primary-500">
+            <span
+              aria-hidden="true"
+              className="text-[72px] sm:text-[100px] lg:text-[132px] leading-[0.94] tracking-[-0.04em] font-extrabold text-primary-500"
+            >
               It.
             </span>
-          </div>
+          </h1>
           <p className="max-w-[520px] text-lg leading-8 text-[#4B6B66]">
             Record the visit. PALM writes the care plan, the billables, the notes, and the contract.
           </p>
