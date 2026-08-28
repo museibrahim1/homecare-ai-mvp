@@ -118,7 +118,7 @@ def build_html():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--to", default="museibrahim@palmtai.com,musajama89@gmail.com")
+    ap.add_argument("--to", default="museibrahim@palmtai.com")
     args = ap.parse_args()
 
     r = requests.post(

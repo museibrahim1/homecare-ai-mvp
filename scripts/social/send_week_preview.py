@@ -27,7 +27,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FROM = os.getenv("SOCIAL_PREVIEW_FROM", "PALM Social <sales@send.palmtai.com>")
 DEFAULT_TO = os.getenv(
-    "SOCIAL_PREVIEW_TO", "museibrahim@palmtai.com,musajama89@gmail.com"
+    "SOCIAL_PREVIEW_TO", "museibrahim@palmtai.com"
 )
 
 MEDIA = "https://palmcareai.com/marketing/social"

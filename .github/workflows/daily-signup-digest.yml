@@ -24,7 +24,7 @@ jobs:
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SIGNUP_DIGEST_TO: museibrahim@palmtai.com,musajama89@gmail.com
+          SIGNUP_DIGEST_TO: museibrahim@palmtai.com
         run: |
           ARGS="--send"
           if [ -n "${{ github.event.inputs.day }}" ]; then

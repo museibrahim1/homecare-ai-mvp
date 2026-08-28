@@ -21,13 +21,13 @@ from lib.utm import app_link, site  # noqa: E402
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FROM = "Muse Ibrahim <sales@send.palmtai.com>"
 REPLY_TO = "sales@palmtai.com"
-REVIEW_TO = ["museibrahim@palmtai.com", "musajama89@gmail.com"]
+REVIEW_TO = ["museibrahim@palmtai.com"]
 
 IMG = "https://palmcareai.com/screenshots/email"
 _S = "border-radius:10px;border:1px solid #e2e8f0;display:block;width:100%;"
 
 TRACK_LOG = PROJECT_ROOT / "scripts" / "email" / ".platform_info_sends.json"
-ALERT_TO = ["museibrahim@palmtai.com", "musajama89@gmail.com"]
+ALERT_TO = ["museibrahim@palmtai.com"]
 
 # Images used in every send (hosted on palmcareai.com)
 IMAGES = {

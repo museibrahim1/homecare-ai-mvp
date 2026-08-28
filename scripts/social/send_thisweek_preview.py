@@ -22,7 +22,7 @@ load_dotenv(ROOT / ".env")
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FROM = os.getenv("SOCIAL_PREVIEW_FROM", "PALM Social <sales@send.palmtai.com>")
-TO = os.getenv("SOCIAL_PREVIEW_TO", "museibrahim@palmtai.com,musajama89@gmail.com")
+TO = os.getenv("SOCIAL_PREVIEW_TO", "museibrahim@palmtai.com")
 
 CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F"
 WED = f"{CDN}/hf_20260625_023058_1112c1c1-5326-4be3-b41b-262d48d6fbb2.png"

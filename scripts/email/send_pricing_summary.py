@@ -75,7 +75,7 @@ resp = requests.post(
     headers={"Authorization": f"Bearer {os.environ['RESEND_API_KEY']}"},
     json={
         "from": "PALM Build Agent <sales@send.palmtai.com>",
-        "to": ["museibrahim@palmtai.com", "musajama89@gmail.com"],
+        "to": ["museibrahim@palmtai.com"],
         "subject": "New pricing is set up: $199 / $699 / $1,200 with trials and annual plans. Not submitted yet.",
         "html": HTML,
     },

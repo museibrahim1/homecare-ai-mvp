@@ -35,7 +35,7 @@ REPORT_TO = [
     e.strip()
     for e in os.getenv(
         "SIGNUP_DIGEST_TO",
-        "museibrahim@palmtai.com,musajama89@gmail.com",
+        "museibrahim@palmtai.com",
     ).split(",")
     if e.strip()
 ]

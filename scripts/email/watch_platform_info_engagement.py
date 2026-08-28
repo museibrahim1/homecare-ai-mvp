@@ -33,7 +33,7 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 TRACK_LOG = Path(__file__).resolve().parent / ".platform_info_sends.json"
 STATE_LOG = Path(__file__).resolve().parent / ".platform_info_watch_state.json"
 ALERT_FROM = "PalmCare Tracking <sales@send.palmtai.com>"
-ALERT_TO = ["museibrahim@palmtai.com", "musajama89@gmail.com"]
+ALERT_TO = ["museibrahim@palmtai.com"]
 REPLY_TO = "sales@palmtai.com"
 HEADERS = {
     "Authorization": f"Bearer {RESEND_API_KEY}",

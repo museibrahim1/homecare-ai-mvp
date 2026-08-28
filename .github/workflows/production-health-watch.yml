@@ -43,7 +43,7 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-          HEALTH_ALERT_TO: museibrahim@palmtai.com,musajama89@gmail.com
+          HEALTH_ALERT_TO: museibrahim@palmtai.com
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install -q python-dotenv

@@ -52,7 +52,7 @@ ALERT_TO = [
     e.strip()
     for e in os.getenv(
         "HEALTH_ALERT_TO",
-        "museibrahim@palmtai.com,musajama89@gmail.com",
+        "museibrahim@palmtai.com",
     ).split(",")
     if e.strip()
 ]

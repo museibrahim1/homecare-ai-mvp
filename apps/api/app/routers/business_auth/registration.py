@@ -280,7 +280,7 @@ async def register_business(
         campaign = (last.get("utm_campaign") or first.get("utm_campaign") or "").lower()
         watch_label = watched.get(owner_email.lower())
         if watch_label or campaign == "platform_info":
-            extra_to = os.getenv("ADMIN_NOTIFICATION_EMAILS") or "museibrahim@palmtai.com,musajama89@gmail.com"
+            extra_to = os.getenv("ADMIN_NOTIFICATION_EMAILS") or "museibrahim@palmtai.com"
             for ae in [e.strip() for e in extra_to.split(",") if e.strip()]:
                 if ae.lower() == admin_email.lower():
                     continue

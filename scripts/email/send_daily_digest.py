@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-CEO_EMAIL = "musajama89@gmail.com"
+CEO_EMAIL = "museibrahim@palmtai.com"
 CEO_WORK_EMAIL = "museibrahim@palmtai.com"
 API_BASE = "https://api-production-a0a2.up.railway.app"
 

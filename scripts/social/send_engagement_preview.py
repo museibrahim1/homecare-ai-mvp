@@ -29,7 +29,7 @@ load_dotenv(ROOT / ".env")
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 FROM = "PALM Marketing <sales@send.palmtai.com>"
-TO_DEFAULT = "museibrahim@palmtai.com,musajama89@gmail.com"
+TO_DEFAULT = "museibrahim@palmtai.com"
 OFFERED_LOG = HERE / ".engagement_offered.json"
 OPTIONS_PER_PLATFORM = 3
 
