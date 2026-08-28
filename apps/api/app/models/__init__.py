@@ -24,6 +24,7 @@ from app.models.agency_lead import AgencyLead
 from app.models.appointment import Appointment
 from app.models.care_tracker_entry import CareTrackerEntry
 from app.models.client_activity import ClientActivity
+from app.models.local_document import LocalDocument
 
 __all__ = [
     "User",

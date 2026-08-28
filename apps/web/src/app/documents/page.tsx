@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import GlassShell from '@/components/GlassShell';
+import LocalDriveSection from '@/components/documents/LocalDriveSection';
 import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -108,6 +109,7 @@ export default function DocumentsPage() {
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [driveLoading, setDriveLoading] = useState(false);
   const [checkingDrive, setCheckingDrive] = useState(true);
+  const [activeSection, setActiveSection] = useState<'library' | 'local'>('library');
 
   // Fetch ALL documents from API (filtering is done client-side to keep folder counts accurate)
   const fetchDocuments = useCallback(async () => {
@@ -501,12 +503,16 @@ export default function DocumentsPage() {
         {/* Paper Documents header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
           <div className="flex flex-col gap-1.5 min-w-0">
-            <p className="text-[11px] tracking-[0.12em] font-semibold text-primary-500">LIBRARY</p>
+            <p className="text-[11px] tracking-[0.12em] font-semibold text-primary-500">
+              {activeSection === 'library' ? 'LIBRARY' : 'LOCAL DRIVE'}
+            </p>
             <h1 className="text-[32px] sm:text-[40px] font-bold tracking-tight leading-tight text-[#10211F]">
               Documents
             </h1>
             <p className="text-[15px] font-medium leading-6 text-[#64748B] max-w-xl">
-              Everything Palm generated from your visits, ready to send.
+              {activeSection === 'library'
+                ? 'Everything Palm generated from your visits, ready to send.'
+                : 'Upload PDFs and DOCX from your computer. Saved to your agency workspace.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">
@@ -520,34 +526,63 @@ export default function DocumentsPage() {
                 className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#FFFFFFB8] border border-[#FFFFFFE0] text-[14px] text-[#10211F] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-primary-500/30 shadow-[0_8px_20px_#0D948812]"
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setShowUploadModal(true)}
-              className="glass-btn-primary"
-            >
-              <Upload className="w-4 h-4" />
-              Upload
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowDriveModal(true)}
-              disabled={checkingDrive}
-              className={`inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-semibold border transition-colors ${
-                driveConnected
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-[#FFFFFFB8] text-[#4B6B66] border-[#FFFFFFE0] hover:bg-white'
-              }`}
-            >
-              {checkingDrive ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : driveConnected ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <Cloud className="w-4 h-4" />
-              )}
-              {driveConnected ? 'Drive connected' : 'Connect Drive'}
-            </button>
+            {activeSection === 'library' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(true)}
+                  className="glass-btn-primary"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDriveModal(true)}
+                  disabled={checkingDrive}
+                  className={`inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-semibold border transition-colors ${
+                    driveConnected
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-[#FFFFFFB8] text-[#4B6B66] border-[#FFFFFFE0] hover:bg-white'
+                  }`}
+                >
+                  {checkingDrive ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : driveConnected ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Cloud className="w-4 h-4" />
+                  )}
+                  {driveConnected ? 'Drive connected' : 'Connect Drive'}
+                </button>
+              </>
+            )}
           </div>
+        </div>
+
+        <div className="inline-flex items-center gap-2 p-1 rounded-[14px] bg-[#FFFFFFB3] border border-[#FFFFFFE0] shadow-[0_8px_20px_#0D948812] w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveSection('library')}
+            className={`h-9 px-[18px] rounded-[10px] text-sm font-semibold transition-colors ${
+              activeSection === 'library'
+                ? 'bg-primary-500 text-white'
+                : 'text-[#64748B] hover:text-[#10211F]'
+            }`}
+          >
+            Palm Library
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSection('local')}
+            className={`h-9 px-[18px] rounded-[10px] text-sm font-semibold transition-colors ${
+              activeSection === 'local'
+                ? 'bg-primary-500 text-white'
+                : 'text-[#64748B] hover:text-[#10211F]'
+            }`}
+          >
+            Local Drive
+          </button>
         </div>
 
         {error && (
@@ -562,7 +597,7 @@ export default function DocumentsPage() {
           </div>
         )}
 
-        {driveConnected && (
+        {activeSection === 'library' && driveConnected && (
           <div className="p-4 glass-card flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
@@ -585,6 +620,10 @@ export default function DocumentsPage() {
           </div>
         )}
 
+        {activeSection === 'local' ? (
+          <LocalDriveSection token={token} searchQuery={searchQuery} onError={setError} />
+        ) : (
+        <>
         {/* Paper type chips */}
         <div className="glass-filter-row">
           {(
@@ -837,6 +876,8 @@ export default function DocumentsPage() {
             </div>
           )}
         </div>
+        </>
+        )}
 
         {/* Preview Modal */}
         {showPreviewModal && selectedFile && (

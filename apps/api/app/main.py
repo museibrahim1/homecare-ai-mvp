@@ -94,6 +94,7 @@ from app.routers import (
     gmail,
     email_sender,
     documents,
+    local_documents,
     demos,
     status,
     contract_templates,
@@ -249,6 +250,7 @@ app.include_router(drive.router, prefix="/drive", tags=["Google Drive"])
 app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])
 app.include_router(email_sender.router, prefix="/email-sender", tags=["Send From My Email"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
+app.include_router(local_documents.router, prefix="/documents/local", tags=["Local Documents"])
 app.include_router(demos.router, prefix="/demos", tags=["Demo Booking"])
 app.include_router(beta.router, prefix="/beta", tags=["iOS Beta (TestFlight)"])
 app.include_router(status.router, prefix="/status", tags=["Status Page"])
