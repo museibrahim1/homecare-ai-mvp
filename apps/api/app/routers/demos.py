@@ -48,24 +48,24 @@ DEMO_DURATION_MINUTES = 30
 
 # Morning hours stay on the picker as unavailable so the calendar looks busy.
 # Muse's real availability (Central):
-#   Mon / Wed / Thu: 1:00 PM – 6:00 PM
-#   Tue:             1:30 PM – 6:00 PM
-#   Fri / weekends:  not available (blacked out)
+#   Mon / Wed / Thu: 1:30 PM – 6:00 PM
+#   Tue / Fri / weekends: not available (blacked out)
 DEMO_MORNING_DISPLAY = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
 ]
-DEMO_SLOTS_FULL = [
+# Full afternoon grid shown in UI; 1:00 PM is displayed but not bookable.
+DEMO_AFTERNOON_DISPLAY = [
     "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00", "17:30", "18:00",
 ]
-DEMO_SLOTS_TUESDAY = [
+DEMO_SLOTS_OPEN = [
     "13:30", "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00", "17:30", "18:00",
 ]
 # Keep alias for older call sites / tests that expect DEMO_SLOTS.
-DEMO_SLOTS = DEMO_SLOTS_FULL
-# weekday(): Mon=0 … Fri=4
-DEMO_OPEN_WEEKDAYS = {0, 1, 2, 3}  # Mon–Thu; Friday closed
+DEMO_SLOTS = DEMO_SLOTS_OPEN
+# weekday(): Mon=0 … Fri=4 — only Mon / Wed / Thu
+DEMO_OPEN_WEEKDAYS = {0, 2, 3}
 
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/Chicago")
 DEMO_TIMEZONE_LABEL = "Central Time"
@@ -76,9 +76,7 @@ def _slots_for_weekday(weekday: int) -> list[str]:
     """Return bookable HH:MM slots for a Python weekday, or [] if closed."""
     if weekday not in DEMO_OPEN_WEEKDAYS:
         return []
-    if weekday == 1:  # Tuesday starts at 1:30 PM
-        return DEMO_SLOTS_TUESDAY.copy()
-    return DEMO_SLOTS_FULL.copy()
+    return DEMO_SLOTS_OPEN.copy()
 
 
 # Allowed "Where did you find us?" values (SEO / attribution). Required on book.
@@ -103,8 +101,8 @@ def _day_schedule(bookable: list[str]) -> list[dict]:
     """Full day view: morning marked unavailable; afternoon per Muse's hours."""
     bookable_set = set(bookable)
     rows = [{"time": t, "available": False} for t in DEMO_MORNING_DISPLAY]
-    # Show the full afternoon grid so Tue 1:00 PM appears blocked, not missing.
-    for t in DEMO_SLOTS_FULL:
+    # Show the full afternoon grid so 1:00 PM appears blocked, not missing.
+    for t in DEMO_AFTERNOON_DISPLAY:
         rows.append({"time": t, "available": t in bookable_set})
     return rows
 
@@ -290,9 +288,9 @@ def _meet_link_from_event(event: dict) -> Optional[str]:
 async def get_available_slots():
     """Return demo slots for the next 14 open days (Central).
 
-    Open: Mon/Wed/Thu 1–6pm, Tue 1:30–6pm. Friday and weekends are omitted
+    Open: Mon/Wed/Thu 1:30–6pm. Tuesday, Friday, and weekends are omitted
     so the calendar blacks them out. `schedule` still shows morning + any
-    blocked afternoon times (e.g. Tue 1:00 PM) as unavailable.
+    blocked afternoon times (e.g. 1:00 PM) as unavailable.
     """
     slots = {}
     schedule = {}
@@ -356,7 +354,7 @@ async def book_demo(
         if not open_slots:
             raise HTTPException(
                 status_code=400,
-                detail="Demos are available Monday–Thursday only (Friday is unavailable)",
+                detail="Demos are available Monday, Wednesday, and Thursday only",
             )
         if booking.time_slot not in open_slots:
             raise HTTPException(status_code=400, detail="Invalid time slot for that day")
