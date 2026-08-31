@@ -23,6 +23,6 @@ struct DocumentFolder: Codable {
 
 struct DocumentsResponse: Codable {
     let documents: [DocumentItem]
-    let total: Int
+    let total: Int?
     let folders: [DocumentFolder]?
 }

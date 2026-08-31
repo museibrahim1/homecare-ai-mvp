@@ -132,12 +132,10 @@ struct PalmGlassCardModifier: ViewModifier {
         content
             .padding(padding ?? 0)
             .background {
-                if !isNight {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                }
+                // Avoid .ultraThinMaterial on scrolling list cells — live backdrop
+                // blur per row causes the lag users report on Clients/Home.
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(isNight ? Color.palmNightGlassFill : Color.white.opacity(fillOpacity))
+                    .fill(isNight ? Color.palmNightGlassFill : Color.white.opacity(max(fillOpacity, 0.88)))
             }
             .overlay(
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
@@ -148,7 +146,7 @@ struct PalmGlassCardModifier: ViewModifier {
             )
             .shadow(
                 color: isNight ? PalmGlass.nightShadow : PalmGlass.shadow,
-                radius: isNight ? 24 : 20,
+                radius: isNight ? 12 : 8,
                 y: isNight ? 14 : 12
             )
     }

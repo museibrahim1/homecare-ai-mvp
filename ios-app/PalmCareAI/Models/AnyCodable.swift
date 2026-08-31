@@ -79,3 +79,12 @@ struct AnyCodable: Codable {
         }
     }
 }
+
+
+/// Decodes T if possible; otherwise stores nil instead of failing the whole array.
+struct FailableDecodable<T: Decodable>: Decodable {
+    let value: T?
+    init(from decoder: Decoder) throws {
+        value = try? T(from: decoder)
+    }
+}

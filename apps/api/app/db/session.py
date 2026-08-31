@@ -28,6 +28,8 @@ def _build_engine():
             pool_pre_ping=True,
             pool_size=10,
             max_overflow=20,
+            # Recycle before Railway/proxy idle kills leave us with dead sockets.
+            pool_recycle=1800,
             connect_args=connect_args,
         )
 

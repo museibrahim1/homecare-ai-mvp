@@ -45,7 +45,7 @@ struct Client: Codable, Identifiable {
     let notes: String?
     let external_id: String?
     let external_source: String?
-    let created_at: String
+    let created_at: String?
     let updated_at: String?
 
     var displayStatus: String {

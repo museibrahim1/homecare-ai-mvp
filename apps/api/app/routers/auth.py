@@ -10,7 +10,13 @@ from sqlalchemy.orm import Session
 
 import pyotp
 
-from app.core.cookies import set_session_cookie, clear_session_cookie
+from app.core.cookies import (
+    REFRESH_COOKIE_NAME,
+    set_session_cookie,
+    set_refresh_cookie,
+    clear_session_cookie,
+    clear_auth_cookies,
+)
 from app.core.rate_limit import get_client_ip
 from app.core.deps import get_db, get_current_user
 from app.core.tenancy import find_user_by_email
@@ -318,9 +324,10 @@ async def login(request: LoginRequest, req: Request, response: Response, db: Ses
         except Exception as e:
             logger.warning(f"Failed to notify CEO of team login: {e}")
     
-    # Web clients authenticate via httpOnly cookie (token never in localStorage)
+    # Web clients authenticate via httpOnly cookies (tokens never in localStorage)
     max_age = int(expires.total_seconds()) if expires else None
     set_session_cookie(response, access_token, max_age_seconds=max_age)
+    set_refresh_cookie(response, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -334,13 +341,21 @@ async def refresh_session(
     """
     Exchange a valid refresh token for a new access token.
 
-    The refresh token is rotated on every use. Used by the mobile app so
-    Face ID users stay signed in without long-lived access tokens.
+    The refresh token is rotated on every use. Mobile sends it in the JSON
+    body; the web app sends it via the httpOnly palm_refresh cookie so the
+    browser can renew a 1-hour access session without storing secrets in JS.
     """
     client_ip = get_client_ip(req)
     _check_rate_limit(f"refresh:{client_ip}")
 
-    token_hash = _hash_refresh_token(request.refresh_token)
+    raw_refresh = request.refresh_token or req.cookies.get(REFRESH_COOKIE_NAME)
+    if not raw_refresh:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired — please sign in again",
+        )
+
+    token_hash = _hash_refresh_token(raw_refresh)
     user = db.query(User).filter(User.refresh_token_hash == token_hash).first()
 
     invalid = HTTPException(
@@ -368,6 +383,7 @@ async def refresh_session(
 
     max_age = int(expires.total_seconds()) if expires else None
     set_session_cookie(response, access_token, max_age_seconds=max_age)
+    set_refresh_cookie(response, new_refresh)
     return Token(access_token=access_token, refresh_token=new_refresh)
 
 
@@ -530,6 +546,7 @@ async def social_login(
     )
 
     set_session_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
     user_payload = _user_response(db, user)
     return SocialLoginResponse(
         access_token=access_token,
@@ -567,13 +584,13 @@ async def update_current_user_info(
 
 @router.post("/session/clear")
 async def clear_session(response: Response):
-    """Clear the httpOnly session cookie only.
+    """Clear httpOnly auth cookies (access + refresh).
 
     Used for implicit logouts (inactivity timeout, visiting /login while
-    signed in). Unlike /auth/logout it does NOT revoke the refresh token or
-    disconnect integrations. No auth required — clearing a cookie is harmless.
+    signed in). Unlike /auth/logout it does NOT revoke the server-side refresh
+    hash or disconnect integrations. No auth required — clearing cookies is harmless.
     """
-    clear_session_cookie(response)
+    clear_auth_cookies(response)
     return {"message": "Session cleared"}
 
 
@@ -584,7 +601,7 @@ async def logout(
     current_user: User = Depends(get_current_user),
 ):
     """Logout current user. Admin Google Calendar stays connected for demo booking."""
-    clear_session_cookie(response)
+    clear_auth_cookies(response)
     is_platform_admin = (
         getattr(current_user, 'role', '') == 'admin'
         and (current_user.email or '').endswith('@palmtai.com')
@@ -615,7 +632,7 @@ async def logout_all_devices(
     will be rejected by get_current_user, forcing re-authentication on
     every device.
     """
-    clear_session_cookie(response)
+    clear_auth_cookies(response)
     current_user.force_logout_at = datetime.now(timezone.utc)
     current_user.refresh_token_hash = None
     current_user.refresh_token_expires_at = None
@@ -763,6 +780,7 @@ async def mfa_login(
     )
 
     set_session_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -835,6 +853,7 @@ async def mfa_verify_pending(
     )
 
     set_session_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
     user_payload = _user_response(db, user)
     return SocialLoginResponse(
         access_token=access_token,

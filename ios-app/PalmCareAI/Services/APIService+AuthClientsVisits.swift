@@ -196,7 +196,9 @@ extension APIService {
         if !forceRefresh, let cached = cachedClients, cached.isValid(ttl: cacheTTL) {
             return cached.value
         }
-        let clients: [Client] = try await request("GET", path: "/clients")
+        // Decode per-row so one malformed client cannot blank the whole list.
+        let rows: [FailableDecodable<Client>] = try await request("GET", path: "/clients")
+        let clients = rows.compactMap(\.value)
         cachedClients = CacheEntry(value: clients, timestamp: Date())
         return clients
     }

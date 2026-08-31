@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
-from app.core.cookies import set_session_cookie
+from app.core.cookies import set_session_cookie, set_refresh_cookie
 from app.core.rate_limit import limiter
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -149,6 +149,7 @@ async def verify_magic_link(
     })
 
     set_session_cookie(response, token)
+    set_refresh_cookie(response, refresh_token)
 
     return BusinessLoginResponse(
         access_token=token,

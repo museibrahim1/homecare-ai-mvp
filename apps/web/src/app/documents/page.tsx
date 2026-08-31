@@ -5,6 +5,7 @@ import GlassShell from '@/components/GlassShell';
 import LocalDriveSection from '@/components/documents/LocalDriveSection';
 import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { api, bearerHeaders } from '@/lib/api';
 
 const API_URL = '/api';
 
@@ -114,21 +115,38 @@ export default function DocumentsPage() {
   // Fetch ALL documents from API (filtering is done client-side to keep folder counts accurate)
   const fetchDocuments = useCallback(async () => {
     if (!token) return;
-    
+
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/documents`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include',
-      });
-      
+      const load = () =>
+        fetch(`${API_URL}/documents`, {
+          headers: { ...bearerHeaders(token) },
+          credentials: 'include',
+        });
+
+      let response = await load();
+      if (response.status === 401) {
+        const renewed = await api.refreshSession();
+        if (renewed) response = await load();
+      }
+
       if (response.ok) {
         const data = await response.json();
         setFiles(data.documents || []);
         setFolders(data.folders || []);
+        setError(null);
+      } else if (response.status === 401) {
+        setFiles([]);
+        setFolders([]);
+        setError('Your session expired. Sign in again to load documents.');
+      } else {
+        setFiles([]);
+        setFolders([]);
+        setError('Could not load documents. Try refreshing the page.');
       }
     } catch (error) {
       console.error('Failed to fetch documents:', error);
+      setError('Could not load documents. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -149,7 +167,7 @@ export default function DocumentsPage() {
       
       try {
         const response = await fetch(`${API_URL}/drive/status`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: { ...bearerHeaders(token) },
         });
         
         if (response.ok) {
@@ -263,7 +281,7 @@ export default function DocumentsPage() {
 
     try {
       const agencyRes = await fetch(`${API_URL}/agency`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
         credentials: 'include',
       });
       const agency = agencyRes.ok ? await agencyRes.json() : { documents: [] };
@@ -280,7 +298,7 @@ export default function DocumentsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...bearerHeaders(token),
         },
         credentials: 'include',
         body: JSON.stringify({ documents: [...existing, ...stored] }),
@@ -336,7 +354,7 @@ export default function DocumentsPage() {
     
     try {
       const response = await fetch(`${API_URL}${file.download_url}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
       });
       
       if (!response.ok) {
@@ -380,7 +398,7 @@ export default function DocumentsPage() {
     try {
       await fetch(`${API_URL}/drive/disconnect`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
       });
       setDriveConnected(false);
       setDriveFiles([]);
@@ -396,7 +414,7 @@ export default function DocumentsPage() {
     setDriveLoading(true);
     try {
       const response = await fetch(`${API_URL}/drive/files`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
       });
       
       if (response.ok) {

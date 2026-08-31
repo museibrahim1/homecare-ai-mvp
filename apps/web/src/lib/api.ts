@@ -27,7 +27,11 @@ class ApiClient {
   private static readonly TIMEOUT_MS = 30000;
   private static readonly MAX_RETRIES = 1;
   private static readonly CACHE_TTL_MS = 15000; // 15s stale-while-revalidate for GET
+  // Access JWTs last 1 hour; renew ~15 minutes early while the tab is open.
+  private static readonly REFRESH_INTERVAL_MS = 45 * 60 * 1000;
   private cache = new Map<string, { data: any; ts: number }>();
+  private refreshPromise: Promise<boolean> | null = null;
+  private refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   private getCached<T>(key: string): T | null {
     const entry = this.cache.get(key);
@@ -42,10 +46,48 @@ class ApiClient {
     }
   }
 
+  /** Silent session renewal via httpOnly refresh cookie. Dedupes in-flight calls. */
+  async refreshSession(): Promise<boolean> {
+    if (this.refreshPromise) return this.refreshPromise;
+    this.refreshPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({}),
+        });
+        return response.ok;
+      } catch {
+        return false;
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+    return this.refreshPromise;
+  }
+
+  /** Keep the 1-hour access cookie alive while the user has the app open. */
+  startSessionRefresh() {
+    if (typeof window === 'undefined') return;
+    if (this.refreshTimer) return;
+    this.refreshTimer = setInterval(() => {
+      void this.refreshSession();
+    }, ApiClient.REFRESH_INTERVAL_MS);
+  }
+
+  stopSessionRefresh() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    token?: string
+    token?: string,
+    allowRefresh = true,
   ): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -82,6 +124,20 @@ class ApiClient {
         clearTimeout(timeout);
 
         if (!response.ok) {
+          // Expired access cookie: renew once via refresh cookie, then retry.
+          if (
+            response.status === 401 &&
+            allowRefresh &&
+            !endpoint.startsWith('/auth/login') &&
+            !endpoint.startsWith('/auth/refresh') &&
+            !endpoint.startsWith('/auth/business/login')
+          ) {
+            const renewed = await this.refreshSession();
+            if (renewed) {
+              return this.request<T>(endpoint, options, token, false);
+            }
+          }
+
           const error = await response.json().catch(() => ({ detail: 'Request failed' }));
           // Handle different error formats from FastAPI
           let errorMessage = 'Request failed';

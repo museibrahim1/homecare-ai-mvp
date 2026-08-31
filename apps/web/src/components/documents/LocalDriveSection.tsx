@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { bearerHeaders } from '@/lib/api';
 import {
   Download,
   Eye,
@@ -77,7 +78,7 @@ export default function LocalDriveSection({ token, searchQuery, onError }: Local
       if (typeFilter !== 'all') params.set('file_type', typeFilter);
       const qs = params.toString();
       const response = await fetch(`${API_URL}/documents/local${qs ? `?${qs}` : ''}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
         credentials: 'include',
       });
       if (!response.ok) {
@@ -126,7 +127,7 @@ export default function LocalDriveSection({ token, searchQuery, onError }: Local
       try {
         const response = await fetch(`${API_URL}/documents/local`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { ...bearerHeaders(token) },
           credentials: 'include',
           body: form,
         });
@@ -164,7 +165,7 @@ export default function LocalDriveSection({ token, searchQuery, onError }: Local
     if (!token) return;
     try {
       const response = await fetch(`${API_URL}${doc.download_url}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
         credentials: 'include',
       });
       if (!response.ok) {
@@ -195,7 +196,7 @@ export default function LocalDriveSection({ token, searchQuery, onError }: Local
     setPreviewUrl(null);
     try {
       const response = await fetch(`${API_URL}${doc.preview_url}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
         credentials: 'include',
       });
       if (!response.ok) {
@@ -224,7 +225,7 @@ export default function LocalDriveSection({ token, searchQuery, onError }: Local
     try {
       const response = await fetch(`${API_URL}/documents/local/${doc.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...bearerHeaders(token) },
         credentials: 'include',
       });
       if (!response.ok) {

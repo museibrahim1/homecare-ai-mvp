@@ -18,7 +18,8 @@ class Token(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    refresh_token: str
+    # Optional: web clients send the refresh token via httpOnly cookie instead.
+    refresh_token: Optional[str] = None
 
 
 class MFALoginRequest(BaseModel):
