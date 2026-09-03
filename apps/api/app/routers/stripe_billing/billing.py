@@ -6,8 +6,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.tenancy import resolve_business_id
 from app.models.user import User
-from app.models.business import BusinessUser
 from app.models.subscription import Plan, Subscription, Invoice
 
 logger = logging.getLogger(__name__)
@@ -29,15 +29,13 @@ async def get_my_subscription(
     current_user: User = Depends(get_current_user),
 ):
     """Get the current user's subscription, plan, and usage."""
-    business_user = db.query(BusinessUser).filter(
-        BusinessUser.email == current_user.email
-    ).first()
+    business_id = resolve_business_id(db, current_user)
 
-    if not business_user:
+    if not business_id:
         return {"subscription": None, "plan": None}
 
     subscription = db.query(Subscription).filter(
-        Subscription.business_id == business_user.business_id
+        Subscription.business_id == business_id
     ).first()
 
     if not subscription:
@@ -81,15 +79,13 @@ async def get_my_invoices(
     current_user: User = Depends(get_current_user),
 ):
     """Get the current user's invoice history."""
-    business_user = db.query(BusinessUser).filter(
-        BusinessUser.email == current_user.email
-    ).first()
+    business_id = resolve_business_id(db, current_user)
 
-    if not business_user:
+    if not business_id:
         return {"invoices": []}
 
     invoices = db.query(Invoice).filter(
-        Invoice.business_id == business_user.business_id
+        Invoice.business_id == business_id
     ).order_by(Invoice.invoice_date.desc()).limit(50).all()
 
     return {
@@ -120,15 +116,13 @@ async def download_invoice_pdf(
     current_user: User = Depends(get_current_user),
 ):
     """Download a single invoice as a PDF (data isolation enforced)."""
-    business_user = db.query(BusinessUser).filter(
-        BusinessUser.email == current_user.email
-    ).first()
-    if not business_user:
+    business_id = resolve_business_id(db, current_user)
+    if not business_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
 
     invoice = db.query(Invoice).filter(
         Invoice.id == invoice_id,
-        Invoice.business_id == business_user.business_id,
+        Invoice.business_id == business_id,
     ).first()
     if not invoice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
