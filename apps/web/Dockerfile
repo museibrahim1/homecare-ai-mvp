@@ -1,5 +1,5 @@
 # Version: v23 - Add dark/light theme switcher
-FROM node:20-alpine AS builder
+FROM node:20.20.2-alpine AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Production image
-FROM node:20-alpine AS runner
+FROM node:20.20.2-alpine AS runner
 
 WORKDIR /app
 
