@@ -25,7 +25,7 @@ import PalmOrb from '@/components/glass/PalmOrb';
 const NAV: { href: string; label: string; icon: LucideIcon; match?: string[] }[] = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/clients', label: 'Clients', icon: Users, match: ['/clients'] },
-  { href: '/pipeline', label: 'Sales', icon: Target, match: ['/pipeline', '/leads'] },
+  { href: '/pipeline', label: 'CRM', icon: Target, match: ['/pipeline', '/leads'] },
   { href: '/visits', label: 'Visits', icon: Calendar },
   { href: '/documents', label: 'Documents', icon: FolderOpen },
   { href: '/schedule', label: 'Calendar', icon: CalendarDays },
@@ -186,7 +186,7 @@ export default function GlassRail() {
 
       <div
         className={`md:hidden fixed top-0 left-0 h-screen z-[60] transition-transform duration-200 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+          mobileOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none'
         }`}
       >
         <button

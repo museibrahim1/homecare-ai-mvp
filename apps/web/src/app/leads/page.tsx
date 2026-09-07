@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-// Leads now live as a tab on the Sales page. This route redirects for any
+// Leads now live as a tab on the CRM page. This route redirects for any
 // bookmarks or links that still point at the old standalone page.
 export default function LeadsRedirect() {
   const router = useRouter();

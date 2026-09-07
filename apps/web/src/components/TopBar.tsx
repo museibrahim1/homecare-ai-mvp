@@ -29,7 +29,7 @@ const PRIORITY_INDICATOR: Record<string, string> = {
 
 const BREADCRUMB_MAP: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/pipeline': 'Deals Pipeline',
+  '/pipeline': 'CRM',
   '/leads': 'Leads',
   '/schedule': 'Schedule',
   '/clients': 'Clients',
@@ -247,7 +247,7 @@ interface SearchableItem {
 const SEARCHABLE_ITEMS: SearchableItem[] = [
   { label: 'Dashboard',        href: '/dashboard',        keywords: ['home', 'overview', 'summary'],                    category: 'page', icon: Layout },
   { label: 'Clients',          href: '/clients',          keywords: ['patients', 'contacts', 'people', 'customer'],     category: 'page', icon: Users },
-  { label: 'Deals Pipeline',   href: '/pipeline',         keywords: ['deals', 'sales', 'funnel', 'opportunities'],      category: 'page', icon: BarChart3 },
+  { label: 'CRM',              href: '/pipeline',         keywords: ['deals', 'sales', 'funnel', 'opportunities', 'crm'], category: 'page', icon: BarChart3 },
   { label: 'Leads',            href: '/leads',            keywords: ['prospects', 'inquiries'],                          category: 'page', icon: Users },
   { label: 'Assessments',      href: '/visits',           keywords: ['visits', 'evaluations', 'intake'],                category: 'page', icon: Zap },
   { label: 'New Assessment',   href: '/visits/new',       keywords: ['create assessment', 'new visit', 'start'],        category: 'action', icon: PlusCircle },

@@ -264,7 +264,7 @@ export default function PipelinePage() {
 
   if (loading) {
     return (
-      <GlassShell title="Sales" subtitle="Track deals through the care process and manage new leads">
+      <GlassShell title="CRM" subtitle="Track deals through the care process and manage new leads">
         <div className="flex items-center justify-center py-24">
           <RefreshCw className="w-8 h-8 text-primary-500 animate-spin" />
         </div>
@@ -274,7 +274,7 @@ export default function PipelinePage() {
 
   return (
     <GlassShell
-      title="Sales"
+      title="CRM"
       subtitle="Track deals through the care process and manage new leads"
       wide={activeTab === 'deals'}
       action={

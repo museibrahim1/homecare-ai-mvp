@@ -34,7 +34,7 @@ const statuses = ['New', 'Contacted', 'Qualified'];
 
 /**
  * Leads management surface (list, add, convert to client). Shared between the
- * Sales page (Leads tab) and the Clients page (Leads tab). Persists to the
+ * Sales/CRM page (Leads tab) and the Clients page (Leads tab). Persists to the
  * agency CRM API; migrates legacy localStorage on first load.
  */
 export default function LeadsPanel() {

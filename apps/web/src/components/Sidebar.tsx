@@ -29,7 +29,7 @@ interface NavSectionData {
 
 const salesNavItems: NavItemData[] = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/pipeline', label: 'Sales', icon: Target },
+  { href: '/pipeline', label: 'CRM', icon: Target },
   { href: '/schedule', label: 'My Schedule', icon: CalendarDays },
 ];
 

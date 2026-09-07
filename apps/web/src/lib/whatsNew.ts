@@ -76,7 +76,11 @@ export function getCurrentRelease(): WhatsNewRelease | undefined {
 
 export function getSeenWhatsNewVersion(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+  try {
+    return localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function shouldShowWhatsNew(): boolean {
@@ -87,7 +91,11 @@ export function shouldShowWhatsNew(): boolean {
 
 export function markWhatsNewSeen(version: string = CURRENT_WHATS_NEW_VERSION): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(WHATS_NEW_STORAGE_KEY, version);
+  try {
+    localStorage.setItem(WHATS_NEW_STORAGE_KEY, version);
+  } catch {
+    // Private / blocked storage: still dismiss for this session via poller state.
+  }
 }
 
 /** Marketing, auth, and legal pages — never show What's New here. */

@@ -37,6 +37,7 @@ export default function GlassTabs({
           return (
             <button
               key={tab.key}
+              type="button"
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(tab.key)}
@@ -72,6 +73,7 @@ export default function GlassTabs({
         return (
           <button
             key={tab.key}
+            type="button"
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab.key)}
