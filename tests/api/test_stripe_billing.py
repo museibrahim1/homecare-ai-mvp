@@ -35,7 +35,8 @@ from app.routers.stripe_billing.webhooks import (
     handle_invoice_paid,
 )
 
-PASSWORD = "Str0ngPassw0rd!"
+# Fixture-only login password for users created directly in the test DB.
+PASSWORD = "unit-test-login-password-1"
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +132,7 @@ def stripe_configured(monkeypatch):
     fake = _FakeStripe()
     monkeypatch.setattr(checkout_mod, "stripe", fake)
     monkeypatch.setattr(checkout_mod, "STRIPE_AVAILABLE", True)
-    monkeypatch.setattr(checkout_mod, "STRIPE_SECRET_KEY", "sk_test_x")
+    monkeypatch.setattr(checkout_mod, "STRIPE_SECRET_KEY", "test-key-not-real")
     return fake
 
 
