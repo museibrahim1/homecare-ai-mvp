@@ -9,16 +9,9 @@ from pydantic import BaseModel
 class CreateCheckoutRequest(BaseModel):
     plan_id: UUID
     billing_cycle: str = "monthly"  # monthly or annual
+    # Ignored server-side (business is derived from the authenticated user);
+    # kept so older clients sending it don't get a validation error.
     business_id: Optional[UUID] = None
-
-
-class SignupCheckoutRequest(BaseModel):
-    """Public checkout request for new signups (no auth required)."""
-    business_id: UUID
-    email: str
-    billing_cycle: str = "monthly"
-    trial_type: str = "standard"  # "standard" (14-day free) or "extended" (30-day for $39.99)
-    plan_tier: str = "starter"
 
 
 class CheckoutResponse(BaseModel):
@@ -27,13 +20,5 @@ class CheckoutResponse(BaseModel):
 
 
 class PortalRequest(BaseModel):
+    # Ignored server-side; see CreateCheckoutRequest.business_id.
     business_id: Optional[UUID] = None
-
-
-class StripePriceConfig(BaseModel):
-    """Configuration for Stripe price IDs"""
-    stripe_product_id: Optional[str] = None
-    stripe_price_id_monthly: Optional[str] = None
-    stripe_price_id_annual: Optional[str] = None
-    stripe_price_id_setup: Optional[str] = None
-

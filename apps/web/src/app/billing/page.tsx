@@ -98,6 +98,7 @@ export default function BillingPage() {
   const [planActionLoading, setPlanActionLoading] = useState<string | null>(null);
   const [billingActionLoading, setBillingActionLoading] = useState(false);
   const [billingError, setBillingError] = useState<string | null>(null);
+  const [checkoutSucceeded, setCheckoutSucceeded] = useState(false);
   const [catalogPlans, setCatalogPlans] = useState<CatalogPlan[]>([]);
 
   const fetchBilling = useCallback(async () => {
@@ -139,6 +140,18 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (isReady && token) fetchBilling();
+  }, [isReady, token, fetchBilling]);
+
+  // Returning from Stripe checkout: show confirmation and refetch until the
+  // webhook has activated the subscription (it can lag by a few seconds).
+  useEffect(() => {
+    if (!isReady || !token) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') !== 'success') return;
+    setCheckoutSucceeded(true);
+    window.history.replaceState(null, '', '/billing');
+    const timers = [2000, 5000, 10000].map((ms) => window.setTimeout(fetchBilling, ms));
+    return () => timers.forEach((t) => window.clearTimeout(t));
   }, [isReady, token, fetchBilling]);
 
   const downloadInvoice = useCallback(async (inv: InvoiceData) => {
@@ -252,6 +265,7 @@ export default function BillingPage() {
       subscription?.stripe_subscription_id,
   );
   const platformPlanId = catalogPlans.find((p) => p.tier === 'starter')?.id;
+  const mobilePlanId = catalogPlans.find((p) => p.tier === 'mobile')?.id;
 
   const handleManageBilling = async () => {
     if (!token) return;
@@ -276,20 +290,17 @@ export default function BillingPage() {
     setPlanActionLoading(planKey);
     setBillingError(null);
     try {
-      if (planKey === 'platform' && platformPlanId) {
-        const openedApp = isMobileIOS() && openPaywallInApp('platform');
-        if (!openedApp) {
-          const url = await startStripeCheckout(token, platformPlanId);
-          if (url) window.location.assign(url);
-        }
+      // On an iPhone with PalmCare installed, the native Apple paywall is
+      // the required purchase path. Everywhere else, Stripe checkout.
+      if (isMobileIOS() && openPaywallInApp(planKey)) return;
+
+      const planId = planKey === 'mobile' ? mobilePlanId : platformPlanId;
+      if (!planId) {
+        setBillingError('Plans are still loading. Please try again in a moment.');
         return;
       }
-      if (planKey === 'mobile') {
-        if (openPaywallInApp('mobile')) return;
-        scrollToManageSubscription();
-        return;
-      }
-      scrollToManageSubscription();
+      const url = await startStripeCheckout(token, planId);
+      if (url) window.location.assign(url);
     } catch (err) {
       setBillingError(err instanceof Error ? err.message : 'Could not start checkout');
       scrollToManageSubscription();
@@ -311,14 +322,7 @@ export default function BillingPage() {
     if (hasPaidSubscription) {
       return { label: 'Change in Apple Subscriptions', kind: 'manageApple' as const };
     }
-    if (planKey === 'mobile') {
-      return {
-        label: isMobileIOS() ? 'Start trial in app' : 'Subscribe on iPhone',
-        kind: 'subscribeMobile' as const,
-        planKey,
-      };
-    }
-    return { label: 'Subscribe with card', kind: 'subscribeStripe' as const, planKey };
+    return { label: 'Start free trial', kind: 'subscribeStripe' as const, planKey };
   };
 
   const hasVisitCap = !!plan && plan.max_visits_per_month > 0 && plan.max_visits_per_month < 99999;
@@ -362,6 +366,12 @@ export default function BillingPage() {
   return (
     <GlassShell title="Billing" subtitle="Plan, usage, and invoices in one place." action={changePlanAction}>
       <div className="max-w-4xl w-full space-y-6">
+        {checkoutSucceeded && (
+          <div className="glass-card p-4 border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            Payment received. Your plan is being activated and will appear below within a minute.
+          </div>
+        )}
         {billingError && (
           <div className="glass-card p-4 border border-amber-200 bg-amber-50 text-amber-800 text-sm">
             {billingError}
@@ -440,14 +450,14 @@ export default function BillingPage() {
         <div id="plans">
           <h2 className="text-lg font-bold text-[#10211F] mb-1">Choose a plan</h2>
           <p className="text-[#4B6B66] text-sm mb-4">
-            Platform can be purchased on the web with a card or in the PalmCare iPhone app. Mobile is iPhone only. Active Apple subscribers manage billing in Apple Subscriptions.
+            Subscribe here with a card, or in the PalmCare iPhone app. Every new plan starts with a 30 day free trial. Active Apple subscribers manage billing in Apple Subscriptions.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {planCatalog.map((p) => {
               const current = isCurrentPlan(p.tier);
               const cta = getPlanCta(p.tier, p.planKey);
               const loadingThis = Boolean(
-                (cta.kind === 'subscribeMobile' || cta.kind === 'subscribeStripe') &&
+                cta.kind === 'subscribeStripe' &&
                   cta.planKey &&
                   planActionLoading === cta.planKey,
               );
@@ -603,7 +613,7 @@ export default function BillingPage() {
             <div>
               <h2 className="font-semibold text-[#10211F]">Subscription and payment</h2>
               <p className="text-sm text-[#4B6B66] mt-0.5">
-                Platform: pay with card on the web or subscribe in the PalmCare app. Mobile: iPhone app only. Apple subscribers manage plans in Apple Subscriptions.
+                Pay with a card here on the web, or subscribe inside the PalmCare iPhone app. Apple subscribers manage plans in Apple Subscriptions; card subscribers use the Stripe billing portal.
               </p>
             </div>
           </div>
@@ -633,10 +643,12 @@ export default function BillingPage() {
                 >
                   {planActionLoading === 'mobile' ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
+                  ) : isMobileIOS() ? (
                     <Smartphone className="w-4 h-4" />
+                  ) : (
+                    <CreditCard className="w-4 h-4" />
                   )}
-                  {isMobileIOS() ? 'Start Mobile trial in app' : 'Mobile on iPhone'}
+                  Subscribe to Mobile
                 </button>
                 <button
                   type="button"
@@ -660,20 +672,22 @@ export default function BillingPage() {
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">1</span>
               <span>
                 {hasPaidSubscription
-                  ? 'Open Apple Subscriptions to change plans, update your payment method, or cancel renewal.'
-                  : 'Tap a plan above on your iPhone or iPad to open PalmCare and start the Apple payment sheet.'}
+                  ? isStripeManaged
+                    ? 'Open the Stripe billing portal to change plans, update your card, download receipts, or cancel renewal.'
+                    : 'Open Apple Subscriptions to change plans, update your payment method, or cancel renewal.'
+                  : 'Pick a plan above. On the web you pay by card through our secure Stripe checkout; on an iPhone with PalmCare installed, the Apple payment sheet opens instead.'}
               </span>
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">2</span>
               <span>
-                In the app, go to <span className="font-medium">Settings → Your Plan</span> if you need to pick Mobile or Platform again.
+                Your plan unlocks automatically after payment. If it does not appear within a minute, refresh this page.
               </span>
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center text-xs font-semibold text-primary-600">3</span>
               <span>
-                You can also manage billing from <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>.
+                Apple subscribers can also manage billing from <span className="font-medium">iPhone Settings → [your name] → Subscriptions</span>, or in the app under <span className="font-medium">Settings → Your Plan</span>.
               </span>
             </li>
           </ol>

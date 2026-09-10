@@ -183,14 +183,85 @@ def create_apple_invoice(
     invoice). Never raises: on any error it logs and returns ``None`` so the
     caller's purchase flow is unaffected.
     """
+    return _create_paid_invoice(
+        db,
+        subscription=subscription,
+        plan=plan,
+        amount=amount,
+        currency=currency,
+        billing_cycle=billing_cycle,
+        period_start=period_start,
+        period_end=period_end,
+        dedupe_key=f"apple:{transaction_id}" if transaction_id else None,
+        billed_via_label=BILLED_VIA_APPLE,
+        billed_via_meta="apple_iap",
+        channel_description="Apple In-App Purchase",
+        external_id=transaction_id or None,
+        paid_at=paid_at,
+    )
+
+
+def create_stripe_invoice(
+    db: Session,
+    *,
+    subscription: Subscription,
+    plan: Optional[Plan],
+    amount: float,
+    currency: str = "USD",
+    billing_cycle: str = "monthly",
+    period_start: Optional[datetime] = None,
+    period_end: Optional[datetime] = None,
+    stripe_invoice_id: str = "",
+    paid_at: Optional[datetime] = None,
+) -> Optional[Invoice]:
+    """
+    Create (idempotently) a paid PalmCare invoice for a Stripe charge.
+
+    Same contract as :func:`create_apple_invoice`: keyed on the Stripe invoice
+    id, never raises, returns ``None`` for $0 or duplicate charges.
+    """
+    return _create_paid_invoice(
+        db,
+        subscription=subscription,
+        plan=plan,
+        amount=amount,
+        currency=currency,
+        billing_cycle=billing_cycle,
+        period_start=period_start,
+        period_end=period_end,
+        dedupe_key=stripe_invoice_id or None,
+        billed_via_label=BILLED_VIA_STRIPE,
+        billed_via_meta="stripe",
+        channel_description="Stripe",
+        external_id=stripe_invoice_id or None,
+        paid_at=paid_at,
+    )
+
+
+def _create_paid_invoice(
+    db: Session,
+    *,
+    subscription: Subscription,
+    plan: Optional[Plan],
+    amount: float,
+    currency: str,
+    billing_cycle: str,
+    period_start: Optional[datetime],
+    period_end: Optional[datetime],
+    dedupe_key: Optional[str],
+    billed_via_label: str,
+    billed_via_meta: str,
+    channel_description: str,
+    external_id: Optional[str],
+    paid_at: Optional[datetime],
+) -> Optional[Invoice]:
     try:
         amount = float(amount or 0)
         if amount <= 0:
-            # No money changed hands (free trial / intro offer). Apple's own
-            # receipt covers the $0 event; we only issue invoices for charges.
+            # No money changed hands (free trial / intro offer). The payment
+            # channel's own receipt covers the $0 event; we only issue
+            # invoices for charges.
             return None
-
-        dedupe_key = f"apple:{transaction_id}" if transaction_id else None
         if dedupe_key:
             existing = (
                 db.query(Invoice)
@@ -220,13 +291,13 @@ def create_apple_invoice(
             invoice_date=now,
             paid_at=paid_at,
             stripe_invoice_id=dedupe_key,
-            description=f"{plan_name} billed via Apple In-App Purchase",
+            description=f"{plan_name} billed via {channel_description}",
         )
         db.add(invoice)
         try:
             db.flush()  # assigns invoice.id; unique index catches races
         except IntegrityError:
-            # Another request already inserted this apple:<transaction_id>.
+            # Another request already inserted this dedupe key.
             db.rollback()
             return None
 
@@ -238,7 +309,7 @@ def create_apple_invoice(
             billing_cycle=billing_cycle,
             period_start=period_start,
             period_end=period_end,
-            billed_via=BILLED_VIA_APPLE,
+            billed_via=billed_via_label,
         )
 
         storage_key: Optional[str] = None
@@ -255,12 +326,12 @@ def create_apple_invoice(
 
         invoice.line_items = json.dumps({
             "pdf_key": storage_key,
-            "billed_via": "apple_iap",
+            "billed_via": billed_via_meta,
             "plan_name": plan_name,
             "billing_cycle": billing_cycle,
             "period_start": period_start.isoformat() if period_start else None,
             "period_end": period_end.isoformat() if period_end else None,
-            "transaction_id": transaction_id or None,
+            "transaction_id": external_id,
             "items": [
                 {
                     "description": plan_name,
@@ -279,12 +350,12 @@ def create_apple_invoice(
 
         db.refresh(invoice)
         logger.info(
-            "Created Apple IAP invoice %s for business %s (%s %s)",
-            invoice.invoice_number, subscription.business_id, amount, currency,
+            "Created %s invoice %s for business %s (%s %s)",
+            billed_via_label, invoice.invoice_number, subscription.business_id, amount, currency,
         )
         return invoice
     except Exception as exc:
-        logger.exception("create_apple_invoice failed: %s", exc)
+        logger.exception("_create_paid_invoice (%s) failed: %s", billed_via_label, exc)
         try:
             db.rollback()
         except Exception:

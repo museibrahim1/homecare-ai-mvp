@@ -1,13 +1,16 @@
 """
 Subscription package (mounted at /billing).
 
-Apple In-App Purchase handles Mobile and in-app Platform (see apple_iap).
-Stripe checkout + portal serve web Platform billing on desktop.
+Two payment channels, one Subscription row per business:
+  * Apple In-App Purchase (app.routers.apple_iap) inside the iOS app.
+  * Stripe Checkout + Customer Portal for the web (checkout.py, webhooks.py).
+
+`router` is re-exported so `from app.routers.stripe_billing import router`
+(mounted at /billing) keeps working.
 """
 
 from fastapi import APIRouter
 
-from .common import STRIPE_PRICE_MAP  # re-exported for app.main / plans seed
 from .plans import router as _plans_router
 from .billing import router as _billing_router
 from .checkout import router as _checkout_router
