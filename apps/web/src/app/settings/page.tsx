@@ -854,20 +854,20 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 {/* PLAN */}
                 <SectionCard label="Plan">
-                  <HubRow
+                    <HubRow
                     icon={<CreditCard className="w-[18px] h-[18px] text-primary-500" />}
                     title={planSummary?.name || 'Your plan'}
-                    subtitle="Manage your plan, rates, and billing"
+                    subtitle="Manage subscription, payment method, and invoices"
                     trailing={
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setView('plan'); }}
+                        onClick={(e) => { e.stopPropagation(); router.push('/billing#manage-subscription'); }}
                         className="h-8 px-3.5 rounded-[16px] text-[13px] font-semibold bg-[#0D94881A] text-[#0F766E] hover:bg-[#0D948826] transition-colors"
                       >
-                        Manage
+                        Billing
                       </button>
                     }
-                    onClick={() => setView('plan')}
+                    onClick={() => router.push('/billing#manage-subscription')}
                   />
                 </SectionCard>
 
