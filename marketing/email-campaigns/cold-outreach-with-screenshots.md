@@ -1,5 +1,12 @@
 # PalmCare AI — Cold Outreach Email Sequence (With iOS Screenshots)
 
+> **DEPRECATED (Sep 2026) — do not send this sequence.**
+> It contains fabricated claims ("163 agencies across 48 states", the $50,000
+> Texas story, the 60%→85% close rate) that violate our claims rules, and the
+> blast-first approach it describes is retired. Outbound now follows
+> `marketing/outbound/MANUAL_OUTBOUND_PLAYBOOK.md`: at least 100 hand-written,
+> individually researched emails before any automation. Kept for history only.
+
 **Enhanced with real app screenshots for maximum authenticity**
 
 ---
