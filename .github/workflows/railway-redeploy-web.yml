@@ -1,7 +1,7 @@
 name: Railway redeploy web
 
-# Manual trigger to pull latest main into the Railway web service.
-# Use when GitHub auto-deploy does not fire after a merge.
+# Pulls latest main into the Railway web service.
+# Use when GitHub→Railway auto-deploy does not fire after a merge.
 
 on:
   workflow_dispatch:
@@ -10,6 +10,12 @@ on:
         description: "Optional commit SHA (defaults to latest connected branch HEAD)"
         required: false
         type: string
+  push:
+    branches: [main]
+    paths:
+      - "scripts/deploy/railway_deploy_web.py"
+      - "scripts/deploy/.redeploy-web"
+      - ".github/workflows/railway-redeploy-web.yml"
 
 permissions:
   contents: read
@@ -28,5 +34,5 @@ jobs:
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-          DEPLOY_COMMIT_SHA: ${{ github.event.inputs.commit_sha }}
+          DEPLOY_COMMIT_SHA: ${{ github.event.inputs.commit_sha || github.sha }}
         run: python scripts/deploy/railway_deploy_web.py
