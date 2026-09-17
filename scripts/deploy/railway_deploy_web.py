@@ -124,33 +124,89 @@ def main() -> int:
             f"created={latest.get('createdAt')} commit={meta.get('commitHash')}"
         )
 
-    variables: dict = {
-        "serviceId": web_service_id,
-        "environmentId": env_id,
-        "latestCommit": True,
-    }
-    if COMMIT_SHA:
-        variables["commitSha"] = COMMIT_SHA
-        print(f"Requesting deploy of commit {COMMIT_SHA}")
-    else:
-        print("Requesting deploy of latest connected-branch commit")
-
-    result = gql(
-        """
-        mutation($serviceId: String!, $environmentId: String!, $commitSha: String, $latestCommit: Boolean) {
-          serviceInstanceDeploy(
-            serviceId: $serviceId
-            environmentId: $environmentId
-            commitSha: $commitSha
-            latestCommit: $latestCommit
-          )
-        }
-        """,
-        variables,
+    print(
+        f"Requesting deploy of "
+        f"{'commit ' + COMMIT_SHA if COMMIT_SHA else 'latest connected-branch commit'}"
     )
-    deploy_id = result.get("serviceInstanceDeploy")
-    print(f"Triggered deploy: {deploy_id}")
-    return 0
+
+    # Prefer explicit commit when provided; otherwise latestCommit on the connected branch.
+    attempts = []
+    if COMMIT_SHA:
+        attempts.append(
+            (
+                "serviceInstanceDeploy+commitSha",
+                """
+                mutation($serviceId: String!, $environmentId: String!, $commitSha: String!) {
+                  serviceInstanceDeploy(
+                    serviceId: $serviceId
+                    environmentId: $environmentId
+                    commitSha: $commitSha
+                    latestCommit: true
+                  )
+                }
+                """,
+                {
+                    "serviceId": web_service_id,
+                    "environmentId": env_id,
+                    "commitSha": COMMIT_SHA,
+                },
+                "serviceInstanceDeploy",
+            )
+        )
+        attempts.append(
+            (
+                "serviceInstanceDeployV2+commitSha",
+                """
+                mutation($serviceId: String!, $environmentId: String!, $commitSha: String!) {
+                  serviceInstanceDeployV2(
+                    serviceId: $serviceId
+                    environmentId: $environmentId
+                    commitSha: $commitSha
+                  )
+                }
+                """,
+                {
+                    "serviceId": web_service_id,
+                    "environmentId": env_id,
+                    "commitSha": COMMIT_SHA,
+                },
+                "serviceInstanceDeployV2",
+            )
+        )
+    attempts.append(
+        (
+            "serviceInstanceDeploy+latestCommit",
+            """
+            mutation($serviceId: String!, $environmentId: String!) {
+              serviceInstanceDeploy(
+                serviceId: $serviceId
+                environmentId: $environmentId
+                latestCommit: true
+              )
+            }
+            """,
+            {"serviceId": web_service_id, "environmentId": env_id},
+            "serviceInstanceDeploy",
+        )
+    )
+
+    last_err: Exception | None = None
+    for label, query, variables, result_key in attempts:
+        try:
+            print(f"Trying {label}…")
+            result = gql(query, variables)
+            deploy_id = result.get(result_key)
+            print(f"Triggered deploy via {label}: {deploy_id}")
+            return 0
+        except SystemExit as e:
+            last_err = e
+            print(f"{label} failed: {e}")
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+            print(f"{label} failed: {e}")
+
+    print(f"All deploy attempts failed. Last error: {last_err}", file=sys.stderr)
+    return 1
 
 
 if __name__ == "__main__":
