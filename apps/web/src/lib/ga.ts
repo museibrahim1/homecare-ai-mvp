@@ -10,7 +10,8 @@
  *
  * Meta Events Manager counterparts:
  *   - CompleteRegistration + StartTrial (signup)
- *   - Lead (demo / contact)
+ *   - Lead (contact / interest)
+ *   - Schedule (confirmed demo booking)
  *   - AppStoreClick custom (App Store CTAs)
  */
 
@@ -61,4 +62,13 @@ export function trackSignUp(params: GaParams = {}): void {
 export function trackGenerateLead(params: GaParams = {}): void {
   trackGaEvent('generate_lead', params);
   trackMetaEvent('Lead', params);
+}
+
+/**
+ * Fired only after a demo time slot is confirmed (not on page load / form open).
+ * Meta standard event: Schedule.
+ */
+export function trackSchedule(params: GaParams = {}): void {
+  trackGaEvent('schedule', params);
+  trackMetaEvent('Schedule', params);
 }

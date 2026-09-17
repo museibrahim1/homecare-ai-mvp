@@ -8,7 +8,8 @@
  *   - PageView              (layout + SPA route changes)
  *   - CompleteRegistration  (website signup)
  *   - StartTrial            (Apple IAP starts 30-day trial)
- *   - Lead                  (demo booking / contact)
+ *   - Lead                  (contact / interest forms)
+ *   - Schedule              (confirmed demo booking on /book-demo)
  *   - AppStoreClick         (custom — App Store CTA clicks)
  */
 
