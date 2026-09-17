@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react';
-import { trackGenerateLead } from '@/lib/ga';
+import { trackGenerateLead, trackSchedule } from '@/lib/ga';
 import PalmOrb from '@/components/glass/PalmOrb';
 import WaveField from '@/components/glass/WaveField';
 
@@ -171,7 +171,16 @@ export default function BookDemoPage() {
       if (!res.ok) throw new Error(data.detail || data.message || 'Booking failed');
       setResult(data);
       setDone(true);
+      // Meta Pixel Schedule + GA lead — only after API confirms the slot.
+      // Do not move these outside this success path (no page-load / form-open fire).
       try {
+        trackSchedule({
+          content_name: 'Book a live demo',
+          content_category: 'demo',
+          lead_type: 'demo_booking',
+          company: company.trim() || undefined,
+          referral_source: referralSource,
+        });
         trackGenerateLead({
           lead_type: 'demo_booking',
           company: company.trim() || undefined,
