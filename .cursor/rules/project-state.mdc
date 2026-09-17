@@ -5,6 +5,11 @@ alwaysApply: true
 
 # PalmCare AI — Project State (March 2026)
 
+## App Store LAUNCH (Jul 10, 2026)
+- **v1.0 is LIVE on the App Store**: https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988 (released 8:24 AM UTC Jul 10). Listing has 7 screenshots, NO app preview video.
+- Launch announcements posted same day to FB (video), IG (Reel), Threads (video), LinkedIn (image + first-comment link) via one-shot `scripts/social/launch_announcement.py` + `.github/workflows/launch-announcement.yml` (dedupe log `scripts/social/.launch_posted.json`). TikTok/X manual — captions in `marketing/app-store-launch/launch-day-posts.md`.
+- ⚠️ Cloud Agent VMs get NO injected secrets (public repo) — post via GitHub Actions (repo secrets), not locally.
+
 ## Apple Subscriptions (Jul 10, 2026)
 - **SUBMITTED Jul 10, 2026** (user gave green light). Review submission `cecbb382-a217-4dd3-8ba1-bb026388012e` — v1.1 (build 10) + the 3 MONTHLY subs are WAITING_FOR_REVIEW.
 - ⚠️ The 3 ANNUAL subs stayed READY_TO_SUBMIT — Apple's API has NO valid `reviewSubmissionItems` relationship for subscriptions ("subscription is not a relationship"), and version-only submissions do not auto-bundle later-created IAPs. To get the annuals reviewed, submit them from the **ASC UI** (each subscription page → Submit for Review, or add to the in-flight submission), or submit after v1.1 is approved. Monthly tiers cover the full offering in the meantime.
