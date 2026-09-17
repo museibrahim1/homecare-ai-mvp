@@ -52,6 +52,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
 from app.core.rate_limit import limiter
+from app.core.tenancy import resolve_business_id
 from app.models.subscription import Plan, PlanTier, Subscription, SubscriptionStatus
 from app.models.user import User
 
@@ -315,7 +316,9 @@ async def verify_apple_transaction(
     if not plan:
         raise HTTPException(status_code=500, detail="Plan not configured on server")
 
-    business_id = getattr(current_user, "business_id", None)
+    # `User` carries no business_id column — the agency is reached through the
+    # account's business_users row (or its company_name for invited teammates).
+    business_id = resolve_business_id(db, current_user)
     if not business_id:
         raise HTTPException(status_code=400, detail="User is not associated with a business")
 

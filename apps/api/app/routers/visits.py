@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.config import settings
 from app.core.demo_accounts import is_demo_email
 from app.core.plan_access import (
+    active_subscription,
     get_tier_limits,
     is_mobile_only_tier,
     month_start_utc,
@@ -23,8 +24,6 @@ from app.models.note import Note
 from app.models.contract import Contract
 from app.models.audio_asset import AudioAsset
 from app.models.diarization_turn import DiarizationTurn
-from app.models.subscription import Subscription, SubscriptionStatus
-from app.models.business import BusinessUser
 from app.schemas.visit import (
     VisitCreate,
     VisitUpdate,
@@ -57,27 +56,19 @@ def _get_user_subscription(db: Session, user: User):
     if role == "admin" and hasattr(user, 'email') and user.email.endswith("@palmtai.com"):
         return {"has_paid_plan": True, "plan_name": "Platform Admin", "tier": "enterprise"}
     
-    # Check if user belongs to a business with an active subscription
-    business_user = db.query(BusinessUser).filter(
-        BusinessUser.email == user.email
-    ).first()
-    
-    if business_user:
-        sub = db.query(Subscription).filter(
-            Subscription.business_id == business_user.business_id,
-            Subscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]),
-        ).first()
-        if sub and sub.plan:
-            plan_tier = sub.plan.tier.value if hasattr(sub.plan.tier, 'value') else str(sub.plan.tier)
-            if plan_tier != "free":
-                return {
-                    "has_paid_plan": True,
-                    "plan_name": sub.plan.name,
-                    "tier": plan_tier,
-                    "max_visits": sub.plan.max_visits_per_month,
-                    "max_clients": sub.plan.max_clients,
-                }
-    
+    # Check if the user's agency has an active subscription
+    sub = active_subscription(db, user)
+    if sub and sub.plan:
+        plan_tier = sub.plan.tier.value if hasattr(sub.plan.tier, 'value') else str(sub.plan.tier)
+        if plan_tier != "free":
+            return {
+                "has_paid_plan": True,
+                "plan_name": sub.plan.name,
+                "tier": plan_tier,
+                "max_visits": sub.plan.max_visits_per_month,
+                "max_clients": sub.plan.max_clients,
+            }
+
     return {"has_paid_plan": False, "plan_name": "Free", "tier": "free"}
 
 

@@ -9,6 +9,10 @@ let migratePromise: Promise<void> | null = null;
  * Only migrates keys that are already scoped to this user id.
  * Unscoped keys (schedule / care-tracker) are never imported — they can
  * belong to a previous login on a shared device.
+ *
+ * Best effort: a failed import must never stop the caller from loading the
+ * CRM data that is already on the server. The local copy is left in place so
+ * a later visit can retry it.
  */
 export async function migrateLocalCrmToServer(token: string, userId: string): Promise<void> {
   if (typeof window === 'undefined') return;
@@ -33,7 +37,15 @@ export async function migrateLocalCrmToServer(token: string, userId: string): Pr
     }
 
     if (payload.leads?.length) {
-      await api.migrateLocalCrm(token, payload);
+      try {
+        await api.migrateLocalCrm(token, payload);
+      } catch (error) {
+        console.warn('Local CRM import skipped:', error);
+        // Retry on the next mount instead of pinning the rejection here,
+        // where every later caller would await the same failure.
+        migratePromise = null;
+        return;
+      }
     }
 
     localStorage.setItem(flag, '1');

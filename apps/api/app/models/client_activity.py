@@ -1,7 +1,8 @@
 import uuid
 from sqlalchemy import Column, String, Text, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from app.db.base import Base, TimestampMixin
+from app.db.types import JSONB
 
 
 class ClientActivity(Base, TimestampMixin):

@@ -31,6 +31,59 @@ def normalize_email(email: str | None) -> str:
     return (email or "").strip().lower()
 
 
+def resolve_business_id(db: Session, user: User | None) -> UUID | None:
+    """The `businesses.id` this account belongs to, or None.
+
+    Two shapes of account map to the same agency:
+
+    * Owners registered through `/auth/business/register` get a `business_users`
+      row. Emails are stored lowercase there, but a `users.email` can differ in
+      case (social sign-in, older rows), so match case-insensitively.
+    * Team invites create a `users` row carrying only `company_name`, with no
+      `business_users` row, so reach the agency through a teammate that has one.
+
+    The teammate hop deliberately never matches on `businesses.name` directly:
+    signup rejects a `company_name` another account already holds, so going
+    through a real teammate keeps a stranger from naming an agency to inherit
+    its plan. Callers that skip this hop treat paying teammates as unsubscribed.
+    """
+    if user is None:
+        return None
+
+    email = normalize_email(getattr(user, "email", None))
+    if email:
+        business_user = (
+            db.query(BusinessUser)
+            .filter(func.lower(BusinessUser.email) == email)
+            .first()
+        )
+        if business_user:
+            return business_user.business_id
+
+    company = (getattr(user, "company_name", None) or "").strip().lower()
+    if company:
+        teammate_emails = [
+            normalize_email(row[0])
+            for row in db.query(User.email)
+            .filter(
+                func.lower(User.company_name) == company,
+                User.id != user.id,
+            )
+            .all()
+            if row[0]
+        ]
+        if teammate_emails:
+            business_user = (
+                db.query(BusinessUser)
+                .filter(func.lower(BusinessUser.email).in_(teammate_emails))
+                .first()
+            )
+            if business_user:
+                return business_user.business_id
+
+    return None
+
+
 def find_users_by_email(db: Session, email: str | None) -> list[User]:
     """All User rows whose email matches, ignoring case."""
     key = normalize_email(email)
