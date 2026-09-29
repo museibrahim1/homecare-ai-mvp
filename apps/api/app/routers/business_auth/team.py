@@ -48,9 +48,51 @@ router = APIRouter()
 # AUTHENTICATED - Team Management
 # =============================================================================
 
+from sqlalchemy import func, or_
+from sqlalchemy.exc import IntegrityError
+
 from app.models.subscription import Subscription, Plan
 
-def get_team_limits(db: Session, company_name: str):
+# Every agency can invite at least one teammate beyond the owner account.
+MIN_TEAM_SEATS = 2
+
+
+def _resolve_business_for_team(db: Session, company_name: Optional[str], owner_email: Optional[str] = None):
+    """Find the Business row for team-limit lookups.
+
+    Team membership is keyed on User.company_name, which does not always equal
+    Business.name (DBA vs legal name, onboarding typos, linked-user creation).
+    Fall back to DBA name, then the owner's BusinessUser email.
+    """
+    if company_name:
+        name = company_name.strip()
+        if name:
+            business = (
+                db.query(Business)
+                .filter(
+                    or_(
+                        func.lower(Business.name) == name.lower(),
+                        func.lower(Business.dba_name) == name.lower(),
+                    )
+                )
+                .first()
+            )
+            if business:
+                return business
+
+    if owner_email:
+        bu = (
+            db.query(BusinessUser)
+            .filter(func.lower(BusinessUser.email) == owner_email.lower().strip())
+            .first()
+        )
+        if bu:
+            return db.query(Business).filter(Business.id == bu.business_id).first()
+
+    return None
+
+
+def get_team_limits(db: Session, company_name: str, owner_email: Optional[str] = None):
     """Get team limits based on subscription plan."""
     # Full access promo: no team-size caps. Label is user-facing — no "beta".
     if settings.beta_free_access:
@@ -62,12 +104,11 @@ def get_team_limits(db: Session, company_name: str):
             "upgrade_options": [],
         }
 
-    # Find business by company name
-    business = db.query(Business).filter(Business.name == company_name).first()
-    
-    # Default limits for free tier
+    business = _resolve_business_for_team(db, company_name, owner_email=owner_email)
+
+    # Default limits for free tier (owner + one teammate)
     default_limits = {
-        "max_users": 1,
+        "max_users": MIN_TEAM_SEATS,
         "plan_name": "Free",
         "plan_tier": "free",
         "monthly_price": 0,
@@ -88,9 +129,13 @@ def get_team_limits(db: Session, company_name: str):
     plan = db.query(Plan).filter(Plan.id == subscription.plan_id).first()
     if not plan:
         return default_limits
+
+    # Floor every paid/free plan at owner + one teammate so Mobile/Free never
+    # block the first invite while catalog rows still say max_users=1.
+    plan_max_users = max(int(plan.max_users or 0), MIN_TEAM_SEATS)
     
     # Get upgrade options (higher tier plans)
-    tier_order = {"free": 0, "starter": 1, "professional": 2, "enterprise": 3}
+    tier_order = {"free": 0, "mobile": 0, "starter": 1, "growth": 1, "professional": 2, "enterprise": 3}
     current_tier_level = tier_order.get(plan.tier.value if hasattr(plan.tier, 'value') else plan.tier, 0)
     
     upgrade_plans = db.query(Plan).filter(
@@ -101,20 +146,21 @@ def get_team_limits(db: Session, company_name: str):
     for up in upgrade_plans:
         up_tier = up.tier.value if hasattr(up.tier, 'value') else up.tier
         up_level = tier_order.get(up_tier, 0)
+        up_max = max(int(up.max_users or 0), MIN_TEAM_SEATS)
         if up_level > current_tier_level:
             upgrade_options.append({
                 "name": up.name,
                 "tier": up_tier,
-                "max_users": up.max_users,
+                "max_users": up_max,
                 "monthly_price": float(up.monthly_price) if up.monthly_price else 0,
-                "additional_users": up.max_users - plan.max_users,
+                "additional_users": up_max - plan_max_users,
             })
     
     # Sort by tier level
     upgrade_options.sort(key=lambda x: tier_order.get(x["tier"], 0))
     
     return {
-        "max_users": plan.max_users,
+        "max_users": plan_max_users,
         "plan_name": plan.name,
         "plan_tier": plan.tier.value if hasattr(plan.tier, 'value') else plan.tier,
         "monthly_price": float(plan.monthly_price) if plan.monthly_price else 0,
@@ -128,7 +174,7 @@ async def get_team_plan_limits(
 ):
     """Get team size limits based on current subscription plan."""
     # Get team limits
-    limits = get_team_limits(db, current_user.company_name)
+    limits = get_team_limits(db, current_user.company_name, owner_email=current_user.email)
     
     # Count current team members
     current_count = db.query(User).filter(
@@ -208,7 +254,7 @@ async def list_team_members(
     ).all()
     
     # Get plan limits for context
-    limits = get_team_limits(db, current_user.company_name)
+    limits = get_team_limits(db, current_user.company_name, owner_email=current_user.email)
     
     return {
         "members": [{
@@ -255,6 +301,8 @@ async def invite_team_member(
     role: str = "caregiver",
 ):
     """Invite a new team member."""
+    email = (email or "").lower().strip()
+    full_name = (full_name or "").strip()
     if not email or not full_name:
         raise HTTPException(status_code=400, detail="Email and full_name are required")
 
@@ -263,14 +311,21 @@ async def invite_team_member(
         raise HTTPException(status_code=400, detail=f"Role must be one of: {', '.join(sorted(ASSIGNABLE_TEAM_ROLES))}")
     
     # Check team limits based on subscription plan
-    limits = get_team_limits(db, current_user.company_name)
+    limits = get_team_limits(db, current_user.company_name, owner_email=current_user.email)
     
-    # Lock existing team members to prevent concurrent inserts exceeding limit
-    current_count = db.query(User).filter(
-        User.company_name == current_user.company_name,
-        User.company_name.isnot(None),
-        User.company_name != ""
-    ).with_for_update().count()
+    # Lock existing team rows (not an aggregate count) so concurrent invites
+    # cannot both pass the seat check. SQLAlchemy drops FOR UPDATE on .count().
+    locked_members = (
+        db.query(User)
+        .filter(
+            User.company_name == current_user.company_name,
+            User.company_name.isnot(None),
+            User.company_name != "",
+        )
+        .with_for_update()
+        .all()
+    )
+    current_count = len(locked_members)
     
     if current_count >= limits["max_users"]:
         # Include upgrade info in error message
@@ -284,8 +339,8 @@ async def invite_team_member(
             detail=f"Team limit reached. Your {limits['plan_name']} plan allows {limits['max_users']} user(s).{upgrade_msg}"
         )
     
-    # Check if user already exists
-    existing = db.query(User).filter(User.email == email).first()
+    # Check if user already exists (case-insensitive; emails are stored lowercased)
+    existing = db.query(User).filter(func.lower(User.email) == email).first()
     if existing:
         raise HTTPException(status_code=400, detail="A user with this email already exists")
     
@@ -301,13 +356,19 @@ async def invite_team_member(
             company_name=current_user.company_name,
             role=role,
             is_active=True,
+            temp_password=True,
+            invited_by=str(current_user.id),
         )
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Failed to create team member (integrity): {e}")
+        raise HTTPException(status_code=400, detail="A user with this email already exists")
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to create team member: {e}")
+        logger.error(f"Failed to create team member: {type(e).__name__}: {e}")
         raise HTTPException(status_code=500, detail="Failed to create team member. Please try again.")
     
     # Send invitation email
@@ -321,7 +382,7 @@ async def invite_team_member(
             sender=email_service.from_welcome,
             html=f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #6366f1;">You've Been Invited!</h2>
+                <h2 style="color: #0d9488;">You've Been Invited!</h2>
                 <p>Hi {full_name},</p>
                 <p>{current_user.full_name} has invited you to join <strong>{current_user.company_name}</strong> on PalmCare AI.</p>
                 
@@ -335,7 +396,7 @@ async def invite_team_member(
                 
                 <div style="text-align: center; margin-top: 20px;">
                     <a href="{app_url}/login" 
-                       style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                       style="background: #0d9488; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                         Login Now
                     </a>
                 </div>
@@ -353,6 +414,9 @@ async def invite_team_member(
         "email": new_user.email,
         "full_name": new_user.full_name,
         "role": new_user.role,
+        # Return the temp password so the inviter can share it if email delivery fails.
+        "temp_password": temp_password,
+        "email_sent": email_sent,
         "message": f"Invitation sent to {email}" if email_sent else f"Team member created but invitation email to {email} could not be sent. Please share credentials manually.",
     }
 

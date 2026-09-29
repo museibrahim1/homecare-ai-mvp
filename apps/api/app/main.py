@@ -299,12 +299,29 @@ async def seed_database():
         from sqlalchemy import text as sa_text, inspect as sa_inspect
         inspector = sa_inspect(db.bind)
         existing_cols = {c["name"] for c in inspector.get_columns("users")}
+        # Keep invite/login inserts resilient if an alembic revision lagged behind
+        # a deploy. Only additive, nullable-or-defaulted columns belong here.
         new_cols = {
             "last_login": "TIMESTAMP WITH TIME ZONE",
             "last_active": "TIMESTAMP WITH TIME ZONE",
             "total_session_minutes": "JSONB DEFAULT '{}'::jsonb",
             "refresh_token_hash": "VARCHAR(64)",
             "refresh_token_expires_at": "TIMESTAMP WITH TIME ZONE",
+            "email_sender_connected": "BOOLEAN DEFAULT false",
+            "email_sender_provider": "VARCHAR(20)",
+            "email_sender_address": "VARCHAR(255)",
+            "email_sender_access_token": "TEXT",
+            "email_sender_refresh_token": "TEXT",
+            "email_sender_token_expiry": "TIMESTAMP WITH TIME ZONE",
+            "mfa_secret": "VARCHAR(255)",
+            "mfa_enabled": "BOOLEAN DEFAULT false",
+            "password_history": "JSONB DEFAULT '[]'::jsonb",
+            "permissions": "JSONB DEFAULT '[]'::jsonb",
+            "invited_by": "VARCHAR(36)",
+            "temp_password": "BOOLEAN DEFAULT false",
+            "executive_title": "VARCHAR(100)",
+            "calling_states": "JSONB DEFAULT '[]'::jsonb",
+            "company_name": "VARCHAR(255)",
         }
         for col_name, col_type in new_cols.items():
             if col_name not in existing_cols:
@@ -664,7 +681,7 @@ async def seed_database():
             _plan_defs = [
                 dict(name="PalmCare Mobile", tier=PlanTier.MOBILE,
                      description="Assessments plus web CRM. 15 assessments and 30 clients per month.",
-                     monthly_price=89.99, annual_price=0, max_users=1, max_clients=30,
+                     monthly_price=89.99, annual_price=0, max_users=2, max_clients=30,
                      max_visits_per_month=15, max_storage_gb=50, is_active=True, is_contact_sales=False,
                      features=_mobile),
                 dict(name="PalmCare Platform", tier=PlanTier.STARTER,

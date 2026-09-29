@@ -137,22 +137,27 @@ export default function CaregiversPage() {
   };
 
   const handleInvite = async () => {
-    if (!token || !inviteEmail.trim() || !inviteName.trim()) return;
+    const name = inviteName.trim();
+    const email = inviteEmail.trim();
+    if (!token || !email || !name || inviting) return;
     setInviting(true);
     setInviteError(null);
     setInviteSuccess(null);
     try {
       const res = await fetch(
-        `${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(inviteEmail.trim())}&full_name=${encodeURIComponent(inviteName.trim())}&role=${inviteRole}`,
+        `${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(email)}&full_name=${encodeURIComponent(name)}&role=${inviteRole}`,
         { method: 'POST', headers: { Authorization: `Bearer ${token}` }, credentials: 'include' }
       );
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.detail || 'Failed to send invitation');
-      setInviteSuccess(
-        data.temp_password
-          ? `Invite sent to ${inviteEmail}. Temporary password: ${data.temp_password}`
-          : `Invite sent to ${inviteEmail}.`
-      );
+      if (!res.ok) {
+        const detail = typeof data.detail === 'string' ? data.detail : 'Failed to send invitation';
+        throw new Error(detail);
+      }
+      const pwd = data.temp_password ? ` Temporary password: ${data.temp_password}` : '';
+      const mailNote = data.email_sent === false
+        ? ' Invite email could not be sent. Share the password with them directly.'
+        : '';
+      setInviteSuccess(`Invite created for ${email}.${pwd}${mailNote}`);
       setInviteName('');
       setInviteEmail('');
       await loadStaff();

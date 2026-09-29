@@ -152,7 +152,7 @@ async def login(
             role="user",
             is_active=True,
             phone=user.phone,
-            company_name=business.legal_name,
+            company_name=business.name,
         )
         db.add(api_user)
         db.flush()
