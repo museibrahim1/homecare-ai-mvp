@@ -99,7 +99,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "monthly_price": 89.99,
             "annual_price": 0,
             "setup_fee": 0,
-            "max_users": 1,
+            "max_users": 2,
             "max_clients": 30,
             "max_visits_per_month": 15,
             "max_storage_gb": 50,

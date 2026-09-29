@@ -681,7 +681,7 @@ async def seed_database():
             _plan_defs = [
                 dict(name="PalmCare Mobile", tier=PlanTier.MOBILE,
                      description="Assessments plus web CRM. 15 assessments and 30 clients per month.",
-                     monthly_price=89.99, annual_price=0, max_users=1, max_clients=30,
+                     monthly_price=89.99, annual_price=0, max_users=2, max_clients=30,
                      max_visits_per_month=15, max_storage_gb=50, is_active=True, is_contact_sales=False,
                      features=_mobile),
                 dict(name="PalmCare Platform", tier=PlanTier.STARTER,

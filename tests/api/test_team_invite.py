@@ -131,3 +131,49 @@ class TestTeamInvite:
                 headers=_auth_for(caregiver),
             )
         assert res.status_code == 403
+
+    def test_free_tier_allows_one_teammate_beyond_owner(self, client, db_session):
+        """Free/Mobile floor is owner + 1 teammate (max_users >= 2)."""
+        owner = _owner(db_session, email="owner4@patron.test", company="Seat Floor Agency")
+        with patch("app.routers.business_auth.team.settings") as mock_settings:
+            mock_settings.beta_free_access = False
+            with patch("app.routers.business_auth.team.get_email_service") as mock_email:
+                mock_email.return_value.send_email.return_value = {"success": True}
+                mock_email.return_value.from_welcome = "welcome@palmcareai.com"
+
+                first = client.post(
+                    "/auth/business/team/invite",
+                    params={
+                        "email": "teammate@patron.test",
+                        "full_name": "First Teammate",
+                        "role": "user",
+                    },
+                    headers=_auth_for(owner),
+                )
+                assert first.status_code == 200, first.text
+
+                second = client.post(
+                    "/auth/business/team/invite",
+                    params={
+                        "email": "third@patron.test",
+                        "full_name": "Third Person",
+                        "role": "user",
+                    },
+                    headers=_auth_for(owner),
+                )
+        assert second.status_code == 403
+        assert "Team limit reached" in second.json()["detail"]
+
+    def test_team_limits_report_min_two_seats(self, client, db_session):
+        owner = _owner(db_session, email="owner5@patron.test", company="Limits Agency")
+        with patch("app.routers.business_auth.team.settings") as mock_settings:
+            mock_settings.beta_free_access = False
+            res = client.get(
+                "/auth/business/team/limits",
+                headers=_auth_for(owner),
+            )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["max_users"] >= 2
+        assert data["can_invite"] is True
+        assert data["remaining_seats"] >= 1

@@ -53,6 +53,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.subscription import Subscription, Plan
 
+# Every agency can invite at least one teammate beyond the owner account.
+MIN_TEAM_SEATS = 2
+
+
 def _resolve_business_for_team(db: Session, company_name: Optional[str], owner_email: Optional[str] = None):
     """Find the Business row for team-limit lookups.
 
@@ -102,9 +106,9 @@ def get_team_limits(db: Session, company_name: str, owner_email: Optional[str] =
 
     business = _resolve_business_for_team(db, company_name, owner_email=owner_email)
 
-    # Default limits for free tier
+    # Default limits for free tier (owner + one teammate)
     default_limits = {
-        "max_users": 1,
+        "max_users": MIN_TEAM_SEATS,
         "plan_name": "Free",
         "plan_tier": "free",
         "monthly_price": 0,
@@ -125,6 +129,10 @@ def get_team_limits(db: Session, company_name: str, owner_email: Optional[str] =
     plan = db.query(Plan).filter(Plan.id == subscription.plan_id).first()
     if not plan:
         return default_limits
+
+    # Floor every paid/free plan at owner + one teammate so Mobile/Free never
+    # block the first invite while catalog rows still say max_users=1.
+    plan_max_users = max(int(plan.max_users or 0), MIN_TEAM_SEATS)
     
     # Get upgrade options (higher tier plans)
     tier_order = {"free": 0, "mobile": 0, "starter": 1, "growth": 1, "professional": 2, "enterprise": 3}
@@ -138,20 +146,21 @@ def get_team_limits(db: Session, company_name: str, owner_email: Optional[str] =
     for up in upgrade_plans:
         up_tier = up.tier.value if hasattr(up.tier, 'value') else up.tier
         up_level = tier_order.get(up_tier, 0)
+        up_max = max(int(up.max_users or 0), MIN_TEAM_SEATS)
         if up_level > current_tier_level:
             upgrade_options.append({
                 "name": up.name,
                 "tier": up_tier,
-                "max_users": up.max_users,
+                "max_users": up_max,
                 "monthly_price": float(up.monthly_price) if up.monthly_price else 0,
-                "additional_users": up.max_users - plan.max_users,
+                "additional_users": up_max - plan_max_users,
             })
     
     # Sort by tier level
     upgrade_options.sort(key=lambda x: tier_order.get(x["tier"], 0))
     
     return {
-        "max_users": plan.max_users,
+        "max_users": plan_max_users,
         "plan_name": plan.name,
         "plan_tier": plan.tier.value if hasattr(plan.tier, 'value') else plan.tier,
         "monthly_price": float(plan.monthly_price) if plan.monthly_price else 0,
