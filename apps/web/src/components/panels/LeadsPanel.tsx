@@ -2,13 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Phone, Mail, Search, X, User, Globe, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight } from 'lucide-react';
+import { Plus, Phone, Mail, Search, X, User, Globe, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight, AlertCircle, Lock, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { api } from '@/lib/api';
+import { api, apiErrorMessage, isPlanGateError } from '@/lib/api';
 import { migrateLocalCrmToServer } from '@/lib/crmMigrate';
 import { leadFromApi, leadToApi } from '@/lib/crmAdapters';
-
-const API_URL = '/api';
 
 type Lead = {
   id: string;
@@ -32,6 +30,20 @@ const statusColors: Record<string, string> = {
 const sources = ['Website', 'Referral', 'Google Ads', 'Facebook', 'Instagram', 'Phone Call', 'Other'];
 const statuses = ['New', 'Contacted', 'Qualified'];
 
+function ErrorBanner({ message, onDismiss }: { message: string; onDismiss?: () => void }) {
+  return (
+    <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+      <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+      <span className="flex-1">{message}</span>
+      {onDismiss && (
+        <button onClick={onDismiss} className="text-red-500 hover:text-red-700" aria-label="Dismiss">
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 /**
  * Leads management surface (list, add, convert to client). Shared between the
  * Sales page (Leads tab) and the Clients page (Leads tab). Persists to the
@@ -51,6 +63,13 @@ export default function LeadsPanel() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
   const [convertData, setConvertData] = useState({ insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private', insurance_id: '', care_level: '', estimated_monthly_value: '' });
+  // The CRM API rejects accounts without an active subscription. Without these
+  // the panel rendered an empty list and a save button that could only fail.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [planGated, setPlanGated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadLeads = useCallback(async () => {
     if (!token || !user?.id) {
@@ -58,12 +77,18 @@ export default function LeadsPanel() {
       return;
     }
     setLoading(true);
+    setLoadError(null);
+    setPlanGated(false);
     try {
       await migrateLocalCrmToServer(token, user.id);
       const rows = await api.getLeads(token);
       setLeads((rows || []).map((r: Record<string, unknown>) => leadFromApi(r)));
     } catch (error) {
       console.error('Failed to load leads:', error);
+      if (isPlanGateError(error)) {
+        setPlanGated(true);
+      }
+      setLoadError(apiErrorMessage(error, 'Could not load your leads.'));
     } finally {
       setLoading(false);
     }
@@ -78,8 +103,15 @@ export default function LeadsPanel() {
     lead.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const openAddModal = () => {
+    setSaveError(null);
+    setShowAddModal(true);
+  };
+
   const handleAddLead = async () => {
-    if (!newLead.name || !token) return;
+    if (!newLead.name.trim() || !token || saving) return;
+    setSaving(true);
+    setSaveError(null);
     try {
       const created = await api.createLead(token, leadToApi(newLead));
       setLeads([leadFromApi(created), ...leads]);
@@ -87,23 +119,30 @@ export default function LeadsPanel() {
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to add lead:', error);
-      alert('Failed to save lead. Please try again.');
+      setSaveError(apiErrorMessage(error, 'Could not save this lead. Try again.'));
+      if (isPlanGateError(error)) setPlanGated(true);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleUpdateStatus = async (leadId: string, newStatus: string) => {
     if (!token) return;
+    setActionError(null);
     try {
       const updated = await api.updateLead(token, leadId, { status: newStatus.toLowerCase() });
       setLeads(leads.map(l => l.id === leadId ? leadFromApi(updated) : l));
+      setSelectedLead(prev => (prev && prev.id === leadId ? leadFromApi(updated) : prev));
     } catch (error) {
       console.error('Failed to update lead status:', error);
+      setActionError(apiErrorMessage(error, 'Could not update this lead.'));
     }
   };
 
   const handleDeleteLead = async (leadId: string) => {
     if (!token) return;
     setDeletingId(leadId);
+    setActionError(null);
     try {
       await api.deleteLead(token, leadId);
       setLeads(leads.filter(l => l.id !== leadId));
@@ -111,6 +150,7 @@ export default function LeadsPanel() {
       setSelectedLead(null);
     } catch (error) {
       console.error('Failed to delete lead:', error);
+      setActionError(apiErrorMessage(error, 'Could not delete this lead.'));
     } finally {
       setDeletingId(null);
     }
@@ -124,8 +164,9 @@ export default function LeadsPanel() {
   };
 
   const handleConfirmConvert = async () => {
-    if (!selectedLead || !token) return;
+    if (!selectedLead || !token || converting) return;
     setConverting(true);
+    setActionError(null);
     try {
       await api.convertLead(token, selectedLead.id, {
         insurance_type: convertData.insurance_type || null,
@@ -142,7 +183,7 @@ export default function LeadsPanel() {
       router.push('/clients?section=clients');
     } catch (error) {
       console.error('Failed to convert lead:', error);
-      alert('Failed to convert lead to client. Please try again.');
+      setActionError(apiErrorMessage(error, 'Could not convert this lead to a client.'));
     } finally {
       setConverting(false);
     }
@@ -156,6 +197,35 @@ export default function LeadsPanel() {
     );
   }
 
+  // The plan gate blocks every lead call, so offer the upgrade path rather
+  // than a list and an Add button that cannot work.
+  if (planGated) {
+    return (
+      <div>
+        <div className="mb-4">
+          <h2 className="text-base font-bold text-slate-900">Leads</h2>
+          <p className="text-slate-500 text-xs mt-0.5">Manage and track potential clients</p>
+        </div>
+        <div className="glass-card p-8 text-center">
+          <Lock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-slate-900 mb-1">Leads need an active plan</h3>
+          <p className="text-sm text-slate-500 mb-4 max-w-md mx-auto">
+            {loadError || saveError || 'Your account does not have an active PalmCare subscription yet.'}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={() => router.push('/billing')} className="glass-btn-primary h-9 text-sm">
+              View your plan
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button onClick={loadLeads} className="h-9 px-4 text-sm bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors">
+              Check again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Header */}
@@ -165,13 +235,17 @@ export default function LeadsPanel() {
           <p className="text-slate-500 text-xs mt-0.5">Manage and track potential clients</p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAddModal}
           className="glass-btn-primary h-9 text-sm"
         >
           <Plus className="w-4 h-4" />
           Add Lead
         </button>
       </div>
+
+      {actionError && !showDetailModal && !showConvertModal && (
+        <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />
+      )}
 
       {/* Search */}
       <div className="mb-4">
@@ -187,13 +261,23 @@ export default function LeadsPanel() {
         </div>
       </div>
 
-      {leads.length === 0 ? (
+      {loadError ? (
+        <div className="glass-card p-8 text-center">
+          <AlertCircle className="w-12 h-12 text-red-300 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-slate-900 mb-1">Could not load your leads</h3>
+          <p className="text-sm text-slate-500 mb-4 max-w-md mx-auto">{loadError}</p>
+          <button onClick={loadLeads} className="glass-btn-primary h-9 text-sm mx-auto">
+            <RefreshCw className="w-4 h-4" />
+            Try again
+          </button>
+        </div>
+      ) : leads.length === 0 ? (
         <div className="glass-card p-8 text-center">
           <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-900 mb-1">No Leads Yet</h3>
           <p className="text-sm text-slate-500 mb-4">Start tracking potential clients by adding your first lead</p>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className="glass-btn-primary h-9 text-sm mx-auto"
           >
             <Plus className="w-4 h-4" />
@@ -280,6 +364,7 @@ export default function LeadsPanel() {
                 <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
+            {saveError && <ErrorBanner message={saveError} />}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Full Name *</label>
@@ -367,8 +452,16 @@ export default function LeadsPanel() {
               <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors">
                 Cancel
               </button>
-              <button onClick={handleAddLead} className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
-                Add Lead
+              <button
+                onClick={handleAddLead}
+                disabled={saving || !newLead.name.trim()}
+                className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
+                ) : (
+                  'Add Lead'
+                )}
               </button>
             </div>
           </div>
@@ -385,6 +478,7 @@ export default function LeadsPanel() {
                 <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
+            {actionError && <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />}
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-3 text-slate-600">
                 <Mail className="w-5 h-5 text-slate-500" />
@@ -444,6 +538,8 @@ export default function LeadsPanel() {
                 <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
+
+            {actionError && <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />}
 
             <div className="mb-6 p-4 bg-slate-50 rounded-lg">
               <p className="text-slate-900 font-medium">{selectedLead.name}</p>
