@@ -73,7 +73,7 @@ export default function SettingsPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
-  const [inviteRole, setInviteRole] = useState('caregiver');
+  const [inviteRole, setInviteRole] = useState('user');
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -629,24 +629,32 @@ export default function SettingsPage() {
 
   // Invite team member
   const handleInvite = async () => {
-    if (!token || !inviteEmail || !inviteName) return;
+    const name = inviteName.trim();
+    const email = inviteEmail.trim();
+    if (!token || !email || !name || inviting) return;
     setInviting(true);
     setInviteError(null);
     setInviteSuccess(null);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(inviteEmail)}&full_name=${encodeURIComponent(inviteName)}&role=${inviteRole}`, {
+      const response = await fetch(`${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(email)}&full_name=${encodeURIComponent(name)}&role=${inviteRole}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Failed to send invitation');
+        const detail = typeof data.detail === 'string' ? data.detail : 'Failed to send invitation';
+        throw new Error(detail);
       }
 
-      setInviteSuccess(`Invitation sent to ${inviteEmail}. Temporary password: ${data.temp_password}`);
+      const pwd = data.temp_password ? ` Temporary password: ${data.temp_password}` : '';
+      const mailNote = data.email_sent === false
+        ? ' Invite email could not be sent. Share the password with them directly.'
+        : '';
+      setInviteSuccess(`Invitation created for ${email}.${pwd}${mailNote}`);
       setInviteEmail('');
       setInviteName('');
       loadTeamMembersInternal();
@@ -1804,8 +1812,8 @@ export default function SettingsPage() {
                       onChange={(e) => setInviteRole(e.target.value)}
                       className="glass-input w-full"
                     >
-                      <option value="caregiver">Caregiver</option>
-                      <option value="admin">Admin</option>
+                      <option value="user">Coordinator</option>
+                      <option value="caregiver">Caregiver (login)</option>
                     </select>
                   </div>
 
