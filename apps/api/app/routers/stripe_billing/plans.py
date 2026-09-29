@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.core.internal_auth import require_internal_key
-from app.models.subscription import Plan
+from app.models.subscription import Plan, PlanTier
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +123,10 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 250,
             "is_contact_sales": False,
             "is_active": True,
+            # Stripe price IDs are intentionally NOT seeded here. Checkout
+            # resolves prices via env override -> plan columns -> inline
+            # price_data from the plan's own price, so stale hardcoded IDs
+            # can never charge the wrong amount.
             "features": PLATFORM_FEATURES,
         },
         {

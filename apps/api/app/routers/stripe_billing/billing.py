@@ -17,10 +17,10 @@ router = APIRouter()
 # =============================================================================
 # READ-ONLY SUBSCRIPTION ENDPOINTS
 #
-# Payments and subscription management have moved to Apple In-App Purchase
-# (see app.routers.apple_iap). These endpoints only READ the Subscription /
-# Plan / Invoice rows that Apple's StoreKit verification writes, so the web
-# app can display the current plan + usage. No Stripe, no checkout, no portal.
+# These endpoints READ the Subscription / Plan / Invoice rows written by the
+# two payment channels — Apple StoreKit verification (app.routers.apple_iap)
+# and Stripe webhooks (stripe_billing.webhooks) — so the web app can display
+# the current plan + usage. Checkout/portal live in stripe_billing.checkout.
 # =============================================================================
 
 @router.get("/subscription")
