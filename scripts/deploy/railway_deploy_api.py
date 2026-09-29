@@ -18,7 +18,7 @@ RAILWAY_GRAPHQL = "https://backboard.railway.com/graphql/v2"
 TOKEN = os.getenv("RAILWAY_API_TOKEN") or os.getenv("RAILWAY_TOKEN", "")
 PROJECT_ID = os.getenv("RAILWAY_PROJECT_ID", "")
 COMMIT_SHA = os.getenv("DEPLOY_COMMIT_SHA", "").strip() or None
-SERVICE_NAME_HINTS = ("web", "frontend", "next", "palmcare-api", "apps-web")
+SERVICE_NAME_HINTS = ("api", "backend", "fastapi", "palmcare-api", "apps-api")
 
 
 def gql(query: str, variables: dict | None = None) -> dict:
