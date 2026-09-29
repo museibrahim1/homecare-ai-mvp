@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -39,6 +39,7 @@ interface WhatsNewModalProps {
 
 export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) {
   const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<'enter' | 'idle' | 'exit'>('enter');
 
   useEffect(() => {
@@ -60,6 +61,22 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [dismiss]);
 
+  // Dismiss on any click outside the panel WITHOUT capturing that click:
+  // a full-screen backdrop button here used to swallow the user's first
+  // click anywhere in the app (reported: "clicking the clients box does
+  // not take me to a new page"). The underlying element must still receive
+  // the click, so listen at the document level instead of overlaying.
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (target && panelRef.current && !panelRef.current.contains(target)) {
+        dismiss();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [dismiss]);
+
   const handlePrimaryAction = () => {
     if (phase === 'exit') return;
     setPhase('exit');
@@ -78,21 +95,11 @@ export default function WhatsNewModal({ release, onClose }: WhatsNewModalProps) 
 
   return (
     <>
-      <button
-        type="button"
-        aria-label="Dismiss what's new"
-        className={`fixed inset-0 z-[100] cursor-default bg-transparent ${
-          phase === 'exit' ? 'animate-whats-new-backdrop-out' : 'animate-whats-new-backdrop-in'
-        }`}
-        onClick={dismiss}
-      />
-
       <div
+        ref={panelRef}
         role="dialog"
-        aria-modal="true"
         aria-labelledby="whats-new-title"
         className={`fixed bottom-5 right-5 z-[101] w-[min(100vw-2.5rem,380px)] overflow-hidden rounded-2xl border border-white/10 bg-[#121212] shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${panelClass}`}
-        onClick={(event) => event.stopPropagation()}
       >
         <div className="relative h-[148px] w-full overflow-hidden">
           <div className="absolute inset-0 animate-whats-new-hero-zoom">

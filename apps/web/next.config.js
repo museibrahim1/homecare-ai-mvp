@@ -4,6 +4,10 @@ const { PROXY_MAX_BODY } = require('./upload-limits.cjs');
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  // Dev-only: Next 16 blocks dev resources requested via 127.0.0.1 as
+  // cross-origin, which silently prevents React hydration for Playwright
+  // (playwright.config.ts uses http://127.0.0.1:3000 as baseURL).
+  allowedDevOrigins: ['127.0.0.1'],
   // Next 15+ removed `swcMinify` (SWC minification is now default and not configurable).
   // Pin the Turbopack workspace root so Next.js does not infer it from the
   // repo-root puppeteer lockfile.

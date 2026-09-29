@@ -217,17 +217,20 @@ export default function DashboardPage() {
                 label: 'Clients',
                 value: stats.totalClients,
                 hint: stats.totalClients === 0 ? 'Add your first client' : 'All active',
+                href: '/clients',
               },
               {
                 label: 'Due this week',
                 value: dueThisWeek.length || stats.hoursThisWeek,
                 hint: dueHint,
+                href: '/schedule',
               },
               {
                 label: 'Needs review',
                 value: Math.max(reviewItems.length, stats.pendingReview),
                 hint: topReviewName || 'Nothing waiting',
                 accent: true,
+                href: '/visits',
               },
             ]}
             trend={monthlyData}

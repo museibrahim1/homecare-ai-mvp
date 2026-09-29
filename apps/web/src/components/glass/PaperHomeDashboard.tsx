@@ -5,7 +5,7 @@ import { ArrowRight, LayoutGrid, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 
-type Stat = { label: string; value: string | number; hint: string; accent?: boolean };
+type Stat = { label: string; value: string | number; hint: string; accent?: boolean; href?: string };
 type TrendPoint = { label: string; value: number };
 type PipelineSeg = { label: string; value: number; color: string };
 type ReviewItem = {
@@ -131,25 +131,34 @@ export default function PaperHomeDashboard({
 
         {/* Stats */}
         <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className={`group flex flex-col py-4 px-4 rounded-2xl gap-0.5 bg-white/75 border border-white/90 shadow-sm backdrop-blur-md hover:bg-white hover:shadow-[0_10px_28px_#0D948818] hover:-translate-y-0.5 hover:border-primary-200/60 transition-all duration-200 ease-out cursor-default dash-reveal ${mounted ? 'dash-reveal-in' : ''}`}
-              style={{ transitionDelay: `${60 + i * 50}ms` }}
-            >
-              <div className="text-[11px] tracking-[0.04em] font-semibold text-slate-500 group-hover:text-primary-600 transition-colors">
-                {s.label}
+          {stats.map((s, i) => {
+            const cardClass = `group flex flex-col py-4 px-4 rounded-2xl gap-0.5 bg-white/75 border border-white/90 shadow-sm backdrop-blur-md hover:bg-white hover:shadow-[0_10px_28px_#0D948818] hover:-translate-y-0.5 hover:border-primary-200/60 transition-all duration-200 ease-out dash-reveal ${mounted ? 'dash-reveal-in' : ''} ${s.href ? 'cursor-pointer' : 'cursor-default'}`;
+            const cardStyle = { transitionDelay: `${60 + i * 50}ms` };
+            const body = (
+              <>
+                <div className="text-[11px] tracking-[0.04em] font-semibold text-slate-500 group-hover:text-primary-600 transition-colors">
+                  {s.label}
+                </div>
+                <div
+                  className={`text-[32px] tracking-tight leading-9 font-bold tabular-nums transition-transform duration-200 group-hover:scale-[1.03] origin-left ${
+                    s.accent ? 'text-primary-500' : 'text-[#10211F]'
+                  }`}
+                >
+                  {s.value}
+                </div>
+                <div className="text-xs font-medium text-[#4B6B66]">{s.hint}</div>
+              </>
+            );
+            return s.href ? (
+              <Link key={s.label} href={s.href} className={cardClass} style={cardStyle} aria-label={`View ${s.label.toLowerCase()}`}>
+                {body}
+              </Link>
+            ) : (
+              <div key={s.label} className={cardClass} style={cardStyle}>
+                {body}
               </div>
-              <div
-                className={`text-[32px] tracking-tight leading-9 font-bold tabular-nums transition-transform duration-200 group-hover:scale-[1.03] origin-left ${
-                  s.accent ? 'text-primary-500' : 'text-[#10211F]'
-                }`}
-              >
-                {s.value}
-              </div>
-              <div className="text-xs font-medium text-[#4B6B66]">{s.hint}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Analytics */}
